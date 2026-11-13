@@ -210,7 +210,8 @@ def derivative(src: Path, cache_dir: Path, key: str, variant: str) -> Path:
 def discover_image_folders(project_root: Path) -> list[dict[str, Any]]:
     found = []
     for d in [project_root, *[p for p in project_root.iterdir() if p.is_dir()]]:
-        if d.name in ("data", "app", ".venv", "node_modules") or d.name.startswith("."):
+        # DEVONLY holds developer screenshots, _release/_work build and scratch folders: never portraits
+        if d.name in ("data", "app", ".venv", "node_modules", "DEVONLY", "_release", "_work") or d.name.startswith("."):
             continue
         n = sum(1 for f in d.rglob("*") if f.suffix.lower() in IMAGE_EXTS) if d != project_root else \
             sum(1 for f in d.iterdir() if f.suffix.lower() in IMAGE_EXTS)

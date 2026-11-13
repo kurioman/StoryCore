@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import * as React from "react";
 import { apiGet, apiPost, errorMessage, apiDelete, apiPut } from "@/api/legacy";
 import * as Icon from "lucide-react";
-import { msg } from "@/i18n";
+import { msg, msgKey } from "@/i18n";
 import { Badge, Button, Field, IconButton, Input, Modal, Select, Textarea, Toggle, useUi } from "@/components/ui";
 import { cn, downloadJson, readFileText } from "@/lib/util";
 
@@ -117,7 +117,7 @@ export function CommandsPage() {
         </div>
         {u.map(([e, t]) => (
           <section className="mb-5" key={e}>
-            <h2 className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-faint">{e}</h2>
+            <h2 className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-faint">{msgKey(e)}</h2>
             <div className="divide-y divide-line rounded-lg border border-line">
               {t.map((e) => (
                 <div className={cn(`flex items-center gap-3 px-3 py-2`, !e.enabled && `opacity-50`)} key={e.id}>
@@ -364,7 +364,11 @@ function CommandEditor({ c: e, onClose, onSaved }) {
         {a.kind !== `local_action` && (
           <Field
             label={msg("Prompt template")}
-            hint="{{input}} = text typed after the command · {{location}} · {{player_name}}"
+            hint={msg("{{input}} = text typed after the command · {{location}} · {{player_name}}", {
+              input: "{{input}}",
+              location: "{{location}}",
+              player_name: "{{player_name}}",
+            })}
           >
             <Textarea
               value={a.template}

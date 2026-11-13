@@ -4,7 +4,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiGet, apiPost, apiPatch, errorMessage } from "@/api/legacy";
 import { useWorlds, useStoryState, useInvalidateStory } from "@/api/queries";
 import * as Icon from "lucide-react";
-import { msg } from "@/i18n";
+import { msg, msgKey } from "@/i18n";
 import {
   Badge,
   Button,
@@ -145,7 +145,7 @@ function eventQuery(e, t) {
     storyState = useStoryState(t);
   return React.useMemo(() => {
     let t = {
-      player: `Protagonist`,
+      player: msg("Protagonist", {}),
     };
     for (let r of worlds.data?.find((t) => t.id === e)?.data_json.characters ?? []) t[r.id] = r.name;
     for (let r of worlds.data?.find((t) => t.id === e)?.data_json.locations ?? []) t[r.id] = r.name;
@@ -229,7 +229,7 @@ function TimelineTab({ storyId, worldId, onJump }) {
             <option value="">{msg("All types")}</option>
             {EVENT_TYPES.map((e) => (
               <option value={e} key={e}>
-                {e.replace(/_/g, ` `)}
+                {msgKey(e)}
               </option>
             ))}
           </Select>
@@ -247,7 +247,7 @@ function TimelineTab({ storyId, worldId, onJump }) {
             <option value="">{msg("Any status (no rejected)")}</option>
             {ReviewBadge.map((e) => (
               <option value={e} key={e}>
-                {e.replace(/_/g, ` `)}
+                {msgKey(e)}
               </option>
             ))}
           </Select>
@@ -334,6 +334,7 @@ function TimelineTab({ storyId, worldId, onJump }) {
                     e.importance >= 4 ? `bg-accent` : `bg-line-strong`,
                   )}
                 />
+
                 <div
                   role="button"
                   tabIndex={0}
@@ -353,6 +354,7 @@ function TimelineTab({ storyId, worldId, onJump }) {
                     onChange={() => l(c.includes(e.id) ? c.filter((t) => t !== e.id) : [...c, e.id])}
                     className="mt-1 accent-[var(--c-accent)]"
                   />
+
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-1.5">
                       <span className="text-[11px] tabular-nums text-faint">#{e.branch_sequence}</span>
@@ -361,13 +363,9 @@ function TimelineTab({ storyId, worldId, onJump }) {
                     </div>
                     <p className="line-clamp-2 text-xs text-muted">{e.summary}</p>
                     <div className="mt-1 flex flex-wrap gap-1">
-                      <Badge>{e.event_type.replace(/_/g, ` `)}</Badge>
-                      <Badge tone={JournalTabLabel(e.verification_status)}>
-                        {e.verification_status.replace(/_/g, ` `)}
-                      </Badge>
-                      {e.evidence_kind !== `witnessed` && (
-                        <Badge tone="warn">{e.evidence_kind.replace(/_/g, ` `)}</Badge>
-                      )}
+                      <Badge>{msgKey(e.event_type)}</Badge>
+                      <Badge tone={JournalTabLabel(e.verification_status)}>{msgKey(e.verification_status)}</Badge>
+                      {e.evidence_kind !== `witnessed` && <Badge tone="warn">{msgKey(e.evidence_kind)}</Badge>}
                       {e.stale && <Badge tone="warn">{msg("stale")}</Badge>}
                       {e.in_world_time && <Badge>{e.in_world_time}</Badge>}
                       {e.entity_ids_json.slice(0, 4).map((e) => (
@@ -432,6 +430,7 @@ function EventDetail({ e, storyId, names, onJump, onClose }) {
             }
             aria-label={msg("Title")}
           />
+
           <Textarea
             value={l.summary}
             onChange={(e) =>
@@ -442,6 +441,7 @@ function EventDetail({ e, storyId, names, onJump, onClose }) {
             }
             aria-label={msg("Summary")}
           />
+
           <div className="grid grid-cols-2 gap-2">
             <Select
               value={l.event_type}
@@ -485,6 +485,7 @@ function EventDetail({ e, storyId, names, onJump, onClose }) {
             placeholder={msg("In-world date/time")}
             aria-label={msg("In-world time")}
           />
+
           <Input
             value={l.tags}
             onChange={(e) =>
@@ -496,6 +497,7 @@ function EventDetail({ e, storyId, names, onJump, onClose }) {
             placeholder={msg("Tags, comma separated")}
             aria-label={msg("Tags")}
           />
+
           <Textarea
             value={l.notes}
             onChange={(e) =>
@@ -508,6 +510,7 @@ function EventDetail({ e, storyId, names, onJump, onClose }) {
             className="min-h-14"
             aria-label={msg("Notes")}
           />
+
           <div className="flex justify-end gap-1.5">
             <Button size="sm" variant="ghost" onClick={() => c(false)}>
               {msg("Cancel")}
@@ -544,10 +547,10 @@ function EventDetail({ e, storyId, names, onJump, onClose }) {
       <dl className="grid grid-cols-[7rem_1fr] gap-y-1 text-xs">
         <dt className="text-faint">{msg("Status")}</dt>
         <dd>
-          <Badge tone={JournalTabLabel(e.verification_status)}>{e.verification_status.replace(/_/g, ` `)}</Badge>
+          <Badge tone={JournalTabLabel(e.verification_status)}>{msgKey(e.verification_status)}</Badge>
         </dd>
         <dt className="text-faint">{msg("Evidence")}</dt>
-        <dd>{e.evidence_kind.replace(/_/g, ` `)}</dd>
+        <dd>{msgKey(e.evidence_kind)}</dd>
         <dt className="text-faint">{msg("Confidence")}</dt>
         <dd>{Math.round(e.confidence * 100)}%</dd>
         <dt className="text-faint">{msg("Importance")}</dt>
@@ -569,7 +572,7 @@ function EventDetail({ e, storyId, names, onJump, onClose }) {
         <dd>{e.location_id ? (names[e.location_id] ?? e.location_id) : `—`}</dd>
         <dt className="text-faint">{msg("Captured")}</dt>
         <dd>
-          {e.capture_method.replace(/_/g, ` `)}
+          {msgKey(e.capture_method)}
           {" · "}
           {timeAgo(e.created_at)}
           {e.extraction_metadata_json.model_id && (
@@ -688,7 +691,7 @@ function SupersedeEventDialog({ e, storyId, onClose }) {
             (await apiPost(`/stories/${storyId}/events/${e.id}/supersede`, {
               title: r,
               summary: a,
-              reason: s || `Retcon / correction`,
+              reason: s || msg("Retcon / correction", {}),
             }),
               invalidateStory(storyId),
               onClose());
@@ -851,6 +854,7 @@ function ReviewTab({ storyId, data, onJump }) {
         {msg("Low-confidence, contradictory or stale records, and proposed state changes, appear here.")}
       </EmptyState>
     );
+
   let a = (t, n) =>
       apiPatch(`/stories/${storyId}/events/${t}`, n)
         .then(() => invalidateStory(storyId))
@@ -991,7 +995,7 @@ function ReviewTab({ storyId, data, onJump }) {
                 <p>{e.content}</p>
                 <div className="mt-1 flex flex-wrap gap-1">
                   <Badge>{e.fact_kind}</Badge>
-                  <Badge tone="warn">{e.status}</Badge>
+                  <Badge tone="warn">{msgKey(e.status)}</Badge>
                   {e.stale && <Badge tone="warn">{msg("stale")}</Badge>}
                   {e.contradicts_fact_ids_json.length > 0 && (
                     <Badge tone="danger">
@@ -1073,23 +1077,23 @@ function MemoriesTab({ storyId, onJump }) {
           {[
             {
               v: ``,
-              l: `All`,
+              l: msg("All", {}),
             },
             {
               v: `happened`,
-              l: `What happened`,
+              l: msg("What happened", {}),
             },
             {
               v: `player`,
-              l: `What the player knows`,
+              l: msg("What the player knows", {}),
             },
             {
               v: `beliefs`,
-              l: `What characters believe`,
+              l: msg("What characters believe", {}),
             },
             {
               v: `uncertain`,
-              l: `Uncertain`,
+              l: msg("Uncertain", {}),
             },
           ].map((e) => (
             <button
@@ -1108,6 +1112,7 @@ function MemoriesTab({ storyId, onJump }) {
           className="w-48"
           aria-label={msg("Search memories")}
         />
+
         <Button size="sm" variant="primary" className="ml-auto" onClick={() => s(true)}>
           <Icon.Plus className="size-3.5" /> {msg("New memory")}
         </Button>
@@ -1139,9 +1144,9 @@ function FactList({ facts, storyId, onJump }) {
             </p>
             <div className="mt-1 flex flex-wrap items-center gap-1">
               <Badge tone={e.fact_kind === `secret` ? `danger` : e.fact_kind === `established` ? `neutral` : `warn`}>
-                {e.fact_kind.replace(/_/g, ` `)}
+                {msgKey(e.fact_kind)}
               </Badge>
-              <Badge tone={e.status === `active` ? `ok` : `warn`}>{e.status}</Badge>
+              <Badge tone={e.status === `active` ? `ok` : `warn`}>{msgKey(e.status)}</Badge>
               {e.pinned && <Badge tone="accent">{msg("pinned")}</Badge>}
               {e.stale && <Badge tone="warn">{msg("stale")}</Badge>}
               {e.knowledge_json.known_by?.length ? (
@@ -1437,33 +1442,39 @@ function CurrentStateTab({ storyId }) {
         )}
       </div>
     );
+
   return (
     <div className="mx-auto grid max-w-5xl gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {r(
-        `Scene`,
+        msg("Scene", {}),
+
         [
-          n.scene.location && `Location: ${n.scene.location}`,
-          n.scene.date && `Date: ${n.scene.date}`,
-          n.scene.time && `Time: ${n.scene.time}`,
-          n.scene.weather && `Weather: ${n.scene.weather}`,
-          n.scene.status && `Status: ${n.scene.status}`,
+          n.scene.location && msg("Location: {{v0}}", { v0: n.scene.location }),
+          n.scene.date && msg("Date: {{v0}}", { v0: n.scene.date }),
+          n.scene.time && msg("Time: {{v0}}", { v0: n.scene.time }),
+          n.scene.weather && msg("Weather: {{v0}}", { v0: n.scene.weather }),
+          n.scene.status && msg("Status: {{v0}}", { v0: n.scene.status }),
         ].filter(Boolean),
       )}
-      {r(`Cast present`, n.scene.present)}
+      {r(msg("Cast present", {}), n.scene.present)}
       {r(
-        `Injuries & conditions`,
+        msg("Injuries & conditions", {}),
+
         n.conditions.map((e) => `${e.label} (${e.severity})`),
       )}
       {r(
-        `Inventory`,
+        msg("Inventory", {}),
+
         n.inventory.map((e) => `${e.name} ×${e.qty}${e.equipped ? ` (equipped)` : ``}`),
       )}
       {r(
-        `Active quests`,
+        msg("Active quests", {}),
+
         n.quests.filter((e) => e.status === `active`).map((e) => e.title),
       )}
       {r(
-        `Relationships`,
+        msg("Relationships", {}),
+
         n.relationships.map(
           (e) =>
             `${e.target_name}: ${e.label} — ${Object.entries(e.axes)
@@ -1473,23 +1484,28 @@ function CurrentStateTab({ storyId }) {
         ),
       )}
       {r(
-        `Known clues`,
+        msg("Known clues", {}),
+
         n.clues.filter((e) => !e.resolved).map((e) => e.text),
       )}
       {r(
-        `Pending promises`,
+        msg("Pending promises", {}),
+
         n.promises.filter((e) => !e.resolved).map((e) => e.text),
       )}
       {r(
-        `Unresolved mysteries`,
+        msg("Unresolved mysteries", {}),
+
         n.mysteries.filter((e) => !e.resolved).map((e) => e.text),
       )}
       {r(
-        `Immediate goals`,
+        msg("Immediate goals", {}),
+
         n.goals.filter((e) => !e.resolved).map((e) => e.text),
       )}
       {r(
-        `Stats`,
+        msg("Stats", {}),
+
         n.stats
           .filter((e) => !e.hidden)
           .map((e) => `${e.label}: ${e.value}${e.max != null && e.type === `current_max` ? `/${e.max}` : ``}`),
@@ -1540,6 +1556,7 @@ function CharactersTab({ storyId, worldId, initial, onJump }) {
               className="size-7 shrink-0"
               rounded="rounded-full"
             />
+
             <span className="truncate">{e.name}</span>
           </button>
         ))}
@@ -1557,6 +1574,7 @@ function CharactersTab({ storyId, worldId, initial, onJump }) {
                 variant="card"
                 className="h-24 w-18"
               />
+
               <div>
                 <h2 className="text-lg font-semibold">{query.data.name}</h2>
                 {query.data.relationship ? (
@@ -1677,8 +1695,8 @@ function RecapsTab({ storyId }) {
         >
           <div className="mb-1 flex flex-wrap items-center gap-1.5 text-xs">
             <b>v{t.version}</b>
-            <Badge tone={t.status === `active` ? `accent` : `neutral`}>{t.status}</Badge>
-            <Badge>{t.source}</Badge>
+            <Badge tone={t.status === `active` ? `accent` : `neutral`}>{msgKey(t.status)}</Badge>
+            <Badge>{msgKey(t.source)}</Badge>
             <span className="text-faint">
               {msg("covers up to #")}
               {t.end_seq}
@@ -1756,12 +1774,22 @@ function RecapsTab({ storyId }) {
 }
 
 function maintenanceSummary(e) {
-  let t = e.remaining_messages ? ` ${e.remaining_messages} message(s) still waiting — run it again to continue.` : ``;
-  if (e.status === `nothing_to_do`) return [`Nothing new to process.`, `info`];
+  let t = e.remaining_messages
+    ? msg(" {{v0}} message(s) still waiting — run it again to continue.", { v0: e.remaining_messages })
+    : ``;
+  if (e.status === `nothing_to_do`) return [msg("Nothing new to process.", {}), `info`];
   if (e.status === `skipped` && e.skipped)
-    return [`Skipped messages #${e.skipped[0]}–#${e.skipped[1]} (not captured).${t}`, `warn`];
-  if (e.status === `failed`) return [`Capture failed: ${e.error ?? `unknown error`}`, `danger`];
-  let n = `Saved ${e.events ?? 0} event(s), ${e.facts ?? 0} fact(s), ${e.proposals ?? 0} proposal(s)${e.processed ? ` from #${e.processed[0]}–#${e.processed[1]}` : ``}`;
+    return [
+      msg("Skipped messages #{{v0}}–#{{v1}} (not captured).{{v2}}", { v0: e.skipped[0], v1: e.skipped[1], v2: t }),
+      `warn`,
+    ];
+  if (e.status === `failed`) return [msg("Capture failed: {{v0}}", { v0: e.error ?? `unknown error` }), `danger`];
+  let n = msg("Saved {{v0}} event(s), {{v1}} fact(s), {{v2}} proposal(s){{v3}}", {
+    v0: e.events ?? 0,
+    v1: e.facts ?? 0,
+    v2: e.proposals ?? 0,
+    v3: e.processed ? ` from #${e.processed[0]}–#${e.processed[1]}` : ``,
+  });
   return e.status === `partial`
     ? [`${n}; then a chunk failed: ${e.error ?? ``}`, `warn`]
     : [`${n}; ${e.duplicates_skipped ?? 0} duplicate(s) skipped.${t}`, `ok`];
@@ -1814,25 +1842,34 @@ function MaintenanceTab({ storyId }) {
         <p className="text-sm font-medium">{t}</p>
       </div>
     );
+
   return (
     <div className="mx-auto max-w-4xl space-y-4">
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {u(`Transcript`, `${l.transcript_messages} messages`)}
-        {u(`Processed up to`, l.last_processed_seq >= 0 ? `#${l.last_processed_seq} of #${l.head_seq}` : `nothing yet`)}
+        {u(msg("Transcript", {}), `${l.transcript_messages} messages`)}
         {u(
-          `Last successful extraction`,
+          msg("Processed up to", {}),
+          l.last_processed_seq >= 0 ? `#${l.last_processed_seq} of #${l.head_seq}` : `nothing yet`,
+        )}
+        {u(
+          msg("Last successful extraction", {}),
+
           l.last_successful_extraction ? timeAgo(l.last_successful_extraction) : `never`,
         )}
         {u(
-          `Capture mode`,
+          msg("Capture mode", {}),
+
           `${l.capture_mode}${l.capture_mode === `batch` ? ` (every ${l.batch_every}, ${l.turns_since_extraction} since)` : ``}`,
         )}
-        {u(`Events`, `${l.events_total} (${l.events_candidates} to review)`)}
-        {u(`Active memories`, `${l.facts_active} (${l.facts_candidates} candidates)`)}
-        {u(`Stale records`, l.stale_records)}
-        {u(`Pending state proposals`, l.pending_proposals)}
-        {u(`Rolling recap`, l.recap ? `v${l.recap.version} up to #${l.recap.end_seq}` : `none`)}
-        {u(`Last full backup`, l.last_backup ? timeAgo(l.last_backup) : `never`)}
+        {u(msg("Events", {}), msg("{{v0}} ({{v1}} to review)", { v0: l.events_total, v1: l.events_candidates }))}
+        {u(msg("Active memories", {}), `${l.facts_active} (${l.facts_candidates} candidates)`)}
+        {u(msg("Stale records", {}), l.stale_records)}
+        {u(msg("Pending state proposals", {}), l.pending_proposals)}
+        {u(
+          msg("Rolling recap", {}),
+          l.recap ? msg("v{{v0}} up to #{{v1}}", { v0: l.recap.version, v1: l.recap.end_seq }) : msg("none"),
+        )}
+        {u(msg("Last full backup", {}), l.last_backup ? timeAgo(l.last_backup) : `never`)}
       </div>
       {l.capture_paused ? (
         <Callout tone="warn" title={msg("Automatic memory capture is paused")}>
@@ -1893,6 +1930,7 @@ function MaintenanceTab({ storyId }) {
             className="w-16"
             aria-label={msg("Rebuild from message number")}
           />
+
           <Button
             loading={mutation.isPending && mutation.variables === `rebuild`}
             onClick={async () => {
@@ -1925,7 +1963,7 @@ function MaintenanceTab({ storyId }) {
                 #{e.start_seq}–#{e.end_seq}
               </span>
               <span className="text-faint">
-                {e.capture_method.replace(/_/g, ` `)}
+                {msgKey(e.capture_method)}
                 {" · "}
                 {e.model_id ?? msg("no model")}
                 {" · "}

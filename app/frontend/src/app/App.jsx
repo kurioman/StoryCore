@@ -61,6 +61,7 @@ function App() {
   ) : (
     <HomePage />
   );
+
   let d = matchRoute(hashPath, `/story/:id`)?.id,
     f = (
       <Sidebar
@@ -71,6 +72,7 @@ function App() {
         onHelp={() => c(true)}
       />
     );
+
   return (
     <div className="flex h-full overflow-hidden">
       {mediaQuery ? (
@@ -84,6 +86,7 @@ function App() {
             )}
             onClick={() => o(false)}
           />
+
           <div
             className={cn(
               `fixed inset-y-0 left-0 z-40 transition-transform`,
@@ -107,7 +110,7 @@ function App() {
           </div>
         )}
         <div className="min-h-0 flex-1">
-          <ErrorBoundary area="This page" resetKey={hashPath.split(`?`)[0]}>
+          <ErrorBoundary area={msg("This page")} resetKey={hashPath.split(`?`)[0]}>
             {l}
           </ErrorBoundary>
         </div>

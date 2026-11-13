@@ -4,7 +4,7 @@ import * as React from "react";
 import * as Icon from "lucide-react";
 import { errorMessage, apiPatch, apiPost, apiDelete, apiUpload } from "@/api/legacy";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
-import { msg } from "@/i18n";
+import { msg, msgKey } from "@/i18n";
 import {
   Badge,
   Button,
@@ -27,6 +27,7 @@ export function Logo({ small }) {
         d="M16 2.5 L19.2 12.8 L29.5 16 L19.2 19.2 L16 29.5 L12.8 19.2 L2.5 16 L12.8 12.8 Z"
         fill="var(--c-accent)"
       />
+
       <circle cx="16" cy="16" r="2.4" fill="var(--c-bg)" />
     </svg>
   );
@@ -80,6 +81,7 @@ export function Sidebar({ activeStoryId, path, collapsed, onToggle, onHelp }) {
         icon: Icon.Settings,
       },
     ];
+
   return collapsed ? (
     <aside className="flex h-full w-12 shrink-0 flex-col items-center gap-1 border-r border-line bg-panel py-2">
       <button onClick={() => navigate(`/`)} aria-label={msg("Home")} className="mb-1 p-1">
@@ -144,7 +146,8 @@ export function Sidebar({ activeStoryId, path, collapsed, onToggle, onHelp }) {
             )}
             key={e}
           >
-            {e === `template` ? msg("Templates") : e} {p[e] ? <span className="text-faint">{p[e]}</span> : null}
+            {e === `template` ? msg("Templates") : e === `active` ? msg("Active") : msg("Archived")}{" "}
+            {p[e] ? <span className="text-faint">{p[e]}</span> : null}
           </button>
         ))}
       </div>
@@ -226,7 +229,7 @@ function StoryRow({ s: e, active }) {
           a === `delete` &&
             (toast(msg("Story deleted. A recovery package was saved in data/backups/deleted_stories.")),
             active && navigate(`/`)),
-          a === `archive` && toast(e.status === `archived` ? `Story restored` : `Story archived`));
+          a === `archive` && toast(e.status === `archived` ? msg("Story restored", {}) : msg("Story archived", {})));
       },
       onError: (e) => toast(errorMessage(e), `danger`),
     });
@@ -290,16 +293,19 @@ function StoryRow({ s: e, active }) {
               label={msg("Export package")}
               onClick={() => (window.location.href = `/api/stories/${e.id}/export`)}
             />
+
             <MenuItem
               icon={e.status === `archived` ? Icon.ArchiveArrowUp : Icon.Archive}
               label={e.status === `archived` ? msg("Unarchive") : msg("Archive")}
               onClick={() => mutation.mutate(`archive`)}
             />
+
             <MenuItem
               icon={Icon.BookOpen}
               label={e.status === `template` ? msg("Unmark template") : msg("Mark as template")}
               onClick={() => mutation.mutate(`template`)}
             />
+
             <div className="my-1 h-px bg-line" />
             <MenuItem
               icon={Icon.Trash}
@@ -410,6 +416,7 @@ function ImportStoryDialog({ open, onOpenChange }) {
         className="hidden"
         onChange={(e) => e.target.files?.[0] && d(e.target.files[0])}
       />
+
       {!a && (
         <Button onClick={() => n.current?.click()} loading={s}>
           <Icon.Upload className="size-4" /> {msg("Choose package…")}
@@ -426,7 +433,7 @@ function ImportStoryDialog({ open, onOpenChange }) {
           <div className="flex flex-wrap gap-1.5">
             {Object.entries(a.report.counts ?? {}).map(([e, t]) => (
               <Badge key={e}>
-                {e.replace(/_/g, ` `)}
+                {msgKey(e)}
                 {": "}
                 {t}
               </Badge>

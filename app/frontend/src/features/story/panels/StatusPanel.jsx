@@ -4,7 +4,7 @@ import * as React from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiPost, errorMessage, apiGet } from "@/api/legacy";
 import * as Icon from "lucide-react";
-import { msg } from "@/i18n";
+import { msg, msgKey } from "@/i18n";
 import {
   Badge,
   Button,
@@ -257,6 +257,7 @@ function StatusPanel({ storyId, avatar }) {
                   {msg("” is reverted). The undo itself is recorded in history.")}
                 </>
               ),
+
               confirmLabel: msg("Undo"),
             })) && mutation.mutate();
           }}
@@ -271,9 +272,12 @@ function StatusPanel({ storyId, avatar }) {
           s={d}
           onClose={() => l(false)}
           onSave={(e, t) =>
-            stateEditor.save((n) => {
-              ((n.player = e), (n.scene.location = t));
-            }, `Player card edited`)
+            stateEditor.save(
+              (n) => {
+                ((n.player = e), (n.scene.location = t));
+              },
+              msg("Player card edited", {}),
+            )
           }
         />
       )}
@@ -369,6 +373,7 @@ function StatsEditor({ stats, templates, onSave }) {
               aria-label={msg("Stat name")}
               className="h-7 flex-1"
             />
+
             <Select
               value={e.type}
               onChange={(e) =>
@@ -417,6 +422,7 @@ function StatsEditor({ stats, templates, onSave }) {
                   className="h-7"
                   aria-label={msg("Options")}
                 />
+
                 <Select
                   value={String(e.value ?? ``)}
                   onChange={(e) =>
@@ -538,7 +544,7 @@ function StatsEditor({ stats, templates, onSave }) {
               </option>
             ))}
         </Select>
-        <Button size="sm" variant="primary" className="ml-auto" onClick={() => onSave(r, `Stats edited`)}>
+        <Button size="sm" variant="primary" className="ml-auto" onClick={() => onSave(r, msg("Stats edited", {}))}>
           {msg("Save stats")}
         </Button>
       </div>
@@ -579,6 +585,7 @@ var STAT_TEMPLATES = {
       unit: `XP`,
     },
   ],
+
   minimal: [
     {
       label: msg("Condition"),
@@ -654,8 +661,9 @@ function ProposalsSection({ storyId }) {
         (invalidateStory(storyId),
           toast(
             r.proposals
-              ? `${r.proposals} change(s) proposed for review`
-              : `No state changes suggested for the last turn`,
+              ? msg("{{v0}} change(s) proposed for review", { v0: r.proposals })
+              : msg("No state changes suggested for the last turn", {}),
+
             `info`,
           ));
       },
@@ -711,7 +719,7 @@ export function ProposalRow({ p, onAct, busy }) {
   return (
     <div className="rounded-md border border-line bg-panel-2/40 p-2 text-xs">
       <div className="flex items-center gap-1.5">
-        <Badge tone="accent">{p.kind.replace(/_/g, ` `)}</Badge>
+        <Badge tone="accent">{msgKey(p.kind)}</Badge>
         <span className="text-faint">
           {Math.round(p.confidence * 100)}
           {msg("% confidence")}
@@ -785,7 +793,7 @@ function StateHistoryDialog({ storyId }) {
           {query.data?.map((e) => (
             <li className="flex gap-2 text-xs" key={e.version}>
               <span className="w-8 shrink-0 text-faint">v{e.version}</span>
-              <Badge>{e.source.replace(/_/g, ` `)}</Badge>
+              <Badge>{msgKey(e.source)}</Badge>
               <span className="flex-1 text-muted">{e.summary}</span>
               <span className="text-faint">{timeAgo(e.created_at)}</span>
             </li>

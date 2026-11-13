@@ -4,7 +4,7 @@ import { useCommands, queryKeys, useContextPreview } from "@/api/queries";
 import * as Icon from "lucide-react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { apiPost, apiGet } from "@/api/legacy";
-import { msg } from "@/i18n";
+import { msg, msgKey } from "@/i18n";
 import {
   Badge,
   Button,
@@ -249,7 +249,7 @@ export var Composer = React.forwardRef(function (
                       ? msg("app action · no model call")
                       : e.kind === `hybrid`
                         ? msg("app tool + model")
-                        : `prompt`}
+                        : msg("prompt")}
                     {e.aliases_json.length > 0 &&
                       msg(" · also {{v0}}", {
                         v0: e.aliases_json.map((e) => `/` + e).join(` `),
@@ -315,14 +315,15 @@ export var Composer = React.forwardRef(function (
             placeholder={
               _
                 ? _.kind === `local_action`
-                  ? `Optional text for this action…`
-                  : `Add instructions or text (optional)…`
+                  ? msg("Optional text for this action…", {})
+                  : msg("Add instructions or text (optional)…", {})
                 : msg("What do you do? Type / for commands")
             }
             className="block max-h-64 w-full resize-none bg-transparent px-3.5 py-2.5 font-serif text-base leading-relaxed text-fg placeholder:font-sans placeholder:text-sm placeholder:text-faint focus:outline-none"
             id="story-composer"
             aria-label={msg("Message")}
           />
+
           <div className="flex items-center gap-1 px-2 pb-2">
             <IconButton label={msg("Recap the story (/recap)")} onClick={() => onQuick(`recap`)}>
               <Icon.ScrollText className="size-4" />
@@ -581,15 +582,13 @@ export function ContextManifest({ manifest, storyId, exclusions }) {
                   className={cn(`flex items-center gap-2 text-xs`, e.included === false && `text-faint line-through`)}
                   key={n}
                 >
-                  <Badge>{e.type}</Badge>
+                  <Badge>{msgKey(e.type)}</Badge>
                   <span className="min-w-0 flex-1 truncate">{e.label}</span>
                   {e.canon_status && e.canon_status !== `recurring_reference` && (
                     <Badge tone="warn">{e.canon_status}</Badge>
                   )}
                   {e.confidence && e.confidence !== `high` && (
-                    <Badge tone="warn">
-                      {e.confidence} {msg("confidence")}
-                    </Badge>
+                    <Badge tone="warn">{msg("{{v0}} confidence", { v0: msgKey(e.confidence) })}</Badge>
                   )}
                   {e.reason && <span className="text-faint">({e.reason})</span>}
                   {storyId && r && (

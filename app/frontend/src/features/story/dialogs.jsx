@@ -4,7 +4,7 @@ import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiPost, apiGet, apiPatch, errorMessage, apiPut, apiDelete } from "@/api/legacy";
 import * as Icon from "lucide-react";
-import { msg } from "@/i18n";
+import { msg, msgKey } from "@/i18n";
 import {
   Badge,
   Button,
@@ -84,10 +84,10 @@ function RecapRunner({ storyId, input, onClose }) {
         invalidateStory(storyId),
         toast(
           t === `active`
-            ? `Recap is now the rolling recap (the full transcript is unchanged).`
+            ? msg("Recap is now the rolling recap (the full transcript is unchanged).", {})
             : t === `rejected`
-              ? `Recap discarded`
-              : `Recap kept as a candidate`,
+              ? msg("Recap discarded", {})
+              : msg("Recap kept as a candidate", {}),
         ),
         onClose());
     },
@@ -229,7 +229,7 @@ function ContinuityDialog({ storyId, input, onClose, focus, onJump, onFocusStatu
                         source_message_ids: t.message_ids ?? [],
                       }),
                         invalidateStory(storyId),
-                        g(n, `Memory created`));
+                        g(n, msg("Memory created", {})));
                     }}
                   >
                     {msg("Create memory")}
@@ -237,12 +237,12 @@ function ContinuityDialog({ storyId, input, onClose, focus, onJump, onFocusStatu
                   <Button
                     size="sm"
                     onClick={() => {
-                      (onFocusStatus(), g(n, `Opened state panel`));
+                      (onFocusStatus(), g(n, msg("Opened state panel", {})));
                     }}
                   >
                     {msg("Update state")}
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={() => g(n, `Ignored`)}>
+                  <Button size="sm" variant="ghost" onClick={() => g(n, msg("Ignored", {}))}>
                     {msg("Ignore")}
                   </Button>
                 </div>
@@ -269,7 +269,7 @@ function ContinuityDialog({ storyId, input, onClose, focus, onJump, onFocusStatu
                     content: d.text,
                   }),
                     invalidateStory(storyId),
-                    g(d.i, `Message corrected`),
+                    g(d.i, msg("Message corrected", {})),
                     f(null));
                 } catch (e) {
                   toast(errorMessage(e), `danger`);
@@ -323,7 +323,7 @@ function AddLoreDialog({ storyId, input, onClose }) {
     d = async (t) => {
       try {
         (await apiPost(`/local-canon`, {
-          title: c.title || `Untitled fact`,
+          title: c.title || msg("Untitled fact", {}),
           content: c.content,
           world_id: story.data?.world_id,
           story_id: storyId,
@@ -340,7 +340,7 @@ function AddLoreDialog({ storyId, input, onClose }) {
           queryClient.invalidateQueries({
             queryKey: queryKeys.context(storyId),
           }),
-          toast(t ? `Added to local canon` : `Saved as a pending local-canon candidate`),
+          toast(t ? msg("Added to local canon", {}) : msg("Saved as a pending local-canon candidate", {})),
           onClose());
       } catch (e) {
         toast(errorMessage(e), `danger`);
@@ -520,11 +520,14 @@ function ContentPrefsDialog({ storyId, onClose }) {
           }
         >
           {t.map((e) => (
-            <option key={e}>{e}</option>
+            <option key={e} value={e}>
+              {msg(e)}
+            </option>
           ))}
         </Select>
       </Field>
     );
+
   return (
     <Modal
       open
@@ -540,9 +543,9 @@ function ContentPrefsDialog({ storyId, onClose }) {
       }
     >
       <div className="grid grid-cols-2 gap-3">
-        {u(`romance_intensity`, [`none`, `subtle`, `moderate`, `mature`], `Romance intensity`)}
-        {u(`profanity`, [`none`, `mild`, `strong`], `Profanity`)}
-        {u(`violence`, [`low`, `moderate`, `graphic`], `Violence / gore`)}
+        {u(`romance_intensity`, [`none`, `subtle`, `moderate`, `mature`], msg("Romance intensity", {}))}
+        {u(`profanity`, [`none`, `mild`, `strong`], msg("Profanity", {}))}
+        {u(`violence`, [`low`, `moderate`, `graphic`], msg("Violence / gore", {}))}
         <div className="flex items-end pb-1">
           <Toggle
             checked={!!s.fade_to_black}
@@ -623,6 +626,7 @@ function SceneDialog({ storyId, onClose }) {
       />
     </Field>
   );
+
   return (
     <Modal
       open
@@ -642,7 +646,7 @@ function SceneDialog({ storyId, onClose }) {
                   ...r,
                   present: e.scene.present,
                 }),
-              `Scene edited`,
+              msg("Scene edited", {}),
             ),
               onClose());
           }}
@@ -679,10 +683,10 @@ function SceneDialog({ storyId, onClose }) {
         </Callout>
       )}
       <div className="grid grid-cols-2 gap-3">
-        {o(`location`, `Location`)}
-        {o(`chapter`, `Chapter / arc`)}
-        {o(`time`, `Time of day`)}
-        {o(`weather`, `Weather`)}
+        {o(`location`, msg("Location", {}))}
+        {o(`chapter`, msg("Chapter / arc", {}))}
+        {o(`time`, msg("Time of day", {}))}
+        {o(`weather`, msg("Weather", {}))}
         <Field label={msg("Story day (D…)")} hint={msg("D1 is the first in-story day")}>
           <Input
             type="number"
@@ -708,7 +712,9 @@ function SceneDialog({ storyId, onClose }) {
           >
             <option value="">{msg("not established")}</option>
             {WEEKDAYS.map((e) => (
-              <option key={e}>{e}</option>
+              <option key={e} value={e}>
+                {msg(e)}
+              </option>
             ))}
           </Select>
         </Field>
@@ -738,12 +744,14 @@ function SceneDialog({ storyId, onClose }) {
           >
             <option value="">{msg("not established")}</option>
             {MONTHS.map((e) => (
-              <option key={e}>{e}</option>
+              <option key={e} value={e}>
+                {msg(e)}
+              </option>
             ))}
           </Select>
         </Field>
         <Field
-          label={stateEditor.q.data?.calendar?.year_label ?? `Year`}
+          label={stateEditor.q.data?.calendar?.year_label ?? msg("Year", {})}
           hint={msg("Only if the story has established it")}
         >
           <Input
@@ -758,9 +766,9 @@ function SceneDialog({ storyId, onClose }) {
             }
           />
         </Field>
-        {o(`date`, `Other date text`, `used only when no calendar date is set`)}
-        {o(`mood`, `Mood`)}
-        {o(`status`, `Scene status`, `e.g. tense negotiation`)}
+        {o(`date`, msg("Other date text", {}), msg("used only when no calendar date is set"))}
+        {o(`mood`, msg("Mood", {}))}
+        {o(`status`, msg("Scene status", {}), msg("e.g. tense negotiation", {}))}
       </div>
       <p className="mt-3 text-xs text-faint">
         {msg(
@@ -806,6 +814,7 @@ function LoreSearchDialog({ storyId, input, onClose }) {
               onChange={(e) => s(e.target.value)}
               placeholder={msg("Search characters, places, systems…")}
             />
+
             <Button type="submit">
               <Icon.Search className="size-4" />
             </Button>
@@ -830,15 +839,15 @@ function LoreSearchDialog({ storyId, input, onClose }) {
               <div className="rounded-md border border-line p-2.5 text-sm" key={t.chunk_id}>
                 <div className="flex flex-wrap items-center gap-1.5">
                   <span className="font-medium">{t.title}</span>
-                  <Badge>{t.category.replace(/_/g, ` `)}</Badge>
+                  <Badge>{msgKey(t.category)}</Badge>
                   {t.confidence && (
                     <Badge tone={t.confidence === `high` ? `ok` : `warn`}>
-                      {t.confidence} {msg("confidence")}
+                      {msg("{{v0}} confidence", { v0: msgKey(t.confidence) })}
                     </Badge>
                   )}
                   {t.canon_status && (
                     <Badge tone={t.canon_status === `recurring_reference` ? `neutral` : `warn`}>
-                      {t.canon_status.replace(/_/g, ` `)}
+                      {msgKey(t.canon_status)}
                     </Badge>
                   )}
                   <Button
@@ -856,7 +865,11 @@ function LoreSearchDialog({ storyId, input, onClose }) {
                         queryClient.invalidateQueries({
                           queryKey: queryKeys.context(storyId),
                         }),
-                        toast(f.includes(t.chunk_id) ? `Unpinned from context` : `Pinned to this story's context`));
+                        toast(
+                          f.includes(t.chunk_id)
+                            ? msg("Unpinned from context", {})
+                            : msg("Pinned to this story's context", {}),
+                        ));
                     }}
                   >
                     <Icon.Pin className="size-3.5" /> {f.includes(t.chunk_id) ? msg("Unpin") : msg("Pin to context")}
@@ -896,6 +909,7 @@ function MemoryDialog({ storyId, input, onClose, onJump }) {
           className="min-h-16"
           placeholder={msg("Something the story should remember")}
         />
+
         <div className="flex gap-2">
           <Select value={u} onChange={(e) => d(e.target.value)} className="w-48">
             <option value="established">{msg("Established fact")}</option>
@@ -1064,6 +1078,7 @@ function UserNotesDialog({ storyId, onClose }) {
             className="min-h-32"
             placeholder={msg("Instructions and persistent facts for this story only.")}
           />
+
           <p className="mt-0.5 text-right text-[11px] text-faint">
             ≈{Math.ceil(c.content.length / 4)} {msg("tokens")}
           </p>
@@ -1096,6 +1111,7 @@ function UserNotesDialog({ storyId, onClose }) {
             className="min-h-28"
             placeholder={msg("Applies to all stories (e.g. writing preferences).")}
           />
+
           <div className="mt-2">
             <Toggle checked={u} onChange={d} label={msg("Disable the global note for this story")} />
           </div>
@@ -1169,6 +1185,7 @@ function SavepointsDialog({ storyId, input, onClose }) {
           onChange={(e) => c(e.target.value)}
           placeholder={msg("Savepoint name (e.g. Before the duel)")}
         />
+
         <Button variant="primary" type="submit" loading={mutation.isPending}>
           {msg("Create")}
         </Button>

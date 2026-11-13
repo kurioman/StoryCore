@@ -1,6 +1,6 @@
 // Reconstructed from the StoryCore v1.7.0 compiled bundle (see DEVONLY/13_FRONTEND_SOURCE.md).
 import { useSettings } from "@/api/queries";
-import { msg } from "@/i18n";
+import { LANGUAGES, currentLanguage, msg, setLanguage } from "@/i18n";
 import { Field, Select } from "@/components/ui";
 import { useSaveSettings } from "@/features/settings/SettingsPage";
 
@@ -9,6 +9,22 @@ export function AppearanceSettings() {
     saveSettings = useSaveSettings();
   return (
     <div className="max-w-xl space-y-3">
+      <Field
+        label={msg("Interface language")}
+        hint={msg("The language of menus, buttons and help. The story text has its own setting (Narration & context).")}
+      >
+        <Select
+          value={currentLanguage}
+          onChange={(e) => setLanguage(e.target.value)}
+          aria-label={msg("Interface language")}
+        >
+          {LANGUAGES.map((l) => (
+            <option value={l.code} key={l.code}>
+              {l.label}
+            </option>
+          ))}
+        </Select>
+      </Field>
       <Field label={msg("Theme")}>
         <Select
           value={settings.data?.theme ?? `dark`}

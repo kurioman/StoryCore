@@ -50,6 +50,7 @@ function runCommand(e, t, n) {
         f.current = false;
       }
     ),
+
     [],
   );
   let p = React.useCallback(
@@ -137,6 +138,7 @@ function runCommand(e, t, n) {
               }),
               null
             );
+
           throw (d.current.onError(e), e);
         }
       },
@@ -246,6 +248,7 @@ export function StoryPage({ storyId }) {
             fe(),
             true
           );
+
         case `savepoint`:
           return (
             n.trim()
@@ -263,6 +266,7 @@ export function StoryPage({ storyId }) {
                 }),
             true
           );
+
         case `undo`: {
           let t = storyState.data?.last_change;
           if (!storyState.data?.can_undo) return (toast(msg("Nothing to undo in the story state."), `warn`), true);
@@ -278,6 +282,7 @@ export function StoryPage({ storyId }) {
                   )}
                 </>
               ),
+
               confirmLabel: msg("Undo"),
             })
           ) {
@@ -350,12 +355,14 @@ export function StoryPage({ storyId }) {
         <Spinner />
       </div>
     );
+
   if (story.isError || !story.data)
     return (
       <div className="p-6">
-        <ErrorCallout error={story.error ?? `Story not found`} />
+        <ErrorCallout error={story.error ?? msg("Story not found", {})} />
       </div>
     );
+
   let k = story.data,
     be = n.data?.messages ?? [],
     xe = k.settings_json.model_profile_id ?? i.data?.default_model_profile_id ?? null,
@@ -390,6 +397,7 @@ export function StoryPage({ storyId }) {
         setKnownFocus={d}
       />
     );
+
   return (
     <div className="flex h-full flex-col">
       <h1 className="sr-only">{k.title}</h1>
@@ -419,6 +427,7 @@ export function StoryPage({ storyId }) {
               })
         }
       />
+
       <div className="flex min-h-0 flex-1">
         <div className="flex min-w-0 flex-1 flex-col">
           <div className={cn(`min-h-0 flex-1 flex-col`, E === `story` ? `flex` : `hidden`)}>
@@ -552,12 +561,14 @@ export function StoryPage({ storyId }) {
         }}
         onJump={pe}
       />
+
       <ContextInspector
         storyId={storyId}
         open={re}
         onClose={() => ie(false)}
         exclusions={k.settings_json.context_exclusions}
       />
+
       {de.consent && (
         <Modal
           open

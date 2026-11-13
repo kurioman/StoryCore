@@ -1,3 +1,4 @@
+import { msg } from "@/i18n";
 // Reconstructed from the StoryCore v1.7.0 compiled bundle (see DEVONLY/13_FRONTEND_SOURCE.md).
 import { clsx } from "clsx";
 
@@ -8,13 +9,13 @@ export function timeAgo(e) {
   let t = new Date(e).getTime(),
     n = Math.round((Date.now() - t) / 1e3);
   return n < 45
-    ? `just now`
+    ? msg("just now")
     : n < 3600
-      ? `${Math.round(n / 60)} min ago`
+      ? msg("{{v0}} min ago", { v0: Math.round(n / 60) })
       : n < 86400
-        ? `${Math.round(n / 3600)} h ago`
+        ? msg("{{v0}} h ago", { v0: Math.round(n / 3600) })
         : n < 604800
-          ? `${Math.round(n / 86400)} d ago`
+          ? msg("{{v0}} d ago", { v0: Math.round(n / 86400) })
           : new Date(e).toLocaleDateString();
 }
 

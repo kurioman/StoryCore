@@ -5,7 +5,7 @@ import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
 import { apiGet, apiPost, errorMessage, apiUpload, apiPatch } from "@/api/legacy";
 import * as Icon from "lucide-react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { msg } from "@/i18n";
+import { msg, msgKey } from "@/i18n";
 import {
   Badge,
   Button,
@@ -41,7 +41,7 @@ var LORE_CATEGORIES = [
     `source`,
   ],
   LORE_HIDDEN_KEYS = new Set([`id`, `name`, `source_ids`, `confidence`, `canon_status`, `aliases`, `type`]),
-  humanizeKey = (e) => e.replace(/_/g, ` `);
+  humanizeKey = (e) => msg(String(e ?? ``).replace(/_/g, ` `)); // data keys (categories, fields) shown translated when known
 
 export function LorePage() {
   let worlds = useWorlds(),
@@ -99,12 +99,14 @@ export function LorePage() {
         <Spinner />
       </div>
     );
+
   if (worlds.isError)
     return (
       <div className="mx-auto max-w-lg p-10">
         <ErrorCallout error={worlds.error} onRetry={() => worlds.refetch()} />
       </div>
     );
+
   if (!worlds.data?.length || !r)
     return (
       <div className="mx-auto max-w-lg p-10">
@@ -119,6 +121,7 @@ export function LorePage() {
         <ImportReport r={v} />
       </div>
     );
+
   let w = x.data?.last_import?.report_json;
   return (
     <div className="flex h-full min-h-0">
@@ -321,7 +324,7 @@ export function LorePage() {
           </div>
         )}
         {u && (
-          <ErrorBoundary area="This lore record" resetKey={`${u.category}:${u.entityId}`} compact>
+          <ErrorBoundary area={msg("This lore record")} resetKey={`${u.category}:${u.entityId}`} compact>
             <LoreRecordPanel worldId={r.id} sel={u} assetId={portraitSlot(portraitMap.data?.[u.entityId])} />
           </ErrorBoundary>
         )}
@@ -413,7 +416,7 @@ function LoreRecordDetail({ d, worldId, assetId }) {
           <div className="mt-2 flex flex-wrap gap-1">
             {a.confidence && (
               <Badge tone={a.confidence === `high` ? `ok` : `warn`}>
-                {a.confidence} {msg("confidence")}
+                {msg("{{v0}} confidence", { v0: msgKey(a.confidence) })}
               </Badge>
             )}
             {a.canon_status && (
@@ -511,7 +514,9 @@ function LocalCanonCard({ c }) {
     <div className="mb-2 rounded-md border border-line p-3">
       <div className="mb-1 flex items-center gap-2 text-sm">
         <span className="font-medium">{c.title}</span>
-        <Badge tone={c.status === `approved` ? `ok` : c.status === `rejected` ? `neutral` : `warn`}>{c.status}</Badge>
+        <Badge tone={c.status === `approved` ? `ok` : c.status === `rejected` ? `neutral` : `warn`}>
+          {msgKey(c.status)}
+        </Badge>
       </div>
       <textarea
         value={t}
@@ -519,6 +524,7 @@ function LocalCanonCard({ c }) {
         className="min-h-24 w-full rounded-md border border-line bg-panel-2 p-2 text-xs"
         aria-label={msg("Override text")}
       />
+
       <div className="mt-1 flex gap-1">
         <Button size="sm" onClick={() => a()}>
           {msg("Save")}

@@ -4,7 +4,7 @@ import { apiGet, apiPost, errorMessage } from "@/api/legacy";
 import { useStories, useProviders, queryKeys } from "@/api/queries";
 import * as React from "react";
 import * as Icon from "lucide-react";
-import { msg } from "@/i18n";
+import { msg, msgKey } from "@/i18n";
 import { Badge, Button, Callout } from "@/components/ui";
 import { Logo } from "@/features/sidebar/Sidebar";
 import { navigate } from "@/lib/router";
@@ -146,7 +146,7 @@ export function HomePage() {
             <div className="mt-1 flex flex-wrap gap-1">
               {Object.entries(i.report.entities_by_category).map(([e, t]) => (
                 <Badge key={e}>
-                  {e.replace(/_/g, ` `)}
+                  {msgKey(e)}
                   {": "}
                   {t}
                 </Badge>

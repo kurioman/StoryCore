@@ -4,7 +4,7 @@ import * as Icon from "lucide-react";
 import { useInvalidateStory } from "@/api/queries";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiGet, apiPost, errorMessage } from "@/api/legacy";
-import { msg } from "@/i18n";
+import { msg, msgKey } from "@/i18n";
 import {
   Badge,
   Button,
@@ -81,14 +81,14 @@ export function RelationsPanel({ storyId, worldId, onOpenCharacter }) {
   let l = stateEditor.state.relationships,
     u = stateEditor.q.data?.relationship_tiers ?? {},
     d = [
-      [`How they see you`, l.filter((e) => !e.source_id)],
-      [`Between characters`, l.filter((e) => e.source_id && e.source_id !== `protagonist`)],
-      [`Your own stance`, l.filter((e) => e.source_id === `protagonist`)],
+      [msg("How they see you", {}), l.filter((e) => !e.source_id)],
+      [msg("Between characters", {}), l.filter((e) => e.source_id && e.source_id !== `protagonist`)],
+      [msg("Your own stance", {}), l.filter((e) => e.source_id === `protagonist`)],
     ],
     f = (e) =>
       e.source_id
         ? e.source_id === `protagonist`
-          ? `You → ${e.target_name}`
+          ? msg("You → {{v0}}", { v0: e.target_name })
           : `${e.source_name || e.source_id} → ${e.target_name}`
         : e.target_name,
     p = (e) => (!e.source_id || e.source_id === `protagonist` ? e.target_id : e.source_id) ?? ``;
@@ -100,9 +100,9 @@ export function RelationsPanel({ storyId, worldId, onOpenCharacter }) {
         <span className="text-muted">
           {
             {
-              relaxed: `Relaxed`,
-              normal: `Normal`,
-              strict: `Strict`,
+              relaxed: msg("Relaxed", {}),
+              normal: msg("Normal", {}),
+              strict: msg("Strict", {}),
             }[stateEditor.q.data?.relationship_difficulty ?? `normal`]
           }
         </span>{" "}
@@ -176,13 +176,13 @@ export function RelationsPanel({ storyId, worldId, onOpenCharacter }) {
           onSave={(e) =>
             stateEditor.save(
               (t) => void (t.relationships = t.relationships.map((t) => (t.id === e.id ? e : t))),
-              `Relationship with ${e.target_name} edited`,
+              msg("Relationship with {{v0}} edited", { v0: e.target_name }),
             )
           }
           onDelete={() =>
             stateEditor.save(
               (e) => void (e.relationships = e.relationships.filter((e) => e.id !== a.id)),
-              `Stopped tracking ${a.target_name}`,
+              msg("Stopped tracking {{v0}}", { v0: a.target_name }),
             )
           }
         />
@@ -209,7 +209,7 @@ export function RelationsPanel({ storyId, worldId, onOpenCharacter }) {
                       note: ``,
                       history: [],
                     }),
-                  `Started tracking ${t}`,
+                  msg("Started tracking {{v0}}", { v0: t }),
                 );
           }}
         />
@@ -391,7 +391,7 @@ function RelationEditor({ r: e, axes, assetId, onClose, onSave, onDelete, onOpen
                   ...(s.history ?? []),
                   {
                     at: new Date().toISOString(),
-                    change: `Edited manually`,
+                    change: msg("Edited manually", {}),
                     source: `manual`,
                   },
                 ],
@@ -438,6 +438,7 @@ function RelationEditor({ r: e, axes, assetId, onClose, onSave, onDelete, onOpen
                 }
                 className="flex-1 accent-[var(--c-accent)]"
               />
+
               <span className="w-8 text-right tabular-nums">{s.axes[e] ?? 0}</span>
             </label>
           ))}
@@ -503,7 +504,7 @@ function RelationEditor({ r: e, axes, assetId, onClose, onSave, onDelete, onOpen
             <li className="text-xs text-muted" key={t}>
               <span className="text-faint">{timeAgo(e.at)}</span>
               {" · "}
-              {e.change} <Badge>{e.source.replace(/_/g, ` `)}</Badge>
+              {e.change} <Badge>{msgKey(e.source)}</Badge>
             </li>
           ))}
         {!e.history?.length && <li className="text-xs text-faint">{msg("No changes recorded yet.")}</li>}

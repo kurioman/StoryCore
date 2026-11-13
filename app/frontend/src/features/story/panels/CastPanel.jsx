@@ -4,7 +4,7 @@ import * as React from "react";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { apiPost } from "@/api/legacy";
 import * as Icon from "lucide-react";
-import { msg } from "@/i18n";
+import { msg, msgKey } from "@/i18n";
 import { Badge, Button, EmptyState, IconButton, Input, Modal, Portrait, Spinner } from "@/components/ui";
 import { cn, shortId } from "@/lib/util";
 import { portraitSlot, usePortraitMap } from "@/lib/portraits";
@@ -27,6 +27,7 @@ export function PickCharacterDialog({ worldId, title, onClose, onPick }) {
         placeholder={msg("Search characters")}
         className="mb-2"
       />
+
       <div className="grid max-h-80 grid-cols-2 gap-1.5 overflow-y-auto sm:grid-cols-3">
         {u.map((e) => (
           <button
@@ -39,7 +40,7 @@ export function PickCharacterDialog({ worldId, title, onClose, onPick }) {
             <Portrait assetId={portraitSlot(portraitMap.data?.[e.id])} name={e.name} className="size-8 shrink-0" />
             <span className="min-w-0">
               <span className="block truncate font-medium">{e.name}</span>
-              <span className="block truncate text-faint">{e.type?.replace(/_/g, ` `)}</span>
+              <span className="block truncate text-faint">{msgKey(e.type)}</span>
             </span>
           </button>
         ))}
@@ -129,15 +130,18 @@ export function CastPanel({ storyId, worldId, onOpenCharacter }) {
                     present_add: [e],
                   },
                 })
-              : stateEditor.save((e) => {
-                  let n = `npc_${shortId()}`;
-                  (e.npcs.push({
-                    id: n,
-                    name: t,
-                    aliases: [],
-                  }),
-                    e.scene.present.push(n));
-                }, `Added local NPC ${t}`);
+              : stateEditor.save(
+                  (e) => {
+                    let n = `npc_${shortId()}`;
+                    (e.npcs.push({
+                      id: n,
+                      name: t,
+                      aliases: [],
+                    }),
+                      e.scene.present.push(n));
+                  },
+                  msg("Added local NPC {{v0}}", { v0: t }),
+                );
           }}
         />
       )}
@@ -161,7 +165,7 @@ function CastCharacterRow({ c, onSlot, onLock, onPresent, onOpen }) {
           <div className="flex items-start justify-between gap-1">
             <div className="min-w-0">
               <p className="truncate text-[13px] font-semibold">{c.name}</p>
-              <p className="truncate text-[11px] text-faint">{c.type.replace(/_/g, ` `)}</p>
+              <p className="truncate text-[11px] text-faint">{msgKey(c.type)}</p>
             </div>
             <IconButton
               label={c.expression.locked ? msg("Unlock expression") : msg("Lock expression")}
@@ -196,7 +200,7 @@ function CastCharacterRow({ c, onSlot, onLock, onPresent, onOpen }) {
               <button
                 role="radio"
                 aria-checked={c.expression.slot === n.slot}
-                title={n.name + (c.available_slots.includes(n.slot) ? `` : ` (no image — falls back)`)}
+                title={n.name + (c.available_slots.includes(n.slot) ? `` : msg(" (no image — falls back)", {}))}
                 onClick={() => onSlot(n.slot)}
                 className={cn(
                   `rounded px-1.5 py-0.5 text-[10px]`,

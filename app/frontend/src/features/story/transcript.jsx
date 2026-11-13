@@ -22,7 +22,10 @@ function BeatPortrait({ b }) {
   let t = EXPRESSIONS[b.expression - 1],
     n = b.beat === `speaking`;
   return (
-    <figure className="story-beat" aria-label={`${b.name}, ${t?.short ?? `Neutral`}, ${n ? `speaking` : `reacting`}`}>
+    <figure
+      className="story-beat"
+      aria-label={`${b.name}, ${t?.short ?? msg("Neutral", {})}, ${n ? `speaking` : `reacting`}`}
+    >
       <div className="story-beat-frame">
         <Portrait
           assetId={b.asset_id}
@@ -126,7 +129,7 @@ function MessageProse({
       {g.map((e, t) => {
         let n = f.get(t + paragraphOffset),
           r = n?.character_id ?? null,
-          i = r === `protagonist` ? protagonist || `You` : (n?.name ?? null),
+          i = r === `protagonist` ? protagonist || msg("You", {}) : (n?.name ?? null),
           s = !!r && r !== b;
         return (
           n && (b = r),
@@ -213,7 +216,7 @@ export function MessageItem({
       onSuccess: () => {
         (x(false),
           onChanged(),
-          toast(se ? `Message edited. Regenerate the reply to use the new text.` : `Message edited`));
+          toast(se ? msg("Message edited. Regenerate the reply to use the new text.", {}) : msg("Message edited", {})));
       },
       onError: (e) => toast(errorMessage(e), `danger`),
     }),
@@ -267,7 +270,7 @@ export function MessageItem({
         highlight && `rounded-md ring-2 ring-accent/60`,
       )}
       aria-label={msg("{{v0}}, message {{v1}}", {
-        v0: se ? `You` : ce ? `Out of character` : `Narrator`,
+        v0: se ? msg("You") : ce ? msg("Out of character") : msg("Narrator"),
         v1: e.seq,
       })}
     >
@@ -309,6 +312,7 @@ export function MessageItem({
               className="min-h-40 font-serif text-[15px]"
               aria-label={msg("Edit message")}
             />
+
             <div className="flex justify-end gap-2">
               <Button variant="ghost" size="sm" onClick={() => x(false)}>
                 <Icon.X className="size-3.5" /> {msg("Cancel")}
@@ -534,11 +538,13 @@ function ImmersiveReply({ m: e, inline, dialogueStyle, protagonist }) {
                     background: `var(--c-accent)`,
                   }}
                 />
+
                 {protagonist || msg("You")}
               </span>
               {i.text}
             </div>
           );
+
         let c = a;
         a += i.text.split(/\n\s*\n/).filter((e) => e.trim()).length;
         let l = o;
@@ -565,22 +571,23 @@ function ImmersiveReply({ m: e, inline, dialogueStyle, protagonist }) {
 
 function DiagnosticsTable({ d }) {
   let t = [
-    [`Model`, d.model],
-    [`Route`, d.provider],
-    [`Generation`, d.generation_id],
-    [`Ended with`, d.finish_reason],
-    [`Provider's reason`, d.native_finish_reason],
-    [`Reasoning`, d.reasoning],
-    [`Output limit`, d.max_tokens],
-    [`Input tokens`, d.input_tokens],
-    [`Output tokens`, d.output_tokens],
-    [`Hidden reasoning tokens`, d.reasoning_tokens],
-    [`Visible tokens`, d.visible_tokens],
-    [`First text after (s)`, d.first_text_s],
-    [`Total time (s)`, d.duration_s],
-    [`Characters saved`, d.chars],
-    [`Error`, d.error],
+    [msg("Model", {}), d.model],
+    [msg("Route", {}), d.provider],
+    [msg("Generation", {}), d.generation_id],
+    [msg("Ended with", {}), d.finish_reason],
+    [msg("Provider's reason", {}), d.native_finish_reason],
+    [msg("Reasoning", {}), d.reasoning],
+    [msg("Output limit", {}), d.max_tokens],
+    [msg("Input tokens", {}), d.input_tokens],
+    [msg("Output tokens", {}), d.output_tokens],
+    [msg("Hidden reasoning tokens", {}), d.reasoning_tokens],
+    [msg("Visible tokens", {}), d.visible_tokens],
+    [msg("First text after (s)", {}), d.first_text_s],
+    [msg("Total time (s)", {}), d.duration_s],
+    [msg("Characters saved", {}), d.chars],
+    [msg("Error", {}), d.error],
   ];
+
   return (
     <dl
       className="mt-1 grid grid-cols-[minmax(0,10rem)_minmax(0,1fr)] gap-x-2 rounded-md bg-panel-2 px-2.5 py-1.5 text-[11px] text-muted"
@@ -708,8 +715,8 @@ export function SpeakersPanel({ scene, onOpenCharacter }) {
               <li key={n.character_id}>
                 <button
                   onClick={() => onOpenCharacter(n.character_id)}
-                  title={`${n.name} — ${a?.name ?? `Neutral`}${n.evidence ? ` (“${n.evidence}”)` : ``}`}
-                  aria-label={`${r + 1}. ${n.name}, ${a?.short ?? `Neutral`}${i ? `, speaking` : ``}`}
+                  title={`${n.name} — ${a?.name ?? msg("Neutral", {})}${n.evidence ? ` (“${n.evidence}”)` : ``}`}
+                  aria-label={`${r + 1}. ${n.name}, ${a?.short ?? msg("Neutral", {})}${i ? `, speaking` : ``}`}
                   className={cn(
                     `flex items-center gap-1.5 rounded-md border p-1 pr-2 text-left`,
                     i ? `border-accent/70 bg-accent/10` : `border-line hover:border-line-strong`,
@@ -720,6 +727,7 @@ export function SpeakersPanel({ scene, onOpenCharacter }) {
                     name={n.name}
                     className={cn(`size-9 shrink-0`, i && `ring-2 ring-accent`)}
                   />
+
                   <span className="min-w-0">
                     <span className="block max-w-28 truncate text-[12px] font-medium">{n.name}</span>
                     <span className="block text-[10px] text-faint">

@@ -3,7 +3,7 @@ import { useInvalidateStory } from "@/api/queries";
 import * as React from "react";
 import { apiPost, errorMessage } from "@/api/legacy";
 import * as Icon from "lucide-react";
-import { msg } from "@/i18n";
+import { msg, msgKey } from "@/i18n";
 import {
   Badge,
   Button,
@@ -21,10 +21,10 @@ import { cn, timeAgo } from "@/lib/util";
 import { relationEventSchema, useKnownCharacter, useKnownCharacters } from "@/features/story/api";
 
 var KNOWLEDGE_LABELS = {
-    rumored: `Heard of`,
-    encountered: `Met`,
-    known: `Known`,
-    removed: `Removed`,
+    rumored: msg("Heard of", {}),
+    encountered: msg("Met", {}),
+    known: msg("Known", {}),
+    removed: msg("Removed", {}),
   },
   KNOWLEDGE_TONES = {
     rumored: `neutral`,
@@ -78,7 +78,7 @@ export function KnownPanel({ storyId, worldId, focus, setFocus, onOpenJournal })
           onClose={() => l(false)}
           onPick={(e, t) => {
             e
-              ? u(e, `known`, `Added manually`)
+              ? u(e, `known`, msg("Added manually", {}))
               : toast(
                   msg("Add “{{v0}}” as a story-local character in the Cast tab first, then mark them here.", {
                     v0: t,
@@ -171,7 +171,7 @@ function KnownCharacterDetail({ storyId, cid, onClose, onStatus, onOpenJournal }
             <Portrait assetId={o?.asset_id} name={s} variant="card" className="h-32 w-24 shrink-0" />
             <div className="min-w-0 flex-1 space-y-2">
               <p className="text-[11px] text-faint">
-                {knownCharacter.data.character.type.replace(/_/g, ` `)}
+                {msgKey(knownCharacter.data.character.type)}
                 {knownCharacter.data.character.local ? msg(" · story-local") : ``}
               </p>
               <div className="flex flex-wrap gap-1" role="radiogroup" aria-label={msg("What the protagonist knows")}>
@@ -181,7 +181,7 @@ function KnownCharacterDetail({ storyId, cid, onClose, onStatus, onOpenJournal }
                     variant={o?.status === e ? `primary` : `secondary`}
                     role="radio"
                     aria-checked={o?.status === e}
-                    onClick={() => onStatus(cid, e, `Corrected manually`)}
+                    onClick={() => onStatus(cid, e, msg("Corrected manually", {}))}
                     key={e}
                   >
                     {KNOWLEDGE_LABELS[e]}
@@ -192,7 +192,7 @@ function KnownCharacterDetail({ storyId, cid, onClose, onStatus, onOpenJournal }
                     size="sm"
                     variant="ghost"
                     onClick={async () => {
-                      (await onStatus(cid, `removed`, `Removed manually`), onClose());
+                      (await onStatus(cid, `removed`, msg("Removed manually", {})), onClose());
                     }}
                   >
                     {msg("Remove")}
@@ -223,7 +223,7 @@ function KnownCharacterDetail({ storyId, cid, onClose, onStatus, onOpenJournal }
                 <li className="text-xs text-muted" key={t}>
                   <span className="text-faint">{timeAgo(e.at)}</span>
                   {" · "}
-                  {e.change} <Badge>{e.source.replace(/_/g, ` `)}</Badge>
+                  {e.change} <Badge>{msgKey(e.source)}</Badge>
                   {e.reason && (
                     <span className="text-faint">
                       {" — "}
@@ -300,11 +300,11 @@ function KnownCharacterDetail({ storyId, cid, onClose, onStatus, onOpenJournal }
                     {" → "}
                     {e.target_name}
                     {": "}
-                    {e.type}
+                    {msgKey(e.type)}
                     {e.confidence !== `high` && (
                       <span className="text-faint">
                         {" · "}
-                        {e.confidence} {msg("confidence")}
+                        {msg("{{v0}} confidence", { v0: msgKey(e.confidence) })}
                       </span>
                     )}
                   </li>
@@ -351,6 +351,7 @@ function KnownCharacterDetail({ storyId, cid, onClose, onStatus, onOpenJournal }
             title={msg("Believes / suspects (may be wrong)")}
             items={knownCharacter.data.knowledge.believes}
           />
+
           <StatusList title={msg("Does not know")} items={knownCharacter.data.knowledge.unaware} />
           {!knownCharacter.data.knowledge.knows.length &&
             !knownCharacter.data.knowledge.believes.length &&

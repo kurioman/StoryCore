@@ -4,7 +4,7 @@ import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
 import { apiGet, apiPost, errorMessage, apiDelete, apiUpload } from "@/api/legacy";
 import { EXPRESSIONS } from "@/api/queries";
 import * as Icon from "lucide-react";
-import { msg } from "@/i18n";
+import { msg, msgKey } from "@/i18n";
 import {
   Badge,
   Button,
@@ -167,6 +167,7 @@ function PortraitAssetDialog({ assetId, onClose, onChanged }) {
           variant="full"
           className="max-h-96 w-1/2 object-contain"
         />
+
         <div className="flex-1 space-y-2 text-xs">
           <p>
             {query.data.width}×{query.data.height}
@@ -201,7 +202,7 @@ function MapAssetRow({ a: e, chars, onDone }) {
           slot: t ? null : Number(o),
           ignored: t,
         }),
-          toast(t ? `File ignored` : `Mapping saved`),
+          toast(t ? msg("File ignored", {}) : msg("Mapping saved", {})),
           onDone());
       } catch (e) {
         toast(errorMessage(e), `danger`);
@@ -360,7 +361,7 @@ function PortraitFolders({ onChanged }) {
               <span className="min-w-0 flex-1 truncate font-mono" title={n.path}>
                 {n.path}
               </span>
-              <Badge>{n.kind}</Badge>
+              <Badge>{msgKey(n.kind)}</Badge>
               <span className="text-faint">
                 {n.file_count} {msg("files")}
               </span>
@@ -441,6 +442,7 @@ function PortraitFolders({ onChanged }) {
               "Folder path on this computer, e.g. C:\\\\\\\\Users\\\\\\\\me\\\\\\\\Pictures\\\\\\\\portraits",
             )}
           />
+
           <Button type="submit" loading={mutation.isPending}>
             {msg("Scan folder")}
           </Button>
@@ -473,6 +475,7 @@ function PortraitFolders({ onChanged }) {
             n.target.value = ``;
           }}
         />
+
         <Button onClick={() => s.current?.click()}>
           <Icon.Upload className="size-4" /> {msg("Choose a folder to upload…")}
         </Button>

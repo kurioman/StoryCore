@@ -209,7 +209,7 @@ function AvatarEditor({ avatar }) {
   let mutation = useMutation({
       mutationFn: async () => {
         let t = {
-          name: o.trim() || c.display_name || `Unnamed`,
+          name: o.trim() || c.display_name || msg("Unnamed", {}),
           profile: c,
           favourite: u,
           tags: f
@@ -264,6 +264,7 @@ function AvatarEditor({ avatar }) {
           className="h-8 w-64 text-[15px] font-semibold"
           aria-label={msg("Avatar name")}
         />
+
         <IconButton
           label={u ? msg("Unfavourite") : msg("Favourite")}
           active={u}
@@ -302,8 +303,9 @@ function AvatarEditor({ avatar }) {
                       v0: avatar.name,
                     }),
                     body: avatar.used_by.length
-                      ? `Stories using it keep a snapshot of the profile.`
-                      : `This cannot be undone.`,
+                      ? msg("Stories using it keep a snapshot of the profile.", {})
+                      : msg("This cannot be undone.", {}),
+
                     danger: true,
                     confirmLabel: msg("Delete"),
                   })) &&
@@ -498,6 +500,7 @@ function AvatarEditor({ avatar }) {
                 className="hidden"
                 onChange={(e) => e.target.files?.[0] && C(e.target.files[0])}
               />
+
               <Button size="sm" className="mt-2 w-52" onClick={() => y.current?.click()}>
                 <Icon.ImagePlus className="size-3.5" />{" "}
                 {avatar?.portrait_path ? msg("Replace portrait") : msg("Upload portrait")}
@@ -729,6 +732,7 @@ function AvatarStatsEditor({ p, upd }) {
                 className="h-7"
                 aria-label={msg("Stat")}
               />
+
               <Select
                 value={e.type}
                 onChange={(e) =>
@@ -759,6 +763,7 @@ function AvatarStatsEditor({ p, upd }) {
                 className="h-7 w-20"
                 aria-label={msg("Value")}
               />
+
               {e.type === `current_max` && (
                 <Input
                   value={String(e.max ?? ``)}
@@ -783,6 +788,7 @@ function AvatarStatsEditor({ p, upd }) {
                 placeholder="unit"
                 aria-label={msg("Unit")}
               />
+
               <IconButton
                 label={msg("Remove")}
                 onClick={() =>
@@ -837,6 +843,7 @@ function AvatarStatsEditor({ p, upd }) {
                 className="h-7"
                 aria-label={msg("Item")}
               />
+
               <Input
                 type="number"
                 value={e.qty}
@@ -855,6 +862,7 @@ function AvatarStatsEditor({ p, upd }) {
                 className="h-7 w-16"
                 aria-label={msg("Quantity")}
               />
+
               <Input
                 value={e.note ?? ``}
                 onChange={(e) =>
@@ -873,6 +881,7 @@ function AvatarStatsEditor({ p, upd }) {
                 placeholder="note"
                 aria-label={msg("Note")}
               />
+
               <IconButton
                 label={msg("Remove")}
                 onClick={() =>
@@ -893,7 +902,7 @@ function AvatarStatsEditor({ p, upd }) {
                   ...r,
                   {
                     id: shortId(),
-                    name: `New item`,
+                    name: msg("New item", {}),
                     qty: 1,
                   },
                 ],

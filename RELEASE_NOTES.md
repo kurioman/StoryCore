@@ -7,6 +7,8 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
 
 - **New interface, with its source code** (`app/frontend/src`), served at `/next/` next to the current one while it
   is being checked. Same screens and behaviour; every text is ready for translation.
+- **Interface in French.** Settings > Appearance > Interface language (new interface): menus, buttons, help and
+  messages in French. Lore and a few texts written by the engine stay in English.
 - **Story language.** The narrator can write in French (Settings > Narration & context, or per story). Lore, names and
   portrait tags are unchanged.
 - **Check Lore Packs.bat** reports what is wrong in a pack (invalid JSON with its line, unknown ids, portraits that

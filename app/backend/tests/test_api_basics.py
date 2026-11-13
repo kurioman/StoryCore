@@ -46,3 +46,7 @@ class BasicsTest(AppTestCase):
     def test_narration_languages_listed(self):
         langs = {l["code"] for l in self.get("/narration-languages")["languages"]}
         self.assertEqual(langs, {"en", "fr"})
+
+    def test_developer_folders_are_not_offered_as_portrait_folders(self):
+        names = {f["name"] for f in self.get("/onboarding")["image_folders"]}
+        self.assertNotIn("DEVONLY", names)

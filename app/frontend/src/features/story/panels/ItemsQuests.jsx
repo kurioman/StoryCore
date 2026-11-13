@@ -42,7 +42,7 @@ export function ItemsPanel({ storyId }) {
                         }
                       : t,
                   )),
-                `${e.equipped ? `Unequipped` : `Equipped`} ${e.name}`,
+                `${e.equipped ? msg("Unequipped", {}) : msg("Equipped", {})} ${e.name}`,
               )
             }
             className={cn(
@@ -53,6 +53,7 @@ export function ItemsPanel({ storyId }) {
               v0: e.name,
             })}
           />
+
           <span className="min-w-0 flex-1 truncate">
             {e.name}
             {e.note && (
@@ -119,6 +120,7 @@ export function ItemsPanel({ storyId }) {
           className="h-7 text-xs"
           aria-label={msg("New item name")}
         />
+
         <Button size="sm" type="submit">
           {msg("Add")}
         </Button>
@@ -198,7 +200,7 @@ export function QuestsPanel({ storyId }) {
                             }
                           : t,
                       )),
-                    `Objective removed`,
+                    msg("Objective removed", {}),
                   )
                 }
               />
@@ -225,6 +227,7 @@ export function QuestsPanel({ storyId }) {
               className="h-7 text-xs"
               aria-label={msg("New quest title")}
             />
+
             <Button size="sm" type="submit">
               {msg("Add")}
             </Button>
@@ -235,22 +238,22 @@ export function QuestsPanel({ storyId }) {
         {
           key: `goals`,
           title: msg("Immediate goals"),
-          ph: `Add goal`,
+          ph: msg("Add goal", {}),
         },
         {
           key: `promises`,
           title: msg("Pending promises"),
-          ph: `Add promise`,
+          ph: msg("Add promise", {}),
         },
         {
           key: `mysteries`,
           title: msg("Unresolved mysteries"),
-          ph: `Add mystery`,
+          ph: msg("Add mystery", {}),
         },
         {
           key: `clues`,
           title: msg("Known clues"),
-          ph: `Add clue`,
+          ph: msg("Add clue", {}),
         },
       ].map((e) => (
         <section key={e.key}>
@@ -286,7 +289,10 @@ export function QuestsPanel({ storyId }) {
               )
             }
             onRemove={(n) =>
-              stateEditor.save((t) => void (t[e.key] = t[e.key].filter((e) => e.id !== n)), `${e.title}: removed entry`)
+              stateEditor.save(
+                (t) => void (t[e.key] = t[e.key].filter((e) => e.id !== n)),
+                msg("{{v0}}: removed entry", { v0: e.title }),
+              )
             }
           />
         </section>

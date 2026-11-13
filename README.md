@@ -83,6 +83,8 @@ Everything below is in **Settings > Memory capture**, and your choices are kept.
 
 Scene analysis powers suggestions, relationship tracking and expression changes, so they stop while it is off. With **Local models only**, replies from hosted models are not analysed, and the app says so under the reply. Turning one feature off leaves the others running. **Relationship changes: Off** keeps your existing relationships as they are.
 
+**Interface language** (Settings > Appearance, new interface): English or French. It changes menus, buttons and help; the lore stays in the language of its pack.
+
 **Story language** (Settings > Narration & context, new interface): English by default, or French. The narrator then writes the story in French; character names and lore stay as the pack writes them. Each story can override it in its options (the sliders button above the story). French prose quality depends on your model: small local models usually write best in English.
 
 **Token settings** are in **Settings > Narration & context** and in each model's parameters:

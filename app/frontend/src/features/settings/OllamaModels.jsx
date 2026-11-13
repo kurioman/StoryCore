@@ -4,7 +4,7 @@ import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { apiPost, apiGet, apiStream, errorMessage } from "@/api/legacy";
 import * as React from "react";
 import * as Icon from "lucide-react";
-import { msg } from "@/i18n";
+import { msg, msgKey } from "@/i18n";
 import { Badge, Button, Callout, EmptyState, Input, Modal, SectionTitle, Spinner, useUi } from "@/components/ui";
 import { fmtBytes } from "@/lib/util";
 
@@ -214,7 +214,7 @@ export function OllamaModelsPage() {
                 <div className="rounded-md border border-line p-3 text-sm" key={e.id}>
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{e.model}</span>
-                    <Badge tone={e.status === `failed` ? `danger` : `info`}>{e.status}</Badge>
+                    <Badge tone={e.status === `failed` ? `danger` : `info`}>{msgKey(e.status)}</Badge>
                     <span className="text-xs text-faint">{e.progress.status}</span>
                     {e.status === `running` ? (
                       <Button

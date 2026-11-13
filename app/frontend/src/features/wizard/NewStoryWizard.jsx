@@ -4,7 +4,7 @@ import { useQueryClient, useMutation } from "@tanstack/react-query";
 import * as React from "react";
 import { apiPost, apiGet, errorMessage } from "@/api/legacy";
 import * as Icon from "lucide-react";
-import { msg } from "@/i18n";
+import { msg, msgKey } from "@/i18n";
 import {
   Badge,
   Button,
@@ -22,7 +22,13 @@ import { cn } from "@/lib/util";
 import { navigate } from "@/lib/router";
 import { portraitSlot, usePortraitMap } from "@/lib/portraits";
 
-var WIZARD_STEPS = [`Story`, `World & start`, `Protagonist`, `Tone & model`, `Review`],
+var WIZARD_STEPS = [
+    msg("Story", {}),
+    msg("World & start", {}),
+    msg("Protagonist", {}),
+    msg("Tone & model", {}),
+    msg("Review", {}),
+  ],
   WIZARD_A = `medium (3–4 paragraphs)`,
   WIZARD_B = 3e3;
 
@@ -231,7 +237,7 @@ export function NewStoryWizard() {
                             className="mt-1.5"
                             title={msg("From the lore pack; community-reconstructed, not official text")}
                           >
-                            {e.canon_status.replace(/_/g, ` `)}
+                            {msgKey(e.canon_status)}
                           </Badge>
                         )}
                       </button>
@@ -311,6 +317,7 @@ export function NewStoryWizard() {
                               name={e.name}
                               className="size-7 shrink-0"
                             />
+
                             <span className="truncate">{e.name}</span>
                           </button>
                         );
@@ -520,22 +527,28 @@ export function NewStoryWizard() {
             )}
             {s === 4 && (
               <div className="space-y-2 text-sm">
-                <ReviewRow k="Title" v={p.title} />
-                <ReviewRow k="World" v={v?.name ?? `None`} />
-                <ReviewRow k="Starting mode" v={b?.name ?? `None`} />
+                <ReviewRow k={msg("Title")} v={p.title} />
+                <ReviewRow k={msg("World")} v={v?.name ?? msg("None", {})} />
+                <ReviewRow k={msg("Starting mode")} v={b?.name ?? msg("None", {})} />
                 <ReviewRow
-                  k="Location / time"
-                  v={[p.starting_location, p.starting_time].filter(Boolean).join(` · `) || `Narrator decides`}
+                  k={msg("Location / time")}
+                  v={[p.starting_location, p.starting_time].filter(Boolean).join(` · `) || msg("Narrator decides", {})}
                 />
-                <ReviewRow k="Avatar" v={avatars.data?.find((e) => e.id === p.avatar_id)?.name ?? `None`} />
+
                 <ReviewRow
-                  k="Preset"
+                  k={msg("Avatar")}
+                  v={avatars.data?.find((e) => e.id === p.avatar_id)?.name ?? msg("None", {})}
+                />
+                <ReviewRow
+                  k={msg("Preset")}
                   v={settings.data?.narration_presets.find((e) => e.id === p.preset_id)?.name ?? p.preset_id}
                 />
+
                 <ReviewRow
-                  k="Model"
+                  k={msg("Model")}
                   v={
-                    providers.data?.profiles.find((e) => e.id === p.model_profile_id)?.display_name ?? `Global default`
+                    providers.data?.profiles.find((e) => e.id === p.model_profile_id)?.display_name ??
+                    msg("Global default", {})
                   }
                 />
               </div>

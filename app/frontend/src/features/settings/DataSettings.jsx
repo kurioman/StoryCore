@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiGet, apiPost, errorMessage, apiUpload } from "@/api/legacy";
 import * as React from "react";
 import * as Icon from "lucide-react";
-import { msg } from "@/i18n";
+import { msg, msgKey } from "@/i18n";
 import { Badge, Button, Callout, ErrorCallout, SectionTitle, Spinner, useUi } from "@/components/ui";
 import { cn, downloadJson, fmtBytes, readFileText, timeAgo } from "@/lib/util";
 
@@ -56,7 +56,7 @@ export function DataSettings() {
           <dl className="grid grid-cols-[8rem_1fr] gap-y-1 text-xs">
             {Object.entries(query.data).map(([e, t]) => (
               <div className="contents" key={e}>
-                <dt className="capitalize text-faint">{e.replace(/_/g, ` `)}</dt>
+                <dt className="capitalize text-faint">{msgKey(e)}</dt>
                 <dd className="break-all font-mono text-muted">{t}</dd>
               </div>
             ))}
@@ -68,7 +68,9 @@ export function DataSettings() {
           <Button
             size="sm"
             onClick={() =>
-              apiPost(`/system/open-data-folder`).then((e) => !e.ok && toast(e.error ?? `Could not open`, `warn`))
+              apiPost(`/system/open-data-folder`).then(
+                (e) => !e.ok && toast(e.error ?? msg("Could not open", {}), `warn`),
+              )
             }
           >
             <Icon.FolderOpen className="size-3.5" /> {msg("Open data folder")}

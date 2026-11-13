@@ -397,6 +397,7 @@ function SelectedModelStatus({ provider, model, onChanged }) {
               aria-label={msg("OpenRouter API key")}
               className="min-w-40 flex-1"
             />
+
             <Button size="md" type="submit" disabled={!a.trim()} loading={mutation.isPending}>
               {msg("Save key")}
             </Button>
@@ -436,6 +437,7 @@ function SelectedModelStatus({ provider, model, onChanged }) {
                       )}
                     </>
                   ),
+
                   confirmLabel: msg("Send test"),
                 })) && u.mutate(true);
               }}
@@ -610,7 +612,9 @@ function DefaultModelPicker({ providers, profiles, defaultId, tested }) {
               {msg("Last")} {tested.display_name} {msg("test")}
             </dt>
             <dd className={c ? (c.ok ? `text-ok` : `text-danger`) : `text-faint`}>
-              {c ? `${c.ok ? `Passed` : `Failed`} ${timeAgo(c.at)}: ${c.message}` : msg("Not tested yet")}
+              {c
+                ? `${c.ok ? msg("Passed", {}) : msg("Failed", {})} ${timeAgo(c.at)}: ${c.message}`
+                : msg("Not tested yet")}
             </dd>
           </>
         )}
@@ -664,13 +668,13 @@ function ProvidersQuickSetup() {
             {
               id: `openrouter`,
               title: msg("OpenRouter (recommended for rich storytelling)"),
-              note: `Powerful hosted models, billed per use. Needs internet.`,
+              note: msg("Powerful hosted models, billed per use. Needs internet.", {}),
               icon: Icon.Cloud,
             },
             {
               id: `ollama`,
               title: msg("Ollama (local and offline)"),
-              note: `Runs on your own computer. Free to use; quality depends on your hardware.`,
+              note: msg("Runs on your own computer. Free to use; quality depends on your hardware."),
               icon: Icon.HardDrive,
             },
           ].map((e) => (
@@ -851,7 +855,7 @@ function ProviderCard({ p: e, profiles, defaultId }) {
         ),
           l(``),
           g(),
-          toast(t ? `API key removed` : `API key saved (it will not be displayed again)`));
+          toast(t ? msg("API key removed", {}) : msg("API key saved (it will not be displayed again)", {})));
       } catch (e) {
         toast(errorMessage(e), `danger`);
       }
@@ -943,6 +947,7 @@ function ProviderCard({ p: e, profiles, defaultId }) {
                       e.has_api_key ? msg("•••••••• (stored — enter a new key to replace)") : msg("Paste key")
                     }
                   />
+
                   <Button size="sm" disabled={!c} onClick={() => y()}>
                     {msg("Save")}
                   </Button>
@@ -1084,6 +1089,7 @@ function ModelProfileRow({ m: e, p, isDefault }) {
                     </Select>
                   </label>
                 );
+
               let n = PARAM_INFO[e];
               return n ? (
                 <label className="flex items-center gap-2 text-xs text-muted" key={e}>
@@ -1197,6 +1203,7 @@ function AddModelDialog({ p, onClose }) {
             })}
             className="mb-2"
           />
+
           <div className="max-h-72 space-y-1 overflow-y-auto">
             {f.length === 0 && (
               <EmptyState title={msg("No models listed")}>
@@ -1244,6 +1251,7 @@ function AddModelDialog({ p, onClose }) {
             p.provider_type === `anthropic` ? msg("Manual model ID, e.g. claude-sonnet-5-5") : msg("Manual model ID")
           }
         />
+
         <Button type="submit" disabled={!a.trim()}>
           {msg("Add manually")}
         </Button>

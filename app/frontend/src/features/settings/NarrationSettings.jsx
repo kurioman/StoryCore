@@ -47,7 +47,7 @@ function NarrationLanguagePicker({ value, onChange }) {
       )}
     >
       <Select value={value ?? `en`} onChange={(e) => onChange(e.target.value)}>
-        {(languages.data?.languages ?? [{ code: `en`, label: `English` }]).map((l) => (
+        {(languages.data?.languages ?? [{ code: `en`, label: msg("English", {}) }]).map((l) => (
           <option value={l.code} key={l.code}>
             {msg(l.label)}
           </option>
@@ -147,6 +147,7 @@ export function NarrationSettings() {
             })
           }
         />
+
         <PromptProfilePicker
           value={n.narrator_prompt_profile ?? null}
           onChange={(e) =>
@@ -156,6 +157,7 @@ export function NarrationSettings() {
             })
           }
         />
+
         <Field
           label={msg("Default narrator prompt")}
           hint={msg("Used for stories without a world prompt (a world's lore pack can ship its own narrative prompt).")}
@@ -184,7 +186,7 @@ export function NarrationSettings() {
                       ...n.narration_presets,
                       {
                         id: `preset_${Date.now()}`,
-                        name: `New preset`,
+                        name: msg("New preset", {}),
                         instructions: ``,
                       },
                     ],
@@ -218,6 +220,7 @@ export function NarrationSettings() {
                   className="w-40"
                   aria-label={msg("Preset name")}
                 />
+
                 <Textarea
                   value={e.instructions}
                   onChange={(e) =>
@@ -236,6 +239,7 @@ export function NarrationSettings() {
                   className="min-h-12 flex-1"
                   aria-label={msg("Preset instructions")}
                 />
+
                 <IconButton
                   label={msg("Remove preset")}
                   onClick={() =>
@@ -264,7 +268,7 @@ export function NarrationSettings() {
                       ...n.starter_presets,
                       {
                         id: `starter_${Date.now()}`,
-                        name: `Custom start`,
+                        name: msg("Custom start", {}),
                         blueprint: ``,
                       },
                     ],
@@ -303,6 +307,7 @@ export function NarrationSettings() {
                   className="w-40"
                   aria-label={msg("Starter name")}
                 />
+
                 <Textarea
                   value={e.blueprint}
                   onChange={(e) =>
@@ -321,6 +326,7 @@ export function NarrationSettings() {
                   className="min-h-12 flex-1"
                   aria-label={msg("Blueprint")}
                 />
+
                 <IconButton
                   label={msg("Remove starter")}
                   onClick={() =>

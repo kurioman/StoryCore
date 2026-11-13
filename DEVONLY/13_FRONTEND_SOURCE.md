@@ -54,10 +54,25 @@ msg("Save")
 msg("In {{v0}} story(ies)", { v0: count })
 ```
 
-The key is the English text itself. `src/i18n/locales/en.json` lists all keys used (base for translators). A new
-language = a JSON file mapping English text to the translation, registered in `src/i18n/index.ts`.
-Note: lists of labels kept in arrays (wizard step names, weekday names...) and texts set inside the backend are not
-wrapped yet; they are handled with the French step.
+The key is the English text itself. `src/i18n/locales/en.json` lists all keys used (base for translators);
+`fr.json` is the French translation (complete: every key of en.json). The player picks the language in
+Settings > Appearance > Interface language; it is kept in the browser (localStorage `lsd:language`) and the page
+reloads, so labels computed when a module loads follow too.
+
+- `msg("English text", { v0: x })` for interface texts; `msgKey(value)` for data keys from the server
+  (`secret_revealed`, `power_system`, `active`...): underscores become spaces and the result is translated when the
+  dictionary has it, otherwise shown as is.
+- Data stays English: values sent to or stored by the server (month and weekday names in a scene, stat labels,
+  categories) are never translated, only their display.
+- After adding texts, refresh en.json and find untranslated keys:
+  `node DEVONLY/tools/frontend_reconstruction/keys.mjs app/frontend/src app/frontend/src/i18n/locales/en.json`
+  then compare with fr.json (every key of en.json must be in fr.json).
+- A new language: copy fr.json to `<code>.json`, translate the values, add it to `LANGUAGES` and `resources` in
+  `src/i18n/index.ts`.
+
+Still in English in a French interface (they come from the backend or the packs, not from the interface): slash
+command descriptions, narration presets and starter names, recommended-model notes, context-inspector section titles
+and warnings, state-history summaries, and the lore itself.
 
 ## Commands
 

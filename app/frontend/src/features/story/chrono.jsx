@@ -35,7 +35,7 @@ function weatherIcon(e) {
   );
 }
 
-function chronoParts(e, t = `Year`) {
+function chronoParts(e, t = msg("Year", {})) {
   let n = [];
   n.push(
     e.story_day
@@ -49,51 +49,54 @@ function chronoParts(e, t = `Year`) {
         }
       : {
           key: `day`,
-          text: `Day not tracked`,
+          text: msg("Day not tracked", {}),
           known: false,
           title: msg("The day count was not tracked when this reply was written"),
         },
   );
+  // month and weekday names come from the story data in English: translated for display only
   let r = e.month ? MONTHS.indexOf(e.month) + 1 : 0,
+    month = e.month ? msg(e.month) : e.month,
+    weekday = e.weekday ? msg(e.weekday) : e.weekday,
     i = null;
   e.year && r && e.day
     ? (i = `${t} ${e.year}/${r}/${e.day}`)
     : r && e.day
-      ? (i = `${e.day} ${e.month}${e.year ? `, ${t} ${e.year}` : `, year unknown`}`)
+      ? (i = `${e.day} ${month}${e.year ? `, ${t} ${e.year}` : msg(", year unknown", {})}`)
       : e.month
-        ? (i = `${e.month}${e.year ? ` ${t} ${e.year}` : ``}`)
+        ? (i = `${month}${e.year ? ` ${t} ${e.year}` : ``}`)
         : e.year
           ? (i = `${t} ${e.year}`)
           : e.date_text && (i = e.date_text);
-  let a = e.year && e.month && e.day ? `${e.day} ${e.month}, ${t} ${e.year}` : i;
+  let a = e.year && e.month && e.day ? `${e.day} ${month}, ${t} ${e.year}` : i;
   return (
     i &&
       n.push({
         key: `date`,
         text: i,
         known: true,
-        title: `Date: ${a}`,
+        title: msg("Date: {{v0}}", { v0: a }),
       }),
     e.weekday &&
       n.push({
         key: `weekday`,
-        text: e.weekday,
+        text: weekday,
         known: true,
-        title: `Weekday: ${e.weekday}`,
+        title: msg("Weekday: {{v0}}", { v0: weekday }),
       }),
     !i && !e.weekday
       ? n.push({
           key: `date`,
-          text: `Date not established`,
+          text: msg("Date not established", {}),
           known: false,
-          title: `No in-story date has been established yet`,
+          title: msg("No in-story date has been established yet", {}),
         })
       : e.weekday ||
         n.push({
           key: `weekday`,
-          text: `Weekday unknown`,
+          text: msg("Weekday unknown", {}),
           known: false,
-          title: `The weekday has not been established`,
+          title: msg("The weekday has not been established", {}),
         }),
     n.push(
       e.time
@@ -107,7 +110,7 @@ function chronoParts(e, t = `Year`) {
           }
         : {
             key: `time`,
-            text: `Time not established`,
+            text: msg("Time not established", {}),
             known: false,
             title: msg(
               "The story has not stated a time yet. It is never guessed; a stated hour or time of day appears here.",
@@ -127,7 +130,7 @@ function chronoParts(e, t = `Year`) {
           }
         : {
             key: `weather`,
-            text: `Weather not established`,
+            text: msg("Weather not established", {}),
             known: false,
             title: msg("The weather has not been established"),
           },
@@ -144,7 +147,7 @@ function chronoParts(e, t = `Year`) {
           }
         : {
             key: `location`,
-            text: `Place unknown`,
+            text: msg("Place unknown", {}),
             known: false,
             title: msg("The location has not been established"),
           },
@@ -154,10 +157,10 @@ function chronoParts(e, t = `Year`) {
 }
 
 var CHRONO_TONES = {
-  before_reply: `Scene as it stood when this reply began (updated once the reply has been analysed)`,
-  analysis: `Scene for this reply, including what the reply established`,
-  manual: `Scene as you corrected it`,
-  reconstructed: `Reconstructed from the story's saved state history (this reply predates per-reply headers)`,
+  before_reply: msg("Scene as it stood when this reply began (updated once the reply has been analysed)", {}),
+  analysis: msg("Scene for this reply, including what the reply established", {}),
+  manual: msg("Scene as you corrected it", {}),
+  reconstructed: msg("Reconstructed from the story's saved state history (this reply predates per-reply headers)", {}),
 };
 
 export function ChronoHeader({ c, yearLabel, onEdit, pending }) {
@@ -170,6 +173,7 @@ export function ChronoHeader({ c, yearLabel, onEdit, pending }) {
         {msg("Scene not recorded for this reply")}
       </p>
     );
+
   let i = chronoParts(c, yearLabel),
     a = i.map((e) => e.text).join(`, `);
   return (
