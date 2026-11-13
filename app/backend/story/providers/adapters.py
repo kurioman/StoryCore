@@ -613,8 +613,7 @@ class OpenAICompatAdapter(ProviderAdapter):
         body = self._body(model, system, messages, params, False)
         mode = self.structured_mode()
         if json_mode and mode != "prompt":
-            body["response_format"] = ({"type": "json_schema", "json_schema": {"name": "structured_output", "strict": False,
-                                                                               "schema": strict_schema(json_schema)}}
+            body["response_format"] = (self._schema_format(json_schema)
                                        if json_schema and mode == "json_schema" else {"type": "json_object"})
         if json_mode and self.is_openrouter and self.config.get("structured_reasoning_off", True):
             # OpenRouter's normalised reasoning switch: a structured answer gains nothing from hidden reasoning, which
@@ -624,15 +623,22 @@ class OpenAICompatAdapter(ProviderAdapter):
             async with self.client() as c:
                 r = await c.post(self.base_url + "/chat/completions", json=body, headers=self.headers())
                 # unsupported options: downgrade one step at a time (schema -> JSON mode -> none; reasoning switch off)
+                # LM Studio and llama.cpp reject {"type": "json_object"} but accept a JSON Schema: try the schema
+                # before giving up on constrained output (without it a small local model often wraps the JSON in prose)
+                tried = {(body.get("response_format") or {}).get("type")}
                 while r.status_code == 400 and json_mode and ("reasoning" in body or "response_format" in body):
+                    kind = (body.get("response_format") or {}).get("type")
                     if "reasoning" in body and "reasoning" in r.text.lower():
                         body.pop("reasoning")
-                    elif (body.get("response_format") or {}).get("type") == "json_schema":
+                    elif kind == "json_schema" and "json_object" not in tried:
                         body["response_format"] = {"type": "json_object"}
+                    elif kind == "json_object" and json_schema and "json_schema" not in tried:
+                        body["response_format"] = self._schema_format(json_schema)
                     elif "response_format" in body:
                         body.pop("response_format")
                     else:
                         body.pop("reasoning")
+                    tried.add((body.get("response_format") or {}).get("type"))
                     r = await c.post(self.base_url + "/chat/completions", json=body, headers=self.headers())
         except Exception as e:
             raise error_from_exception(e, self.label)
@@ -667,7 +673,14 @@ class OpenAICompatAdapter(ProviderAdapter):
             return cfg
         if self.config.get("json_mode") is False:
             return "prompt"
-        return "json_schema" if self.is_openrouter else "json_object"
+        # local servers (LM Studio, llama.cpp, Ollama's OpenAI endpoint) constrain output with a JSON Schema grammar;
+        # LM Studio refuses plain JSON mode outright
+        return "json_schema" if self.is_openrouter or _is_local_url(self.base_url) else "json_object"
+
+    @staticmethod
+    def _schema_format(json_schema: dict[str, Any]) -> dict[str, Any]:
+        return {"type": "json_schema", "json_schema": {"name": "structured_output", "strict": False,
+                                                       "schema": strict_schema(json_schema)}}
 
 
 def _listed_price(m: dict[str, Any]) -> dict[str, Any]:

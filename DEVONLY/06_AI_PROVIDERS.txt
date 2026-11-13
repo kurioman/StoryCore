@@ -66,9 +66,12 @@ Any other OpenAI-compatible local server works the same way with the "Custom Ope
 6. JSON ANSWERS (ANALYSIS, MEMORY CAPTURE)
 ------------------------------------------
 adapter.complete(model, system, messages, params, json_mode=True, json_schema=...) returns text.
-Each adapter uses the best mechanism it has: strict JSON schema (OpenRouter, OpenAI), JSON mode (other
-OpenAI-compatible servers, Ollama "format"), or prompt-only. Provider setting "structured_output"
-(json_schema | json_object | prompt) forces one; use "prompt" if a local server rejects response_format.
+Each adapter uses the best mechanism it has: JSON schema (OpenRouter, OpenAI, and local OpenAI-compatible
+servers such as LM Studio and llama.cpp, whose grammar enforces it), JSON mode (other OpenAI-compatible
+servers, Ollama "format"), or prompt-only. If a server answers 400 to JSON mode, the adapter tries the JSON
+schema before dropping the constraint (LM Studio refuses {"type": "json_object"}). Provider setting
+"structured_output" (json_schema | json_object | prompt) forces one; use "prompt" if a server rejects both.
+Test: DEVONLY/tests/test_lmstudio_json.py <path to app/backend> (simulated server, no network).
 
 
 7. ADDING A NEW PROVIDER TYPE
