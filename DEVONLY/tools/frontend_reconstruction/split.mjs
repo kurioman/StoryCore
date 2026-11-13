@@ -81,7 +81,10 @@ const ast = parse(src, { sourceType: "module", plugins: ["jsx"] });
   } });
   for (const [b, nodes] of jsxRefs) {
     let to;
-    if (b.scope.path.isProgram()) to = names[b.identifier.name] ?? ("C_" + b.identifier.name);
+    if (b.scope.path.isProgram()) {
+      to = names[b.identifier.name] ?? ("C_" + b.identifier.name);
+      if (!/^[A-Z]/.test(to.split(".").pop())) console.warn("WARNING: component with lowercase name", b.identifier.name, "->", to);
+    }
     else {
       const parent = b.path.parentPath;
       let key = null;

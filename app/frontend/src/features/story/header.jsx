@@ -101,7 +101,7 @@ export function StoryHeader({
       )}
       <div className="ml-auto flex shrink-0 items-center gap-1">
         <ContextWarnings manifest={manifest} onClick={() => onOpen(`context`)} />
-        <useStoryPanelState />
+        <SaveStatus />
         <MoreToolsMenu story={story} onOpen={onOpen} compact={y} />
         <div className="flex rounded-md border border-line p-0.5" role="tablist" aria-label={msg("Workspace view")}>
           <button
@@ -174,7 +174,7 @@ function MoreToolsMenu({ story, onOpen, compact }) {
   );
 }
 
-function useStoryPanelState() {
+function SaveStatus() {
   let isMutating = useIsMutating(),
     mutationState = useMutationState({
       select: (e) => e.state.status,

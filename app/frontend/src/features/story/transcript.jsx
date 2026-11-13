@@ -773,7 +773,7 @@ export function SpeakersPanel({ scene, onOpenCharacter }) {
   );
 }
 
-function analysisKey({ text }) {
+function InlineEmphasis({ text }) {
   return (
     <>
       {text
@@ -872,7 +872,7 @@ export function TurnAnalysisBar({ storyId, scene, busy, onAct, onSuggest }) {
                       <span className="mb-0.5 block text-[10px] uppercase tracking-wide text-faint">{e.approach}</span>
                     )}
                     <span className="line-clamp-5 [overflow-wrap:anywhere]">
-                      <analysisKey text={e.label} />
+                      <InlineEmphasis text={e.label} />
                     </span>
                     {e.description && <span className="mt-0.5 block text-[11px] text-muted">{e.description}</span>}
                   </button>
