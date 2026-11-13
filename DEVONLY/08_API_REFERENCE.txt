@@ -150,6 +150,8 @@ PROVIDERS  (routers/providers.py)
   POST   /api/ollama/pulls/{job_id}/cancel                        ollama pull cancel
   POST   /api/ollama/{pid}/delete                                 ollama delete
   POST   /api/ollama/quick-setup                                  Create the default local Ollama provider if it doesn't exist yet.
+  GET    /api/lmstudio/detect?base_url=                           (v1.8) find LM Studio, list models with state and context sizes
+  POST   /api/lmstudio/setup                                      (v1.8) {base_url, model_id, make_default}: provider + sized profile
 
 STATE  (routers/state.py)
   GET    /api/stories/{sid}/state                                 get state
@@ -211,3 +213,5 @@ SYSTEM  (routers/system.py)
   POST   /api/system/clear-logs                                   clear logs
   GET    /api/system/logs                                         read logs
   GET    /api/system/integrity                                    integrity
+  GET    /api/system/bug-report                                   (v1.8) zip for bug reports: versions, settings, recent
+                                                                  generation errors, pack check, last logs. No keys, no story text.

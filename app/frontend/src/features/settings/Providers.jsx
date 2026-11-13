@@ -4,7 +4,7 @@ import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiPost, errorMessage, apiPut, apiGet, apiPatch, apiDelete } from "@/api/legacy";
 import { queryKeys, useSettings, useProviders } from "@/api/queries";
 import * as React from "react";
-import { msg } from "@/i18n";
+import { msg, currentLanguage } from "@/i18n";
 import {
   Badge,
   Button,
@@ -639,6 +639,159 @@ function DefaultModelPicker({ providers, profiles, defaultId, tested }) {
   );
 }
 
+function lmNoteText(e) {
+  if (e.code === `not_loaded`)
+    return msg(
+      "This model is not loaded in LM Studio yet: load it there before playing (LM Studio may also load it on the first request).",
+    );
+  if (e.code === `small_context`)
+    return msg(
+      "It runs with a context of {{v0}} tokens, which is small for a story: in LM Studio, reload the model with a larger Context Length (16,384 or more if your memory allows), then press Detect again.",
+      { v0: e.value.toLocaleString(currentLanguage) },
+    );
+  if (e.code === `max_context_used`)
+    return msg(
+      "LM Studio did not say which context length the model is loaded with; its maximum ({{v0}}) was used. If replies forget the start of the story, set the profile's context window to the length chosen in LM Studio.",
+      { v0: e.value },
+    );
+  return e.text;
+}
+
+function LMStudioQuickSetup({ onChanged }) {
+  let ui = useUi(),
+    [url, setUrl] = React.useState(`http://localhost:1234/v1`),
+    [result, setResult] = React.useState(null),
+    detect = useMutation({
+      mutationFn: () => apiGet(`/lmstudio/detect?base_url=${encodeURIComponent(url)}`),
+      onSuccess: () => setResult(null),
+    }),
+    setup = useMutation({
+      mutationFn: (modelId) =>
+        apiPost(`/lmstudio/setup`, {
+          base_url: url,
+          model_id: modelId,
+          make_default: true,
+        }),
+      onSuccess: (e) => {
+        setResult(e);
+        onChanged();
+        ui.toast(msg("{{v0}} is ready and set as the default model.", { v0: e.model_id }));
+      },
+      onError: (e) =>
+        setResult({
+          error: errorMessage(e),
+        }),
+    }),
+    found = detect.data;
+  return (
+    <section aria-labelledby="lmstudio-guide" className="rounded-lg border border-line bg-panel p-3">
+      <h3 id="lmstudio-guide" className="mb-2 text-sm font-semibold">
+        {msg("Set up LM Studio")}
+      </h3>
+      <ol className="space-y-2">
+        <SetupStep n={1} title={msg("Install LM Studio and download a model")}>
+          <ExternalLinkText href="https://lmstudio.ai/">{msg("lmstudio.ai")}</ExternalLinkText>
+        </SetupStep>
+        <SetupStep n={2} title={msg("Start the local server")}>
+          {msg(
+            "In LM Studio, open the Developer tab and switch the server on. When you load a model, choose a Context Length of 16,384 or more if your memory allows.",
+          )}
+        </SetupStep>
+        <SetupStep n={3} title={msg("Detect LM Studio")}>
+          <span className="mt-1 flex flex-wrap items-center gap-2">
+            <Input
+              aria-label={msg("LM Studio server address")}
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              className="h-8 w-64 font-mono text-xs"
+            />
+            <Button size="sm" loading={detect.isPending} onClick={() => detect.mutate()}>
+              <Icon.Radar className="size-3.5" aria-hidden />
+              {msg("Detect")}
+            </Button>
+          </span>
+        </SetupStep>
+        <SetupStep n={4} title={msg("Pick a model")}>
+          {msg("One click creates the connection with the right context size and output length, and makes it the default.")}
+        </SetupStep>
+      </ol>
+      {detect.isError && (
+        <Callout tone="warn" className="mt-2">
+          {errorMessage(detect.error)}
+        </Callout>
+      )}
+      {found && !found.reachable && (
+        <Callout tone="warn" className="mt-2">
+          {msg(
+            "LM Studio is not reachable at this address. Open LM Studio, go to the Developer tab and start the server (port 1234 by default).",
+          )}
+        </Callout>
+      )}
+      {found?.reachable && found.models.length === 0 && (
+        <Callout tone="warn" className="mt-2">
+          {msg("LM Studio answers, but has no model. Download one in LM Studio, then press Detect again.")}
+        </Callout>
+      )}
+      {found?.reachable && found.models.length > 0 && (
+        <ul className="mt-2 divide-y divide-line rounded-md border border-line" aria-label={msg("LM Studio models")}>
+          {found.models.map((m) => {
+            let ctx = m.loaded_context ?? m.max_context;
+            return (
+              <li key={m.id} className="flex flex-wrap items-center gap-2 px-2.5 py-2">
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-mono text-xs">{m.id}</span>
+                  <span className="block text-[11px] text-muted">
+                    {m.state === `loaded`
+                      ? msg("Loaded")
+                      : m.state === `not-loaded`
+                        ? msg("Not loaded")
+                        : msg("State unknown")}
+                    {ctx ? ` · ` + msg("context {{v0}} tokens", { v0: ctx.toLocaleString(currentLanguage) }) : ``}
+                    {m.quantization ? ` · ${m.quantization}` : ``}
+                  </span>
+                </span>
+                {m.loaded_context && m.loaded_context < 8192 && (
+                  <Badge tone="warn">{msg("Small context")}</Badge>
+                )}
+                <Button
+                  size="sm"
+                  variant={m.state === `loaded` ? `primary` : `secondary`}
+                  loading={setup.isPending && setup.variables === m.id}
+                  disabled={setup.isPending}
+                  onClick={() => setup.mutate(m.id)}
+                >
+                  {msg("Use this model")}
+                </Button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {result?.error && (
+        <Callout tone="warn" className="mt-2">
+          {result.error}
+        </Callout>
+      )}
+      {result && !result.error && (
+        <Callout tone={result.notes.length ? `warn` : `ok`} className="mt-2">
+          <p>
+            {msg("{{v0}} is ready: context {{v1}} tokens, replies up to {{v2}} tokens.", {
+              v0: result.model_id,
+              v1: result.context_limit ? result.context_limit.toLocaleString(currentLanguage) : `?`,
+              v2: result.max_tokens,
+            })}
+          </p>
+          {result.notes.map((e) => (
+            <p className="mt-1" key={e.code}>
+              {lmNoteText(e)}
+            </p>
+          ))}
+        </Callout>
+      )}
+    </section>
+  );
+}
+
 function ProvidersQuickSetup() {
   let providers = useProviders(),
     queryClient = useQueryClient(),
@@ -655,6 +808,7 @@ function ProvidersQuickSetup() {
     },
     o = i.providers.find(isOpenRouter),
     s = i.providers.find((e) => e.provider_type === `ollama`),
+    lm = i.providers.find((e) => e.provider_type === `openai_compat` && /:1234\b/.test(e.base_url ?? ``)),
     c = i.profiles.filter((e) => e.provider_id === o?.id),
     l = c.find((e) => e.id === i.default_model_profile_id) ?? c[0];
   return (
@@ -663,7 +817,7 @@ function ProvidersQuickSetup() {
         <SectionTitle>
           <span id="run-ai">{msg("Choose how to run the AI")}</span>
         </SectionTitle>
-        <div role="group" aria-labelledby="run-ai" className="grid gap-2 sm:grid-cols-2">
+        <div role="group" aria-labelledby="run-ai" className="grid gap-2 sm:grid-cols-3">
           {[
             {
               id: `openrouter`,
@@ -676,6 +830,12 @@ function ProvidersQuickSetup() {
               title: msg("Ollama (local and offline)"),
               note: msg("Runs on your own computer. Free to use; quality depends on your hardware."),
               icon: Icon.HardDrive,
+            },
+            {
+              id: `lmstudio`,
+              title: msg("LM Studio (local and offline)"),
+              note: msg("Runs on your own computer, with a window to download and load models. Set up in one click."),
+              icon: Icon.Monitor,
             },
           ].map((e) => (
             <button
@@ -698,7 +858,7 @@ function ProvidersQuickSetup() {
         </div>
         <p className="mt-1 text-xs text-faint">
           {msg(
-            "This only changes which guide you see here. Anthropic, OpenAI, LM Studio and other servers are under All providers below.",
+            "This only changes which guide you see here. Anthropic, OpenAI and other servers are under All providers below.",
           )}
         </p>
       </section>
@@ -707,6 +867,8 @@ function ProvidersQuickSetup() {
           <ModelCatalog provider={o} profiles={i.profiles} defaultId={i.default_model_profile_id} />
           <SelectedModelStatus provider={o} model={l} onChanged={a} />
         </>
+      ) : n === `lmstudio` ? (
+        <LMStudioQuickSetup onChanged={a} />
       ) : (
         <OllamaQuickSetup provider={s} onChanged={a} />
       )}
@@ -714,7 +876,7 @@ function ProvidersQuickSetup() {
         providers={i.providers}
         profiles={i.profiles}
         defaultId={i.default_model_profile_id}
-        tested={n === `openrouter` ? o : s}
+        tested={n === `openrouter` ? o : n === `lmstudio` ? lm : s}
       />
     </div>
   );

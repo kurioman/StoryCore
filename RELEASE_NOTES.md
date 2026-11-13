@@ -16,6 +16,11 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
 - **Scene analysis with LM Studio**: the analysis now asks LM Studio for its JSON in a form it accepts, so it no longer
   fails with "No JSON object found".
 - Hero's Chronicle portraits recompressed (133 MB to 18 MB, same look).
+- **LM Studio in one click** (new interface): Settings > Providers & models > LM Studio > Detect. StoryCore lists the
+  models with their real context size; "Use this model" creates the connection with fitting settings and makes it the
+  default. It warns when the model is loaded with a context too small for a story.
+- **Report a problem**: Settings > Data & backups > Export a bug report makes a zip to send to the developer (versions,
+  settings, recent errors, last logs). It never contains your API keys or your stories.
 - Engine tests (`app/backend/tests`, `DEVONLY/run_tests.bat`).
 
 ## New in v1.7.0

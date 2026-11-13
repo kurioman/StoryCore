@@ -354,3 +354,28 @@ def ollama_quick_setup(ctx: AppContext = Depends(get_ctx), db: Session = Depends
     return provider_out(ctx, p)
 
 
+class LMStudioSetupIn(BaseModel):
+    base_url: str = "http://localhost:1234/v1"
+    model_id: str
+    make_default: bool = True
+
+
+@router.get("/lmstudio/detect")
+async def lmstudio_detect(base_url: str = "http://localhost:1234/v1") -> dict[str, Any]:
+    """Look for LM Studio's local server and list its models with their context sizes."""
+    from ..services import lmstudio
+    return await lmstudio.detect(base_url)
+
+
+@router.post("/lmstudio/setup")
+async def lmstudio_setup(body: LMStudioSetupIn, ctx: AppContext = Depends(get_ctx),
+                         db: Session = Depends(get_db)) -> dict[str, Any]:
+    """One click: create (or reuse) the LM Studio connection and a model profile sized to the loaded context."""
+    from ..services import lmstudio
+    found = await lmstudio.detect(body.base_url)
+    model = next((m for m in found["models"] if m["id"] == body.model_id), None)
+    if model is None:
+        if not found["reachable"]:
+            raise ValueError(found.get("message") or "LM Studio is not reachable.")
+        raise HTTPException(404, f"LM Studio does not list the model {body.model_id}.")
+    return lmstudio.setup(db, body.base_url, model, make_default=body.make_default)

@@ -257,6 +257,24 @@ export function DataSettings() {
         </p>
       </section>
       <section>
+        <SectionTitle>{msg("Report a problem")}</SectionTitle>
+        <p className="mb-2 text-xs text-muted">
+          {msg(
+            "Makes a zip to send to whoever helps you with StoryCore: versions, the app log, settings, your AI providers and models, the lore pack check and figures about recent replies. Never inside: API keys, story text, story titles, notes or lore content.",
+          )}
+        </p>
+        <Button
+          size="sm"
+          variant="primary"
+          onClick={() => {
+            window.location.href = `/api/system/bug-report`;
+            toast(msg("Preparing the bug report…"));
+          }}
+        >
+          <Icon.Download className="size-3.5" /> {msg("Export a bug report")}
+        </Button>
+      </section>
+      <section>
         <SectionTitle>{msg("Maintenance")}</SectionTitle>
         <div className="flex flex-wrap gap-2">
           <Button size="sm" loading={mutation.isPending} onClick={() => mutation.mutate()}>

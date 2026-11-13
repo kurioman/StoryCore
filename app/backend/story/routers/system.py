@@ -134,6 +134,16 @@ def read_logs(ctx: AppContext = Depends(get_ctx), lines: int = 200) -> dict[str,
     return {"lines": f.read_text(encoding="utf-8", errors="replace").splitlines()[-min(lines, 1000):]}
 
 
+@router.get("/system/bug-report")
+def bug_report(ctx: AppContext = Depends(get_ctx), db: Session = Depends(get_db)):
+    """A zip for reporting a problem: versions, logs, settings, providers (never keys), lore pack check, recent
+    generation figures. No story text, no secrets (services/bug_report.py)."""
+    from fastapi.responses import Response
+    from ..services import bug_report
+    name, data = bug_report.build(ctx, db)
+    return Response(data, media_type="application/zip", headers={"Content-Disposition": f'attachment; filename="{name}"'})
+
+
 @router.get("/system/integrity")
 def integrity(db: Session = Depends(get_db)) -> dict[str, Any]:
     return backup_svc.integrity_check(db)
