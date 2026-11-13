@@ -1,0 +1,438 @@
+{
+ "#/": {
+  "headings": [
+   "StoryCore",
+   "Get set up",
+   "Continue"
+  ],
+  "labels": [],
+  "buttons": [
+   "Add provider",
+   "New story Pick a world, avatar and starter.",
+   "Create an avatar Your reusable protagonists.",
+   "Browse lore Characters, factions, places, systems.",
+   "Inventory Test 1 min ago · Hero's Chronicle *[Mock provider — offline demo text, not a real model]* The scene responds to your action: “I ask Lily why she chose me. (OOC: narrate only"
+  ],
+  "inputs": []
+ },
+ "#/new": {
+  "headings": [
+   "New story"
+  ],
+  "labels": [
+   "Story title",
+   "Story note (optional)"
+  ],
+  "buttons": [
+   "1. Story",
+   "2. World & start",
+   "3. Protagonist",
+   "4. Tone & model",
+   "5. Review",
+   "Next"
+  ],
+  "inputs": [
+   "e.g. The Commoner's Gambit",
+   "textarea"
+  ]
+ },
+ "#/lore": {
+  "headings": [
+   "LAST IMPORT REPORT (SUCCEEDED)"
+  ],
+  "labels": [],
+  "buttons": [
+   "Re-import",
+   "Import another lore pack",
+   "character 21",
+   "faction 2",
+   "location 17",
+   "power system 4",
+   "organization 2",
+   "world 1",
+   "scenario 2",
+   "glossary 5",
+   "Arbel Noble · An upright knight raised in the bitter cold of the North who knows nothing but swordsmanship. She holds back the monsters in the northern city of Chalcedon.",
+   "Azra Dragonkin Chieftain (title: Dragon Emperor) · The village's supreme leader and Dragon Emperor. Her draconic traits are strongly expressed; she looks like a girl of about 18 but possesses formidable power and lineage.",
+   "Beelzebub Demon King · The supreme ruler of the Demon Realm. An unpredictable personality who will do anything for amusement.",
+   "Bellona Noble · Has a harmless and cute side, often getting lost or dropping things. She is currently studying abroad in Enigma.",
+   "Casey Shaman · A shaman of the Moonlight Forest. Her power is ranked by human standards as equivalent to the 5th Circle. Extremely timid and very shy around strangers, but possesses unrivaled ability in shamanic sorcery.",
+   "Celestia Noble · Beautiful as a flower on the outside, but runs on a thorough calculator inside. Converts all value into 'money' when she speaks.",
+   "Diana Noble · The absolute power of the Central Empire (Aether), ruling from the capital Grandel.",
+   "Irina Elf · Daughter of the High Priestess. Seeks to find her own path in the rigid Elven society.",
+   "Iris Dark Elf and 1st Legion Commander · Ruler of 'Elysium', an elusive, corrupted region of the Demon Realm shrouded in a deceptive gray mist. She lost everything trying to protect her kin, and to avoid the pain of loving and losing something, she has suppressed all of her will.",
+   "Isolde Noble · The queen of high society, wielding the Empire's foremost wealth and political power as weapons.",
+   "Kashar Beastkin and 2nd Legion Commander · An outcast exiled from the beastkin village. She gathered together the weak and outcasts with nowhere to go and built her own safe fortress.",
+   "Kriemhild Sword Saint (Human) · A hidden ally who trains the hero. Tempers the hero in preparation for the despair to come.",
+   "Lilith Succubus and 3rd Legion Commander · Ruler of the 'Palace of Nightmares,' the labyrinth of pleasure and nightmares. Manipulates others' emotions, but is extremely afraid of facing her own true feelings.",
+   "Lily Lumina Goddess (Heavenly God) · The Heavenly God Lily herself, whom the holy nation of Lumina serves. As an absolute divinity she acts out of a strong sense of duty, but she is terribly indifferent and listless about everything, finding it all a bother.",
+   "Riana Mage Tower Master · The Saint's childhood friend. Mocks the Saint's small chest and teases her. Sometimes provokes the Saint's jealousy.",
+   "Selphina Saint (Holy Maiden) · Strong, but deliberately acts frail and weak in front of the hero. A paladin style using both holy power and a mace.",
+   "Seraphin Noble · Befitting her origin from a family that governs the city of arts, she views everything in the world from an aesthetic perspective.",
+   "Seria Noble · A strategist aiming for the next imperial throne. Treats the incompetent like insects, but grants immense rewards to the capable.",
+   "Sylvia Noble · She hides her terrible inferiority complex toward First Princess Seria behind the 'mask' of a perfect princess. She has a secret hobby of collecting and breaking pretty living dolls (people).",
+   "Vivian Information Broker, Thief and Hitman · An information broker, thief and hitman of the information guild Tenebris, ranked Expert (High). She feels emptiness in all of life and lives languidly, yet is an enchanting figure who indulges only in intriguing thrills and pleasure.",
+   "Ymir Dwarf Blacksmith · Daughter of the Dwarf chieftain. Having strongly inherited the chieftain's blood, she has the finest talent as a blacksmith."
+  ],
+  "inputs": [
+   "World",
+   "file",
+   "Search all lore (names, aliases, text)",
+   "Confidence filter"
+  ]
+ },
+ "#/portraits": {
+  "headings": [
+   "Portraits"
+  ],
+  "labels": [],
+  "buttons": [
+   "Characters (51)",
+   "Needs mapping",
+   "Folders",
+   "1. Neutral",
+   "2. Happy",
+   "3. Sad",
+   "4. Angry",
+   "5. Disdain",
+   "6. Love"
+  ],
+  "inputs": []
+ },
+ "#/avatars": {
+  "headings": [
+   "Avatars"
+  ],
+  "labels": [],
+  "buttons": [
+   "Import avatar JSON",
+   "New"
+  ],
+  "inputs": [
+   "file"
+  ]
+ },
+ "#/avatars/new": {
+  "headings": [
+   "Avatars"
+  ],
+  "labels": [
+   "Display name",
+   "Name NPCs use",
+   "Pronunciation",
+   "Age",
+   "Pronouns",
+   "Gender (optional)",
+   "Title / epithet",
+   "Occupation",
+   "Social status",
+   "Affiliations",
+   "Tags"
+  ],
+  "buttons": [
+   "Import avatar JSON",
+   "New",
+   "Favourite",
+   "Saved",
+   "Identity",
+   "Appearance",
+   "Background & personality",
+   "Abilities",
+   "Stats & inventory",
+   "Additional info",
+   "Prompt preview"
+  ],
+  "inputs": [
+   "file",
+   "Avatar name",
+   "text",
+   "comma separated"
+  ]
+ },
+ "#/commands": {
+  "headings": [
+   "Slash commands",
+   "CONTINUITY",
+   "LORE",
+   "META",
+   "NARRATIVE",
+   "SCENE",
+   "SETTINGS",
+   "TOOLS"
+  ],
+  "labels": [],
+  "buttons": [
+   "Export",
+   "Import",
+   "New command",
+   "/recap built-in hybrid Summarise the story so far and save it as a recap candidate you can accept or edit.",
+   "Duplicate",
+   "Reset to default",
+   "/continuity /check built-in hybrid Check the current scene/state against recent events, memories and lore; propose fixes without retconning.",
+   "/journal /events built-in local action Open the event timeline, or create a manual event from your text.",
+   "/memory /mem /remember built-in local action Search, pin, edit or create a durable memory/fact.",
+   "/recon /redcon /reconcile built-in hybrid Continuity reconciliation: compare recent transcript with avatar, notes, memories, state and lore; list contradictions and fixes.",
+   "/addlore /canon built-in local action Capture a new fact as a local-canon candidate (requires your approval).",
+   "/lore /search built-in local action Search the imported lore library and local canon (results show source/confidence).",
+   "/ooc /meta built-in prompt Step out of character for a question, correction, lore clarification or direction.",
+   "/story /next built-in prompt Create a plausible next situation that advances existing threads before introducing new plot.",
+   "/continue /cont built-in prompt Continue the scene without the protagonist taking a new deliberate action.",
+   "/meanwhile /cutaway built-in prompt Narrate a brief cutaway from an NPC or faction perspective, limited to what that viewpoint knows.",
+   "/scene built-in local action Inspect or edit scene metadata: time, location, weather, mood and attendees.",
+   "/state /status built-in local action Open the player/NPC state inspector and optionally ask the model to propose changes.",
+   "/nsfw /content built-in local action Open this story's content preferences (tone, intensity, fade-to-black). Provider policies still apply.",
+   "/savepoint /save built-in local action Create a named snapshot of this branch, its state, journal and memories.",
+   "/undo built-in local action Undo the last accepted state change (with confirmation)."
+  ],
+  "inputs": [
+   "file",
+   "Search commands"
+  ]
+ },
+ "#/story/:id": {
+  "headings": [
+   "Inventory Test"
+  ],
+  "labels": [],
+  "buttons": [
+   "Skip to message box",
+   "Inventory Test",
+   "? No avatar",
+   "Mock narrator (offline demo)",
+   "Balanced",
+   "≈2.9k / 6.2k",
+   "More story tools",
+   "Story",
+   "Journal & Memory",
+   "Hide status panel",
+   "Copy",
+   "Edit",
+   "Generate a new reply from here",
+   "Branch from here",
+   "Delete",
+   "Context sent to the model",
+   "How this reply was generated",
+   "Regenerate",
+   "Correct the current scene (day, date, time, weather, place)",
+   "Write your own…",
+   "Continue scene",
+   "Lily Lumina Neutral · speaking",
+   "Recap the story (/recap)",
+   "Open Journal & Memory",
+   "Send"
+  ],
+  "inputs": [
+   "What do you do? Type / for commands"
+  ]
+ },
+ "#/settings/providers": {
+  "headings": [
+   "Settings",
+   "Providers & models",
+   "CHOOSE HOW TO RUN THE AI",
+   "Recommended models for stories",
+   "Set up OpenRouter",
+   "Selected model and status"
+  ],
+  "labels": [],
+  "buttons": [
+   "Providers & models",
+   "Ollama models",
+   "Narration & context",
+   "Memory capture",
+   "Global note",
+   "Appearance",
+   "Data & backups",
+   "OpenRouter (recommended for rich storytelling) Powerful hosted models, billed per use. Needs internet.",
+   "Ollama (local and offline) Runs on your own computer. Free to use; quality depends on your hardware.",
+   "Refresh prices",
+   "Select",
+   "Save key",
+   "Test connection",
+   "Test model (small paid request)",
+   "Remove model profile"
+  ],
+  "inputs": [
+   "Paste your key"
+  ]
+ },
+ "#/settings/ollama": {
+  "headings": [
+   "Settings",
+   "Ollama models"
+  ],
+  "labels": [],
+  "buttons": [
+   "Providers & models",
+   "Ollama models",
+   "Narration & context",
+   "Memory capture",
+   "Global note",
+   "Appearance",
+   "Data & backups",
+   "Set up local Ollama (localhost:11434)"
+  ],
+  "inputs": []
+ },
+ "#/settings/generation": {
+  "headings": [
+   "Settings",
+   "Narration & context",
+   "NARRATION PRESETS",
+   "GENERIC STARTER BLUEPRINTS"
+  ],
+  "labels": [
+   "Context budget (tokens)",
+   "Reserved for the reply (tokens)",
+   "Always keep at least N recent messages",
+   "Warn when context reaches (%)",
+   "Enter sends the message Off: Ctrl+Enter sends and Enter adds a new line.",
+   "Player-agency prompt profile",
+   "Default narrator prompt"
+  ],
+  "buttons": [
+   "Providers & models",
+   "Ollama models",
+   "Narration & context",
+   "Memory capture",
+   "Global note",
+   "Appearance",
+   "Data & backups",
+   "Add preset",
+   "Remove preset",
+   "Add starter",
+   "Remove starter",
+   "Save"
+  ],
+  "inputs": [
+   "number",
+   "select-one",
+   "textarea",
+   "Preset name",
+   "Preset instructions",
+   "Starter name",
+   "Blueprint"
+  ]
+ },
+ "#/settings/memory": {
+  "headings": [
+   "Settings",
+   "Memory capture",
+   "SCENE ANALYSIS AFTER EACH REPLY"
+  ],
+  "labels": [
+   "Automatic event capture",
+   "Batch size (replies)",
+   "Extraction model",
+   "Clearly narrated events are stored as",
+   "Review threshold (confidence below → review queue)",
+   "Run scene analysis",
+   "Relationship changes",
+   "Where portraits appear",
+   "Suggest three replies Shown under the latest reply. Picking one only fills the message box; nothing is sent for you.",
+   "Update portrait expressions automatically Off keeps the expressions you set yourself. Locked portraits never change either way.",
+   "Generated recaps replace the rolling recap automatically Off: new recaps are candidates you accept."
+  ],
+  "buttons": [
+   "Providers & models",
+   "Ollama models",
+   "Narration & context",
+   "Memory capture",
+   "Global note",
+   "Appearance",
+   "Data & backups",
+   "Save"
+  ],
+  "inputs": [
+   "select-one",
+   "number",
+   "Run scene analysis",
+   "Relationship changes",
+   "Where portraits appear"
+  ]
+ },
+ "#/settings/notes": {
+  "headings": [
+   "Settings",
+   "Global note"
+  ],
+  "labels": [
+   "Enabled"
+  ],
+  "buttons": [
+   "Providers & models",
+   "Ollama models",
+   "Narration & context",
+   "Memory capture",
+   "Global note",
+   "Appearance",
+   "Data & backups",
+   "Save",
+   "Export notes"
+  ],
+  "inputs": [
+   "Global note"
+  ]
+ },
+ "#/settings/appearance": {
+  "headings": [
+   "Settings",
+   "Appearance"
+  ],
+  "labels": [
+   "Theme",
+   "Story text font",
+   "Reading size",
+   "Dialogue"
+  ],
+  "buttons": [
+   "Providers & models",
+   "Ollama models",
+   "Narration & context",
+   "Memory capture",
+   "Global note",
+   "Appearance",
+   "Data & backups"
+  ],
+  "inputs": [
+   "select-one",
+   "Story text font",
+   "Reading size",
+   "Dialogue presentation"
+  ]
+ },
+ "#/settings/data": {
+  "headings": [
+   "Settings",
+   "Data & backups",
+   "WHERE YOUR DATA LIVES",
+   "FULL BACKUPS",
+   "EXPORTS",
+   "MAINTENANCE"
+  ],
+  "labels": [],
+  "buttons": [
+   "Providers & models",
+   "Ollama models",
+   "Narration & context",
+   "Memory capture",
+   "Global note",
+   "Appearance",
+   "Data & backups",
+   "Open data folder",
+   "Back up now",
+   "Upload a backup…",
+   "Command library (JSON)",
+   "Local canon (JSON)",
+   "Local canon (Markdown)",
+   "Notes (JSON)",
+   "Import local canon",
+   "Check database integrity",
+   "View recent logs",
+   "Clear logs"
+  ],
+  "inputs": [
+   "file"
+  ]
+ }
+}
