@@ -9,3 +9,6 @@ __pycache__/
 *.pyc
 # Dossier de travail temporaire
 _work/
+
+# Interface : dépendances npm (réinstallables avec npm install)
+app/frontend/node_modules/

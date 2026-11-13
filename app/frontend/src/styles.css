@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+/* StoryCore design tokens. Colours live in CSS variables (--c-*) so the dark / light theme is a data attribute on
+   <html>; Tailwind utilities map onto them (bg-panel, text-muted, border-line...). */
+@theme inline {
+  --font-sans: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --font-mono: "Cascadia Code", "SF Mono", Consolas, ui-monospace, monospace;
+  --color-bg: var(--c-bg);
+  --color-panel: var(--c-panel);
+  --color-panel-2: var(--c-panel-2);
+  --color-raised: var(--c-raised);
+  --color-line: var(--c-border);
+  --color-line-strong: var(--c-border-strong);
+  --color-fg: var(--c-fg);
+  --color-muted: var(--c-muted);
+  --color-faint: var(--c-faint);
+  --color-narration: var(--c-narration);
+  --color-accent: var(--c-accent);
+  --color-accent-soft: var(--c-accent-soft);
+  --color-accent-fg: var(--c-accent-fg);
+  --color-user: var(--c-user);
+  --color-ooc: var(--c-ooc);
+  --color-ooc-line: var(--c-ooc-border);
+  --color-danger: var(--c-danger);
+  --color-danger-soft: var(--c-danger-soft);
+  --color-ok: var(--c-ok);
+  --color-ok-soft: var(--c-ok-soft);
+  --color-warn: var(--c-warn);
+  --color-warn-soft: var(--c-warn-soft);
+  --color-info: var(--c-info);
+  --color-info-soft: var(--c-info-soft);
+}
+
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+:root,[data-theme=dark]{--c-bg:#0e0f12;--c-panel:#14161b;--c-panel-2:#1a1d23;--c-raised:#20242b;--c-border:#262a32;--c-border-strong:#353a44;--c-fg:#e7e3da;--c-muted:#a09b91;--c-faint:#8f8a81;--c-narration:#aaa69c;--c-accent:#c9a25b;--c-accent-soft:#c9a25b1f;--c-accent-fg:#17140e;--c-user:#181b21;--c-ooc:#142028;--c-ooc-border:#23485a;--c-danger:#e0715f;--c-danger-soft:#e0715f1f;--c-ok:#79b38a;--c-ok-soft:#79b38a1f;--c-warn:#d9b25c;--c-warn-soft:#d9b25c1f;--c-info:#7fa7d6;--c-info-soft:#7fa7d61f;--c-scroll:#2c3038;--lightningcss-light: ;--lightningcss-dark:initial;color-scheme:dark}
+[data-theme=light]{--c-bg:#f4f1ea;--c-panel:#fbf9f4;--c-panel-2:#f1ede4;--c-raised:#fff;--c-border:#e2dccf;--c-border-strong:#cfc7b6;--c-fg:#26231d;--c-muted:#57524a;--c-faint:#6b665c;--c-narration:#5c574e;--c-accent:#745515;--c-accent-soft:#7455151a;--c-accent-fg:#fff;--c-user:#ece6da;--c-ooc:#e6eef2;--c-ooc-border:#a9c4d1;--c-danger:#a03c26;--c-danger-soft:#a03c261a;--c-ok:#336a42;--c-ok-soft:#336a421a;--c-warn:#785a10;--c-warn-soft:#785a101a;--c-info:#335d88;--c-info-soft:#335d881a;--c-scroll:#d6cfc0;--lightningcss-light:initial;--lightningcss-dark: ;color-scheme:light}
+html,body,#root{height:100%}
+body{background:var(--c-bg);color:var(--c-fg);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;font-size:14px;line-height:1.5}
+:focus-visible{outline:2px solid var(--c-accent);outline-offset:2px;border-radius:4px}
+::selection{background:var(--c-accent-soft)}
+*{scrollbar-width:thin;scrollbar-color:var(--c-scroll) transparent}
+:root{--font-story:var(--font-sans);--story-size:1.125rem;--story-leading:1.72;--story-column:44rem}
+:root[data-story-font=serif]{--font-story:var(--font-serif)}
+:root[data-reading-size=compact]{--story-size:1.0625rem;--story-leading:1.68;--story-column:42rem}
+:root[data-reading-size=large]{--story-size:1.25rem;--story-leading:1.75;--story-column:48rem}
+.story-column{max-width:var(--story-column)}
+.story-suggestions{grid-template-columns:minmax(0,1fr);gap:.375rem;display:grid}
+@container story (width>=40rem){.story-suggestions{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+.prose-story{font-family:var(--font-story);font-size:var(--story-size);line-height:var(--story-leading);color:var(--c-fg);overflow-wrap:anywhere;max-width:70ch}
+.story-narration{color:var(--c-narration)}
+.story-plain{color:var(--c-fg)}
+.story-dialogue{color:var(--c-fg);font-weight:450}
+.story-narration em,.story-dialogue em{color:inherit}
+.story-scroll{container:story/inline-size}
+.story-beats{grid-template-columns:minmax(0,1fr);gap:.75rem;max-width:min(100%,34rem);margin:.4em 0 .9em;display:grid}
+.story-beats-multi{grid-template-columns:repeat(auto-fit,minmax(min(100%,13rem),1fr));max-width:100%}
+.story-beat{min-width:0;margin:0}
+.story-beat-frame{aspect-ratio:1644/1125;background:var(--c-panel-2);border-radius:.5rem;width:100%;overflow:hidden}
+.story-beat img,.story-beat .story-beat-fallback{object-fit:contain;width:100%;height:100%;display:block}
+@container story (width>=64rem){.story-beats:not(.story-beats-multi){max-width:30rem}
+}
+@container story (width<=30rem){.story-beats,.story-beats-multi{grid-template-columns:minmax(0,1fr);max-width:100%}
+}
+.story-present{font-family:var(--font-sans);flex-wrap:wrap;align-items:center;gap:.35rem .5rem;margin:.2em 0 .8em;font-size:11px;display:flex}
+.story-present-chip{border:1px dashed var(--c-border-strong);min-width:0;max-width:100%;color:var(--c-muted);border-radius:999px;align-items:center;gap:.35rem;padding:.1rem .55rem .1rem .15rem;display:inline-flex}
+:root,[data-theme=dark]{--spk-0:#d6a85a;--spk-1:#78aee0;--spk-2:#8fc49a;--spk-3:#d98fa7;--spk-4:#b9a1e3;--spk-5:#6fc6c0}
+[data-theme=light]{--spk-0:#8a6418;--spk-1:#2d6497;--spk-2:#2f7340;--spk-3:#a33f61;--spk-4:#6a4aa6;--spk-5:#1f7570}
+.story-para-dialogue{--speaker-accent:var(--c-border-strong);border-left:2px solid var(--speaker-accent);margin:0 0 .85em;padding-left:.85em}
+.story-para-dialogue p{margin-bottom:.5em}
+.story-para-dialogue p:last-child{margin-bottom:0}
+.story-para-unknown{border-left-style:dotted}
+.story-para-protagonist{--speaker-accent:var(--c-accent)}
+.story-speaker{font-family:var(--font-sans);letter-spacing:.04em;text-transform:uppercase;color:var(--c-muted);align-items:center;gap:.4em;margin-bottom:.15em;font-size:.72rem;font-weight:600;display:flex}
+.story-speaker-dot{background:var(--speaker-accent);border-radius:999px;width:.5em;height:.5em}
+.story-player{border-left:2px solid var(--c-accent);background:var(--c-user);white-space:pre-wrap;overflow-wrap:anywhere;border-radius:0 .5rem .5rem 0;margin:0 0 .85em;padding:.45em .85em}
+.story-pre,.prose-story pre{max-width:100%;overflow-x:auto}
+.prose-ui{overflow-wrap:anywhere}
+.prose-story p{margin:0 0 .85em}
+.prose-story p:last-child{margin-bottom:0}
+.prose-story em{color:var(--c-fg)}
+@supports (color:color-mix(in lab, red, red)){.prose-story em{color:color-mix(in srgb, var(--c-fg) 82%, var(--c-accent))}
+}
+.prose-story strong{font-weight:600}
+.prose-story ul,.prose-story ol{margin:.4em 0 .85em 1.4em}
+.prose-story ul{list-style:outside}
+.prose-story ol{list-style:decimal}
+.prose-story blockquote{border-left:2px solid var(--c-border-strong);color:var(--c-muted);padding-left:.9em}
+.prose-story code{font-family:var(--font-mono);background:var(--c-panel-2);border-radius:4px;padding:.1em .3em;font-size:.85em}
+.prose-story h1,.prose-story h2,.prose-story h3{margin:.8em 0 .4em;font-weight:600}
+.prose-story hr{border-color:var(--c-border);margin:1em 0}
+.prose-ui{font-family:var(--font-sans);font-size:.875rem;line-height:1.6}
+.caret:after{content:"▍";color:var(--c-accent);margin-left:2px;animation:1s steps(2,end) infinite blink}
+@keyframes blink{to{opacity:0}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}
+}

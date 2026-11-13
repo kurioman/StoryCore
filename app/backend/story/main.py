@@ -195,6 +195,23 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
     if (FRONTEND_DIST / "assets").is_dir():
         app.mount("/assets", StaticFiles(directory=FRONTEND_DIST / "assets"), name="assets")
 
+    # Second frontend served side by side at /next/ while the rebuilt interface is being checked against the
+    # current one (app/frontend/dist-next, built with base "/next/"). Absent folder = nothing is served there.
+    next_dist = FRONTEND_DIST.parent / "dist-next"
+    if (next_dist / "assets").is_dir():
+        app.mount("/next/assets", StaticFiles(directory=next_dist / "assets"), name="next-assets")
+
+    @app.get("/next", include_in_schema=False)
+    @app.get("/next/{full_path:path}", include_in_schema=False)
+    async def spa_next(full_path: str = ""):
+        f = (next_dist / full_path).resolve() if full_path else None
+        if f and f.is_file() and next_dist.resolve() in f.parents:
+            return FileResponse(f)
+        index = next_dist / "index.html"
+        if index.is_file():
+            return FileResponse(index, headers={"Cache-Control": "no-cache"})
+        return HTMLResponse("<h1>StoryCore</h1><p>The new interface has not been built yet (app/frontend/dist-next).</p>")
+
     @app.get("/{full_path:path}", include_in_schema=False)
     async def spa(full_path: str):
         if full_path.startswith("api/"):
