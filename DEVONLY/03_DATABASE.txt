@@ -1,0 +1,105 @@
+DATABASE
+========
+
+SQLite file: data/stories.db (WAL journal: stories.db-wal and stories.db-shm next to it are normal; never copy the .db
+alone while the app runs - use the in-app backup, which takes a consistent snapshot).
+
+ORM: story/models.py (SQLAlchemy 2 declarative). Ids are UUID strings, timestamps ISO-8601 UTC strings.
+Schema history: story/migrations/versions (Alembic). Current head: 0007.
+
+
+1. TABLES
+---------
+World and lore (rebuilt by each lore import; never edited by the player directly)
+  worlds              One row per imported Lore Pack.
+                        slug          = pack id (stories are linked through world_id, the slug is the stable key)
+                        name, description, source_path (absolute path to the pack folder; re-pointed if moved)
+                        system_prompt (the pack's narrative prompt), stats_template, import_version, imported_at
+                        data_json:
+                          "pack"               the normalised pack.json (read through services/world_pack.py)
+                          "starters"           openings offered in the New Story wizard
+                          "hidden"             narrator-only notes { "character:kriemhild": [..], ... }  NEVER sent
+                                               to the browser (routers/lore.py public_world strips it)
+                          "pack_fingerprint"   detects lore changes (bundled.py)
+                          "images_fingerprint" detects portrait changes
+                          + legacy keys (academy record, etc.)
+  lore_documents      Every lore file as text (Markdown as written; JSON pretty-printed, "hidden" removed).
+  lore_entities       One row per lore record (character, faction, location...): entity_id, category, entity_type,
+                      name, aliases, summary, data_json (the record without "hidden").
+  lore_chunks         Searchable pieces of lore (one per record + Markdown sections) sent to the narrator.
+  import_runs         Import reports (counts, warnings, errors; hidden notes as a count only).
+  local_canon         Facts established during play (or by the player) that override base lore.
+  roles               Unused (kept for compatibility; posts live in pack.json + settings).
+
+Stories
+  stories             title, world_id, active_avatar_id, avatar_snapshot_json, active_branch_id, status,
+                      settings_json (per-story options: model, preset, tone, starter, stat sheet, notes, exclusions...)
+  message_branches    Branches of a story (head_message_id, parent branch, fork point).
+  messages            The transcript tree: parent_id, seq, role (user/assistant/system), kind (story, ooc,
+                      utility), content, status (complete, streaming, partial, failed, cancelled), request_id,
+                      generation_metadata_json (model, usage, how the reply ended).
+  message_versions    Previous texts of edited messages.
+  story_states        Versioned state per branch: state_json = stats, inventory, quests, scene (place, time,
+                      weather, day, present...), relationships, expressions... Every change = new version.
+  state_proposals     Review queue: changes suggested by memory capture / analysis waiting for the player.
+  turn_analyses       Post-reply analysis per assistant message: speakers, beats, dialogue spans, suggestions,
+                      discoveries, relationship changes, diagnostics.
+  character_discoveries  Append-only: what the protagonist knows about each character, per branch.
+  story_events        The journal (timeline of what happened), with evidence and verification status.
+  entity_facts        Facts and beliefs (who knows what), with sources and validity.
+  memory_extraction_runs / extraction_cursors   Memory capture bookkeeping (what range was analysed).
+  recaps              Rolling and chapter summaries ("story so far").
+  savepoints          Snapshots of a branch.
+
+App
+  app_settings        key -> JSON value (defaults in services/settings_service.py DEFAULTS).
+  user_notes          Global note and per-story notes (always sent to the narrator when enabled).
+  slash_commands      Built-in and custom commands.
+  providers           AI connections (type, base_url, non-secret config, secret_reference to the key store).
+  model_profiles      A model on a provider + generation settings (max_tokens, temperature...) + context_limit.
+  avatars             The player's protagonists (profile_json, portrait).
+  asset_roots         Registered portrait folders.
+  asset_manifest      One row per image found: character_id, slot (1-6 expression), status, match reason.
+  asset_overrides     Manual portrait assignments / ignored files.
+  slug_overrides      Manual "file name -> character" links.
+
+Full-text search: FTS5 virtual tables lore_fts, canon_fts, events_fts, facts_fts, recaps_fts, kept in sync by
+triggers (migration 0002). The narrator context uses lore_fts to retrieve relevant lore each turn.
+
+
+2. MIGRATIONS
+-------------
+  0001 initial schema           0002 FTS5 search indexes        0003 unique (story, request_id) for turns
+  0004 scene/suggestions/discovery   0005 analysis v2 (beats, dialogue, relationships, diagnostics)
+  0006 worlds.stats_template + roles table   0007 remove the old "Enrollment" opening from the global list
+
+At startup db.Database.migrate() upgrades to head. If the existing database is older, it first writes a consistent
+copy to data/backups/pre_migration_<from>_to_<to>_<date>.db.
+
+Adding a change to the schema:
+  1. edit models.py;
+  2. add migrations/versions/0008_<name>.py with revision = "0008", down_revision = "0007", and upgrade() using
+     op.add_column / op.create_table (use batch_alter_table for SQLite column changes). Copy 0006 as an example;
+  3. make the code tolerate old rows (missing JSON keys) - migrations do not rewrite JSON content;
+  4. start the app on a COPY of a real database (--data-dir) and check data/logs/app.log.
+There is no autogenerate setup; write migrations by hand.
+
+
+3. BACKUPS AND EXPORTS (services/backup.py, routers/backup.py)
+--------------------------------------------------------------
+  Full backup (Settings > Data & backups > Back up now): data/backups/<name>.zip containing story.db (consistent
+  snapshot), uploads/ and manifest.json. API keys are never included. Verify and Restore are in the same page;
+  restoring copies the database INTO the live file with SQLite's backup API and replaces uploads.
+  Story export: one story as a .zip package (messages, branches, states, journal...) importable on another PC; ids are
+  re-mapped (idmap.py) and the story is linked to its world by slug when that world exists there.
+  Old formats from Lumencia Story Desk ("lumencia-*") are still accepted on import.
+  Deleted stories are moved to data/backups/deleted_stories before removal.
+
+
+4. INSPECTING THE DATABASE
+--------------------------
+Close the app first (or work on a copy). Any SQLite tool works (DB Browser for SQLite, sqlite3 CLI, Python):
+
+  python -c "import sqlite3;c=sqlite3.connect('data/stories.db');print(c.execute('select slug,name from worlds').fetchall())"
+
+Integrity check from the app: GET /api/system/integrity.

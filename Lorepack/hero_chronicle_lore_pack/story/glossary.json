@@ -1,0 +1,25 @@
+{
+  "martial_realm": {
+    "aura": "Body enhancement energy",
+    "sword_energy": "Concentrated aura for offensive strikes",
+    "sword_force": "Physical weight and impact of sword techniques",
+    "sword_saint": "Title held by the strongest swordsman alive"
+  },
+  "magic_realm": {
+    "mana": "The primary source of magic",
+    "circle": "The measurement of magical capacity",
+    "archmage": "A title for those of 7th Circle or above"
+  },
+  "holy_power": {
+    "priest_mana": "Mana purified by the Church of Lily",
+    "divinity": "The power of the Heavenly God Lily"
+  },
+  "miasma": {
+    "description": "Corruption-based power used by the Demon God Cult"
+  },
+  "currency": {
+    "gold": "1G",
+    "silver": "1S",
+    "copper": "1C"
+  }
+}

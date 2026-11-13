@@ -1,0 +1,33 @@
+{
+  "martial_realm": {
+    "description": "Focuses on Aura (Body Enhancement, Sword Energy, Sword Force)",
+    "ranks": {
+      "fighter_and_swordsman": [
+        "Beginner (Low, Mid, High)",
+        "Intermediate (Low, Mid, High)",
+        "Expert (Low, Mid, High)",
+        "Master-Initiate",
+        "Master-Proficient",
+        "Master-Pinnacle"
+      ],
+      "order": "Beginner (Low / Mid / High) < Intermediate (Low / Mid / High) < Expert (Low / Mid / High) < Master-Initiate < Master-Proficient < Master-Pinnacle"
+    },
+    "titles": {
+      "sword_saint": "A title held by the strongest swordsman alive."
+    }
+  },
+  "magic_realm": {
+    "description": "Focuses on Mana",
+    "circles": "1st to 9th Circle",
+    "titles": {
+      "archmage": "Granted for 7th Circle and above"
+    }
+  },
+  "holy_power": {
+    "description": "Manifested through the Church of Lily, serving the Heavenly God Lily",
+    "source": "Priest Mana"
+  },
+  "miasma": {
+    "description": "A power distinct from ordinary mana, used by the Demon God Cult"
+  }
+}

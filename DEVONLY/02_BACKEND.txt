@@ -1,0 +1,171 @@
+BACKEND (THE ENGINE)
+====================
+
+Source: app/backend/story/  (Python 3.12, FastAPI, SQLAlchemy 2, Alembic, httpx, Pillow)
+About 14 000 lines. Every module starts with a docstring explaining what it does and why: read those first.
+
+
+1. LAYERS
+---------
+
+   Browser (compiled React app)
+        |  HTTP JSON + Server-Sent Events, all under /api
+        v
+   routers/      thin HTTP layer: validates input (pydantic), calls services, shapes JSON
+        |
+        v
+   services/     all the logic (context building, turns, lore import, analysis, memory...)
+        |                      \
+        v                       v
+   models.py + db.py         providers/  (talk to the AI services over HTTP)
+   (SQLite through SQLAlchemy)
+
+  - Routers never contain story logic; services never know about HTTP (except a few helpers that raise
+    TurnError / NotFound / ValueError, turned into JSON errors in main.py).
+  - Long work (AI generation, analysis, memory capture, Ollama downloads) runs as asyncio background tasks owned by
+    AppContext; the browser follows them with Server-Sent Events (SSE).
+
+
+2. TOP-LEVEL FILES
+------------------
+  __main__.py         Launcher: free port, uvicorn on 127.0.0.1, opens the browser.
+  config.py           Paths (PROJECT_ROOT, data dir), APP_VERSION, environment variables, legacy DB adoption.
+  main.py             create_app(): logging, security middleware, error handlers, routers, static frontend,
+                      startup sequence (migrate -> recover -> seed -> sync lore packs), the after-reply pipeline.
+  db.py               SQLite engine (WAL, foreign keys, busy timeout), sessions, Alembic migrations with a backup
+                      copy before any upgrade.
+  models.py           Every table (see 03_DATABASE.txt).
+  deps.py             FastAPI dependencies: get_ctx (AppContext), get_db (one session per request, commit on
+                      success, rollback on error), sse() helper.
+  bundled.py          Automatic Lore Pack loading at startup (see 04_LOREPACK.txt, "Import").
+  secrets_store.py    API key storage (keyring / file / memory) and the log filter that masks keys.
+
+
+3. AppContext (services/runtime.py)
+-----------------------------------
+One object shared by the whole app (request.app.state.ctx):
+  settings      config.Settings (paths, port)
+  db            db.Database (engine + SessionLocal; ctx.db.session() is a context manager for background work)
+  secrets       the secret store
+  generations   GenerationManager: runs one AI reply per branch, streams tokens, saves the text as it comes,
+                handles cancel, calls the on_complete hooks when a reply ends
+  pulls         PullManager: Ollama model downloads
+  extraction    ExtractionService: memory capture (journal events, facts, recaps)
+  background    running asyncio tasks (cancelled cleanly at shutdown)
+
+  ctx.resolve(db, profile_id) -> (provider, model profile, adapter). Raises NoModelConfigured (no model chosen) or
+  ConsentRequired (a cloud provider not yet approved by the player; the frontend shows the privacy notice).
+  ctx.story_profile_id(db, story): the story's own model, else the default model from settings.
+
+
+4. SECURITY (main.py middleware)
+--------------------------------
+  - Only Host 127.0.0.1 / localhost / ::1 is served (protects against DNS-rebinding).
+  - POST/PUT/PATCH/DELETE under /api need the header  X-Story-Client: 1  (old name X-Lumencia-Client also accepted)
+    and, if an Origin header is present, a loopback origin. This blocks other websites from driving the app.
+  - API keys: stored server-side only, never returned to the browser, masked in logs, never exported.
+  - Errors: TurnError -> 4xx with a plain message; NotFound -> 404; ValueError -> 400; ProviderError -> 502 with a
+    friendly message + technical details; anything else -> 500 "details are in the app log" (logged with traceback).
+
+
+5. SERVICES, ONE BY ONE
+-----------------------
+Story flow
+  turns.py            send / regenerate / branch / edit / delete / undelete a message. send(): expands a slash
+                      command, resolves the model, appends the player message + an empty "streaming" reply, builds
+                      the context and starts the generation. Idempotent with request_id (double clicks are safe).
+  story_tree.py       Messages form a tree (parent_id). A branch points to its head message; its transcript is the
+                      chain head -> root. Regenerating a leaf adds a sibling; editing the past creates a new branch.
+  context_builder.py  THE BRAIN: builds the system prompt + recent messages sent to the model, within a token
+                      budget, and a "manifest" shown in the Context Inspector. See 05_NARRATOR_AND_CONTEXT.txt.
+  runtime.py          AppContext, GenerationManager (streaming, cancel, partial replies, diagnostics),
+                      PullManager, recovery after a crash.
+  commands.py         Slash commands (/recap, /ooc, ...): prompt templates expanded on the server, never shell.
+  immersive.py        Optional: NPC reactions between the player's own quoted lines (the player text is never changed).
+  savepoints.py       Named / automatic snapshots of a branch; restoring creates a new branch.
+
+After each reply (see 05_NARRATOR_AND_CONTEXT.txt, section 4)
+  turn_analysis.py    One small JSON request after each reply: who spoke (expression 1-6), who is present, three
+                      suggested player replies, characters discovered, relationship changes, world clock changes.
+  scene_cast.py       Who is physically in the scene (scene.present), from the analysis; gathering rosters.
+  world_state.py      In-story clock, date, weather, place, story day counter (D1, D2...); pack calendar.
+  chrono.py           The small "day / time / place" header shown above each reply (built by the app, not the model).
+  relationships.py    Relationship scores per character (trust, affection...), changed only with quoted evidence;
+                      small confident changes auto-applied, others go to a review queue.
+  discovery.py        Which characters the protagonist has actually heard of / met (lore is not the roster).
+  suggestions.py      Validation of the three suggested replies (player's own voice, language, person).
+  expressions.py      Cheap offline speaker / mood guesses (fallback when no analysis).
+  extraction.py       Memory capture: journal events, facts, rolling recaps, continuity checks, state-change
+                      proposals. Runs in batches, in bounded chunks, never modifies the transcript.
+  state_service.py    Versioned story state per branch (stats, inventory, quests, scene, relationships...). Every
+                      change is a new version; undo creates a new version too.
+
+World / lore
+  lore_import.py      Reads a pack folder into worlds / lore_documents / lore_entities / lore_chunks (+ full-text
+                      search index). Tolerant of many layouts. Strips "hidden" notes. See 04_LOREPACK.txt.
+  pack_manifest.py    Reads and validates pack.json (sections can be separate files); never fatal.
+  world_pack.py       THE single accessor for a world's pack settings: of(db, world_id), section(...), has_module(...).
+                      Every engine feature that depends on the pack reads through it.
+  roles.py            Posts and closed groups (lore + pack + in-app corrections) and conflict detection
+                      ("a second Emperor appeared").
+  canon.py            Fixed facts (kinship, family branches) and gatherings (classes, councils) with provenance.
+  encounters.py       Up to three established characters who could plausibly be met here (pack places,
+                      never_random types, gatherings, recent activity).
+  identity.py         Resolves "the Headmaster", "Lucia's sister" to a character id.
+  entities.py         Name / alias index (accent- and case-insensitive; ambiguous first names never resolve).
+
+Portraits
+  portrait_tags.py    The narrator's [Name:N] tags: removed from the stream, resolved to characters, portraits and
+                      expressions written at once when a reply ends; put back into history sent to the model.
+  assets.py           Scans portrait folders, matches files to characters (name_1.webp ... name_6.webp), makes
+                      thumbnails, picks the right expression with fallbacks. Original images are never modified.
+
+Data & settings
+  settings_service.py App settings with typed DEFAULTS (one key per row in app_settings). Includes the in-app lore
+                      corrections role_assignments and canon_facts, scoped by world slug.
+  backup.py           Story export/import packages (.zip), full backups, verify, restore, integrity check.
+  idmap.py            Re-maps ids when a story or savepoint is imported/restored.
+  model_catalog.py    Recommended hosted models (editorial notes + OpenRouter's live catalogue for prices).
+
+
+6. ROUTERS (all mounted under /api)
+-----------------------------------
+  system.py      health, settings, onboarding checklist, paths, logs, integrity
+  providers.py   providers, model profiles, model listing, connection tests, Ollama pull/delete, model catalogue
+  stories.py     stories, branches, messages, turns, opening scene, regenerate, generation stream, context inspector
+  state.py       story state, relationships, review queue (proposals), user notes
+  journal.py     events, facts, memory capture runs, recaps, continuity check, savepoints, maintenance
+  narrative.py   scene (speakers, portraits, suggestions), post-turn analysis retry, story characters
+  lore.py        worlds, lore import, entities, search, roles, local canon
+  assets.py      portrait folders, scanning, manifest, overrides, images
+  avatars.py     player avatars (protagonist profiles) and their portraits
+  commands.py    slash command library
+  backup.py      export/import stories, full backups, notes and local-canon import/export
+Full list: 08_API_REFERENCE.txt.
+
+
+7. ONE TURN, END TO END
+-----------------------
+  1. Browser: POST /api/stories/{id}/turns  {content, request_id}
+  2. turns.send(): saves the player message + an empty assistant message (status "streaming"),
+     context_builder.build() assembles the prompt, GenerationManager.start() launches the AI request.
+     The response returns immediately with the message ids and the context manifest.
+  3. Browser: GET /api/generations/{assistant_id}/stream  (SSE) -> receives tokens as they arrive.
+  4. GenerationManager saves the text regularly; at the end status becomes "complete" (or "partial", "failed",
+     "cancelled"). A reply cut by the output limit is NOT marked complete.
+  5. on_complete hook (main.py -> after_generation):
+       a. turns.post_process: offline speaker / mood heuristics,
+       a2. portrait_tags.apply: the narrator's tags become the reply's portraits and expressions immediately,
+       b. turn_analysis.analyse: the scene-analysis request (speakers, presence, suggestions, relationships, clock),
+       c. memory capture if due (extraction.run, by batch of N turns or after each turn, per settings).
+  6. Browser polls / refreshes the scene (GET /api/stories/{id}/scene) to show portraits and suggestions.
+
+
+8. CODING CONVENTIONS
+---------------------
+  - Ids are UUID strings (models.new_id); timestamps ISO-8601 UTC strings (models.now_iso).
+  - JSON columns hold structured data (data_json, settings_json, state_json...). Read them with "or {}".
+  - Anything the AI returns is validated; malformed parts are dropped, never "repaired by guessing".
+  - Optional features fail visibly but never break the reply (analysis failure = a Retry button, not a crash).
+  - When something is world-specific, it comes from world_pack.py; there is no hard-coded world name.
+  - Comments explain WHY (often with the version that introduced the rule, e.g. "v1.5:"). Keep that style.

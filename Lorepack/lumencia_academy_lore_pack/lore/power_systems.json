@@ -1,0 +1,200 @@
+{
+  "schema_version": "1.0.0",
+  "power_systems": [
+    {
+      "id": "mana_and_magic_circles",
+      "name": "Mana-Based Magic",
+      "type": "arcane_magic",
+      "summary": "Mages channel mana outward through stabilized circles to produce spells that interact with natural laws.",
+      "mechanics": [
+        "Mana is stored and refined through a core and internal circuits.",
+        "Magic circles encode a spell's logic, such as element, range, intensity and duration.",
+        "Higher circle counts increase efficiency, complexity and the mage's ability to manipulate natural laws.",
+        "Classical specializations include elemental, spirit, healing and illusion magic."
+      ],
+      "tiers": [
+        {
+          "level": 1,
+          "rank": "1-Circle (Novice)",
+          "capabilities": "Mana circuit opened; simple elemental orbs and elementary effects."
+        },
+        {
+          "level": 2,
+          "rank": "2-Circle (Basic)",
+          "capabilities": "First circle complete; basic offensive spells and improved casting speed."
+        },
+        {
+          "level": 3,
+          "rank": "3-Circle (Full Mage)",
+          "capabilities": "Basic combat and utility magic; more stable mana efficiency."
+        },
+        {
+          "level": 4,
+          "rank": "4-Circle (Intermediate)",
+          "capabilities": "Improved mana attunement; area effects become practical."
+        },
+        {
+          "level": 5,
+          "rank": "5-Circle (Advanced)",
+          "capabilities": "Can customize spell formulae and develop personal variants."
+        },
+        {
+          "level": 6,
+          "rank": "6-Circle (High Mage)",
+          "capabilities": "Can achieve silent casting without externally visible circles."
+        },
+        {
+          "level": 7,
+          "rank": "7-Circle (Archmage)",
+          "capabilities": "Can read and predict mana flow; often compared to Master Entry martial combat potential, though the comparison is approximate."
+        },
+        {
+          "level": 8,
+          "rank": "8-Circle (Arch Mage)",
+          "capabilities": "Deep understanding of magical laws and direct manipulation of natural laws."
+        },
+        {
+          "level": 9,
+          "rank": "9-Circle (Grand Sage)",
+          "capabilities": "Can reinterpret natural laws and develop entirely new magic; extremely rare."
+        }
+      ],
+      "limitations_and_balance": [
+        "Circle count is not a guarantee of victory: knowledge, matchup, preparation and circumstance matter.",
+        "Do not assume a character can use every school of magic merely because they have a high circle rank."
+      ],
+      "confidence": "high",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "dreamrunner_zeph_lumencia",
+        "reddit_calendar_power"
+      ]
+    },
+    {
+      "id": "martial_aura",
+      "name": "Martial Cultivation / Aura",
+      "type": "martial_power",
+      "summary": "Martial artists refine mana internally into Aura (also called Qi in some descriptions). Rather than casting outward, they reinforce body, reflexes and weapons.",
+      "mechanics": [
+        "Ambient mana is absorbed and circulated internally.",
+        "Internal training converts raw mana into Aura.",
+        "Aura enhances strength, speed, durability and reflexes, and can later be channelled into weapons.",
+        "At Master ranks, Aura can manifest visibly or be shaped by will."
+      ],
+      "tiers": [
+        {
+          "level": 1,
+          "rank": "Beginner",
+          "capabilities": "Basic circulation and slight physical enhancement."
+        },
+        {
+          "level": 2,
+          "rank": "Expert Low",
+          "capabilities": "Controlled aura flow; brief enhancement focused on body parts."
+        },
+        {
+          "level": 3,
+          "rank": "Expert Mid",
+          "capabilities": "Stable full-body Aura circulation and consistent physical enhancement."
+        },
+        {
+          "level": 4,
+          "rank": "Expert High",
+          "capabilities": "Combines inner and outer control; weapon coating and early sword energy may emerge."
+        },
+        {
+          "level": 5,
+          "rank": "Expert Supreme",
+          "capabilities": "Refined sword energy and reduced strain through deep understanding; a major plateau."
+        },
+        {
+          "level": 6,
+          "rank": "Master Entry",
+          "capabilities": "Aura visibly manifests; unique Sword Aura appears, but sustained use is physically taxing."
+        },
+        {
+          "level": 7,
+          "rank": "Master Adept",
+          "capabilities": "Sword Aura becomes stable and sustainable; body and Aura work in harmony."
+        },
+        {
+          "level": 8,
+          "rank": "Master Apex",
+          "capabilities": "Transcendent mastery in which will can shape Aura; extraordinarily rare."
+        }
+      ],
+      "confidence": "high",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "dreamrunner_zeph_lumencia",
+        "reddit_calendar_power"
+      ]
+    },
+    {
+      "id": "divinity",
+      "name": "Holy Power / Divinity",
+      "type": "divine_power",
+      "summary": "A power source distinct from mana, associated primarily with Lily and the Holy Kingdom of Dominus.",
+      "mechanics": [
+        "Channelled through faith, prayer, rituals, sacred oaths and blessed objects.",
+        "Common manifestations include healing, purification, barriers and holy attacks.",
+        "Especially effective against demonic or corrupted entities in the public reference.",
+        "Its strength is not ranked by magic circles; devotion, divine favour and individual spiritual capacity are described as factors."
+      ],
+      "terms": {
+        "saintess": "A mortal described as an exceptional conduit of divine power.",
+        "holy_knight": "A combatant who combines martial training with divine blessing.",
+        "inquisitor": "A religious investigator or combat specialist associated with Dominus."
+      },
+      "confidence": "high",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "dreamrunner_zeph_lumencia",
+        "reddit_calendar_power",
+        "reddit_character_profiles"
+      ]
+    },
+    {
+      "id": "miasma",
+      "name": "Miasma",
+      "type": "demonic_power",
+      "summary": "A cursed power associated with Delphirem, the Abyss Zone and the Demon God Cult. It is distinct from ordinary mana and is described as corruptive.",
+      "mechanics": [
+        "Associated with the Abyss Zone and the Demon God Delphirem.",
+        "Can corrupt mana circuits; prolonged exposure may affect body and mind.",
+        "Cult members access it through pacts, rituals or offerings.",
+        "Sin Bishops are described as receiving power comparable to a 7-Circle mage through pacts; Apostles operate at still higher levels."
+      ],
+      "narrative_constraints": [
+        "Do not use Miasma as a generic synonym for mana.",
+        "Cult activity should usually involve motive, preparation, concealment or consequences rather than random attacks.",
+        "A pact should have a meaningful price or risk."
+      ],
+      "confidence": "high",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "dreamrunner_zeph_lumencia",
+        "reddit_character_profiles",
+        "reddit_calendar_power"
+      ]
+    },
+    {
+      "id": "spirit_magic",
+      "name": "Spirit Magic",
+      "type": "specialized_magic",
+      "summary": "A magical tradition involving interaction with and/or summoning of spirits. Sia is the standout character associated with four elemental spirits.",
+      "mechanics": [
+        "Details are not exhaustively specified by the sources.",
+        "Do not invent exact spirit names, personalities or contracts as established lore unless established in the current campaign."
+      ],
+      "confidence": "medium",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "dreamrunner_zeph_lumencia",
+        "reddit_constant_data"
+      ]
+    }
+  ],
+  "cross_system_rule": "Mana-based magic and martial Aura use the same broad resource concept differently: mages direct power outward through spell constructs; martial artists refine and circulate it inward. Divinity and Miasma are distinct power sources and should not be silently reduced to ordinary mana.",
+  "scaling_warning": "Power-tier comparisons in source material are approximate. Resolve confrontations using context, skills, preparation, injuries, terrain and narrative stakes rather than rank alone."
+}

@@ -1,0 +1,62 @@
+{
+  "empires": [
+    {
+      "name": "Central Empire (Aether)",
+      "aliases": [
+        "Aether",
+        "the Empire"
+      ],
+      "capital": "Grandel",
+      "description": "A vast governing nation where the Emperor and Princesses hold absolute power. Its capital is Grandel.",
+      "military": "The Imperial Army directly under the Emperor (Knight Orders, Magic Corps) and noble private soldiers in charge of territorial defense."
+    }
+  ],
+  "nations": [
+    {
+      "name": "Eastern Holy Nation (Lumina)",
+      "description": "A religious nation whose state religion is the Church of Lily.",
+      "privileges": [
+        "clerical tax exemption",
+        "recognized sanctuaries",
+        "independent inquisitorial authority"
+      ],
+      "stance": "Proclaims political neutrality and pursues an ideology of rewarding good and punishing evil.",
+      "light_and_shadow": "The Holy Sword Excalibur exists, but internally there are also those who are corrupt."
+    }
+  ],
+  "organizations": [
+    {
+      "name": "Information Guild Tenebris",
+      "description": "A vast underground crime/information cartel that evolved from former imperial intelligence operatives. ('The truth is more expensive than blood')",
+      "base": "Rondel"
+    },
+    {
+      "name": "Demon Realm Legions",
+      "description": "Strict vertical hierarchy based on magical talent and power.",
+      "legions": [
+        {
+          "name": "1st Legion (Iris)",
+          "location": "Elysium",
+          "description": "An elusive, corrupted region of the Demon Realm shrouded in a deceptive gray mist, where mental erosion is lethal."
+        },
+        {
+          "name": "2nd Legion (Kashar)",
+          "location": "The Blood Arena, Scratch",
+          "description": "An endless wasteland battered by red sandstorms and a vast ruined city. A cruel arena where only strength proves rank, and a cynically defiant sanctuary that takes in the outcasts of the Demon Realm."
+        },
+        {
+          "name": "3rd Legion (Lilith)",
+          "location": "Palace of Nightmares",
+          "description": "A decadent gothic castle and a dreamlike ball."
+        },
+        {
+          "name": "4th Legion (Unknown)",
+          "location": "The Sword's Grave",
+          "description": "A place where extreme killing intent and formless sword energy rage.",
+          "hidden": "Its commander is Kriemhild, the Sword Saint, bound to the Demon King by a soul-bond. Publicly, nobody knows who leads it."
+        }
+      ],
+      "hierarchy": "Demon King > Legion Commander > Officer > Monster class"
+    }
+  ]
+}

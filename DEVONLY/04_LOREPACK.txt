@@ -1,0 +1,207 @@
+LORE PACKS - EVERYTHING
+=======================
+
+A Lore Pack is one story world. Adding a story = adding a folder in Lorepack/. No code change.
+The exact pack.json reference is LOREPACK_FORMAT.md (project root). This file explains the whole system around it.
+
+Code: services/pack_manifest.py (pack.json), services/lore_import.py (lore files), bundled.py (automatic loading),
+services/world_pack.py (how the engine reads pack settings), services/assets.py (portraits).
+
+
+1. FOLDER LAYOUT
+----------------
+  Lorepack/
+    my_story_lore_pack/                 any folder name; the pack's identity is pack.json -> "id"
+      pack.json                         REQUIRED for automatic loading (entry point)
+      pack/                             optional: smaller files pack.json points to ("posts": "pack/posts.json")
+      ai/narrative_system_prompt.md     the narrator's world prompt (path configurable in pack.json -> files)
+      lore/premise.md                   the premise; first section = description if pack.json has none
+      lore/*.json, lore/*.md            world, locations, power systems, history...
+      characters/characters.json        characters
+      factions/factions.json            factions, nations, organisations
+      scenarios/starting_scenarios.json optional lore-side openings (pack.json "starters" is simpler)
+      story/glossary.json               terms
+      schemas/                          JSON schemas for authors: skipped by the import
+      my_story_images/                  portraits (folder named "images" or "*_images", or pack.json -> files.images)
+
+Every .json and .md file anywhere in the pack is read (except schemas/, pack.json and the files pack.json points to).
+Folder names are a convention, not a requirement: what matters is the KEY of each list inside the JSON files (or the
+file name), see section 3.
+
+
+2. pack.json IN SHORT
+---------------------
+  Required: format_version (1), id (permanent, lowercase_with_underscores), name.
+  Optional: description, canon_note, modules, files, stats, starters, posts, closed_groups, facts, gatherings,
+            places, calendar, never_random.
+  Keys starting with "_" are ignored (use "_comment": "..." for notes to yourself).
+  Any section can be a path to its own file instead of inline content.
+  A broken section is skipped and listed in the import report; only a broken identity stops the pack.
+
+  What each section does in the engine:
+    files          where the system prompt, premise and portraits are
+    modules        genre switches. "school" = lessons, school year, first-year students, student wording.
+                   Others are stored for the future (isekai, heroic_fantasy, cyberpunk...).
+    stats          the player's starting stat sheet ("World default" in the New Story wizard)
+    starters       opening scenarios offered in the wizard (id, name, purpose, blueprint, optional starting scene)
+    posts          unique positions: the narrator always uses that character, never invents a second holder
+    closed_groups  fixed sets (gods, a council): never add members
+    facts          kinship (aunt_of, sibling_of, parent_of, spouse_of), family_branch, other
+    gatherings     groups that meet (class, council): leader + members assumed present when keywords match
+    places         who might plausibly be met where (regulars, likely affiliations / traits)
+    calendar       year label and the month the year starts. The format is fixed for all worlds: 12 months,
+                   7-day weeks (names standard; only names could ever differ, never the format)
+    never_random   character types never offered as chance encounters (gods, demon lords)
+
+  Character references in pack.json are lore ids ("kriemhild"), never display names. After import, the report lists
+  every id that does not exist in the lore.
+
+  NEVER change "id" once stories exist: stories are linked to the world by it. "name" can change any time.
+
+
+3. LORE FILES: HOW JSON BECOMES RECORDS
+--------------------------------------
+Each JSON file is an object. Inside it, every LIST OF OBJECTS is a list of records. The list's key decides the
+category:
+    characters, members, deities, npcs, antagonists         -> character
+    factions                                                -> faction
+    organizations                                           -> organization
+    departments                                             -> department
+    polities                                                -> polity
+    locations, regions, places, cities                      -> location
+    power_systems                                           -> power_system
+    scenarios, starting_scenarios, starting_points          -> scenario (lore-side openings)
+    hooks                                                   -> plot_hook
+    terms (with "definition")                               -> glossary
+    sources                                                 -> source
+    relationships  (from / to / type / description)         -> one "relationships" lore chunk
+If the key is unknown, the FILE NAME decides (factions.json with a list "empires" -> faction; glossary.json ->
+glossary; world.json -> world). If nothing is recognised, an object-shaped file ({"magic": {...}, "martial":
+{...}}) becomes one record per entry, or the whole file becomes one record.
+
+Record fields:
+    id            unique within its category. If missing but "name" exists, an id is generated from the name
+                  ("Sword's Grave" -> the_sword_s_grave) and the report lists it. Give ids yourself for stability.
+    name          display name (or "term" / "title")
+    aliases       other names the text may use ("the Saint", nicknames). Used to recognise characters in replies.
+    type          shown as the character's type; used by closed_groups.types, never_random and some heuristics
+    summary / description / premise / definition / purpose / notes / personality_traits
+                  the first one found is the short summary in the lore library
+    appearance    {"hair": "...", "eyes": "..."} -> used to keep looks consistent
+    hidden        narrator-only secrets (section 4)
+    confidence, canon_status, source_ids   optional provenance shown with the lore (research packs)
+    anything else free-form: every field is rendered as text for the narrator ("rank: Master-Pinnacle")
+  Fields with these names are checked as references to other ids (warnings if unknown): location_id,
+  parent_location_id, polity_id, headquarters_location_id, department_id, deity_id, capital_location_id,
+  faction_id, faction_ids, members, key_members, leaders_or_members, rivals, involved_ids, worshipped_by.
+
+Markdown files are kept as documents and split into searchable chunks at each heading (#, ##, ###). Write one topic
+per heading: the narrator retrieves chunks by relevance each turn.
+
+What the narrator gets from lore: every turn, the records of characters in the scene (focus) + up to 6 chunks found
+by full-text search on the recent text + pinned lore, within about 20 % of the context budget. So: short, factual,
+one idea per field beats long prose.
+
+
+4. HIDDEN INFORMATION (NARRATOR-ONLY SECRETS)
+---------------------------------------------
+Any JSON record, at any depth, may have "hidden": "text" or "hidden": ["text", "text"].
+
+  {"id": "kriemhild", "name": "Kriemhild", "type": "Noble", ...,
+   "hidden": ["She is soul-bound to the Demon King...", "She commands the 4th Legion."]}
+
+What the engine does (lore_import.strip_hidden / context_builder section 8b):
+  - Removed before anything is stored for display: lore library records and raw files, search, world details,
+    character sheets, the import report (count only: "hidden_notes": 7). Stored apart in worlds.data_json["hidden"]
+    keyed "category:id" ("character:kriemhild"). routers/lore.py public_world() strips that key from API answers.
+  - Sent to the narrator only when the record is in play: the character is present / named in the scene, or its lore
+    chunk was retrieved this turn. It goes in a section "Narrator-only secrets" with rules: true but secret, never
+    state it, let it shape motives, reveal only through events, clues or a character's choice.
+  - The "Preview context" screen shows "[Narrator-only notes are hidden from the player.]" instead.
+  - A note inside a nested entry is prefixed with that entry's name ("[4th Legion (Unknown)] ...").
+  - Tip: put a secret on EVERY record that should trigger it (the character AND the place/faction where it matters).
+  Limits: not read from Markdown files; hidden notes inside "relationships" lists are dropped (not stored).
+  Honest warning: the player can still read the pack files on disk, and a model can let a secret slip. It hides
+  information from the app's interface, it is not encryption.
+
+
+5. OPENINGS (STARTERS)
+----------------------
+The New Story wizard offers, in order: the pack's "starters", then lore scenarios (scenarios/*.json lists, with
+"ai_initialization" or a description; or scenarios/intro_blueprints.md headings matching scenario names), then the
+global presets (Free Mode, Character Preview). A pack starter replaces a lore scenario with the same id.
+
+Optional "scene" on a pack starter: where and when the story begins, set in the story state before the first reply
+(location, time, weather, weekday, day, month as name or number, year, present = character ids). The player's own
+wizard choices win. Example: the_hero_summoned in Hero's Chronicle (Pure White Space, 09:00, 1 March 1301, Lily).
+
+A blueprint is an instruction to the narrator for the FIRST scene only. Good blueprints: where and when, who is there,
+one immediate situation with at least two possible approaches, "Do not decide the protagonist's dialogue, feelings or
+actions", end on a clear opening for the player. Secrets belong in "hidden" notes, not in the blueprint (the blueprint
+is visible in the wizard and in the context inspector).
+
+
+6. PORTRAITS
+------------
+Folder: pack.json -> files.images (default: the single subfolder named "images" or ending in "_images").
+Naming: <character id or name>_<1-6>.<ext>   e.g. kriemhild_1.webp ... kriemhild_6.webp
+        also accepted: "kriemhild (3).png", "kriemhild-03.jpg", kriemhild/3.webp (one folder per character)
+Formats: webp, png, jpg/jpeg, gif, bmp, avif.
+Slots (expressions) - the same numbers as the narrator's portrait tags:
+   1 neutral (also: the AI does not know)   2 happy / smiling     3 sad / sobbing
+   4 angry / aggressive                     5 disdain / disgust   6 love / shy
+Missing slots fall back (5 -> 4 -> 1, 6 -> 2 -> 1, others -> 1). Only slot 1 is needed.
+
+Portrait tags ("image triggers"): the narrator writes [Name:N] before a character's spoken line, e.g.
+   [Selphina:3] "I... I didn't mean it."      -> shows selphina_3.webp next to that line
+Accepted forms: [Name:N], [Name|N], [Name+N], [Name#N], N = 1-6. Name = the character's name, id or a unique alias.
+The tag is removed from the text while it streams (the player never sees it, the saved reply has none) and the
+portrait is shown as soon as the reply ends. The scene analysis then adds silent reactions and untagged speakers;
+it never overrides a tagged expression. A player-locked portrait keeps its expression. Earlier replies are sent back
+to the model WITH their tags so it keeps the habit. Code: services/portrait_tags.py. Setting: portrait_tags_enabled.
+In an opening blueprint you can write the tags yourself (see the_hero_summoned).
+Matching uses ids, names and unique aliases. Unmatched files are listed in the Portraits page, where the player can
+assign them by hand (stored as overrides; the image files are never modified).
+
+
+7. IMPORT AND RE-IMPORT
+-----------------------
+Automatic (bundled.py, at every start):
+  - every folder of Lorepack/ that has a pack.json is imported if its world does not exist yet;
+  - re-imported if any .json/.md file changed (size or date), a file was added/removed, or the importer itself
+    changed (bundled.IMPORTER_VERSION - raise it when you change what the importer reads);
+  - its portrait folder is registered and rescanned if images changed or the lore was re-imported;
+  - if the project folder was moved/renamed, stored paths are found again by folder name;
+  - two packs with the same id: the second is skipped (logged). A broken pack is skipped, the app still starts.
+  So: edit the pack, restart the app. That's it.
+Manual: Home page "Import lore" (folder path or a .zip), Lore page "Re-import". Packs without pack.json can still be
+imported by hand (old behaviour, every optional feature off).
+
+What a re-import changes: worlds row (name, prompt, description, starters, pack settings, hidden notes) and all
+lore_documents / lore_entities / lore_chunks of that world are replaced. It NEVER touches stories, story states,
+journals, the player's corrections or local canon. Existing stories see the new lore on their next turn (but their
+starting stat sheet and opening are already played).
+
+The import report (Lore page, or GET /api/lore/import-runs): files loaded, records per category, parse errors,
+duplicate ids, unresolved references, generated ids, pack errors/warnings, number of hidden notes.
+
+
+8. LAYERING: PACK DEFAULTS AND IN-APP CORRECTIONS
+-------------------------------------------------
+  lore files  <  pack.json  <  corrections made in the app (highest)
+Corrections are app settings scoped to a world slug: role_assignments (post holders, services/roles.py) and
+canon_facts (kinship, gatherings, services/canon.py). Per story, the player can also add story notes, local canon,
+pinned lore and context exclusions. Re-importing never erases any of these. A correction pointing to a character that
+no longer exists is ignored (verified against lore at use).
+
+
+9. CREATING A NEW STORY - CHECKLIST
+-----------------------------------
+  1. Copy Lorepack/hero_chronicle_lore_pack (or start empty) to Lorepack/<new>_lore_pack.
+  2. Write pack.json: format_version 1, a NEW id, name, description, files, stats, at least one starter.
+  3. characters/characters.json: {"characters": [{"id": ..., "name": ..., "type": ..., ...}]}
+  4. ai/narrative_system_prompt.md: tone, genre rules, what the narrator must respect.
+  5. lore/premise.md and any other lore files.
+  6. Portraits: <id>_1.webp ... in the images folder.
+  7. Start the app, open Lore > the world > import report. Fix warnings, restart.
+  8. New story > choose the world > an opening > generate. Use the Context Inspector to see what the narrator got.

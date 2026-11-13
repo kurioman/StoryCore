@@ -1,0 +1,15 @@
+{
+  "gatherings": [
+    { "id": "magic_y1", "kind": "class", "name": "first-year Magic", "leader": "elena_caldwin",
+      "members": ["sia", "rena", "serena_caldwin", "chloe_brightwell"],
+      "keywords": ["magic", "magic class", "spell", "spells", "mana", "circle", "circles", "spellcraft", "arcane"] },
+    { "id": "knight_y1", "kind": "class", "name": "first-year Knight / Chivalry", "leader": "artemis",
+      "members": ["lilia_valenheart", "isabel", "laris", "sera"],
+      "keywords": ["knight", "knights", "chivalry", "sword", "swordplay", "sparring", "spar", "training yard", "training hall",
+                   "drill", "drills", "aura", "fencing"] },
+    { "id": "theology_y1", "kind": "class", "name": "first-year Theology", "leader": "aria",
+      "members": ["mirabel"],
+      "keywords": ["theology", "chapel", "prayer", "scripture", "divinity", "holy", "sermon"],
+      "note": "Aria is the Saintess and a third-year student; she teaches Theology to first- and second-years because she is the Saintess." }
+  ]
+}

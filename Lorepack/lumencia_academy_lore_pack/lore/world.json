@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0.0",
+  "id": "lumencia_world",
+  "display_name": "The World of Lumencia Academy",
+  "canon_status": "recurring_reference",
+  "confidence": "high",
+  "source_ids": [
+    "dreamrunner_zeph_lumencia",
+    "reddit_character_profiles"
+  ],
+  "continent": {
+    "id": "aethermere",
+    "name": "Aethermere",
+    "description": "The known continent. The Lumencia Empire dominates its central and western regions; the Holy Kingdom of Dominus lies to the south; the Abyss Zone occupies the far east.",
+    "source_ids": [
+      "dreamrunner_zeph_lumencia"
+    ]
+  },
+  "polities": [
+    {
+      "id": "lumencia_empire",
+      "name": "Lumencia Empire",
+      "government": "Empire",
+      "capital_location_id": "asterion",
+      "core_regions": [
+        "central_aethermere",
+        "western_aethermere"
+      ],
+      "description": "A medieval fantasy empire with a powerful aristocracy and advanced martial and magical institutions. Education is officially open to nobles and commoners, but wealth, lineage and political networks create substantial real-world inequality.",
+      "source_ids": [
+        "dreamrunner_zeph_lumencia",
+        "reddit_character_profiles"
+      ]
+    },
+    {
+      "id": "dominus_holy_kingdom",
+      "name": "Holy Kingdom of Dominus",
+      "government": "Theocracy",
+      "capital_location_id": null,
+      "description": "A neighboring theocratic state that worships Lily and trains divine healers, holy warriors and inquisitors. It sends selected representatives and students to Lumencia Academy.",
+      "source_ids": [
+        "dreamrunner_zeph_lumencia",
+        "reddit_character_profiles"
+      ]
+    },
+    {
+      "id": "abyss_zone",
+      "name": "Abyss Zone",
+      "government": "Contested / demonic territory",
+      "capital_location_id": null,
+      "description": "A dangerous region in the far east associated with demonic spawning, Miasma and the Demon God Cult's headquarters.",
+      "source_ids": [
+        "dreamrunner_zeph_lumencia"
+      ]
+    }
+  ],
+  "setting_principles": [
+    "The official ideal of equal opportunity conflicts with entrenched noble privilege.",
+    "Academy politics mirror political and social conflicts in the wider empire.",
+    "No single plot outcome should be assumed before the player encounters it.",
+    "Power differences are consequential, especially in direct combat."
+  ]
+}

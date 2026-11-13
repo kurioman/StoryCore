@@ -1,0 +1,194 @@
+{
+  "format_version": 1,
+  "id": "hero_chronicle",
+  "name": "Hero's Chronicle",
+  "description": "The Arche Continent: a medieval fantasy world where aura and magic coexist, where noble houses, a holy nation and the Demon Realm struggle for power.",
+  "modules": [],
+  "_note": "Provisional settings written during the multi-story refactor from what the lore already states (character types, premise, power systems). To be reviewed by the author.",
+  "files": {
+    "system_prompt": "ai/narrative_system_prompt.md",
+    "premise": "lore/premise.md",
+    "images": "hero_chronicle_images"
+  },
+  "stats": [
+    {
+      "label": "HP",
+      "type": "current_max",
+      "value": 100,
+      "max": 100
+    },
+    {
+      "label": "Aura",
+      "type": "current_max",
+      "value": 30,
+      "max": 30
+    },
+    {
+      "label": "Mana",
+      "type": "current_max",
+      "value": 30,
+      "max": 30
+    },
+    {
+      "label": "Rank",
+      "type": "text",
+      "value": "Unranked"
+    },
+    {
+      "label": "Social standing",
+      "type": "text",
+      "value": "Commoner"
+    },
+    {
+      "label": "Silver",
+      "type": "number",
+      "value": 20,
+      "unit": "S"
+    }
+  ],
+  "starters": [
+    {
+      "id": "the_hero_summoned",
+      "name": "The Summoned Hero",
+      "purpose": "Prologue: the Heavenly God Lily summons you as the hero, in a pure white void, and offers a blessing.",
+      "blueprint": "PROLOGUE - THE SUMMONED HERO. The protagonist has just been summoned from another world as the hero of the Arche Continent and wakes in the Pure White Space. The only other being there is the Heavenly God Lily (Lily Lumina). The offer, for the turns that follow: if the hero refuses the curse, Lily grants one blessing of her own choosing; if the hero accepts one curse, the hero chooses their blessing. The curse has a real cost that matches the blessing's power; Lily picks it unless the hero proposes one she accepts. She answers questions only as far as her listlessness allows. The hero stays in the white space until the offer is settled; then Lily sends them down to the Arche Continent (the place of arrival is yours to choose, consistent with the lore). Never answer the offer for the protagonist and never decide their dialogue, feelings or actions.\nYOUR REPLY FOR THIS OPENING: write the author's prologue below as the scene, almost word for word. Keep every line of dialogue and every portrait tag exactly as written and in the same order, keep the tone, add nothing after Lily's last line, and do not copy these instructions. The author's prologue:\n\n───When consciousness returned, all around was an endless, pure white void.\nIn the middle of this bizarre space where neither gravity, temperature, nor even the flow of time could be felt─a single being was floating.\nHer grayish hair fluttered, defying gravity, and her gold eyes looked down lethargically. She possessed heavenly beauty, but her expression was indifferent, as if everything was a bother.\n\n[Lily:1] \"...Ah, you're here.\"\n\nThe goddess─no, the heavenly deity Lily propped her chin up and spoke languidly.\n\n[Lily:1] \"The balance of the world is wavering. The Demon Realm is expanding... well, something like that. It's a pain, but I'll explain.\"\n\nWith a light snap of her fingers, letters floated in the air.\n\n[Lily:1] \"You are being summoned to this world as a hero. In return, I'll give you one blessing.\"\n\"Or─\"\n\nLily added, stifling a yawn.\n\n[Lily:1] \"If you accept one curse, I can give you one blessing of your choice. Anyone of your choice, so tell me what you want.\"\n\nShe added a last final line.\n\n[Lily:1] \"Whether you take it or not is up to you.\"",
+      "scene": {
+        "location": "Pure White Space",
+        "time": "09:00",
+        "day": 1,
+        "month": 3,
+        "year": 1301,
+        "present": [
+          "lily"
+        ]
+      }
+    },
+    {
+      "id": "the_distribution_of_bases",
+      "name": "The Distribution of Bases",
+      "purpose": "Explore the major bases and factions of the Arche Continent.",
+      "blueprint": "Begin in one of the Arche Continent's major cities chosen to fit the protagonist (Grandel, the imperial capital, if nothing points elsewhere). Establish the city's atmosphere and the power that rules it, hint at the wider struggle between the Central Empire (Aether), the holy nation of Lumina and the Demon Realm, and present one immediate situation with at least two possible approaches. Do not decide the protagonist's dialogue, feelings or actions. End on a clear opening for player input."
+    },
+    {
+      "id": "the_enigma_academy",
+      "name": "The Enigma Academy",
+      "purpose": "Start at the spiral academy built inside a giant meteor crater.",
+      "blueprint": "Begin at Enigma, the spiral academy built within an enormous meteor crater. Establish the scale and strangeness of the place, the mix of nobles, foreign students and commoners, and introduce one immediate decision. Do not decide the protagonist's dialogue, feelings or actions. End on a clear opening for player input."
+    }
+  ],
+  "posts": [
+    {
+      "id": "emperor",
+      "title": "Empress of the Central Empire (Aether)",
+      "character": "diana",
+      "aliases": [
+        "the Empress",
+        "the Emperor",
+        "Her Imperial Majesty"
+      ],
+      "mandatory": true
+    },
+    {
+      "id": "heavenly_god",
+      "title": "The Heavenly God Lily",
+      "character": "lily",
+      "aliases": [
+        "the Goddess",
+        "Lily"
+      ],
+      "mandatory": true
+    },
+    {
+      "id": "saint",
+      "title": "Saint (Holy Maiden) of the Church of Lily",
+      "character": "selphina",
+      "aliases": [
+        "the Saint",
+        "the Holy Maiden"
+      ]
+    },
+    {
+      "id": "demon_king",
+      "title": "Demon King",
+      "character": "beelzebub",
+      "aliases": [
+        "the Demon King",
+        "ruler of the Demon Realm"
+      ],
+      "mandatory": true
+    },
+    {
+      "id": "first_princess",
+      "title": "First Princess of the Empire",
+      "character": "seria",
+      "aliases": [
+        "the First Princess"
+      ]
+    },
+    {
+      "id": "second_princess",
+      "title": "Second Princess of the Empire",
+      "character": "sylvia",
+      "aliases": [
+        "the Second Princess"
+      ]
+    },
+    {
+      "id": "legion_commander_1",
+      "title": "1st Legion Commander of the Demon Realm",
+      "character": "iris",
+      "aliases": [
+        "1st Legion Commander"
+      ]
+    },
+    {
+      "id": "legion_commander_2",
+      "title": "2nd Legion Commander of the Demon Realm",
+      "character": "kashar",
+      "aliases": [
+        "2nd Legion Commander"
+      ]
+    },
+    {
+      "id": "legion_commander_3",
+      "title": "3rd Legion Commander of the Demon Realm",
+      "character": "lilith",
+      "aliases": [
+        "3rd Legion Commander"
+      ]
+    },
+    {
+      "id": "mage_tower_master",
+      "title": "Mage Tower Master",
+      "character": "riana",
+      "aliases": [
+        "Master of the Mage Tower"
+      ]
+    },
+    {
+      "id": "merchant_guild_head",
+      "title": "Head of the Merchant Guild",
+      "character": "celestia",
+      "aliases": [
+        "Merchant Guild Head"
+      ]
+    },
+    {
+      "id": "dragon_emperor",
+      "title": "Chieftain of the Dragonkin (title: Dragon Emperor)",
+      "character": "azra",
+      "aliases": [
+        "the Dragon Emperor",
+        "Dragonkin Chieftain"
+      ]
+    }
+  ],
+  "never_random": [
+    "Demon King",
+    "Goddess"
+  ],
+  "calendar": {
+    "year_label": "Imperial Calendar",
+    "year_start": "January"
+  }
+}

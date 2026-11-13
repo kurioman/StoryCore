@@ -1,0 +1,134 @@
+{
+  "schema_version": "1.0.0",
+  "id": "lumencia_academy",
+  "name": "Lumencia Academy",
+  "type": "imperial academy",
+  "description": "The most prestigious academy in the Lumencia Empire, operating under direct imperial jurisdiction. It is officially politically neutral, but students and external powers use it to build influence.",
+  "location_id": "asterion",
+  "source_ids": [
+    "dreamrunner_zeph_lumencia",
+    "reddit_character_profiles"
+  ],
+  "canon_status": "recurring_reference",
+  "confidence": "high",
+  "institutional_principles": [
+    "Education is nominally open to nobles and commoners.",
+    "Actual access, reputation and opportunity remain affected by money, lineage and political networks.",
+    "Student rankings and evaluations can change over time.",
+    "The academy is a place of education, social formation and political competition."
+  ],
+  "departments": [
+    {
+      "id": "knight_department",
+      "name": "Knight Department",
+      "focus": [
+        "swordsmanship",
+        "martial conditioning",
+        "Aura cultivation",
+        "weapons",
+        "tactical combat"
+      ],
+      "culture": "Nobles may train for family honour and legacy; commoners may view martial achievement as survival or social mobility.",
+      "head_professor_id": "artemis"
+    },
+    {
+      "id": "magic_department",
+      "name": "Magic Department",
+      "focus": [
+        "mana theory",
+        "magic circles",
+        "elemental magic",
+        "spirit magic",
+        "healing",
+        "illusion",
+        "magical research"
+      ],
+      "culture": "Academic rigour combines theoretical study, practical casting and research.",
+      "head_professor_id": "elena_caldwin"
+    },
+    {
+      "id": "theology_department",
+      "name": "Theology Department",
+      "focus": [
+        "Divinity",
+        "healing",
+        "purification",
+        "holy combat",
+        "religious doctrine",
+        "anti-demonic operations"
+      ],
+      "culture": "Associated with the Holy Kingdom of Dominus and its traditions. The exact departmental status is less fully documented than the other two departments.",
+      "head_professor_id": null,
+      "confidence": "medium",
+      "canon_status": "recurring_reference"
+    }
+  ],
+  "governance": {
+    "headmaster_id": "emily",
+    "student_council": {
+      "id": "student_council",
+      "role": "Highest student authority for operations, events, galas and examinations.",
+      "selection_basis": [
+        "academic results",
+        "practical evaluations",
+        "leadership"
+      ],
+      "known_members": [
+        "anastasia",
+        "lucia_caldwin"
+      ]
+    },
+    "ranking_system": {
+      "description": "Student performance, practical examinations, professor evaluations and attitude affect rank and reputation.",
+      "warning": "Exact scoring formula and consequences are not verified."
+    }
+  },
+  "organizations": [
+    {
+      "id": "blue_knights",
+      "name": "Blue Knights",
+      "department_id": "knight_department",
+      "type": "combat and escort circle",
+      "activities": [
+        "campus security",
+        "mock battles",
+        "escort missions",
+        "combat training"
+      ],
+      "membership": "Mixed noble and commoner membership is described in the public adaptation."
+    },
+    {
+      "id": "white_rose_society",
+      "name": "White Rose Society",
+      "department_id": "magic_department",
+      "type": "elite social circle",
+      "activities": [
+        "galas",
+        "balls",
+        "ceremonies",
+        "high-society event preparation",
+        "information exchange"
+      ],
+      "known_member_ids": [
+        "elise_reihart"
+      ]
+    }
+  ],
+  "campus_details": {
+    "dormitories_by_year": {
+      "first_year": "Hall A",
+      "second_year": "Hall B",
+      "third_year": "Hall C"
+    },
+    "entry_age_year_one": 20,
+    "confidence": "medium",
+    "canon_status": "public_adaptation_detail",
+    "note": "These details appear in the public DreamRunner adaptation and should not be assumed to match every OOC run."
+  },
+  "pedagogy": [
+    "Training and study should affect abilities gradually.",
+    "Students and NPCs may improve independently over time.",
+    "Failure and setbacks are possible and consequential.",
+    "Major breakthroughs should be earned and not granted solely to flatter the protagonist."
+  ]
+}

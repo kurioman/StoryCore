@@ -1,0 +1,96 @@
+INSTALL AND RUN
+===============
+
+
+1. HOW THE APP STARTS (WINDOWS)
+-------------------------------
+"Start StoryCore.bat":
+  1. goes to its own folder (everything is relative to it; the folder can be anywhere and can be renamed or moved);
+  2. checks that app\python\python.exe exists (if not, the ZIP was not extracted);
+  3. clears PYTHONHOME / PYTHONPATH / PYTHONSTARTUP so a Python installed on the PC cannot interfere, sets
+     PYTHONUTF8=1 and PYTHONDONTWRITEBYTECODE=1;
+  4. checks that data\ is writable (fails with a clear message in Program Files or on a read-only drive);
+  5. runs:   app\python\python.exe --check-hash-based-pycs always scripts\serve.py %*
+     Any argument given to the .bat is passed on (see section 3).
+
+scripts/serve.py adds app/backend to sys.path and calls story.__main__.main(), which:
+  - reads the settings (story/config.py),
+  - finds a free port starting at 8765 (tries 50 ports),
+  - creates the FastAPI app (story/main.py -> create_app),
+  - starts uvicorn on 127.0.0.1 ONLY (never 0.0.0.0: the app is not reachable from the network),
+  - opens the browser as soon as /api/health answers (up to 2 minutes on a slow first start).
+
+At startup (main.py -> lifespan), before serving pages:
+  1. database migration to the latest schema (a backup copy is made first if the schema was older),
+  2. recovery of replies interrupted by a crash ("streaming" -> "partial"/"failed"),
+  3. default data seeded once (slash commands, the global note, the Mock provider),
+  4. every Lore Pack in Lorepack/ is imported / re-imported if it changed, and its portraits scanned
+     (story/bundled.py). The first start therefore takes longer (all portraits are scanned).
+
+
+2. THE "STALE .PYC" TRAP (IMPORTANT)
+------------------------------------
+The original release shipped pre-compiled files (__pycache__/*.pyc) built with "unchecked hash": Python runs them
+WITHOUT checking whether the .py source changed. Result: you edit a .py file and nothing changes, or old code runs.
+That is why the .bat passes  --check-hash-based-pycs always  (Python then checks every .pyc against its source and
+ignores out-of-date ones).
+
+  - ALWAYS use that option when you run the backend yourself (tests, scripts, a debugger).
+  - The clean release has no __pycache__ folders in app/backend at all, and PYTHONDONTWRITEBYTECODE=1 keeps Python
+    from writing new ones. Compiling the source at each start costs about a second.
+  - If you ever see "No module named 'lumencia'" or behaviour that ignores your edits: delete every __pycache__
+    folder under app/backend and start again.
+
+
+3. COMMAND-LINE OPTIONS AND ENVIRONMENT VARIABLES
+-------------------------------------------------
+  Start StoryCore.bat --port 9000       start on another port (the next free one if taken)
+  Start StoryCore.bat --no-browser      do not open the browser
+  Start StoryCore.bat --data-dir D:\sc  use another data folder (several independent "profiles")
+
+  STORY_DATA_DIR          same as --data-dir
+  STORY_PORT              default port
+  STORY_SECRETS_BACKEND   where API keys are kept: auto (default) | keyring | file | memory
+                          auto = Windows Credential Manager when available, else data/secrets.json
+
+Paths (story/config.py):
+  data/stories.db         database (WAL mode: stories.db-wal / -shm next to it are normal)
+  data/uploads/           avatars, uploaded portraits, portrait folders copied into the app
+  data/cache/             thumbnails (safe to delete; rebuilt on demand), model catalogue cache
+  data/backups/           full backups, pre-migration copies, deleted stories
+  data/logs/app.log       log file (rotated, 2 MB x 3). API keys are masked.
+  data/tmp/               temporary files
+
+Legacy: on the first start, if data/stories.db does not exist but data/lumencia.db (the old name) does, it is copied
+to stories.db. The old file is left untouched.
+
+
+4. RUNNING ON LINUX / MAC OR WITH YOUR OWN PYTHON
+-------------------------------------------------
+The bundled Python is Windows-only. Elsewhere, use Python 3.12+ and install the same libraries:
+
+    pip install "fastapi>=0.115" "uvicorn[standard]" "sqlalchemy>=2.0" alembic httpx pydantic pillow \
+                keyring python-multipart pyyaml
+
+Then, from the project root:
+
+    python --check-hash-based-pycs always scripts/serve.py --no-browser
+
+Exact versions shipped on Windows (app/python/Lib/site-packages): fastapi 0.162, starlette 1.10, uvicorn 0.54,
+sqlalchemy 2.1.6, alembic 1.20.1, pydantic 2.14, httpx 0.28.1, pillow 13.0, keyring 25.7, python-multipart 0.0.32,
+pyyaml 6.0.3 (+ their dependencies).
+
+Adding a library to the bundled Python: the embeddable Python has no pip. From any Python 3.12 (64-bit, Windows):
+    pip install --target app\python\Lib\site-packages <package>
+app/python/python312._pth lists the folders it searches (Lib, DLLs, Lib\site-packages); keep "import site".
+
+
+5. DEVELOPMENT TIPS
+-------------------
+  - Restart the app after each backend change (there is no auto-reload). Close the black window, run the .bat again.
+  - Use a separate data folder while testing (--data-dir) so you never damage your real stories.
+  - Interactive API documentation: http://127.0.0.1:8765/docs (FastAPI's Swagger page). Requests that change
+    something need the header  X-Story-Client: 1  (see 02_BACKEND.txt, "Security").
+  - A frontend dev server on http://localhost:5173 or http://127.0.0.1:5173 is allowed as an origin (if you rebuild
+    the frontend from a source you have; see 07_FRONTEND.txt).
+  - Testing with Python directly (no server): see 09_HOW_TO.txt, "Test the backend from a script".

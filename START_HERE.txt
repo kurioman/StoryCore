@@ -1,0 +1,57 @@
+STORYCORE v1.7.0 (Windows)
+Quick start. Takes about a minute to read.
+
+You do not need to install Python, Node.js or anything else.
+
+1. EXTRACT
+   Right-click the ZIP and choose "Extract All...". Pick a normal folder
+   such as Documents or Desktop. Do not run anything from inside the ZIP
+   window, and avoid Program Files. Extraction can take a minute or two.
+
+2. START
+   Open the StoryCore folder and double-click:
+
+       Start StoryCore.bat
+
+   This beta is not code-signed, so Windows may show "Windows protected
+   your PC". Choose "More info", then "Run anyway".
+
+   A black window opens, then your browser opens the app. Keep the black
+   window open while you play. Close it when you are done.
+
+3. CHOOSE AN AI
+   In the app, open Settings, then Providers & models. Follow the short
+   guide on that page. Three common choices:
+
+   - LM Studio (local models, free to run): in LM Studio, load a model and
+     start its local server (Developer tab). In StoryCore, under All
+     providers, press Add provider, choose "LM Studio (local)", then add
+     the loaded model and select it.
+   - Ollama (local models, free to run): you install Ollama and a model
+     yourself. Results depend on your PC.
+   - OpenRouter (hosted models): you need your own account and API key.
+     Usage is billed by OpenRouter, to you. Set a spending limit on the key.
+
+   You can try the app first with the built-in "Mock narrator". It writes
+   clearly labelled demo text only, not a real story.
+
+4. PLAY
+   Choose New story and go through the five short steps. On the second
+   step, choose a World (for example "Hero's Chronicle" or "Lumencia
+   Academy") and one of its openings, or you get a story with no lore.
+   At the end, choose "Generate the opening scene", then write what your
+   character does. The ? Help button in the sidebar gives a short tour.
+
+Character portraits and relationship tracking are on by default, so they
+work as soon as a model is connected. Portraits appear as soon as a reply
+ends. Three suggested replies can be turned on in Settings, Memory capture.
+On a paid model the scene reading uses one extra request per reply.
+
+Your stories stay on this PC, in the "data" folder inside the StoryCore folder.
+If you delete that folder, you delete your stories. To back up, use
+Settings, Data & backups, Back up now.
+
+Something wrong? See "Troubleshooting" in README.md.
+Bug reports go to the person who shared StoryCore with you.
+
+Developers: the DEVONLY folder explains how everything works.

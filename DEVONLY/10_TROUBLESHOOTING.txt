@@ -1,0 +1,76 @@
+TROUBLESHOOTING (DEVELOPER SIDE)
+================================
+
+First look: data/logs/app.log (also in Settings > Data & backups). Unhandled errors are logged there with a traceback;
+the browser only shows "Unexpected server error; details are in the app log". The black console window shows
+uvicorn warnings and the startup messages.
+
+
+PROBLEM                                   CAUSE / FIX
+-------                                   -----------
+"No module named 'lumencia'", or your     Stale pre-compiled .pyc files. Run Python with
+edits have no effect                      --check-hash-based-pycs always (the .bat does), or delete every
+                                          __pycache__ folder under app/backend. See 01_INSTALL_AND_RUN.txt.
+
+The app window closes at once             Start it from a cmd window to read the error:
+                                          cd to the folder, then "Start StoryCore.bat".
+
+"cannot write to this folder"             The folder is read-only (Program Files, a protected drive, a ZIP window).
+
+A world does not appear                   - No pack.json, or its identity is invalid (format_version / id / name).
+                                          - Two packs share the same id (the second is skipped).
+                                          - JSON syntax error in pack.json. The log says "lore pack <folder>: skipped
+                                            (...)". Validate the JSON (any online JSON validator or an editor).
+
+A lore change is not visible              Restart the app (packs are re-imported at start). Check the import report
+                                          (Lore page) for parse errors. Existing stories see new lore on the next
+                                          turn; their opening and starting stats were set at creation.
+
+A pack.json section has no effect         The import report lists skipped sections/entries (pack warnings) and
+                                          character ids that do not exist in the lore.
+
+Portraits appear late / no tags          The model ignored the portrait-tag rule (small models sometimes do); the
+                                          scene analysis still finds speakers, later. Check the Context Inspector
+                                          ("Portrait tags" section), or a [Name:N] example in the opening.
+
+A character has no portrait               File name does not match the id/name (<id>_1.webp). Check the Portraits
+                                          page: unmatched files are listed and can be assigned by hand.
+
+A secret ("hidden") leaked to the player  Check that the text is inside "hidden" and not also in another field
+                                          (notes, description). If the narrator WROTE it into the story, it is now
+                                          part of the transcript (and may be captured in the journal): that is the
+                                          model not following the rules - regenerate, or use a stronger model.
+
+The narrator never uses a secret          The record was not "in play": the character must be present/named, or its
+                                          lore retrieved. Put the secret on the place/faction too.
+
+"No model selected" / no_model            No default model profile. Settings > Providers & models.
+
+Provider errors (HTTP 502 in the browser) The "technical details" part gives the provider's answer. Common:
+                                          wrong base URL (LM Studio needs .../v1), server not started, model not
+                                          loaded, context too large for the model, invalid key, no credit.
+
+Replies cut off / marked incomplete       Output limit reached. Raise max_tokens in the model profile, or lower the
+                                          context budget so the model's window has room for the reply.
+
+Timeout on local models                   base.DEFAULT_TIMEOUT read = 180 s between two pieces of data. A slow PC
+                                          processing a big prompt can exceed it before the first word. Smaller
+                                          model / smaller context budget, or raise the timeout in providers/base.py.
+
+Analysis fails ("Retry" under replies)    The model returned invalid JSON. Small models struggle; set the provider's
+                                          structured_output to "json_object" or "prompt" (06_AI_PROVIDERS.txt,
+                                          section 6), or use a stronger model.
+
+"database is locked"                      Another program has stories.db open (a DB browser) or two copies of the
+                                          app use the same data folder. Close the other one.
+
+Migration failed at start                 The database was not changed if the error happened before the upgrade;
+                                          a copy is in data/backups/pre_migration_*.db. Read app.log.
+
+Port 8765 busy                            The app takes the next free port; the console shows the address.
+
+Frontend shows an old version             Browser cache: Ctrl+F5. When you patch the JS, give it a new file name
+                                          and update index.html (07_FRONTEND.txt).
+
+Strange behaviour after copying data/     Close the app before copying data/ (the -wal file holds recent writes),
+                                          or use the in-app full backup.

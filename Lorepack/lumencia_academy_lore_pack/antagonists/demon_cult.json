@@ -1,0 +1,295 @@
+{
+  "schema_version": "1.0.0",
+  "faction_id": "demon_god_cult",
+  "hierarchy": [
+    "apostles",
+    "sin_bishops",
+    "upper_priests",
+    "mid_priests",
+    "lower_priests",
+    "acolytes"
+  ],
+  "members": [
+    {
+      "id": "nemesis",
+      "name": "Nemesis",
+      "aliases": [],
+      "type": "apostle",
+      "aspect": "Despair",
+      "power": {
+        "system": "miasma",
+        "approximate_equivalence": "9-Circle level"
+      },
+      "personality_traits": [
+        "cold",
+        "fatalistic",
+        "calm",
+        "convinced resistance is futile"
+      ],
+      "narrative_role": "A top-level, rare antagonist whose presence should signal a major escalation.",
+      "confidence": "medium",
+      "canon_status": "public_adaptation_detail",
+      "source_ids": [
+        "dreamrunner_zeph_lumencia"
+      ],
+      "ability_notes": [
+        "Miasma is described as creating suffocating stillness and eroding hope."
+      ],
+      "behaviour_notes": [
+        "Rarely appears in person.",
+        "A direct appearance signals a decisive cult operation.",
+        "Does not typically threaten or prolong a confrontation."
+      ],
+      "relationships": [
+        {
+          "target_id": "veradin",
+          "type": "mutual respect",
+          "confidence": "medium"
+        },
+        {
+          "target_id": "kartia",
+          "type": "finds her theatrics distracting",
+          "confidence": "medium"
+        },
+        {
+          "target_id": "arien",
+          "type": "finds her emotionality distracting but recognizes her danger",
+          "confidence": "medium"
+        }
+      ]
+    },
+    {
+      "id": "veradin",
+      "name": "Veradin",
+      "aliases": [],
+      "type": "apostle",
+      "aspect": "Void",
+      "power": {
+        "system": "miasma",
+        "approximate_equivalence": "Master Apex level"
+      },
+      "personality_traits": [
+        "cynical",
+        "logical",
+        "methodical",
+        "strategic"
+      ],
+      "narrative_role": "Strategic threat associated with the Void aspect; detailed abilities beyond this are not fixed here.",
+      "confidence": "medium",
+      "canon_status": "public_adaptation_detail",
+      "source_ids": [
+        "dreamrunner_zeph_lumencia"
+      ],
+      "ability_notes": [
+        "Can suppress or conceal a distinctive Miasma signature in the public adaptation.",
+        "Uses spatial manipulation or dimensional severing to disrupt positions, trajectories and defensive formations."
+      ],
+      "behaviour_notes": [
+        "Most likely Apostle to work inside ordinary society without being identified.",
+        "Treats Delphirem's return as a conclusion rather than an act of religious devotion."
+      ],
+      "relationships": [
+        {
+          "target_id": "nemesis",
+          "type": "mutual intellectual respect",
+          "confidence": "medium"
+        }
+      ]
+    },
+    {
+      "id": "kartia",
+      "name": "Kartia",
+      "aliases": [],
+      "type": "apostle",
+      "aspect": "Desire",
+      "power": {
+        "system": "miasma",
+        "approximate_equivalence": "8-Circle level"
+      },
+      "personality_traits": [
+        "seductive",
+        "proud",
+        "dominant",
+        "amused by contradiction"
+      ],
+      "narrative_role": "Temptation, control and desire; use only when the campaign has built sufficient foreshadowing.",
+      "confidence": "medium",
+      "canon_status": "public_adaptation_detail",
+      "source_ids": [
+        "dreamrunner_zeph_lumencia"
+      ],
+      "ability_notes": [
+        "Miasma amplifies latent desires rather than directly controlling minds.",
+        "Can shape Miasma constructs around the desires or vulnerabilities of opponents."
+      ],
+      "behaviour_notes": [
+        "May approach targets directly to offer pacts, alliances or conversation.",
+        "Frames temptation as revealing what a person already wants."
+      ],
+      "relationships": [
+        {
+          "target_id": "arien",
+          "type": "complex attachment; sees beauty in her grief",
+          "confidence": "medium"
+        }
+      ]
+    },
+    {
+      "id": "arien",
+      "name": "Arien",
+      "aliases": [],
+      "type": "apostle",
+      "aspect": "Grief",
+      "power": {
+        "system": "miasma",
+        "approximate_equivalence": "8-Circle level"
+      },
+      "personality_traits": [
+        "emotional",
+        "obsessive",
+        "volatile",
+        "intensely attached to lost things"
+      ],
+      "narrative_role": "A personal and psychological antagonist associated with loss and grief.",
+      "confidence": "medium",
+      "canon_status": "public_adaptation_detail",
+      "source_ids": [
+        "dreamrunner_zeph_lumencia"
+      ],
+      "ability_notes": [
+        "Miasma can manifest as phantom sensations and vivid memories associated with loss.",
+        "May overwhelm targets with nostalgia or longing, blurring present and past."
+      ],
+      "behaviour_notes": [
+        "Her shifts between tenderness and violence are described as emotional volatility rather than calculated deception.",
+        "The person or thing she lost is explicitly unresolved in the public adaptation."
+      ],
+      "relationships": [
+        {
+          "target_id": "kartia",
+          "type": "mutual fixation or attachment; exact nature left ambiguous",
+          "confidence": "medium"
+        }
+      ]
+    },
+    {
+      "id": "pria",
+      "name": "Pria",
+      "aliases": [],
+      "type": "sin_bishop",
+      "sin": "Pride",
+      "power": {
+        "system": "miasma",
+        "approximate_equivalence": "7-Circle level through pact; source-reported"
+      },
+      "confidence": "medium",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "reddit_character_profiles"
+      ],
+      "notes": "Personality details are inconsistent and should be treated as optional unless established in play."
+    },
+    {
+      "id": "sloth",
+      "name": "Sloth",
+      "aliases": [],
+      "type": "sin_bishop",
+      "sin": "Sloth",
+      "power": {
+        "system": "miasma",
+        "approximate_equivalence": "7-Circle level through pact; source-reported"
+      },
+      "confidence": "medium",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "reddit_character_profiles"
+      ]
+    },
+    {
+      "id": "aris",
+      "name": "Aris",
+      "aliases": [],
+      "type": "sin_bishop",
+      "sin": "Greed",
+      "power": {
+        "system": "miasma",
+        "approximate_equivalence": "7-Circle level through pact; source-reported"
+      },
+      "confidence": "medium",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "reddit_character_profiles"
+      ]
+    },
+    {
+      "id": "beelzebub",
+      "name": "Beelzebub",
+      "aliases": [],
+      "type": "sin_bishop",
+      "sin": "Gluttony",
+      "power": {
+        "system": "miasma",
+        "approximate_equivalence": "7-Circle level through pact; source-reported"
+      },
+      "confidence": "medium",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "reddit_character_profiles"
+      ]
+    },
+    {
+      "id": "asmo",
+      "name": "Asmo",
+      "aliases": [],
+      "type": "sin_bishop",
+      "sin": "Lust",
+      "power": {
+        "system": "miasma",
+        "approximate_equivalence": "7-Circle level through pact; source-reported"
+      },
+      "confidence": "medium",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "reddit_character_profiles"
+      ]
+    },
+    {
+      "id": "leviane",
+      "name": "Leviane",
+      "aliases": [],
+      "type": "sin_bishop",
+      "sin": "Envy",
+      "power": {
+        "system": "miasma",
+        "approximate_equivalence": "7-Circle level through pact; source-reported"
+      },
+      "confidence": "medium",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "reddit_character_profiles"
+      ]
+    },
+    {
+      "id": "belian",
+      "name": "Belian",
+      "aliases": [],
+      "type": "sin_bishop",
+      "sin": "Wrath",
+      "power": {
+        "system": "miasma",
+        "approximate_equivalence": "7-Circle level through pact; source-reported"
+      },
+      "confidence": "medium",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "reddit_character_profiles"
+      ]
+    }
+  ],
+  "operational_guidance": [
+    "Apostles are not random encounters; they are rare, consequential threats.",
+    "Prefer gradual foreshadowing, intermediaries, rumours, evidence and consequences before a direct appearance.",
+    "The cult can infiltrate institutions or exploit vulnerable people; it need not behave as a visible army in every scene.",
+    "Do not invent the full identity or abilities of unnamed priests as existing canon."
+  ]
+}

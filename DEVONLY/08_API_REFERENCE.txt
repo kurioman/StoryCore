@@ -1,0 +1,211 @@
+API REFERENCE
+=============
+
+All endpoints are under /api on http://127.0.0.1:<port>. JSON in, JSON out, unless noted.
+Live interactive documentation with request/response schemas: http://127.0.0.1:8765/docs (Swagger) while the app runs.
+
+Rules for clients:
+  - Every POST / PUT / PATCH / DELETE needs the header  X-Story-Client: 1  (else 403).
+  - Errors: {"detail": "<plain message>", "code": "<code>"} - codes: turn_error, not_found, invalid, no_model,
+    cloud_consent_required (409), provider_error (502, with "error" details), internal (500).
+  - Streams (text/event-stream): /api/generations/{mid}/stream (reply tokens), /api/ollama/pulls/{id}/stream.
+  - Ids are UUID strings ({sid} story, {bid} branch, {mid} message, {wid} world, {pid} provider...).
+
+The list below is generated from the routers (first line of each function's docstring, or its name).
+To regenerate it after changes, see 09_HOW_TO.txt ("Regenerate the API list").
+
+ASSETS  (routers/assets.py)
+  GET    /api/assets/expressions                                  expressions
+  GET    /api/assets/roots                                        roots
+  POST   /api/assets/roots                                        add root
+  DELETE /api/assets/roots/{rid}                                  remove root
+  POST   /api/assets/roots/{rid}/scan                             scan
+  POST   /api/assets/rescan-all                                   rescan all
+  GET    /api/assets/manifest                                     manifest
+  GET    /api/assets/characters                                   characters
+  POST   /api/assets/overrides                                    set override
+  DELETE /api/assets/overrides/{asset_id}                         clear override
+  POST   /api/assets/slug-overrides                               slug override
+  GET    /api/assets/{asset_id}/image                             image
+  POST   /api/assets/upload                                       Folder upload from the browser (webkitdirectory). Files are copied into the app data folder.
+  POST   /api/assets/roots/{rid}/copy-to-app-data                 copy to app data
+
+AVATARS  (routers/avatars.py)
+  GET    /api/avatars                                             list avatars
+  POST   /api/avatars                                             create avatar
+  GET    /api/avatars/{aid}                                       get avatar
+  PUT    /api/avatars/{aid}                                       update avatar
+  DELETE /api/avatars/{aid}                                       delete avatar
+  GET    /api/avatars/{aid}/preview                               preview
+  POST   /api/avatars/preview                                     preview unsaved
+  POST   /api/avatars/{aid}/portrait                              upload portrait
+  POST   /api/avatars/{aid}/portrait-from-asset                   portrait from asset
+  DELETE /api/avatars/{aid}/portrait                              remove portrait
+  GET    /api/uploads/{sub}/{name}                                serve upload
+  GET    /api/avatars/{aid}/export                                export avatar
+  POST   /api/avatars/import                                      import avatar
+
+BACKUP  (routers/backup.py)
+  GET    /api/stories/{sid}/export                                export story
+  POST   /api/import/story/preview                                import preview
+  POST   /api/import/story/confirm                                import confirm
+  GET    /api/backups                                             list backups
+  POST   /api/backups                                             create backup
+  GET    /api/backups/{name}/download                             download backup
+  POST   /api/backups/{name}/verify                               verify backup
+  POST   /api/backups/upload                                      upload backup
+  POST   /api/backups/{name}/restore                              restore backup
+  GET    /api/notes/export                                        export notes
+  POST   /api/notes/import                                        import notes
+  GET    /api/local-canon/export                                  export canon
+  POST   /api/local-canon/import                                  import canon
+
+COMMANDS  (routers/commands.py)
+  GET    /api/commands                                            list commands
+  POST   /api/commands                                            create command
+  PUT    /api/commands/{cid}                                      update command
+  DELETE /api/commands/{cid}                                      delete command
+  POST   /api/commands/{cid}/duplicate                            duplicate command
+  POST   /api/commands/{cid}/reset                                reset command
+  POST   /api/commands/expand                                     expand
+  GET    /api/commands/export                                     export commands
+  POST   /api/commands/import                                     import commands
+
+JOURNAL  (routers/journal.py)
+  GET    /api/stories/{sid}/events                                list events
+  POST   /api/stories/{sid}/events                                create event
+  PATCH  /api/stories/{sid}/events/{eid}                          patch event
+  POST   /api/stories/{sid}/events/{eid}/supersede                Explicit correction: the old event stays (status superseded) and links to its replacement.
+  POST   /api/stories/{sid}/events/merge                          merge events
+  GET    /api/stories/{sid}/facts                                 list facts
+  POST   /api/stories/{sid}/facts                                 create fact
+  PATCH  /api/stories/{sid}/facts/{fid}                           patch fact
+  DELETE /api/stories/{sid}/facts/{fid}                           Facts are rejected rather than erased, preserving the audit trail.
+  POST   /api/stories/{sid}/facts/{fid}/supersede                 supersede fact
+  POST   /api/stories/{sid}/facts/{fid}/contradiction             mark contradiction
+  GET    /api/stories/{sid}/review                                review queue
+  GET    /api/stories/{sid}/search                                search all
+  GET    /api/stories/{sid}/characters/{cid}/history              character history
+  POST   /api/stories/{sid}/extract                               extract now
+  POST   /api/stories/{sid}/extract/rebuild                       extract rebuild
+  GET    /api/stories/{sid}/extract/runs                          extraction runs
+  POST   /api/stories/{sid}/extract/runs/{rid}/retry              retry run
+  POST   /api/stories/{sid}/extract/skip                          Mark the next unprocessed chunk as not captured (explicit player choice; recorded as ``skipped``).
+  POST   /api/stories/{sid}/reconcile                             Re-check stale records: re-run extraction over the edited range and list stale items for review.
+  GET    /api/stories/{sid}/recaps                                list recaps
+  POST   /api/stories/{sid}/recaps/generate                       generate recap
+  POST   /api/stories/{sid}/recaps                                manual recap
+  PATCH  /api/stories/{sid}/recaps/{rid}                          patch recap
+  POST   /api/stories/{sid}/continuity                            continuity
+  GET    /api/stories/{sid}/savepoints                            list savepoints
+  POST   /api/stories/{sid}/savepoints                            create savepoint
+  POST   /api/stories/{sid}/savepoints/{spid}/restore             restore savepoint
+  DELETE /api/stories/{sid}/savepoints/{spid}                     delete savepoint
+  GET    /api/stories/{sid}/maintenance                           maintenance
+
+LORE  (routers/lore.py)
+  GET    /api/worlds                                              worlds
+  GET    /api/worlds/{wid}/roles                                  Established posts and closed groups (lore-derived + owner-confirmed), ambiguous titles and lore/owner conflicts.
+  GET    /api/worlds/{wid}                                        world
+  POST   /api/lore/import                                         import lore
+  POST   /api/lore/import-zip                                     import lore zip
+  POST   /api/worlds/{wid}/reimport                               reimport
+  GET    /api/lore/import-runs                                    import runs
+  GET    /api/worlds/{wid}/entities                               entities
+  GET    /api/worlds/{wid}/entities/{entity_id}                   entity
+  GET    /api/worlds/{wid}/search                                 search
+  GET    /api/lore/chunks/{cid}                                   chunk
+  GET    /api/local-canon                                         list canon
+  POST   /api/local-canon                                         create canon
+  PATCH  /api/local-canon/{cid}                                   patch canon
+  POST   /api/lore/copy-to-canon                                  'Create local override': copy a baseline record into editable local canon. The baseline stays untouched.
+
+NARRATIVE  (routers/narrative.py)
+  GET    /api/stories/{sid}/scene                                 Speakers and suggestions for the latest assistant reply on the active branch (never another branch/story).
+  POST   /api/messages/{mid}/analysis                             rerun analysis
+  GET    /api/stories/{sid}/characters                            known characters
+  POST   /api/stories/{sid}/characters                            Manual correction (mark as met / rumoured / known, or remove an accidental discovery) with an audit record.
+  GET    /api/stories/{sid}/characters/{cid}                      Discovery audit trail, relationship history and proposals, and what this NPC knows / believes / must not know.
+
+PROVIDERS  (routers/providers.py)
+  GET    /api/providers/presets                                   presets
+  GET    /api/providers                                           list providers
+  POST   /api/providers                                           create provider
+  PATCH  /api/providers/{pid}                                     update provider
+  DELETE /api/providers/{pid}                                     delete provider
+  POST   /api/providers/{pid}/consent                             give consent
+  POST   /api/providers/{pid}/test                                test provider
+  GET    /api/providers/{pid}/models                              provider models
+  GET    /api/model-catalog                                       Recommended models with OpenRouter's public prices. Metadata only: no key is sent and no model runs.
+  POST   /api/model-catalog/refresh                               model catalog refresh
+  POST   /api/model-profiles                                      create profile
+  PATCH  /api/model-profiles/{mid}                                update profile
+  DELETE /api/model-profiles/{mid}                                delete profile
+  GET    /api/ollama/curated                                      curated
+  GET    /api/ollama/{pid}/show                                   ollama show
+  POST   /api/ollama/{pid}/pull                                   ollama pull
+  GET    /api/ollama/pulls                                        ollama pulls
+  GET    /api/ollama/pulls/{job_id}/stream                        ollama pull stream
+  POST   /api/ollama/pulls/{job_id}/cancel                        ollama pull cancel
+  POST   /api/ollama/{pid}/delete                                 ollama delete
+  POST   /api/ollama/quick-setup                                  Create the default local Ollama provider if it doesn't exist yet.
+
+STATE  (routers/state.py)
+  GET    /api/stories/{sid}/state                                 get state
+  GET    /api/stories/{sid}/relationships/duplicates              Read-only: records that describe the same direction and the same person (legacy duplicates).
+  POST   /api/stories/{sid}/relationships/merge                   Explicit merge chosen by the player (keeps the chosen record's values, merges histories; undoable).
+  PUT    /api/stories/{sid}/state                                 put state
+  POST   /api/stories/{sid}/state/change                          apply change
+  POST   /api/stories/{sid}/state/undo                            undo
+  GET    /api/stories/{sid}/state/history                         history
+  GET    /api/stories/{sid}/state/history/{version}               history version
+  GET    /api/stories/{sid}/proposals                             proposals
+  POST   /api/stories/{sid}/proposals/{pid}                       resolve proposal
+  GET    /api/notes                                               get notes
+  PUT    /api/notes/{nid}                                         put note
+  POST   /api/stories/{sid}/suggest-state                         suggest state
+
+STORIES  (routers/stories.py)
+  GET    /api/stories                                             list stories
+  POST   /api/stories                                             create story
+  GET    /api/stories/{sid}                                       get story
+  PATCH  /api/stories/{sid}                                       patch story
+  DELETE /api/stories/{sid}                                       delete story
+  POST   /api/stories/{sid}/duplicate                             duplicate story
+  POST   /api/stories/{sid}/avatar                                switch avatar
+  GET    /api/stories/{sid}/branches                              list branches
+  PATCH  /api/stories/{sid}/branches/{bid}                        patch branch
+  POST   /api/stories/{sid}/branches/{bid}/activate               activate branch
+  DELETE /api/stories/{sid}/branches/{bid}                        Branches are archived, not destroyed: their messages may be shared with other branches.
+  POST   /api/stories/{sid}/messages/{mid}/branch                 branch from
+  GET    /api/stories/{sid}/messages                              list messages
+  POST   /api/stories/{sid}/turns                                 send turn
+  POST   /api/stories/{sid}/start                                 Generate the opening scene from the story's starter blueprint.
+  POST   /api/stories/{sid}/messages/{mid}/regenerate             regenerate
+  POST   /api/stories/{sid}/messages/{mid}/select                 select alt
+  PATCH  /api/stories/{sid}/messages/{mid}                        edit message
+  DELETE /api/stories/{sid}/messages/{mid}                        delete message
+  POST   /api/stories/{sid}/messages/{mid}/restore                restore message
+  GET    /api/stories/{sid}/messages/{mid}/versions               message versions
+  POST   /api/stories/{sid}/messages/{mid}/versions/{vid}/restore restore version
+  GET    /api/stories/{sid}/messages/{mid}/context                message context
+  GET    /api/generations/{mid}/stream                            generation stream
+  POST   /api/generations/{mid}/cancel                            generation cancel
+  GET    /api/generations/active                                  generations active
+  GET    /api/stories/{sid}/context                               context preview
+  POST   /api/stories/{sid}/context/exclusions                    set exclusion
+  POST   /api/stories/{sid}/context/pinned-lore                   pin lore
+  GET    /api/stories/{sid}/cast                                  cast
+  POST   /api/stories/{sid}/expressions                           set expression
+
+SYSTEM  (routers/system.py)
+  GET    /api/health                                              health
+  GET    /api/settings                                            get settings
+  GET    /api/prompt-profiles                                     prompt profiles
+  PUT    /api/settings                                            put settings
+  GET    /api/onboarding                                          onboarding
+  GET    /api/system/paths                                        paths
+  POST   /api/system/open-data-folder                             open data folder
+  POST   /api/system/clear-logs                                   clear logs
+  GET    /api/system/logs                                         read logs
+  GET    /api/system/integrity                                    integrity

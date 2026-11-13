@@ -1,0 +1,14 @@
+{
+  "starting_points": [
+    {
+      "name": "The Distribution of Bases",
+      "description": "Explore the major bases and factions of the vast Arche Continent.",
+      "location": "Multiple"
+    },
+    {
+      "name": "The Enigma Academy",
+      "description": "A spiral academy built within an enormous meteor crater.",
+      "location": "Enigma"
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+STORYCORE - DEVELOPER DOCUMENTATION
+===================================
+
+This folder is for developers only. Players never need it (they read START_HERE.txt).
+It explains how the whole project works so you can understand it, fix it and change it as you please.
+
+
+1. WHAT STORYCORE IS
+--------------------
+StoryCore is a local web app for AI text roleplay. The player writes what their character does; an AI model (the
+"narrator") writes what happens next. The app keeps the story coherent: it remembers the scene, who is present, the
+time and place, relationships, past events, and the lore of the world.
+
+Every story world is a "Lore Pack": a folder in Lorepack/ with lore files (JSON / Markdown), portraits, and one
+pack.json that tells the engine everything else. The engine itself contains NO story-specific data. To add a new
+story you add a folder; you do not touch code.
+
+It runs entirely on the player's PC:
+  - a Python server (FastAPI) on http://127.0.0.1:8765 (or the next free port), loopback only;
+  - a compiled React web page served by that server, opened in the player's browser;
+  - a SQLite database in data/;
+  - the AI model is whatever the player connects: a local server (LM Studio, Ollama, llama.cpp...) or a hosted API
+    (OpenRouter, OpenAI, Anthropic). A "Mock narrator" exists for testing without any model.
+
+
+2. FOLDER MAP
+-------------
+  Start StoryCore.bat        The launcher players double-click (Windows).
+  START_HERE.txt             Player quick start.
+  README.md                  Player manual + troubleshooting.
+  ARCHITECTURE.md            Short architecture summary (this folder goes deeper).
+  LOREPACK_FORMAT.md         Reference of the pack.json format (04_LOREPACK.txt goes deeper).
+  REFACTOR_LOG.md            History of the multi-story refactor (November 2026).
+  RELEASE_NOTES.md, CREDITS.md, THIRD_PARTY_NOTICES.txt
+
+  app/python/                Bundled "embeddable" Windows Python 3.12 + all libraries. Nothing to install.
+  app/backend/story/         THE ENGINE (Python source). See 02_BACKEND.txt.
+  app/frontend/dist/         The compiled web interface (HTML/CSS/JS). See 07_FRONTEND.txt.
+  scripts/serve.py           Entry point used by the .bat.
+
+  Lorepack/<pack folder>/    One folder per story world. See 04_LOREPACK.txt.
+
+  data/                      THE PLAYER'S DATA, created on first start: database, uploads, backups, logs, cache.
+                             Never ship your own data/ folder to someone else (it holds your stories and settings).
+
+  DEVONLY/                   This documentation.
+
+
+3. WHICH FILE TO READ
+---------------------
+  01_INSTALL_AND_RUN.txt     How the app starts, command-line options, environment variables, running on Linux/Mac,
+                             running in development, the "stale .pyc" trap.
+  02_BACKEND.txt             The Python engine: layers, every module, request flow, background jobs.
+  03_DATABASE.txt            Tables, migrations (Alembic), backups, what is stored where.
+  04_LOREPACK.txt            EVERYTHING about lore packs: folder layout, pack.json, lore files, hidden information,
+                             portraits, openings, how import and re-import work, how in-app corrections layer on top.
+  05_NARRATOR_AND_CONTEXT.txt How the prompt sent to the AI is built each turn, and what happens after each reply
+                             (scene analysis, memory capture, relationships, clock).
+  06_AI_PROVIDERS.txt        Model connections (LM Studio, Ollama, OpenRouter...), adapters, adding a new provider.
+  07_FRONTEND.txt            The compiled interface: pages, how it talks to the API, how to change it without source.
+  08_API_REFERENCE.txt       Every HTTP endpoint, grouped by area.
+  09_HOW_TO.txt              Recipes: add a story, add a pack field, add a module, add an endpoint, add a table...
+  10_TROUBLESHOOTING.txt     Known problems and how to diagnose them.
+  11_RELEASE_CHECKLIST.txt   How to build a clean ZIP to share.
+
+
+4. THE FIVE RULES OF THIS PROJECT
+---------------------------------
+  1. No story data in the engine. Anything specific to one world goes in its Lore Pack.
+  2. A broken pack must never stop the app. Bad sections are skipped and reported.
+  3. The player's data (data/) is sacred: imports never touch stories; a migration always backs the database up first.
+  4. Layering: lore files < pack.json < corrections made in the app. A re-import never erases a correction.
+  5. Secrets stay secret: API keys never go to the browser, logs or exports; "hidden" lore never goes to the player.
+
+
+5. VOCABULARY
+-------------
+  World         One imported Lore Pack (database table "worlds"; its slug = the pack's id).
+  Story         One playthrough, linked to a World (or to none).
+  Branch        Stories are trees: regenerating or editing an old message creates a new branch; nothing is lost.
+  Turn          One player message + the narrator's reply.
+  Scene         Place, time, weather, who is present. Stored in the versioned story state.
+  Starter       An opening scenario ("blueprint") used to generate the first scene.
+  Post          A unique position held by one character (Emperor, Headmaster...). The narrator may not invent another.
+  Closed group  A fixed set of characters (the gods, a council). The narrator may not add members.
+  Gathering     A group that meets regularly (a class, a council). Its members are assumed present when it meets.
+  Hidden note   A lore fact only the narrator sees (a secret). See 04_LOREPACK.txt.
+  Module        A genre switch in pack.json ("school" today) that turns on genre-specific behaviour.
+  Provider      A connection to an AI service. Model profile = one model on a provider with its settings.

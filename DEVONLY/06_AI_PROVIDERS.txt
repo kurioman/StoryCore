@@ -1,0 +1,86 @@
+AI PROVIDERS (CONNECTING A MODEL)
+================================
+
+Code: providers/base.py (interface, errors, SSE parsing), providers/adapters.py (one class per API),
+providers/structured.py (JSON answers), routers/providers.py, services/runtime.py (resolve + generation),
+secrets_store.py (API keys).
+
+
+1. CONCEPTS
+-----------
+  Provider       a connection: type + base URL + optional API key (table "providers")
+  Model profile  one model on a provider + its generation settings (max_tokens, temperature...) + context_limit
+                 (table "model_profiles"). The default profile is a setting; each story can choose its own.
+  Adapter        the Python class that speaks that provider's API.
+
+
+2. PROVIDER TYPES
+-----------------
+  type            class                API used                         presets (Settings > Providers & models)
+  mock            MockAdapter          none (offline demo text)          "Mock (offline demo)", created on first start
+  openai_compat   OpenAICompatAdapter  /chat/completions (+ /models)     LM Studio (http://localhost:1234/v1),
+                                                                         OpenRouter, Custom (llama.cpp, vLLM,
+                                                                         KoboldCpp, text-generation-webui, ...)
+  ollama          OllamaAdapter        Ollama native API (/api/chat)     Ollama (http://localhost:11434), with model
+                                                                         download/delete from the app
+  openai          OpenAIAdapter        OpenAI Responses API              OpenAI
+  anthropic       AnthropicAdapter     Anthropic Messages API            Anthropic Claude
+
+Supported generation settings per adapter (unsupported ones are never sent):
+  openai_compat: temperature, top_p, max_tokens, frequency_penalty, presence_penalty, seed, ...
+  ollama:        temperature, top_p, top_k, max_tokens, context_size (num_ctx), repeat_penalty, seed, think
+  anthropic:     temperature, top_p, top_k, max_tokens        openai: temperature, top_p, max_tokens
+
+
+3. CONNECTING LM STUDIO (THE AUTHOR'S SETUP) - PLAYER STEPS
+------------------------------------------------------------
+  1. LM Studio: download a model, load it, then Developer tab > Start Server (default port 1234).
+     Set the model's Context Length (e.g. 8192 or more).
+  2. StoryCore: Settings > Providers & models > add the "LM Studio (local)" preset (base URL
+     http://localhost:1234/v1, no key) > Test connection > the model list appears > add the model as a profile.
+  3. Set the profile's context limit to LM Studio's Context Length and max_tokens to e.g. 800-1200.
+  4. Make it the default model (or choose it per story).
+Any other OpenAI-compatible local server works the same way with the "Custom OpenAI-compatible" preset.
+
+
+4. LOCAL vs CLOUD, CONSENT, KEYS
+--------------------------------
+  - An adapter is "cloud" when its URL is not localhost/127.0.0.1/::1 (anthropic/openai always are). Before the
+    first request to a cloud provider the app asks the player's consent (privacy notice in main.py CLOUD_NOTICE):
+    ctx.resolve raises ConsentRequired -> HTTP 409 code "cloud_consent_required" -> the frontend shows the notice.
+  - API keys: stored by secrets_store.py (Windows Credential Manager via keyring when available, else
+    data/secrets.json). Providers only keep a reference. Keys are never sent to the browser, logged or exported.
+  - turn_analysis_mode "local_only" runs the post-reply analysis only on local models.
+
+
+5. HOW A REPLY IS STREAMED
+--------------------------
+  GenerationManager.start() -> adapter.stream_chat(model, system, messages, params) yields text pieces ->
+  saved to the message regularly -> pushed to the browser through GET /api/generations/{message_id}/stream (SSE).
+  At the end the adapter reports how the stream ended (last_finish) and token usage (last_usage);
+  raise_if_cut_off() turns "length"/"content_filter" endings into a visible error instead of a "complete" reply.
+  Timeouts (base.DEFAULT_TIMEOUT): connect 10 s, read 180 s between two pieces of data.
+  Errors are ProviderError(kind, friendly message, technical details) -> HTTP 502 with both texts.
+
+
+6. JSON ANSWERS (ANALYSIS, MEMORY CAPTURE)
+------------------------------------------
+adapter.complete(model, system, messages, params, json_mode=True, json_schema=...) returns text.
+Each adapter uses the best mechanism it has: strict JSON schema (OpenRouter, OpenAI), JSON mode (other
+OpenAI-compatible servers, Ollama "format"), or prompt-only. Provider setting "structured_output"
+(json_schema | json_object | prompt) forces one; use "prompt" if a local server rejects response_format.
+
+
+7. ADDING A NEW PROVIDER TYPE
+-----------------------------
+  1. providers/adapters.py: subclass ProviderAdapter. Set provider_type, label, supported_params, is_cloud,
+     connection_hint. Implement:
+        async list_models() -> list[ModelInfo]
+        stream_chat(model, system, messages, params) -> async iterator of text (set self.last_finish/last_usage)
+        async complete(model, system, messages, params, json_mode=False, json_schema=None) -> str
+        headers() for auth (use self.api_key)
+     Use self.client() for HTTP (tests inject a transport), error_from_status / error_from_exception for errors,
+     iter_sse() to parse server-sent events, normalize_alternating() if the API needs user/assistant alternation.
+  2. Register it in ADAPTERS and, if useful, add a preset in PROVIDER_PRESETS.
+  3. The frontend lists presets from GET /api/providers/presets, so a new preset appears without frontend changes.
+     A brand-new type works through the generic provider form if it fits (base URL + optional key).

@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0.0",
+  "title": "Community-reconstructed Academic Calendar",
+  "canon_status": "community_reconstruction",
+  "confidence": "medium",
+  "source_ids": [
+    "reddit_calendar_power"
+  ],
+  "warning": "This is a useful scheduling scaffold published by a community member, not verified as a locked official calendar. Treat dates as defaults that can flex with the story.",
+  "imperial_year": {
+    "starts": "March 1",
+    "ends": "February 28/29",
+    "note": "Imperial year is described as running March through February."
+  },
+  "terms": [
+    {
+      "id": "spring_semester",
+      "name": "Spring Semester",
+      "start": "03-01",
+      "end": "07-15",
+      "purpose": "Core instruction and early-year assessments"
+    },
+    {
+      "id": "summer_break",
+      "name": "Summer Break",
+      "start": "07-16",
+      "end": "08-31",
+      "purpose": "Optional missions, internships and club camps"
+    },
+    {
+      "id": "autumn_semester",
+      "name": "Autumn Semester",
+      "start": "09-01",
+      "end": "01-15",
+      "purpose": "Core instruction, ranking challenges and final assessments"
+    },
+    {
+      "id": "winter_break",
+      "name": "Winter Break",
+      "start": "01-16",
+      "end": "02-28",
+      "purpose": "Formal rest and noble-house obligations"
+    }
+  ],
+  "weekly_schedule": {
+    "classes": "Monday-Friday",
+    "weekends": "Clubs, missions and personal training may occur Saturday-Sunday",
+    "canon_status": "community_reconstruction"
+  },
+  "events": [
+    {
+      "id": "entrance_evaluation",
+      "timing": "First week of March",
+      "description": "Initial evaluation and starting rank/placement."
+    },
+    {
+      "id": "spring_intramural_tournament",
+      "timing": "Late April",
+      "description": "Cross-department duelling tournament with individual and team brackets."
+    },
+    {
+      "id": "midterm_evaluations",
+      "timing": "Late May",
+      "description": "Written and practical examinations plus professor evaluations; rankings may shift."
+    },
+    {
+      "id": "founders_gala",
+      "timing": "Early June",
+      "description": "Formal event associated with the White Rose Society and imperial guests; a stage for networking and rumours."
+    },
+    {
+      "id": "field_expedition_one",
+      "timing": "Late June to early July",
+      "description": "Supervised outing outside Asterion; destination can vary."
+    },
+    {
+      "id": "summer_mission_board",
+      "timing": "July 16 to August 31",
+      "description": "Optional missions offered by guilds, noble houses or the Empire."
+    },
+    {
+      "id": "autumn_ranking_challenge",
+      "timing": "Mid-September",
+      "description": "Students may challenge higher-ranked peers, subject to local rules."
+    },
+    {
+      "id": "harvest_festival",
+      "timing": "October",
+      "description": "City-wide festival in Asterion, with academy demonstrations and club showcases."
+    },
+    {
+      "id": "joint_department_exercise",
+      "timing": "November",
+      "description": "Knight and Magic students cooperate in graded combat scenarios."
+    },
+    {
+      "id": "final_evaluations",
+      "timing": "Late December to early January",
+      "description": "Comprehensive evaluation and year-end ranking."
+    },
+    {
+      "id": "imperial_audience",
+      "timing": "January",
+      "description": "Top students may be presented to the Emperor and invited to imperial events."
+    }
+  ],
+  "year_progression": [
+    {
+      "year": 1,
+      "focus": "Foundation, fundamentals, ranking and identity",
+      "typical_age": 20,
+      "note": "Community reconstruction; age and expected skills are not verified official rules."
+    },
+    {
+      "year": 2,
+      "focus": "Specialization, political involvement and external exposure",
+      "typical_age": 21,
+      "note": "Community reconstruction."
+    },
+    {
+      "year": 3,
+      "focus": "Advanced mastery, leadership and post-academy positioning",
+      "typical_age": 22,
+      "note": "Community reconstruction."
+    }
+  ]
+}

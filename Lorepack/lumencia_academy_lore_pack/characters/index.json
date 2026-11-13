@@ -1,0 +1,293 @@
+{
+  "schema_version": "1.0.0",
+  "entities": [
+    {
+      "id": "lilia_valenheart",
+      "name": "Lilia Valenheart",
+      "type": "student",
+      "group": "students",
+      "file": "characters/students.json",
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "isabel",
+      "name": "Isabel",
+      "type": "student",
+      "group": "students",
+      "file": "characters/students.json",
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "sera",
+      "name": "Sera",
+      "type": "student",
+      "group": "students",
+      "file": "characters/students.json",
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "laris",
+      "name": "Laris",
+      "type": "student",
+      "group": "students",
+      "file": "characters/students.json",
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "anastasia",
+      "name": "Anastasia",
+      "type": "student",
+      "group": "students",
+      "file": "characters/students.json",
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "rena",
+      "name": "Rena",
+      "type": "student",
+      "group": "students",
+      "file": "characters/students.json",
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "sia",
+      "name": "Sia",
+      "type": "student",
+      "group": "students",
+      "file": "characters/students.json",
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "serena_caldwin",
+      "name": "Serena Caldwin",
+      "type": "student",
+      "group": "students",
+      "file": "characters/students.json",
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "chloe_brightwell",
+      "name": "Chloe Brightwell",
+      "type": "student",
+      "group": "students",
+      "file": "characters/students.json",
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "lucia_caldwin",
+      "name": "Lucia Caldwin",
+      "type": "student",
+      "group": "students",
+      "file": "characters/students.json",
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "elise_reihart",
+      "name": "Elise Reihart",
+      "type": "student",
+      "group": "students",
+      "file": "characters/students.json",
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "aria",
+      "name": "Aria",
+      "type": "student",
+      "group": "students",
+      "file": "characters/students.json",
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "mirabel",
+      "name": "Mirabel",
+      "type": "student",
+      "group": "students",
+      "file": "characters/students.json",
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "artemis",
+      "name": "Artemis",
+      "type": "faculty",
+      "group": "faculty_and_celestials",
+      "file": "characters/faculty_and_celestials.json",
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "elena_caldwin",
+      "name": "Elena Caldwin",
+      "type": "faculty",
+      "group": "faculty_and_celestials",
+      "file": "characters/faculty_and_celestials.json",
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "emily",
+      "name": "Emily",
+      "type": "faculty_and_celestial",
+      "group": "faculty_and_celestials",
+      "file": "characters/faculty_and_celestials.json",
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "ethera",
+      "name": "Ethera",
+      "type": "faculty_and_celestial",
+      "group": "faculty_and_celestials",
+      "file": "characters/faculty_and_celestials.json",
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "carne",
+      "name": "Carne",
+      "type": "celestial",
+      "group": "faculty_and_celestials",
+      "file": "characters/faculty_and_celestials.json",
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "seriel",
+      "name": "Seriel",
+      "type": "celestial",
+      "group": "faculty_and_celestials",
+      "file": "characters/faculty_and_celestials.json",
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "nemesis",
+      "name": "Nemesis",
+      "type": "apostle",
+      "group": "demon_cult_members",
+      "file": "antagonists/demon_cult.json",
+      "confidence": "medium",
+      "canon_status": "public_adaptation_detail"
+    },
+    {
+      "id": "veradin",
+      "name": "Veradin",
+      "type": "apostle",
+      "group": "demon_cult_members",
+      "file": "antagonists/demon_cult.json",
+      "confidence": "medium",
+      "canon_status": "public_adaptation_detail"
+    },
+    {
+      "id": "kartia",
+      "name": "Kartia",
+      "type": "apostle",
+      "group": "demon_cult_members",
+      "file": "antagonists/demon_cult.json",
+      "confidence": "medium",
+      "canon_status": "public_adaptation_detail"
+    },
+    {
+      "id": "arien",
+      "name": "Arien",
+      "type": "apostle",
+      "group": "demon_cult_members",
+      "file": "antagonists/demon_cult.json",
+      "confidence": "medium",
+      "canon_status": "public_adaptation_detail"
+    },
+    {
+      "id": "pria",
+      "name": "Pria",
+      "type": "sin_bishop",
+      "group": "demon_cult_members",
+      "file": "antagonists/demon_cult.json",
+      "confidence": "medium",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "sloth",
+      "name": "Sloth",
+      "type": "sin_bishop",
+      "group": "demon_cult_members",
+      "file": "antagonists/demon_cult.json",
+      "confidence": "medium",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "aris",
+      "name": "Aris",
+      "type": "sin_bishop",
+      "group": "demon_cult_members",
+      "file": "antagonists/demon_cult.json",
+      "confidence": "medium",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "beelzebub",
+      "name": "Beelzebub",
+      "type": "sin_bishop",
+      "group": "demon_cult_members",
+      "file": "antagonists/demon_cult.json",
+      "confidence": "medium",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "asmo",
+      "name": "Asmo",
+      "type": "sin_bishop",
+      "group": "demon_cult_members",
+      "file": "antagonists/demon_cult.json",
+      "confidence": "medium",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "leviane",
+      "name": "Leviane",
+      "type": "sin_bishop",
+      "group": "demon_cult_members",
+      "file": "antagonists/demon_cult.json",
+      "confidence": "medium",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "belian",
+      "name": "Belian",
+      "type": "sin_bishop",
+      "group": "demon_cult_members",
+      "file": "antagonists/demon_cult.json",
+      "confidence": "medium",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "lily",
+      "name": "Lily",
+      "type": "celestial_deity",
+      "group": "deities",
+      "file": "antagonists/deities.json",
+      "confidence": "medium",
+      "canon_status": "public_adaptation_detail"
+    },
+    {
+      "id": "delphirem",
+      "name": "Delphirem",
+      "type": "demon_god",
+      "group": "deities",
+      "file": "antagonists/deities.json",
+      "confidence": "medium",
+      "canon_status": "public_adaptation_detail"
+    }
+  ]
+}

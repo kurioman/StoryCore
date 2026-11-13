@@ -1,0 +1,11 @@
+# Données du joueur (bases, sauvegardes, cache, logs)
+data/
+# Runtime Python embarqué (fourni tel quel, pas du code du projet)
+app/python/
+# Archives de release
+_release/
+# Caches Python
+__pycache__/
+*.pyc
+# Dossier de travail temporaire
+_work/

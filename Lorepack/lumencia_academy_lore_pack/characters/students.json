@@ -1,0 +1,610 @@
+{
+  "schema_version": "1.0.0",
+  "characters": [
+    {
+      "id": "lilia_valenheart",
+      "name": "Lilia Valenheart",
+      "aliases": [
+        "Lilia"
+      ],
+      "type": "student",
+      "department_id": "knight_department",
+      "year": 1,
+      "social_status": "Youngest daughter of the Valenheart Duchy",
+      "power": {
+        "system": "martial_aura",
+        "rank": "Expert Mid"
+      },
+      "appearance": {
+        "hair": "red",
+        "eyes": "gold"
+      },
+      "personality_traits": [
+        "passionate",
+        "honest",
+        "bright",
+        "hardworking",
+        "direct"
+      ],
+      "motivation": "Wants to achieve genuine strength through personal merit, rather than relying only on family honour.",
+      "story_functions": [
+        "martial rival or training partner",
+        "bridge between noble prestige and personal merit"
+      ],
+      "faction_ids": [
+        "valenheart_duchy",
+        "lumencia_academy"
+      ],
+      "relationship_notes": [
+        {
+          "target_id": "laris",
+          "type": "target_of_subtle_jealousy_or_following",
+          "confidence": "medium"
+        }
+      ],
+      "confidence": "high",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "reddit_character_profiles",
+        "dreamrunner_zeph_lumencia"
+      ]
+    },
+    {
+      "id": "isabel",
+      "name": "Isabel",
+      "aliases": [
+        "Isabela"
+      ],
+      "type": "student",
+      "department_id": "knight_department",
+      "year": 1,
+      "social_status": "Second imperial princess",
+      "power": {
+        "system": "martial_aura",
+        "rank": "Expert Low",
+        "special_ability": "Eye of Insight",
+        "ability_details_confidence": "medium"
+      },
+      "appearance": {
+        "hair": "black",
+        "eyes": "gold"
+      },
+      "personality_traits": [
+        "arrogant",
+        "calculating",
+        "haughty",
+        "indirect",
+        "occasionally childish"
+      ],
+      "motivation": "Builds a political faction among capable academy students and pursues a claim to the throne.",
+      "story_functions": [
+        "political patron",
+        "rival claimant",
+        "difficult ally"
+      ],
+      "faction_ids": [
+        "imperial_family",
+        "lumencia_academy"
+      ],
+      "relationship_notes": [
+        {
+          "target_id": "anastasia",
+          "type": "succession_rivalry",
+          "confidence": "high"
+        }
+      ],
+      "notes": "The Eye of Insight is recurring, but its precise capabilities should be revealed conservatively; claims about lie detection or mana perception vary by playthrough.",
+      "confidence": "high",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "reddit_character_profiles",
+        "dreamrunner_zeph_lumencia",
+        "reddit_constant_data"
+      ]
+    },
+    {
+      "id": "sera",
+      "name": "Sera",
+      "aliases": [],
+      "type": "student",
+      "department_id": "knight_department",
+      "year": 1,
+      "social_status": "Commoner; reportedly grew up on the streets",
+      "power": {
+        "system": "martial_aura",
+        "rank": "Expert Low"
+      },
+      "appearance": {
+        "hair": "brown",
+        "eyes": "blue"
+      },
+      "personality_traits": [
+        "cynical",
+        "realistic",
+        "prickly",
+        "sarcastic",
+        "perceptive"
+      ],
+      "motivation": "Survive and improve her position through practical skill rather than status.",
+      "story_functions": [
+        "practical combat ally",
+        "security-minded friend",
+        "grounded observer"
+      ],
+      "faction_ids": [
+        "lumencia_academy"
+      ],
+      "confidence": "high",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "reddit_character_profiles",
+        "reddit_constant_data"
+      ]
+    },
+    {
+      "id": "laris",
+      "name": "Laris",
+      "aliases": [],
+      "type": "student",
+      "department_id": "knight_department",
+      "year": 1,
+      "social_status": "Member of a secondary branch of the Valenheart family",
+      "power": {
+        "system": "martial_aura",
+        "rank": "Expert Low"
+      },
+      "appearance": {
+        "hair": "white",
+        "eyes": "red"
+      },
+      "personality_traits": [
+        "cold",
+        "rational",
+        "perfectionist",
+        "decisive",
+        "terse"
+      ],
+      "motivation": "Wants to prove that merit can matter more than proximity to the main bloodline.",
+      "story_functions": [
+        "reserved rival",
+        "disciplined combatant",
+        "loyal shadow around Lilia"
+      ],
+      "faction_ids": [
+        "valenheart_duchy",
+        "lumencia_academy"
+      ],
+      "relationship_notes": [
+        {
+          "target_id": "lilia_valenheart",
+          "type": "subtle_jealousy_and_following",
+          "confidence": "medium"
+        }
+      ],
+      "confidence": "high",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "reddit_character_profiles",
+        "reddit_constant_data"
+      ]
+    },
+    {
+      "id": "anastasia",
+      "name": "Anastasia",
+      "aliases": [],
+      "type": "student",
+      "department_id": "knight_department",
+      "year": 3,
+      "social_status": "First imperial princess; Student Council President",
+      "power": {
+        "system": "martial_aura",
+        "rank": "Master Low"
+      },
+      "appearance": {
+        "hair": "black",
+        "eyes": "red"
+      },
+      "personality_traits": [
+        "dignified",
+        "charismatic",
+        "ambitious",
+        "authoritative",
+        "concise"
+      ],
+      "motivation": "Consolidate power and build a loyal network ahead of the imperial succession struggle.",
+      "story_functions": [
+        "high-level political patron",
+        "imperial authority",
+        "potential antagonist or ally"
+      ],
+      "faction_ids": [
+        "imperial_family",
+        "lumencia_academy",
+        "student_council"
+      ],
+      "relationship_notes": [
+        {
+          "target_id": "isabel",
+          "type": "succession_rivalry",
+          "confidence": "high"
+        },
+        {
+          "target_id": "lucia_caldwin",
+          "type": "political_rivalry_or_competition",
+          "confidence": "medium"
+        }
+      ],
+      "confidence": "high",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "reddit_character_profiles",
+        "dreamrunner_zeph_lumencia"
+      ]
+    },
+    {
+      "id": "rena",
+      "name": "Rena",
+      "aliases": [],
+      "type": "student",
+      "department_id": "magic_department",
+      "year": 1,
+      "social_status": "Commoner; first-year valedictorian in the public reference",
+      "power": {
+        "system": "mana_and_magic_circles",
+        "rank": "7-Circle; some reports say 7th/8th circle"
+      },
+      "appearance": {
+        "hair": "silver",
+        "eyes": "purple"
+      },
+      "personality_traits": [
+        "genius",
+        "lazy",
+        "curious",
+        "slow-speaking",
+        "sleepy"
+      ],
+      "motivation": "Prefers minimum effort for maximum result and values sleep; curiosity can pull her into research.",
+      "story_functions": [
+        "prodigy",
+        "comic relief",
+        "high-level magical mentor or problem-solver"
+      ],
+      "faction_ids": [
+        "lumencia_academy"
+      ],
+      "relationship_notes": [
+        {
+          "target_id": "ethera",
+          "type": "apprentice_of_tower_master",
+          "confidence": "high"
+        }
+      ],
+      "notes": "Exact circle count varies between 7 and 8 in community reports. Use 7 as baseline and keep the discrepancy visible.",
+      "confidence": "high",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "reddit_character_profiles",
+        "reddit_constant_data",
+        "dreamrunner_zeph_lumencia"
+      ]
+    },
+    {
+      "id": "sia",
+      "name": "Sia",
+      "aliases": [],
+      "type": "student",
+      "department_id": "magic_department",
+      "year": 1,
+      "social_status": "Commoner",
+      "power": {
+        "system": "mana_and_magic_circles",
+        "rank": "4-Circle",
+        "specialization": "spirit magic",
+        "special_ability": "Exceptional affinity with four elemental spirits"
+      },
+      "appearance": {
+        "hair": "pink",
+        "eyes": "blue"
+      },
+      "personality_traits": [
+        "cheerful",
+        "eccentric",
+        "curious",
+        "mysterious"
+      ],
+      "motivation": "Explore her unusual bond with spirits; specific long-term goals are not established.",
+      "story_functions": [
+        "spirit-magic specialist",
+        "unpredictable ally",
+        "source of exploration hooks"
+      ],
+      "faction_ids": [
+        "lumencia_academy"
+      ],
+      "notes": "Names and identities of her four spirits vary between playthroughs and are intentionally not hard-coded here.",
+      "confidence": "high",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "reddit_character_profiles",
+        "reddit_constant_data",
+        "dreamrunner_zeph_lumencia"
+      ]
+    },
+    {
+      "id": "serena_caldwin",
+      "name": "Serena Caldwin",
+      "aliases": [
+        "Serena"
+      ],
+      "type": "student",
+      "department_id": "magic_department",
+      "year": 1,
+      "social_status": "Second daughter of the Caldwin Duchy",
+      "power": {
+        "system": "mana_and_magic_circles",
+        "rank": "4-Circle"
+      },
+      "appearance": {
+        "hair": "white",
+        "eyes": "blue"
+      },
+      "personality_traits": [
+        "calm",
+        "introverted",
+        "brilliant",
+        "quiet",
+        "terse"
+      ],
+      "motivation": "Wants to establish her own worth while living under constant comparison to her older sister Lucia.",
+      "story_functions": [
+        "underestimated student",
+        "family tension",
+        "quiet intellectual ally"
+      ],
+      "faction_ids": [
+        "caldwin_duchy",
+        "lumencia_academy"
+      ],
+      "relationship_notes": [
+        {
+          "target_id": "lucia_caldwin",
+          "type": "younger_sister_in_older_sister_shadow",
+          "confidence": "high"
+        }
+      ],
+      "notes": "A fondness for romance novels is anecdotal and should not be treated as essential canon.",
+      "confidence": "high",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "reddit_character_profiles",
+        "reddit_constant_data"
+      ]
+    },
+    {
+      "id": "chloe_brightwell",
+      "name": "Chloe Brightwell",
+      "aliases": [
+        "Chloe"
+      ],
+      "type": "student",
+      "department_id": "magic_department",
+      "year": 1,
+      "social_status": "Daughter of the Brightwell merchant family",
+      "power": {
+        "system": "mana_and_magic_circles",
+        "rank": "2-Circle (reported; practical magical ability may be secondary to her trade role)"
+      },
+      "appearance": {
+        "hair": "red",
+        "eyes": "green"
+      },
+      "personality_traits": [
+        "calculating",
+        "clever",
+        "cunning",
+        "pragmatic",
+        "transactional"
+      ],
+      "motivation": "Prioritizes trade, profit, information and leverage over pure magical scholarship.",
+      "story_functions": [
+        "merchant contact",
+        "information broker",
+        "deal-maker"
+      ],
+      "faction_ids": [
+        "brightwell_county",
+        "lumencia_academy"
+      ],
+      "notes": "Some players emphasize commerce more than spellcasting; do not assume she is a combat-focused mage.",
+      "confidence": "high",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "reddit_character_profiles",
+        "reddit_wiki_thread",
+        "dreamrunner_zeph_lumencia"
+      ]
+    },
+    {
+      "id": "lucia_caldwin",
+      "name": "Lucia Caldwin",
+      "aliases": [
+        "Lucia"
+      ],
+      "type": "student",
+      "department_id": "magic_department",
+      "year": 2,
+      "social_status": "Eldest daughter of the Caldwin Duchy; Student Council Vice President",
+      "power": {
+        "system": "mana_and_magic_circles",
+        "rank": "6-Circle"
+      },
+      "appearance": {
+        "hair": "silver",
+        "eyes": "blue"
+      },
+      "personality_traits": [
+        "arrogant",
+        "brilliant",
+        "irritable",
+        "sarcastic",
+        "haughty"
+      ],
+      "motivation": "Maintain her standing as a top mage and influential academy figure.",
+      "story_functions": [
+        "high-status rival",
+        "political operator",
+        "family pressure source"
+      ],
+      "faction_ids": [
+        "caldwin_duchy",
+        "lumencia_academy",
+        "student_council"
+      ],
+      "relationship_notes": [
+        {
+          "target_id": "serena_caldwin",
+          "type": "older_sister_who_often_dismisses_younger_sister",
+          "confidence": "high"
+        },
+        {
+          "target_id": "anastasia",
+          "type": "political_competition",
+          "confidence": "medium"
+        }
+      ],
+      "confidence": "high",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "reddit_character_profiles",
+        "dreamrunner_zeph_lumencia"
+      ]
+    },
+    {
+      "id": "elise_reihart",
+      "name": "Elise Reihart",
+      "aliases": [
+        "Elise"
+      ],
+      "type": "student",
+      "department_id": "magic_department",
+      "year": 2,
+      "social_status": "Daughter of the Reihart Marquisate; White Rose Society Vice President",
+      "power": {
+        "system": "mana_and_magic_circles",
+        "rank": "5-Circle"
+      },
+      "appearance": {
+        "hair": "blonde",
+        "eyes": "blue"
+      },
+      "personality_traits": [
+        "sociable",
+        "perceptive",
+        "pragmatic",
+        "kind"
+      ],
+      "motivation": "Maintain relationships and influence through social knowledge; precise long-term goals are not established.",
+      "story_functions": [
+        "rumour network",
+        "social connector",
+        "political information channel"
+      ],
+      "faction_ids": [
+        "reihart_marquisate",
+        "lumencia_academy",
+        "white_rose_society"
+      ],
+      "confidence": "high",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "reddit_character_profiles",
+        "dreamrunner_zeph_lumencia"
+      ]
+    },
+    {
+      "id": "aria",
+      "name": "Aria",
+      "aliases": [],
+      "type": "student",
+      "department_id": "theology_department",
+      "year": 3,
+      "social_status": "Representative of the Holy Kingdom of Dominus; healer",
+      "power": {
+        "system": "divinity",
+        "rank": "Saintess"
+      },
+      "appearance": {
+        "hair": "white",
+        "eyes": "pink"
+      },
+      "personality_traits": [
+        "compassionate",
+        "gentle",
+        "poised",
+        "strategic",
+        "dual-natured"
+      ],
+      "motivation": "Her academy attendance is associated with a divine oracle; the exact prophecy is not documented.",
+      "story_functions": [
+        "healer",
+        "religious envoy",
+        "sign of divine interest in the empire"
+      ],
+      "faction_ids": [
+        "dominus_holy_kingdom",
+        "lumencia_academy"
+      ],
+      "confidence": "high",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "reddit_character_profiles",
+        "dreamrunner_zeph_lumencia"
+      ]
+    },
+    {
+      "id": "mirabel",
+      "name": "Mirabel",
+      "aliases": [
+        "Maribel"
+      ],
+      "type": "student",
+      "department_id": "theology_department",
+      "year": 1,
+      "social_status": "Student from the Holy Kingdom of Dominus",
+      "power": {
+        "system": "martial_aura_and_divinity",
+        "rank": "Expert Low; aspiring holy combatant"
+      },
+      "appearance": {
+        "hair": "blonde",
+        "eyes": "gold"
+      },
+      "personality_traits": [
+        "cheerful",
+        "free-spirited",
+        "devoted",
+        "playful",
+        "teasing",
+        "emotional"
+      ],
+      "motivation": "Aspires to become a holy knight or inquisitor.",
+      "story_functions": [
+        "combat-oriented theologian",
+        "energetic ally",
+        "religious perspective on danger"
+      ],
+      "faction_ids": [
+        "dominus_holy_kingdom",
+        "lumencia_academy"
+      ],
+      "notes": "The spelling Mirabel/Maribel varies. This pack uses Mirabel as the primary ID and retains Maribel as an alias.",
+      "confidence": "high",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "reddit_character_profiles",
+        "reddit_constant_data"
+      ]
+    }
+  ]
+}

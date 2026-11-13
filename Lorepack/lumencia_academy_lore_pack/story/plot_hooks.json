@@ -1,0 +1,172 @@
+{
+  "schema_version": "1.0.0",
+  "warning": "These are optional, setting-compatible hooks, not claims about a mandatory canon storyline. Activate only when appropriate for the player's choices and established campaign facts.",
+  "hooks": [
+    {
+      "id": "succession_competition",
+      "title": "The Two Princesses",
+      "category": "court_politics",
+      "premise": "Anastasia and Isabel are building networks of capable supporters through academy relationships.",
+      "entry_points": [
+        "A student receives two incompatible invitations.",
+        "A competition result makes a student's loyalty politically valuable.",
+        "A rumour threatens the reputation of one princess's allies."
+      ],
+      "stakes": [
+        "reputation",
+        "patronage",
+        "career",
+        "family ties"
+      ],
+      "involved_ids": [
+        "anastasia",
+        "isabel",
+        "student_council"
+      ],
+      "canon_status": "recurring_reference_plus_optional_hook"
+    },
+    {
+      "id": "valenheart_caldwin_rivalry",
+      "title": "Steel and Circles",
+      "category": "noble_rivalry",
+      "premise": "The Valenheart and Caldwin houses compete for prestige as leading martial and magical families.",
+      "entry_points": [
+        "A public tournament pits students from both houses against one another.",
+        "A joint mission forces martial and magical specialists to cooperate.",
+        "A professor seeks a fair test that neither house can easily control."
+      ],
+      "stakes": [
+        "house prestige",
+        "friendship",
+        "merit",
+        "academic standing"
+      ],
+      "involved_ids": [
+        "valenheart_duchy",
+        "caldwin_duchy",
+        "lilia_valenheart",
+        "laris",
+        "lucia_caldwin",
+        "serena_caldwin"
+      ],
+      "canon_status": "recurring_reference_plus_optional_hook"
+    },
+    {
+      "id": "commoner_merit",
+      "title": "Merit Against Lineage",
+      "category": "social_conflict",
+      "premise": "A capable commoner encounters barriers that the academy's official merit ideal does not remove.",
+      "entry_points": [
+        "A ranking dispute reveals unequal access to training resources.",
+        "A noble offers support with strings attached.",
+        "A club must choose between a talented newcomer and a prestigious candidate."
+      ],
+      "stakes": [
+        "fairness",
+        "social mobility",
+        "loyalty",
+        "reputation"
+      ],
+      "involved_ids": [
+        "sera",
+        "rena",
+        "sia",
+        "lumencia_academy"
+      ],
+      "canon_status": "setting-derived_optional_hook"
+    },
+    {
+      "id": "white_rose_information",
+      "title": "Rumours at the White Rose",
+      "category": "social_intrigue",
+      "premise": "A gala, club event or rumour network turns information into social currency.",
+      "entry_points": [
+        "A rumour is true but misleading.",
+        "A source sells the same information to rival factions.",
+        "An event exposes a private connection between students."
+      ],
+      "stakes": [
+        "trust",
+        "reputation",
+        "political leverage"
+      ],
+      "involved_ids": [
+        "elise_reihart",
+        "white_rose_society",
+        "chloe_brightwell"
+      ],
+      "canon_status": "setting-derived_optional_hook"
+    },
+    {
+      "id": "dominuse_oracle",
+      "title": "The Unanswered Oracle",
+      "category": "religion_and_prophecy",
+      "premise": "Aria's reported oracle-related enrolment suggests religious interest in the academy, but the content of the oracle remains open.",
+      "entry_points": [
+        "A second interpretation of a sacred sign appears.",
+        "A healer recognises a pattern tied to an unexplained event.",
+        "Dominus sends an envoy whose account conflicts with the official version."
+      ],
+      "stakes": [
+        "faith",
+        "diplomacy",
+        "personal duty",
+        "uncertainty"
+      ],
+      "involved_ids": [
+        "aria",
+        "mirabel",
+        "dominus_holy_kingdom",
+        "lily"
+      ],
+      "canon_status": "setting-derived_optional_hook"
+    },
+    {
+      "id": "abyss_miasma_trace",
+      "title": "A Trace from the Abyss",
+      "category": "demonic_mystery",
+      "premise": "An unusual magical disturbance suggests Miasma, but the source and motive are not initially known.",
+      "entry_points": [
+        "A field team returns with a damaged mana circuit.",
+        "A harmless-looking object produces a corruptive reaction.",
+        "A pattern of missing supplies points towards an illicit ritual."
+      ],
+      "stakes": [
+        "physical safety",
+        "corruption",
+        "institutional trust",
+        "escalation"
+      ],
+      "involved_ids": [
+        "demon_god_cult",
+        "abyss_zone",
+        "delphirem"
+      ],
+      "canon_status": "setting-derived_optional_hook"
+    },
+    {
+      "id": "celestial_intervention",
+      "title": "When a Celestial Appears",
+      "category": "high_power_event",
+      "premise": "The appearance of one of the Four Celestials should substantially change the stakes rather than simply serve as a cameo.",
+      "entry_points": [
+        "A crisis exceeds ordinary academy staff.",
+        "A research discovery draws Ethera's interest.",
+        "A threat near the frontier attracts Carne or Seriel."
+      ],
+      "stakes": [
+        "political consequences",
+        "danger",
+        "institutional autonomy",
+        "long-term obligations"
+      ],
+      "involved_ids": [
+        "ethera",
+        "emily",
+        "carne",
+        "seriel"
+      ],
+      "canon_status": "setting-derived_optional_hook"
+    }
+  ]
+}

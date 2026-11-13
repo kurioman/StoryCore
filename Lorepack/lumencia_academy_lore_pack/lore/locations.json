@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0.0",
+  "locations": [
+    {
+      "id": "asterion",
+      "name": "Asterion",
+      "type": "capital_city",
+      "polity_id": "lumencia_empire",
+      "description": "Political and cultural center of the empire. Lumencia Academy is located here.",
+      "tags": [
+        "capital",
+        "politics",
+        "academy",
+        "nobility"
+      ],
+      "confidence": "high",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "dreamrunner_zeph_lumencia"
+      ]
+    },
+    {
+      "id": "lumencia_academy",
+      "name": "Lumencia Academy",
+      "type": "academy",
+      "parent_location_id": "asterion",
+      "description": "The empire's most prestigious academy and a central meeting point for talented nobles and commoners. Officially politically neutral, but factions use it to recruit allies and build influence.",
+      "tags": [
+        "education",
+        "combat",
+        "magic",
+        "politics"
+      ],
+      "confidence": "high",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "dreamrunner_zeph_lumencia",
+        "reddit_character_profiles"
+      ]
+    },
+    {
+      "id": "remaria",
+      "name": "Remaria",
+      "type": "coastal_city",
+      "polity_id": "lumencia_empire",
+      "description": "A temperate southern coastal city known as the City of Arts, with theatre, opera, poetry, painting and magical crafts.",
+      "tags": [
+        "arts",
+        "coast",
+        "crafts"
+      ],
+      "confidence": "medium",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "dreamrunner_zeph_lumencia"
+      ]
+    },
+    {
+      "id": "orpherum",
+      "name": "Orpherum",
+      "type": "port_city",
+      "polity_id": "lumencia_empire",
+      "description": "A southeastern port with sea markets, maritime guilds and a history associated with piracy; a Navigator Guild and Sea Temple are mentioned in the public adaptation.",
+      "tags": [
+        "port",
+        "trade",
+        "sailing",
+        "guilds"
+      ],
+      "confidence": "medium",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "dreamrunner_zeph_lumencia"
+      ]
+    },
+    {
+      "id": "rubelin",
+      "name": "Rubelin",
+      "type": "garden_city",
+      "polity_id": "lumencia_empire",
+      "description": "A city in the northwestern plains associated with scholarship, botany, pharmacy and alchemical research.",
+      "tags": [
+        "research",
+        "botany",
+        "alchemy"
+      ],
+      "confidence": "medium",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "dreamrunner_zeph_lumencia"
+      ]
+    },
+    {
+      "id": "prima_glacie",
+      "name": "Prima Glacie",
+      "type": "northern_mountain_region",
+      "polity_id": "lumencia_empire",
+      "description": "A far-northern icy mountain region known for severe cold and frequent blizzards.",
+      "tags": [
+        "mountains",
+        "cold",
+        "survival"
+      ],
+      "confidence": "medium",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "dreamrunner_zeph_lumencia"
+      ]
+    },
+    {
+      "id": "zaraha",
+      "name": "Zaraha",
+      "type": "desert_region",
+      "polity_id": "lumencia_empire",
+      "description": "A southwestern desert with ancient ruins, golden temples, extreme day/night temperature changes and sandstorms.",
+      "tags": [
+        "desert",
+        "ruins",
+        "temples",
+        "exploration"
+      ],
+      "confidence": "medium",
+      "canon_status": "recurring_reference",
+      "source_ids": [
+        "dreamrunner_zeph_lumencia"
+      ]
+    }
+  ]
+}

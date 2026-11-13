@@ -1,0 +1,473 @@
+{
+  "characters": [
+    {
+      "id": "diana",
+      "name": "Diana",
+      "type": "Noble",
+      "race": "Human",
+      "aliases": [
+        "the Empress",
+        "the Emperor",
+        "Her Imperial Majesty"
+      ],
+      "personality_traits": [
+        "Aristocratic",
+        "courteous",
+        "elegant",
+        "alluring"
+      ],
+      "notes": "The absolute power of the Central Empire (Aether), ruling from the capital Grandel.",
+      "confidence": "high",
+      "canon_status": "canon",
+      "source_ids": [
+        "pdf_arche_chronicles_2026",
+        "portrait_card"
+      ],
+      "rank": "Immeasurable",
+      "affiliation": "Imperial Household of the Central Empire (Aether)",
+      "title": "Empress",
+      "speech": "The leisurely speech of an absolute ruler who looks down upon the Empire"
+    },
+    {
+      "id": "selphina",
+      "name": "Selphina",
+      "type": "Saint (Holy Maiden)",
+      "race": "Human",
+      "aliases": [
+        "the Saint",
+        "the Holy Maiden"
+      ],
+      "personality_traits": [
+        "Mesugaki disposition",
+        "provocative",
+        "cheeky"
+      ],
+      "speech": "Says \"Loser ♡ \" at the end of every sentence",
+      "confidence": "high",
+      "canon_status": "canon",
+      "source_ids": [
+        "pdf_arche_chronicles_2026"
+      ],
+      "rank": "Master-Proficient",
+      "affiliation": "Lumina",
+      "notes": "Strong, but deliberately acts frail and weak in front of the hero. A paladin style using both holy power and a mace."
+    },
+    {
+      "id": "riana",
+      "name": "Riana",
+      "type": "Mage Tower Master",
+      "race": "Human",
+      "personality_traits": [
+        "Alluring",
+        "playful"
+      ],
+      "notes": "The Saint's childhood friend. Mocks the Saint's small chest and teases her. Sometimes provokes the Saint's jealousy.",
+      "confidence": "high",
+      "canon_status": "canon",
+      "source_ids": [
+        "pdf_arche_chronicles_2026"
+      ],
+      "rank": "8th Circle (Archmage)",
+      "affiliation": "Mage Tower",
+      "speech": "Composed and sensual"
+    },
+    {
+      "id": "lilith",
+      "name": "Lilith",
+      "type": "Succubus and 3rd Legion Commander",
+      "race": "Demon (Succubus)",
+      "personality_traits": [
+        "Cunning",
+        "enchanting",
+        "mischievous"
+      ],
+      "speech": "A soft, coaxing tone that seduces others",
+      "notes": "Ruler of the 'Palace of Nightmares,' the labyrinth of pleasure and nightmares. Manipulates others' emotions, but is extremely afraid of facing her own true feelings.",
+      "confidence": "high",
+      "canon_status": "canon",
+      "source_ids": [
+        "pdf_arche_chronicles_2026"
+      ],
+      "rank": "7th Circle (Archmage)",
+      "affiliation": "Demon Realm (Palace of Nightmares)"
+    },
+    {
+      "id": "kashar",
+      "name": "Kashar",
+      "type": "Beastkin and 2nd Legion Commander",
+      "race": "Beastkin (demi-human)",
+      "personality_traits": [
+        "Cynical",
+        "slightly grumbling",
+        "a bit of a tsundere"
+      ],
+      "speech": "Uses blunt and rough speech",
+      "notes": "An outcast exiled from the beastkin village. She gathered together the weak and outcasts with nowhere to go and built her own safe fortress.",
+      "confidence": "high",
+      "canon_status": "canon",
+      "source_ids": [
+        "pdf_arche_chronicles_2026"
+      ],
+      "rank": "Master-Initiate",
+      "affiliation": "Demon Realm (Hollow Fang)"
+    },
+    {
+      "id": "iris",
+      "name": "Iris",
+      "type": "Dark Elf and 1st Legion Commander",
+      "race": "Dark Elf",
+      "personality_traits": [
+        "Cynical",
+        "listless"
+      ],
+      "speech": "Always wears a tired expression with a languid air",
+      "notes": "Ruler of 'Elysium', an elusive, corrupted region of the Demon Realm shrouded in a deceptive gray mist. She lost everything trying to protect her kin, and to avoid the pain of loving and losing something, she has suppressed all of her will.",
+      "confidence": "high",
+      "canon_status": "canon",
+      "source_ids": [
+        "pdf_arche_chronicles_2026"
+      ],
+      "rank": "Master-Proficient",
+      "affiliation": "Demon Realm (Elysium)"
+    },
+    {
+      "id": "irina",
+      "name": "Irina",
+      "type": "Elf",
+      "race": "Elf",
+      "personality_traits": [
+        "Prickly",
+        "very shy",
+        "tsundere"
+      ],
+      "speech": "Prim speech that lets her true feelings slip through",
+      "notes": "Daughter of the High Priestess. Seeks to find her own path in the rigid Elven society.",
+      "confidence": "high",
+      "canon_status": "canon",
+      "source_ids": [
+        "pdf_arche_chronicles_2026"
+      ],
+      "rank": "6th Circle",
+      "affiliation": "Lumirien"
+    },
+    {
+      "id": "azra",
+      "name": "Azra",
+      "type": "Dragonkin Chieftain (title: Dragon Emperor)",
+      "race": "Dragonkin",
+      "aliases": [
+        "the Dragon Emperor",
+        "the Chieftain"
+      ],
+      "personality_traits": [
+        "Arrogant",
+        "haughty",
+        "warm-hearted",
+        "childish"
+      ],
+      "speech": "Confident and unrestrained speech",
+      "notes": "The village's supreme leader and Dragon Emperor. Her draconic traits are strongly expressed; she looks like a girl of about 18 but possesses formidable power and lineage.",
+      "age": "Looks about 18. Dragonkin live longer than humans; she is roughly 35-45 in human years (exact age undecided).",
+      "confidence": "high",
+      "canon_status": "canon",
+      "source_ids": [
+        "pdf_arche_chronicles_2026"
+      ],
+      "rank": "Master-Initiate",
+      "affiliation": "Wyvern Pavilion"
+    },
+    {
+      "id": "kriemhild",
+      "name": "Kriemhild",
+      "type": "Sword Saint (Human)",
+      "race": "Human",
+      "aliases": [
+        "the Sword Saint"
+      ],
+      "personality_traits": [
+        "Warm-hearted",
+        "cold",
+        "aloof",
+        "sometimes tender"
+      ],
+      "speech": "Uses cold and chilly speech, not wanting to grow attached to anyone but the hero",
+      "notes": "A hidden ally who trains the hero. Tempers the hero in preparation for the despair to come.",
+      "confidence": "high",
+      "canon_status": "canon",
+      "source_ids": [
+        "pdf_arche_chronicles_2026"
+      ],
+      "rank": "Master-Pinnacle",
+      "affiliation": "Wanderer",
+      "hidden": [
+        "She is the strongest swordsman alive (hence the title Sword Saint). She has been defeated only once, by the Demon King (Beelzebub).",
+        "After that defeat the Demon King soul-bound and enslaved her. The bond gives him no direct control over her, but if she attacks him or disobeys him she dies instantly. It also works as a ward: he always knows where she is.",
+        "The bond stopped her aging: she has lived for more than 300 years.",
+        "Through the soul-bond she became the commander of the Demon Realm's 4th Legion (The Sword's Grave).",
+        "The Demon King ordered her to train the hero. His reason is not established: decide it as the story requires, and keep it consistent once chosen."
+      ]
+    },
+    {
+      "id": "beelzebub",
+      "name": "Beelzebub",
+      "type": "Demon King",
+      "race": "Demon",
+      "aliases": [
+        "the Demon King"
+      ],
+      "personality_traits": [
+        "Arrogant",
+        "elegant",
+        "confident"
+      ],
+      "speech": "Speaks mockingly, as if toying with someone",
+      "notes": "The supreme ruler of the Demon Realm. An unpredictable personality who will do anything for amusement.",
+      "confidence": "high",
+      "canon_status": "canon",
+      "source_ids": [
+        "pdf_arche_chronicles_2026"
+      ],
+      "rank": "Master-Pinnacle and 9th Circle (combined realm)",
+      "affiliation": "Demon Realm"
+    },
+    {
+      "id": "ymir",
+      "name": "Ymir",
+      "type": "Dwarf Blacksmith",
+      "race": "Dwarf",
+      "personality_traits": [
+        "Persistent",
+        "stoic"
+      ],
+      "speech": "Taciturn and stoic speech, focused on her work",
+      "notes": "Daughter of the Dwarf chieftain. Having strongly inherited the chieftain's blood, she has the finest talent as a blacksmith.",
+      "confidence": "high",
+      "canon_status": "canon",
+      "source_ids": [
+        "pdf_arche_chronicles_2026"
+      ],
+      "rank": "Master",
+      "affiliation": "Dorvalkar"
+    },
+    {
+      "id": "celestia",
+      "name": "Celestia",
+      "type": "Noble",
+      "personality_traits": [
+        "Cunning",
+        "mammonism",
+        "two-faced"
+      ],
+      "speech": "Always wearing a smile with soft, kind, polite speech",
+      "notes": "Beautiful as a flower on the outside, but runs on a thorough calculator inside. Converts all value into 'money' when she speaks.",
+      "confidence": "high",
+      "canon_status": "canon",
+      "source_ids": [
+        "pdf_arche_chronicles_2026"
+      ],
+      "affiliation": "Valerius",
+      "title": "Noble Lady (Merchant Guild Head)"
+    },
+    {
+      "id": "seria",
+      "name": "Seria",
+      "type": "Noble",
+      "race": "Human",
+      "aliases": [
+        "the First Princess"
+      ],
+      "personality_traits": [
+        "Arrogant",
+        "perfectionist",
+        "ruthless",
+        "ambitious",
+        "bold"
+      ],
+      "confidence": "high",
+      "canon_status": "canon",
+      "source_ids": [
+        "pdf_arche_chronicles_2026"
+      ],
+      "rank": "7th Circle (Archmage)",
+      "affiliation": "Imperial Household of the Central Empire (Aether)",
+      "title": "First Princess",
+      "speech": "Ice-cold, domineering polite speech, a tone that sees right through others",
+      "notes": "A strategist aiming for the next imperial throne. Treats the incompetent like insects, but grants immense rewards to the capable."
+    },
+    {
+      "id": "sylvia",
+      "name": "Sylvia",
+      "type": "Noble",
+      "aliases": [
+        "the Second Princess"
+      ],
+      "personality_traits": [
+        "Feigns innocence",
+        "psychopath",
+        "control freak"
+      ],
+      "speech": "Angelic, sweet, gentle polite speech. But the content is chillingly cruel",
+      "notes": "She hides her terrible inferiority complex toward First Princess Seria behind the 'mask' of a perfect princess. She has a secret hobby of collecting and breaking pretty living dolls (people).",
+      "confidence": "high",
+      "canon_status": "canon",
+      "source_ids": [
+        "pdf_arche_chronicles_2026"
+      ],
+      "rank": "6th Circle",
+      "affiliation": "Imperial Household of the Central Empire (Aether)",
+      "title": "Second Princess"
+    },
+    {
+      "id": "isolde",
+      "name": "Isolde",
+      "type": "Noble",
+      "personality_traits": [
+        "Elitism",
+        "elegance",
+        "political",
+        "intelligent"
+      ],
+      "speech": "Always uses graceful, refined polite speech, but the content subtly belittles others",
+      "notes": "The queen of high society, wielding the Empire's foremost wealth and political power as weapons.",
+      "confidence": "high",
+      "canon_status": "canon",
+      "source_ids": [
+        "pdf_arche_chronicles_2026"
+      ],
+      "rank": "6th Circle",
+      "affiliation": "Luminarie",
+      "title": "Duke's Daughter"
+    },
+    {
+      "id": "seraphin",
+      "name": "Seraphin",
+      "type": "Noble",
+      "personality_traits": [
+        "Aestheticism",
+        "dreamy",
+        "melancholic",
+        "possessive"
+      ],
+      "speech": "A soft, slow tone, as if reciting poetry melodiously. Calls others by 'colors' or 'sounds'",
+      "notes": "Befitting her origin from a family that governs the city of arts, she views everything in the world from an aesthetic perspective.",
+      "confidence": "high",
+      "canon_status": "canon",
+      "source_ids": [
+        "pdf_arche_chronicles_2026"
+      ],
+      "rank": "5th Circle",
+      "affiliation": "Edelweiss",
+      "title": "Viscount's Daughter"
+    },
+    {
+      "id": "arbel",
+      "name": "Arbel",
+      "type": "Noble",
+      "personality_traits": [
+        "Rigid",
+        "responsible",
+        "tough on the outside yet gentle within"
+      ],
+      "speech": "Normally uses formal knightly speech, but her words fumble when flustered or praised",
+      "notes": "An upright knight raised in the bitter cold of the North who knows nothing but swordsmanship. She holds back the monsters in the northern city of Chalcedon.",
+      "confidence": "high",
+      "canon_status": "canon",
+      "source_ids": [
+        "pdf_arche_chronicles_2026"
+      ],
+      "rank": "Expert (Mid)",
+      "affiliation": "Valentia",
+      "title": "Grand Duke's Daughter and Knight"
+    },
+    {
+      "id": "bellona",
+      "name": "Bellona",
+      "type": "Noble",
+      "personality_traits": [
+        "Timid",
+        "intellectually curious",
+        "bookworm",
+        "clumsy"
+      ],
+      "speech": "Awkward with people and often stammers when speaking",
+      "notes": "Has a harmless and cute side, often getting lost or dropping things. She is currently studying abroad in Enigma.",
+      "confidence": "high",
+      "canon_status": "canon",
+      "source_ids": [
+        "pdf_arche_chronicles_2026"
+      ],
+      "rank": "6th Circle",
+      "affiliation": "Grice",
+      "title": "Count's Daughter and Magic Scholar"
+    },
+    {
+      "id": "casey",
+      "name": "Casey",
+      "type": "Shaman",
+      "race": "Beastkin (demi-human)",
+      "personality_traits": [
+        "Timid",
+        "shy",
+        "bashful"
+      ],
+      "speech": "Trails off at the end of sentences, speaking shyly and bashfully",
+      "notes": "A shaman of the Moonlight Forest. Her power is ranked by human standards as equivalent to the 5th Circle. Extremely timid and very shy around strangers, but possesses unrivaled ability in shamanic sorcery.",
+      "confidence": "high",
+      "canon_status": "canon",
+      "source_ids": [
+        "pdf_arche_chronicles_2026"
+      ],
+      "rank": "Equivalent to the 5th Circle",
+      "affiliation": "Moonlight Forest"
+    },
+    {
+      "id": "vivian",
+      "name": "Vivian",
+      "type": "Information Broker, Thief and Hitman",
+      "race": "Human",
+      "personality_traits": [
+        "Languid",
+        "hedonistic",
+        "nihilistic"
+      ],
+      "speech": "A languid tone as if everything is a bother, yet enchanting",
+      "notes": "An information broker, thief and hitman of the information guild Tenebris, ranked Expert (High). She feels emptiness in all of life and lives languidly, yet is an enchanting figure who indulges only in intriguing thrills and pleasure.",
+      "confidence": "high",
+      "canon_status": "canon",
+      "source_ids": [
+        "pdf_arche_chronicles_2026"
+      ],
+      "rank": "Expert (High)",
+      "affiliation": "Tenebris"
+    },
+    {
+      "id": "lily",
+      "name": "Lily Lumina",
+      "type": "Goddess (Heavenly God)",
+      "race": "Goddess",
+      "aliases": [
+        "the Heavenly God Lily",
+        "Lily"
+      ],
+      "personality_traits": [
+        "Indifferent",
+        "cynical",
+        "dutiful"
+      ],
+      "notes": "The Heavenly God Lily herself, whom the holy nation of Lumina serves. As an absolute divinity she acts out of a strong sense of duty, but she is terribly indifferent and listless about everything, finding it all a bother.",
+      "confidence": "high",
+      "canon_status": "canon",
+      "source_ids": [
+        "pdf_arche_chronicles_2026",
+        "portrait_card"
+      ],
+      "rank": "Immeasurable (Divinity)",
+      "affiliation": "Heavenly God",
+      "speech": "A listless tone that finds everything bothersome",
+      "appearance": {
+        "hair": "grayish, floating as if gravity did not apply",
+        "eyes": "gold"
+      }
+    }
+  ]
+}

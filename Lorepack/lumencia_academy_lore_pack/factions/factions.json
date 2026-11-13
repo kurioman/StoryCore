@@ -1,0 +1,284 @@
+{
+  "schema_version": "1.0.0",
+  "factions": [
+    {
+      "id": "lumencia_empire",
+      "name": "Lumencia Empire",
+      "type": "state",
+      "goals": [
+        "Maintain imperial authority",
+        "Preserve the stability and prestige of the capital and academy"
+      ],
+      "methods": [
+        "Imperial administration",
+        "Army and Imperial Guard",
+        "Court politics"
+      ],
+      "leaders_or_members": [
+        "anastasia",
+        "isabel"
+      ],
+      "rivals": [
+        "dominus_holy_kingdom",
+        "demon_god_cult"
+      ],
+      "source_ids": [
+        "dreamrunner_zeph_lumencia",
+        "reddit_character_profiles"
+      ],
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "imperial_family",
+      "name": "Imperial Family",
+      "type": "ruling dynasty",
+      "goals": [
+        "Preserve the throne and imperial legitimacy",
+        "Build alliances and secure succession"
+      ],
+      "key_members": [
+        "anastasia",
+        "isabel"
+      ],
+      "internal_conflicts": [
+        "Anastasia and Isabel are described as rival claimants who build networks of supporters."
+      ],
+      "source_ids": [
+        "reddit_character_profiles",
+        "dreamrunner_zeph_lumencia"
+      ],
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "valenheart_duchy",
+      "name": "Valenheart Duchy",
+      "type": "noble house",
+      "domain": "Martial strength, swordsmanship and knightly honour",
+      "goals": [
+        "Maintain martial prestige",
+        "Protect the house's reputation"
+      ],
+      "key_members": [
+        "lilia_valenheart",
+        "laris",
+        "carne"
+      ],
+      "rivals": [
+        "caldwin_duchy"
+      ],
+      "source_ids": [
+        "dreamrunner_zeph_lumencia",
+        "reddit_character_profiles"
+      ],
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "caldwin_duchy",
+      "name": "Caldwin Duchy",
+      "type": "noble house",
+      "domain": "Magic, magical knowledge and academic influence",
+      "goals": [
+        "Preserve influence over magical institutions",
+        "Maintain family prestige"
+      ],
+      "key_members": [
+        "lucia_caldwin",
+        "serena_caldwin",
+        "elena_caldwin"
+      ],
+      "rivals": [
+        "valenheart_duchy"
+      ],
+      "source_ids": [
+        "dreamrunner_zeph_lumencia",
+        "reddit_character_profiles",
+        "reddit_constant_data"
+      ],
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "brightwell_county",
+      "name": "Brightwell County",
+      "type": "noble / merchant family",
+      "domain": "Trade, finance and commercial networks",
+      "key_members": [
+        "chloe_brightwell"
+      ],
+      "influence_methods": [
+        "Trade",
+        "Information gathering",
+        "Transactional alliances"
+      ],
+      "source_ids": [
+        "dreamrunner_zeph_lumencia",
+        "reddit_wiki_thread"
+      ],
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "reihart_marquisate",
+      "name": "Reihart Marquisate",
+      "type": "noble house",
+      "domain": "High society, connections and information",
+      "key_members": [
+        "elise_reihart"
+      ],
+      "influence_methods": [
+        "Social networking",
+        "Rumour circulation",
+        "Court access"
+      ],
+      "source_ids": [
+        "dreamrunner_zeph_lumencia",
+        "reddit_character_profiles"
+      ],
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "lumencia_academy",
+      "name": "Lumencia Academy",
+      "type": "institution",
+      "goals": [
+        "Educate capable students",
+        "Maintain prestige and institutional function"
+      ],
+      "official_position": "Politically neutral and under imperial jurisdiction",
+      "practical_reality": "Competing houses, the imperial heirs and foreign/religious interests seek influence on campus.",
+      "source_ids": [
+        "dreamrunner_zeph_lumencia",
+        "reddit_character_profiles"
+      ],
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "student_council",
+      "name": "Student Council",
+      "type": "academy governance body",
+      "goals": [
+        "Oversee student operations, events, galas and examinations"
+      ],
+      "key_members": [
+        "anastasia",
+        "lucia_caldwin"
+      ],
+      "source_ids": [
+        "dreamrunner_zeph_lumencia",
+        "reddit_character_profiles"
+      ],
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "blue_knights",
+      "name": "Blue Knights",
+      "type": "academy club / combat circle",
+      "goals": [
+        "Train together",
+        "Support campus security and escort missions"
+      ],
+      "source_ids": [
+        "dreamrunner_zeph_lumencia"
+      ],
+      "confidence": "medium",
+      "canon_status": "public_adaptation_detail"
+    },
+    {
+      "id": "white_rose_society",
+      "name": "White Rose Society",
+      "type": "academy social circle",
+      "goals": [
+        "Host galas and ceremonies",
+        "Coordinate elite social events",
+        "Maintain social connections"
+      ],
+      "key_members": [
+        "elise_reihart"
+      ],
+      "source_ids": [
+        "dreamrunner_zeph_lumencia",
+        "reddit_character_profiles"
+      ],
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "dominus_holy_kingdom",
+      "name": "Holy Kingdom of Dominus",
+      "type": "theocratic state",
+      "deity_id": "lily",
+      "goals": [
+        "Preserve its faith and institutions",
+        "Train divine healers, holy warriors and inquisitors"
+      ],
+      "key_members": [
+        "aria",
+        "mirabel"
+      ],
+      "source_ids": [
+        "dreamrunner_zeph_lumencia",
+        "reddit_character_profiles"
+      ],
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "demon_god_cult",
+      "name": "Demon God Cult",
+      "type": "secret religious / antagonistic organization",
+      "deity_id": "delphirem",
+      "goals": [
+        "Bring about the return of Delphirem",
+        "Expand the cult's influence and access to Miasma"
+      ],
+      "methods": [
+        "Pacts",
+        "Rituals",
+        "Infiltration",
+        "Manipulation",
+        "Demonic incursions"
+      ],
+      "headquarters_location_id": "abyss_zone",
+      "hierarchy": [
+        "apostles",
+        "sin_bishops",
+        "upper_priests",
+        "mid_priests",
+        "lower_priests",
+        "acolytes"
+      ],
+      "source_ids": [
+        "dreamrunner_zeph_lumencia",
+        "reddit_character_profiles"
+      ],
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    },
+    {
+      "id": "four_celestials",
+      "name": "The Four Celestials",
+      "type": "informal group of elite individuals",
+      "goals": [
+        "No unified group agenda is established; each acts according to their own duties and interests."
+      ],
+      "members": [
+        "ethera",
+        "emily",
+        "carne",
+        "seriel"
+      ],
+      "source_ids": [
+        "reddit_character_profiles",
+        "dreamrunner_zeph_lumencia"
+      ],
+      "confidence": "high",
+      "canon_status": "recurring_reference"
+    }
+  ]
+}

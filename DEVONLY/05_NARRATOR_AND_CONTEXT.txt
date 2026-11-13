@@ -1,0 +1,98 @@
+THE NARRATOR: WHAT IS SENT TO THE AI, AND WHAT HAPPENS AFTER
+==========================================================
+
+Code: services/context_builder.py (build), services/turns.py, services/runtime.py, services/turn_analysis.py,
+services/extraction.py. In the app, open a story and use the Context Inspector to see exactly what was sent.
+
+
+1. ONE REQUEST = A SYSTEM PROMPT + RECENT MESSAGES
+--------------------------------------------------
+context_builder.build() returns:
+  system    one text made of "# Title\nbody" sections (below)
+  messages  the most recent player/narrator messages that fit
+  manifest  token counts per section, what was left out and why, warnings (shown in the Context Inspector)
+  secrets   the narrator-only text (so the preview can mask it)
+
+Sections, in order (key in brackets; [optional] ones are dropped first when space runs out):
+   1 core          The world's narrative prompt (pack ai/narrative_system_prompt.md) - or the default prompt for a
+                   story without a world - + style preset, tone, pacing, length, agency policy, content preferences,
+                   agency rules, and an extra instruction for special turns (opening scene, immersive mode).
+   2 global_note   The player's global note (Settings).
+   3 story_note    The story's own note (overrides the global note and base lore).
+   4 avatar        The protagonist (player's avatar profile) and player state (stats, inventory...).
+   5 scene         Current place/time/weather/day, characters present and mentioned (with short lore summaries
+                   and looks), relationships between them (lore background + values evolved in the story).
+   5b roles        Established posts and closed groups: never reassign, never invent a second holder.
+   5c known        Characters the protagonist has already met (discoveries).
+   5d canon        Kinship, family branches, the gathering under way (class roster...).
+   5e group_scene  Who is in the room and who has been quiet (natural attention in group scenes).
+   5f encounters   [optional] Up to three established characters plausibly nearby (never a script).
+   6 pinned        Pinned memories.
+   7 events        [optional] Journal: timeline digest + relevant events.
+   7 facts         [optional] Relevant facts and beliefs (who knows what).
+   8 lore          [optional] Lore of characters in focus + full-text search hits (up to 6) + pinned lore +
+                   approved local canon. About 20 % of the budget; long chunks cut at 2400 characters.
+   8b secrets      Narrator-only "hidden" notes of the records in play (never dropped). See 04_LOREPACK.txt.
+   9 recap         [optional] Rolling "story so far" recap.
+   9b portrait_tags  The [Name:N] portrait tag rule (worlds only; setting portrait_tags_enabled). See 04_LOREPACK.txt.
+  10 narration_rules  Short operational rules placed LAST (small models obey the last instructions best).
+Then the recent messages, newest first until the budget is used (at least "recent_messages_min", default 6).
+When even that does not fit, optional sections are dropped in this order: lore, encounters, events, facts, recap.
+
+Budget: setting context_budget_tokens (default 10 000) or the story's own; never more than the model's window
+(model profile context_limit, or Ollama num_ctx) minus the reply size, with a 10 % safety margin. Token counts are
+estimates (characters / 4).
+
+Prompt profiles (setting narrator_prompt_profile; default v5_history_hygiene): variants of where the rules go and
+whether a short reminder is added after the player's turn; v5 also hides trailing "options menus" of earlier
+replies from the model (the saved story is unchanged). Defined in context_builder.PROMPT_PROFILES.
+
+
+2. WHERE EACH PIECE COMES FROM
+------------------------------
+  World prompt, premise, lore, posts, facts, gatherings, places, calendar, stats, openings   -> the Lore Pack
+  Notes, presets, budget, prompt profile, analysis/memory options                          -> app settings
+  Per-story options (model, preset, tone, notes, exclusions, pinned lore)                   -> stories.settings_json
+  Scene, cast, clock, relationships, stats                                                  -> story_states (versioned)
+  Journal, facts, recaps, discoveries                                                       -> memory tables
+To change what the narrator is told about a WORLD: edit the pack. To change how the ENGINE talks to every model:
+edit context_builder.py (and keep the manifest in sync so the inspector stays truthful).
+
+
+3. THE OPENING SCENE
+--------------------
+POST /api/stories/{id}/start uses the starter blueprint chosen in the wizard (stored in stories.settings_json as
+starter_blueprint) as the instruction for the first reply (routers/stories.py, "Generate the opening scene").
+
+
+4. AFTER EACH REPLY
+-------------------
+main.py -> after_generation(message_id), only for replies that ended normally:
+  a. turns.post_process         cheap offline heuristics (speaker, mood)
+  a2. portrait_tags.apply       the narrator's [Name:N] tags -> portraits + expressions at once (no extra request)
+  b. turn_analysis.analyse      ONE small JSON request to a model (ANALYSIS_MAX_TOKENS = 1800):
+                                  - speakers and reactions with an expression 1-6 (portraits),
+                                  - who is present / left (scene_cast.py),
+                                  - three suggested replies in the player's voice (suggestions.py; off by default),
+                                  - characters discovered (discovery.py),
+                                  - relationship changes with a quoted proof (relationships.py),
+                                  - time / place / weather changes with proof (world_state.py).
+                                Everything is validated against the reply text; anything unproven is dropped.
+                                Setting turn_analysis_mode: always | local_only | off.
+  c. extraction (memory capture) by batch (setting event_capture_mode: off | manual | batch | after_each_turn):
+                                journal events, facts, recap suggestions, continuity problems, state-change
+                                proposals (review queue). Uses the narration model or a separate one
+                                (extraction_model_source).
+Failures there never touch the reply: the player sees a Retry button.
+
+Hidden notes and the analysis: the analysis and memory capture read the TRANSCRIPT, not the secrets section, so a
+secret only enters memory if the narrator actually wrote it into the story.
+
+
+5. TUNING TIPS
+--------------
+  - Small local models (7-13B): keep the world prompt short and concrete; prefer facts in pack.json/lore fields over
+    long Markdown; keep context_budget_tokens within the model's real context (LM Studio "Context Length").
+  - If replies are cut: raise the model profile's max_tokens, or lower it if the model's window is small.
+  - If the narrator invents a second ruler / god: add a post or closed group in pack.json.
+  - If a character is never met: add places (regulars / likely) or a gathering in pack.json.

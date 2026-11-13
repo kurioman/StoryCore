@@ -1,0 +1,47 @@
+RELEASE CHECKLIST (MAKING A ZIP TO SHARE)
+=========================================
+
+Goal: someone extracts the ZIP on another Windows PC, double-clicks "Start StoryCore.bat", connects their own model
+and plays. Nothing of yours (stories, settings, keys) may be inside.
+
+
+1. BEFORE BUILDING
+------------------
+  [ ] Version: app/backend/story/config.py APP_VERSION, RELEASE_NOTES.md, START_HERE.txt, README.md.
+  [ ] If the lore importer or pack.json validation changed: bundled.IMPORTER_VERSION raised.
+  [ ] Every pack loads without errors: start the app, Lore page, import report of each world.
+  [ ] Python source compiles (from the project folder):
+        app\python\python.exe -m compileall -q app\backend\story
+      then delete the __pycache__ folders it created (or just let make_release.py leave them out).
+
+
+2. BUILD
+--------
+From the StoryCore folder (cmd):
+
+    app\python\python.exe DEVONLY\make_release.py
+
+It writes _release\StoryCore_v<version>.zip with a single top folder "StoryCore", containing:
+    Start StoryCore.bat, START_HERE.txt, README.md, RELEASE_NOTES.md, CREDITS.md, THIRD_PARTY_NOTICES.txt,
+    ARCHITECTURE.md, LOREPACK_FORMAT.md, REFACTOR_LOG.md, DEVONLY\, app\, scripts\, Lorepack\
+and NEVER: data\ (your stories, settings, secrets.json, logs, backups), _backup_*, _to_delete, _release,
+the engine's __pycache__ folders.
+
+
+3. TEST LIKE A NEW PLAYER (do not skip)
+---------------------------------------
+  [ ] Extract the ZIP into a NEW folder (e.g. Desktop\test) - never over your own install.
+  [ ] Run "Start StoryCore.bat" from the extracted folder. Browser opens (another port if yours is running).
+  [ ] Home: both worlds listed, no stories, onboarding shows "connect a model".
+  [ ] Settings > Providers & models: add LM Studio (or Ollama/OpenRouter), test, select a model.
+  [ ] New story > Hero's Chronicle > The Summoned Hero > Generate the opening scene. Portraits appear (Lily).
+  [ ] Send two turns. Suggestions and the header (D1, date, time, place) appear.
+  [ ] Settings > Data & backups > Back up now > Verify.
+  [ ] Close the black window, start again: the story is still there, no re-import of unchanged packs.
+  [ ] Delete the test folder afterwards (it contains a test data\ folder).
+
+
+4. SHARE
+--------
+Send the ZIP. Tell the receiver: extract everything first, then double-click "Start StoryCore.bat" (START_HERE.txt).
+The app is not code-signed: Windows SmartScreen will ask "Run anyway".

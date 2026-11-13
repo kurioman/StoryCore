@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0.0",
+  "terms": [
+    {
+      "term": "Aethermere",
+      "id": "aethermere",
+      "definition": "The known continent containing the Lumencia Empire, Dominus and the eastern Abyss Zone."
+    },
+    {
+      "term": "Aura",
+      "id": "aura",
+      "definition": "Internally refined power used by martial artists to enhance body and weapons."
+    },
+    {
+      "term": "Circle",
+      "id": "magic_circle_rank",
+      "definition": "A rank of a mage's stabilized mana construct and spellcraft mastery."
+    },
+    {
+      "term": "Divinity",
+      "id": "divinity",
+      "definition": "Faith-linked holy power distinct from ordinary mana."
+    },
+    {
+      "term": "Miasma",
+      "id": "miasma",
+      "definition": "Demonic/cursed power associated with Delphirem and the Abyss Zone."
+    },
+    {
+      "term": "Saintess",
+      "id": "saintess",
+      "definition": "An exceptional mortal conduit for divine power; Aria is described this way."
+    },
+    {
+      "term": "Four Celestials",
+      "id": "four_celestials",
+      "definition": "Ethera, Emily, Carne and Seriel, described as the empire's four publicly known strongest figures."
+    },
+    {
+      "term": "Apostles",
+      "id": "apostles",
+      "definition": "The highest ranking members of the Demon God Cult, each a vessel of a fragmented aspect of Delphirem according to the public adaptation."
+    },
+    {
+      "term": "Sin Bishops",
+      "id": "sin_bishops",
+      "definition": "A second tier in the Demon God Cult associated with the seven deadly sins."
+    },
+    {
+      "term": "White Rose Society",
+      "id": "white_rose_society",
+      "definition": "Elite social circle tied to Magic Department students and academy ceremonies."
+    },
+    {
+      "term": "Blue Knights",
+      "id": "blue_knights",
+      "definition": "Knight Department combat and escort circle."
+    },
+    {
+      "term": "Mirabel / Maribel",
+      "id": "mirabel",
+      "definition": "A Theology Department student from Dominus; name spelling varies across public/community sources."
+    },
+    {
+      "term": "Delphirem / Delpirem",
+      "id": "delphirem",
+      "definition": "Demon God sought by the cult; spelling varies in sources."
+    },
+    {
+      "term": "Eye of Insight",
+      "id": "eye_of_insight",
+      "definition": "Isabel's special ability. Exact boundaries and effects are not fully verified."
+    }
+  ]
+}

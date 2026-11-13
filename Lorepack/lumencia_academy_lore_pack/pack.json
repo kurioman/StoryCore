@@ -1,0 +1,71 @@
+{
+  "format_version": 1,
+  "id": "lumencia_academy",
+  "name": "Lumencia Academy",
+  "description": "A prestigious imperial academy where martial cultivation, spellcraft and divine power meet, and noble privilege collides with commoner ambition.",
+  "canon_note": "Imported from a research-based reference pack. Records carry confidence and canon_status; community reconstructions are not guaranteed official canon.",
+  "modules": ["school"],
+
+  "files": {
+    "system_prompt": "ai/narrative_system_prompt.md",
+    "premise": "lore/premise.md",
+    "images": "lumencia_images"
+  },
+
+  "stats": [
+    { "label": "HP", "type": "current_max", "value": 100, "max": 100 },
+    { "label": "Mana / Aura", "type": "current_max", "value": 50, "max": 50 },
+    { "label": "Rank", "type": "text", "value": "Unranked" },
+    { "label": "Reputation", "type": "number", "value": 0 }
+  ],
+
+  "posts": [
+    { "id": "headmaster", "title": "Headmaster of Lumencia Academy", "character": "emily",
+      "aliases": ["headmaster", "headmistress", "academy head", "head of the academy", "principal"],
+      "mandatory": true },
+    { "id": "head_professor:magic_department", "title": "Head Professor of the Magic Department", "character": "elena_caldwin",
+      "aliases": ["professor of magic", "magic professor", "magic classes"],
+      "note": "Use Elena first for magic classes." },
+    { "id": "head_professor:knight_department", "title": "Head Professor of the Knight Department", "character": "artemis",
+      "aliases": ["knight instructor", "chivalry instructor", "knight classes", "chivalry classes"],
+      "note": "Instructor for knight and chivalry classes." },
+    { "id": "instructor:theology_department", "title": "Theology instructor", "character": "aria",
+      "aliases": ["theology professor", "theology teacher", "theology classes"],
+      "note": "Aria is the Saintess and a third-year student; she teaches Theology to first- and second-years because she is the Saintess." }
+  ],
+
+  "closed_groups": [
+    { "id": "deities", "title": "Deities", "types": ["celestial_deity", "demon_god"] },
+    { "id": "apostles", "title": "Apostles of the demon cult", "types": ["apostle"] },
+    { "id": "sin_bishops", "title": "Sin Bishops of the demon cult", "types": ["sin_bishop"] }
+  ],
+
+  "facts": [
+    { "kind": "aunt_of", "subject": "elena_caldwin", "object": "serena_caldwin" },
+    { "kind": "aunt_of", "subject": "elena_caldwin", "object": "lucia_caldwin" },
+    { "kind": "family_branch", "subject": "lilia_valenheart", "family": "Valenheart", "branch": "main branch" },
+    { "kind": "family_branch", "subject": "laris", "family": "Valenheart", "branch": "a different (secondary) branch",
+      "note": "Lilia and Laris are relatives from different Valenheart branches; no exact degree is canon." }
+  ],
+
+  "gatherings": "pack/classes.json",
+
+  "places": [
+    { "id": "library", "keywords": ["library", "archive", "archives", "reading room", "stacks"],
+      "likely": { "affiliations": ["magic_department", "theology_department"],
+                  "traits": ["brilliant", "introverted", "quiet", "studious", "rational"] } },
+    { "id": "refectory", "keywords": ["refectory", "dining hall", "cafeteria", "mess hall", "canteen", "lunch", "breakfast", "dinner"],
+      "likely": { "traits": ["cheerful", "playful", "free-spirited", "sociable"] } },
+    { "id": "training", "keywords": ["training", "yard", "arena", "sparring", "drill", "practice field", "gymnasium"],
+      "likely": { "affiliations": ["knight_department"], "traits": ["passionate", "hardworking", "disciplined", "decisive"] } },
+    { "id": "chapel", "keywords": ["chapel", "shrine", "temple", "prayer"],
+      "likely": { "affiliations": ["theology_department"], "traits": ["devoted", "compassionate"] } },
+    { "id": "headmaster_office", "keywords": ["headmaster's office", "headmaster’s office", "office of the headmaster"],
+      "regulars": ["emily"] },
+    { "id": "outdoors", "keywords": ["courtyard", "corridor", "hallway", "garden", "gardens", "grounds", "gate", "plaza", "stairs", "staircase"] }
+  ],
+
+  "calendar": { "year_label": "Imperial Year", "year_start": "March" },
+
+  "never_random": ["deity", "demon", "apostle", "sin_bishop", "celestial_deity", "demon_god"]
+}

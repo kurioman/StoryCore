@@ -1,0 +1,34 @@
+{
+  "title_system": [
+    "Grand Duke",
+    "Duke",
+    "Marquis",
+    "Count",
+    "Viscount",
+    "Baron"
+  ],
+  "class_divisions": {
+    "noble": [
+      "Knight",
+      "Lord",
+      "Chancellor"
+    ],
+    "commoner": [
+      "Adventurer",
+      "Soldier",
+      "Merchant",
+      "Artisan",
+      "Farmer",
+      "Slave"
+    ]
+  },
+  "currency": {
+    "value_in_copper": {
+      "gold": 10000,
+      "silver": 100,
+      "copper": 1
+    },
+    "conversion": "1G = 100S, 1S = 100C",
+    "commoner_living_cost": "5S"
+  }
+}

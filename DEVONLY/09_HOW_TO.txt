@@ -1,0 +1,127 @@
+HOW TO ... (RECIPES)
+====================
+
+Always: work on a copy of your data (--data-dir), run Python with --check-hash-based-pycs always, restart the app
+after backend changes, read data/logs/app.log when something fails.
+
+
+1. ADD A NEW STORY
+------------------
+No code. See 04_LOREPACK.txt, section 9. Folder in Lorepack/ + pack.json with a new id, restart.
+
+
+2. ADD A SECRET (HIDDEN INFORMATION) TO A CHARACTER, PLACE OR FACTION
+---------------------------------------------------------------------
+Add "hidden": "..." or "hidden": ["...", "..."] to the record in its JSON file, restart. Check the import report:
+"hidden_notes" counts them. See 04_LOREPACK.txt, section 4.
+
+
+3. ADD A NEW pack.json SECTION OR FIELD
+---------------------------------------
+  1. services/pack_manifest.py: add the name to SECTIONS (so it is not reported as unknown) and write a validator
+     like the existing ones (_posts, _places...): accept good entries, skip bad ones with rep.warnings, never raise.
+  2. Read it ONLY through services/world_pack.py: world_pack.section(db, world_id, "my_section").
+     It returns an empty value when the pack has no such section: your feature must simply be off then.
+  3. Use it in a service (and, if the narrator must know, in context_builder.build as a Section with a manifest item).
+  4. Raise bundled.IMPORTER_VERSION (e.g. "3" -> "4") so every pack is re-imported once with the new validator.
+  5. Document it in LOREPACK_FORMAT.md and 04_LOREPACK.txt.
+
+
+4. ADD A GENRE MODULE (e.g. "isekai")
+-------------------------------------
+  1. services/pack_manifest.py: add the name to KNOWN_MODULES.
+  2. Where the behaviour differs: if world_pack.has_module(pack, "isekai"): ...
+     ("school" is the example: services/world_state.py, encounters.py, roles.py, scene_cast.py, canon.py).
+  3. Packs opt in with "modules": ["isekai"]. Packs without it must behave exactly as before.
+
+
+5. ADD AN APP SETTING
+---------------------
+  1. services/settings_service.py: add the key with its default to DEFAULTS (comment the allowed values).
+  2. Read it with settings_service.get(db, "my_key").
+  3. The compiled frontend will not show it. Set it with the API:
+       PUT /api/settings  {"my_key": value}   (header X-Story-Client: 1)
+     or patch the frontend (07_FRONTEND.txt).
+
+
+6. ADD AN API ENDPOINT
+----------------------
+  1. In the right routers/*.py:
+       @router.get("/stories/{sid}/my-thing")
+       def my_thing(sid: str, db: Session = Depends(get_db)) -> dict[str, Any]:
+           """One line: what it returns (used by 08_API_REFERENCE.txt)."""
+           s = story_tree.get_story(db, sid)        # raises NotFound -> 404
+           return {"ok": True}
+     Use ctx: AppContext = Depends(get_ctx) for background work, providers, secrets.
+     Put the logic in a service, not in the router.
+  2. Raise TurnError / ValueError for player-facing errors (plain-language message).
+  3. Never return worlds.data_json["hidden"] or anything from secrets_store.
+
+
+7. ADD A TABLE OR COLUMN
+------------------------
+models.py + a new Alembic migration (03_DATABASE.txt, section 2). Bump nothing else; the migration runs at start with
+an automatic backup.
+
+
+8. ADD A SECTION TO THE NARRATOR CONTEXT
+----------------------------------------
+In context_builder.build(), append Section("my_key", "Title for the model", text, [manifest items]) at the right
+place (order matters: later = stronger for most models; the narration rules stay last). If it may be dropped when
+space is short, add its key to OPTIONAL_SECTIONS (order = drop order). Check the result in the Context Inspector.
+
+
+9. ADD A PROVIDER TYPE
+----------------------
+06_AI_PROVIDERS.txt, section 7.
+
+
+10. CHANGE THE VERSION NUMBER
+-----------------------------
+story/config.py APP_VERSION (shown in the UI and logs, written in backups). Update RELEASE_NOTES.md and
+START_HERE.txt.
+
+
+11. TEST THE BACKEND FROM A SCRIPT (NO BROWSER)
+----------------------------------------------
+  import os, sys, tempfile
+  sys.path.insert(0, r"C:\path\to\StoryCore\app\backend")
+  os.environ["STORY_DATA_DIR"] = tempfile.mkdtemp()          # never your real data
+  from fastapi.testclient import TestClient
+  from story.config import load_settings
+  from story.main import create_app
+  from story.bundled import sync_lore_packs
+  settings = load_settings(); settings.secrets_backend = "memory"
+  app = create_app(settings, testing=True)                   # testing: no log file, no automatic lore loading
+  with TestClient(app) as c:
+      sync_lore_packs(app.state.ctx)                         # load Lorepack/ like a normal start
+      print(c.get("/api/worlds").json())
+      H = {"X-Story-Client": "1"}
+      # c.post("/api/stories", json={...}, headers=H) ...
+Run it with:  app\python\python.exe --check-hash-based-pycs always my_test.py
+The "mock" provider (created at start) lets you send turns without a real model.
+
+
+12. SEE EXACTLY WHAT THE NARRATOR RECEIVES
+------------------------------------------
+In a story: Context Inspector (section list, tokens, what was left out). "Preview" shows the full text (secrets
+masked). From a script: context_builder.build(db, story, branch).system - this one is NOT masked (developer view).
+
+
+13. REGENERATE THE API LIST (08_API_REFERENCE.txt)
+--------------------------------------------------
+From app/backend/story, with any Python:
+  import ast, glob, os
+  for f in sorted(glob.glob("routers/*.py")):
+      for n in ast.parse(open(f, encoding="utf-8").read()).body:
+          if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)):
+              for d in n.decorator_list:
+                  if isinstance(d, ast.Call) and getattr(d.func, "attr", "") in ("get", "post", "put", "patch", "delete"):
+                      doc = (ast.get_docstring(n) or n.name).split("\n")[0]
+                      print(d.func.attr.upper().ljust(7), "/api" + d.args[0].value, "-", doc)
+
+
+14. MOVE OR COPY AN INSTALL
+---------------------------
+Copy the whole folder (with data/). Stored paths to packs and portraits are re-found automatically by folder name.
+API keys stored in Windows Credential Manager stay on the old PC: re-enter them on the new one.

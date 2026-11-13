@@ -1,0 +1,71 @@
+# Release notes: StoryCore v1.7.0 for Windows
+
+StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine: every world is a lore pack in the
+`Lorepack` folder, loaded automatically at start.
+
+## New in v1.7.0
+
+- **Several worlds.** Hero's Chronicle (heroic fantasy) joins Lumencia Academy. Each world brings its own openings,
+  stat sheet, characters, portraits, unique posts and rules. Add a world by adding a folder with a `pack.json`
+  (see `LOREPACK_FORMAT.md`); restart the app and it is there.
+- **Portraits right away.** The narrator tags each spoken line with the speaker and an expression
+  (`[Selphina:3]`); the app hides the tag and shows the matching portrait as soon as the reply ends, instead of
+  waiting for the scene analysis. Expressions: 1 neutral, 2 happy, 3 sad, 4 angry, 5 disdain, 6 love / shy.
+- **Suggested replies are now off by default** (faster scene analysis); turn them on in Settings > Memory capture.
+- **Narrator-only secrets.** Lore can hold hidden information the narrator knows but the player never sees in the
+  app (for example a character's true allegiance). It shapes the story and is revealed only through events.
+- **Automatic loading and re-loading.** Edit a pack, restart, and the world is updated. Your stories, corrections
+  and notes are never touched by a re-import.
+- **LM Studio** and other OpenAI-compatible local servers are documented next to Ollama and OpenRouter.
+- **Developer documentation** in the `DEVONLY` folder.
+- Fixes: the app started old compiled code after an update; full backups could not be verified or restored; files
+  exported by Lumencia Story Desk can be imported again.
+
+**Coming from Lumencia Story Desk or an earlier StoryCore?** Close the app and copy your `data` folder into the new
+`StoryCore` folder. On the first start your old `lumencia.db` is copied to `stories.db` (the old file is kept) and the
+database is updated, with a backup made first.
+
+## Earlier: v1.6.4
+
+- Portraits, suggested replies, relationship tracking and scene analysis on by default, each adjustable in Settings > Memory capture.
+- New token defaults (context budget 10000, reserved for the reply 2000, max output tokens 3000, output length Medium).
+- Thinking off for story replies by default; clearer analysis failures with a Retry button.
+
+## What is included
+
+**Story**
+- Create and save stories with a five-step wizard; each world offers its own openings, plus Free Mode and Character Preview.
+- Narrated replies through LM Studio, Ollama, OpenRouter, OpenAI, Anthropic or any OpenAI-compatible server, plus an offline Mock narrator for trying the app.
+- Three editable suggestions after each reply. Nothing is sent until you press Send.
+- A header on each reply with the in-story day, time, weather and place. You can correct it with the pencil or `/scene`.
+- Two dialogue styles (Dialogue emphasis, with speaker labels and portraits in the text, and Classic), reading size, story font, and Light and Dark themes.
+- Savepoints, branches, recaps, slash commands and per-story content preferences.
+
+**World and characters**
+- Two lore packs: Hero's Chronicle (21 characters) and Lumencia Academy (about 30 characters), with factions, locations and power systems.
+- Portraits with six expressions per character, shown beside the moment a character speaks or reacts.
+- Cast panel, relationships, and a journal and memory with links back to the messages they came from.
+
+**Your data**
+- Everything is stored in a local `data` folder that starts empty.
+- Full backups, story export and import, and an in-app Help tour.
+
+## Known technical limitations
+
+- **Tested on Windows 11.** Windows 10 should work but has had little testing.
+- **Not code-signed, and there is no installer.** Expect a SmartScreen warning on the first start, and possibly an antivirus warning.
+- **Windows only.** The interface is in English only.
+- **Keep the black window open** while you play. Run only one copy at a time.
+- **The Mock narrator shows no portraits or relationship changes,** because it cannot read the story. Use a real model to see them.
+- **Speaker labels:** the fix that shows someone as speaking when a reply only says "she said" could not be confirmed on real model output. Ambiguous scenes stay conservative, so a character can still be shown as "Also present". The sentence and the ⓘ figures from that reply make a very useful report.
+- **Analysis can fail** on malformed model output. The app retries once, which is one extra request. If that also fails, the reply is fine but has no portraits or suggestions until you press Retry.
+- **Prose quality depends on your model.** Hidden reasoning is off by default for OpenRouter narration, and this has only had limited testing.
+- **Suggestions are checked for shape, not truth.** A draft can contain a small invented detail, so read it before you send it.
+- **Long sessions** have had little testing with real models. Season and date details can drift.
+- **A long reply can be cut off** at the output limit. It is then marked incomplete rather than silently accepted.
+- **Portrait matching needs the original file names** (`<character>_1.webp` ... `_6`), so leave the image folders as they are.
+- **Prices and models change.** The app reads current prices from OpenRouter, and what you pay can differ by routed provider.
+
+## Feedback
+
+Send feedback and bug reports to the person who shared StoryCore with you. `README.md` lists what to include. The most useful notes are what you did, what you expected, and what happened.
