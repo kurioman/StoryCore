@@ -68,6 +68,8 @@ DEFAULTS: dict[str, Any] = {
     "recap_auto_replace": False,
     "enter_to_send": True,
     "theme": "dark",
+    # v1.8: language of the story text (narration and dialogue): en | fr. Stories may override it (settings_json).
+    "narration_language": "en",
     # in-app corrections layered over each world's pack.json (scoped by a "world" slug): post holders (services/roles.py)
     # and kinship, family branches and gatherings (services/canon.py), verified against lore at use
     "role_assignments": [],

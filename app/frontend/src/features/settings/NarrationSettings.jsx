@@ -36,6 +36,27 @@ function PromptProfilePicker({ value, onChange }) {
   );
 }
 
+// v1.8: language of the story text (the narrator writes in it; the interface language is separate)
+function NarrationLanguagePicker({ value, onChange }) {
+  const languages = useQuery({ queryKey: [`narration-languages`], queryFn: () => apiGet(`/narration-languages`) });
+  return (
+    <Field
+      label={msg("Story language")}
+      hint={msg(
+        "The language the narrator writes the story in. Lore and instructions stay in English; character names and portrait tags are kept as they are. Each story can override it.",
+      )}
+    >
+      <Select value={value ?? `en`} onChange={(e) => onChange(e.target.value)}>
+        {(languages.data?.languages ?? [{ code: `en`, label: `English` }]).map((l) => (
+          <option value={l.code} key={l.code}>
+            {msg(l.label)}
+          </option>
+        ))}
+      </Select>
+    </Field>
+  );
+}
+
 export function NarrationSettings() {
   let settings = useSettings(),
     saveSettings = useSaveSettings(),
@@ -117,6 +138,15 @@ export function NarrationSettings() {
             />
           </div>
         </section>
+        <NarrationLanguagePicker
+          value={n.narration_language ?? `en`}
+          onChange={(e) =>
+            r({
+              ...n,
+              narration_language: e,
+            })
+          }
+        />
         <PromptProfilePicker
           value={n.narrator_prompt_profile ?? null}
           onChange={(e) =>
@@ -320,6 +350,7 @@ export function NarrationSettings() {
               narration_presets: n.narration_presets,
               starter_presets: n.starter_presets,
               narrator_prompt_profile: n.narrator_prompt_profile ?? null,
+              narration_language: n.narration_language ?? `en`,
             })
           }
         >

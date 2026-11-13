@@ -105,6 +105,20 @@ def reimport(wid: str, ctx: AppContext = Depends(get_ctx), db: Session = Depends
     return lore_import.import_pack(db, Path(w.source_path))
 
 
+@router.get("/lore/packs/check")
+def check_packs(world_id: str = "", ctx: AppContext = Depends(get_ctx), db: Session = Depends(get_db)) -> dict[str, Any]:
+    """Lore pack checker (services/pack_check.py): every pack in the Lorepack folder, or the source folder of one
+    world. Read-only: runs on a throw-away database."""
+    from ..services import pack_check
+
+    if world_id:
+        w = db.get(World, world_id)
+        if w is None or not w.source_path:
+            raise HTTPException(404, "World not found")
+        return {"packs": [pack_check.check_pack(Path(w.source_path))]}
+    return {"packs": pack_check.check_all(ctx.settings.project_root / "Lorepack")}
+
+
 @router.get("/lore/import-runs")
 def import_runs(db: Session = Depends(get_db)) -> dict[str, Any]:
     rows = db.scalars(select(ImportRun).where(ImportRun.kind == "lore").order_by(ImportRun.started_at.desc()).limit(20))

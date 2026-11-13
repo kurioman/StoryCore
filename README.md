@@ -83,6 +83,8 @@ Everything below is in **Settings > Memory capture**, and your choices are kept.
 
 Scene analysis powers suggestions, relationship tracking and expression changes, so they stop while it is off. With **Local models only**, replies from hosted models are not analysed, and the app says so under the reply. Turning one feature off leaves the others running. **Relationship changes: Off** keeps your existing relationships as they are.
 
+**Story language** (Settings > Narration & context, new interface): English by default, or French. The narrator then writes the story in French; character names and lore stay as the pack writes them. Each story can override it in its options (the sliders button above the story). French prose quality depends on your model: small local models usually write best in English.
+
 **Token settings** are in **Settings > Narration & context** and in each model's parameters:
 
 | Setting | Default | What it does |
@@ -195,5 +197,7 @@ Send your report to the person who shared StoryCore with you. Please include:
 Read logs and screenshots before you send them. They can show your Windows user name in folder paths, and screenshots can show story text. Never send your API key, and do not send your `data` folder unless you are happy to share your stories.
 
 ## For developers
+
+To check a lore pack you are writing, double-click **Check Lore Packs.bat**: it lists errors (the app would skip something), warnings (something will look wrong) and notes for every pack in `Lorepack`, without starting the app.
 
 The `DEVONLY` folder documents the whole project: how it starts, the backend, the database, the lore pack format, how the narrator's context is built, AI providers, the frontend, the API, recipes and a release checklist. Start with `DEVONLY/00_READ_FIRST.txt`.

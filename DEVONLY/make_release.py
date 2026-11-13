@@ -17,7 +17,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 TOP = "StoryCore"  # folder name inside the ZIP
 
-INCLUDE = ["Start StoryCore.bat", "START_HERE.txt", "README.md", "RELEASE_NOTES.md", "CREDITS.md",
+INCLUDE = ["Start StoryCore.bat", "Check Lore Packs.bat", "START_HERE.txt", "README.md", "RELEASE_NOTES.md", "CREDITS.md",
            "THIRD_PARTY_NOTICES.txt", "ARCHITECTURE.md", "LOREPACK_FORMAT.md", "REFACTOR_LOG.md",
            "DEVONLY", "app", "scripts", "Lorepack"]
 SKIP_DIRS = {"__pycache__", ".git", ".vscode", ".idea", "node_modules", ".venv"}

@@ -496,6 +496,16 @@ function StoryOptions({ story }) {
           </Select>
         </label>
         <label className="block text-xs text-muted">
+          {msg("Story language")}
+          <Select value={String(r.narration_language ?? ``)} onChange={(e) => i(`narration_language`, e.target.value)}>
+            <option value="">
+              {msg("App setting")} ({settings.data?.narration_language === `fr` ? msg("French") : msg("English")})
+            </option>
+            <option value="en">{msg("English")}</option>
+            <option value="fr">{msg("French")}</option>
+          </Select>
+        </label>
+        <label className="block text-xs text-muted">
           {msg("Output length")}
           <Select value={String(r.output_length ?? ``)} onChange={(e) => i(`output_length`, e.target.value)}>
             <option value="">{msg("Model default")}</option>

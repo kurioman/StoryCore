@@ -52,9 +52,13 @@ replies from the model (the saved story is unchanged). Defined in context_builde
 ------------------------------
   World prompt, premise, lore, posts, facts, gatherings, places, calendar, stats, openings   -> the Lore Pack
   Notes, presets, budget, prompt profile, analysis/memory options                          -> app settings
-  Per-story options (model, preset, tone, notes, exclusions, pinned lore)                   -> stories.settings_json
+  Per-story options (model, preset, tone, notes, exclusions, pinned lore, story language)   -> stories.settings_json
   Scene, cast, clock, relationships, stats                                                  -> story_states (versioned)
   Journal, facts, recaps, discoveries                                                       -> memory tables
+Story language (v1.8, services/narration_language.py): app setting narration_language (en | fr), overridable per
+story (settings_json.narration_language). For French, a "Story language" section is added after the portrait-tag rule,
+and "(Write your reply in French.)" after each player turn (not after the opening request). Lore, instructions, portrait
+tags, names and the analysis JSON stay in English; suggested replies follow the reply's language on their own.
 To change what the narrator is told about a WORLD: edit the pack. To change how the ENGINE talks to every model:
 edit context_builder.py (and keep the manifest in sync so the inspector stays truthful).
 

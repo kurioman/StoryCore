@@ -203,5 +203,24 @@ no longer exists is ignored (verified against lore at use).
   4. ai/narrative_system_prompt.md: tone, genre rules, what the narrator must respect.
   5. lore/premise.md and any other lore files.
   6. Portraits: <id>_1.webp ... in the images folder.
-  7. Start the app, open Lore > the world > import report. Fix warnings, restart.
+  7. Double-click "Check Lore Packs.bat" (project root): errors, warnings and notes for every pack, without starting
+     the app. Fix, check again. (Also: python -m story.pack_check <folder>, or GET /api/lore/packs/check.)
+     Then start the app, open Lore > the world > import report.
   8. New story > choose the world > an opening > generate. Use the Context Inspector to see what the narrator got.
+
+
+10. CHECKING A PACK (v1.8)
+--------------------------
+"Check Lore Packs.bat" (or python -m story.pack_check [folder ...], or GET /api/lore/packs/check[?world_id=...])
+runs the real import and portrait scan on a throw-away database and prints one report per pack. Code:
+services/pack_check.py. It never reads or writes the data folder.
+
+  ERRORS     the app skips the pack or a file in it: invalid JSON (with line and column), bad pack.json identity,
+             portrait folder missing, unreadable images.
+  WARNINGS   the pack loads but something will look wrong: duplicate ids, references to ids that do not exist,
+             unknown pack.json sections, character ids in pack.json that the lore does not have, opening portrait tags
+             ([Name:N]) naming nobody, portrait files matching no character, missing expressions (1-6), the same
+             picture used for several expressions.
+  NOTES      worth knowing: records without an explicit id, characters without portraits, very large images.
+
+Exit code 1 when a pack has errors (usable in scripts). The test suite checks that the shipped packs have none.

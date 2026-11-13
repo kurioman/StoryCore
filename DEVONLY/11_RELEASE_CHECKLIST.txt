@@ -9,7 +9,8 @@ and plays. Nothing of yours (stories, settings, keys) may be inside.
 ------------------
   [ ] Version: app/backend/story/config.py APP_VERSION, RELEASE_NOTES.md, START_HERE.txt, README.md.
   [ ] If the lore importer or pack.json validation changed: bundled.IMPORTER_VERSION raised.
-  [ ] Every pack loads without errors: start the app, Lore page, import report of each world.
+  [ ] Every pack loads without errors: run "Check Lore Packs.bat" (RESULT: OK for each pack).
+  [ ] Engine tests pass: DEVONLY\run_tests.bat ("All tests passed").
   [ ] Python source compiles (from the project folder):
         app\python\python.exe -m compileall -q app\backend\story
       then delete the __pycache__ folders it created (or just let make_release.py leave them out).

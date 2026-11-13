@@ -111,6 +111,7 @@ LORE  (routers/lore.py)
   POST   /api/lore/import-zip                                     import lore zip
   POST   /api/worlds/{wid}/reimport                               reimport
   GET    /api/lore/import-runs                                    import runs
+  GET    /api/lore/packs/check[?world_id=]                        lore pack checker report (v1.8, read-only)
   GET    /api/worlds/{wid}/entities                               entities
   GET    /api/worlds/{wid}/entities/{entity_id}                   entity
   GET    /api/worlds/{wid}/search                                 search
@@ -202,6 +203,7 @@ SYSTEM  (routers/system.py)
   GET    /api/health                                              health
   GET    /api/settings                                            get settings
   GET    /api/prompt-profiles                                     prompt profiles
+  GET    /api/narration-languages                                 story languages (v1.8): en, fr
   PUT    /api/settings                                            put settings
   GET    /api/onboarding                                          onboarding
   GET    /api/system/paths                                        paths

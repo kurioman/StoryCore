@@ -101,6 +101,11 @@ START_HERE.txt.
 Run it with:  app\python\python.exe --check-hash-based-pycs always my_test.py
 The "mock" provider (created at start) lets you send turns without a real model.
 
+The automated tests do exactly this: app/backend/tests (unittest, standard library only). Run them all with
+DEVONLY\run_tests.bat, or one file: app\python\python.exe DEVONLY\run_tests.py -v test_story_flow
+A new test: copy a test_*.py file; AppTestCase (tests/support.py) gives a fresh app with both packs imported, the
+mock narrator set to answer instantly, and helpers (new_story, post, get, wait_reply).
+
 
 12. SEE EXACTLY WHAT THE NARRATOR RECEIVES
 ------------------------------------------

@@ -3,6 +3,19 @@
 StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine: every world is a lore pack in the
 `Lorepack` folder, loaded automatically at start.
 
+## In progress for v1.8 (not released yet)
+
+- **New interface, with its source code** (`app/frontend/src`), served at `/next/` next to the current one while it
+  is being checked. Same screens and behaviour; every text is ready for translation.
+- **Story language.** The narrator can write in French (Settings > Narration & context, or per story). Lore, names and
+  portrait tags are unchanged.
+- **Check Lore Packs.bat** reports what is wrong in a pack (invalid JSON with its line, unknown ids, portraits that
+  match nobody, missing expressions, identical expression images...) without starting the app.
+- **Scene analysis with LM Studio**: the analysis now asks LM Studio for its JSON in a form it accepts, so it no longer
+  fails with "No JSON object found".
+- Hero's Chronicle portraits recompressed (133 MB to 18 MB, same look).
+- Engine tests (`app/backend/tests`, `DEVONLY/run_tests.bat`).
+
 ## New in v1.7.0
 
 - **Several worlds.** Hero's Chronicle (heroic fantasy) joins Lumencia Academy. Each world brings its own openings,

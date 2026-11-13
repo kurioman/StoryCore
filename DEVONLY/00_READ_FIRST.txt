@@ -36,6 +36,9 @@ It runs entirely on the player's PC:
   app/python/                Bundled "embeddable" Windows Python 3.12 + all libraries. Nothing to install.
   app/backend/story/         THE ENGINE (Python source). See 02_BACKEND.txt.
   app/frontend/dist/         The compiled web interface (HTML/CSS/JS). See 07_FRONTEND.txt.
+  app/frontend/src/          Source of the new interface (v1.8, served at /next/). See 13_FRONTEND_SOURCE.md.
+  app/backend/tests/         Engine tests (run DEVONLY\run_tests.bat).
+  Check Lore Packs.bat       Lore pack checker for pack authors. See 04_LOREPACK.txt section 10.
   scripts/serve.py           Entry point used by the .bat.
 
   Lorepack/<pack folder>/    One folder per story world. See 04_LOREPACK.txt.
@@ -62,6 +65,8 @@ It runs entirely on the player's PC:
   09_HOW_TO.txt              Recipes: add a story, add a pack field, add a module, add an endpoint, add a table...
   10_TROUBLESHOOTING.txt     Known problems and how to diagnose them.
   11_RELEASE_CHECKLIST.txt   How to build a clean ZIP to share.
+  13_FRONTEND_SOURCE.md      Source of the new interface: layout, languages (msg()), build commands.
+  run_tests.bat / .py        Runs the engine tests with the bundled Python.
 
 
 4. THE FIVE RULES OF THIS PROJECT

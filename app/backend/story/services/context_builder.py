@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 from ..models import (Avatar, EntityFact, LocalCanon, LoreChunk, LoreEntity, Message, MessageBranch, Recap, Story,
                       StoryEvent, UserNote, World)
 from ..providers.base import ChatMessage
-from . import portrait_tags, settings_service, state_service, story_tree
+from . import narration_language, portrait_tags, settings_service, state_service, story_tree
 from .entities import EntityIndex, build_index
 
 STOPWORDS = set("""the and that with this from have what your their there they them then than into about would could should
@@ -596,6 +596,9 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
     min_recent = int(cfg.get("recent_messages_min") or 6)
     # v1.7 portrait tags: the narrator marks who speaks and how ([Selphina:3]); the app shows the portrait at once
     tags_text = portrait_tags.instruction(pname) if story.world_id and cfg.get("portrait_tags_enabled", True) else ""
+    # v1.8 story language: the narrator writes in it; tags, names and the analysis JSON stay as they are
+    lang_code = narration_language.of(cfg, ssettings)
+    lang_text = narration_language.instruction(lang_code)
     candidates = []  # newest first: (message, body as sent, tokens, trailing menu left out)
     for m in reversed(convo):
         body, cut = message_for_model(m), False
@@ -606,7 +609,7 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
     def fixed_tokens() -> int:
         # measure the system prompt exactly as it is sent (section headings included), not just the section bodies
         return est_tokens("\n\n".join(f"# {s.title}\n{s.text}" for s in [*sections, *([rules] if rules else [])])) + 8 \
-            + (est_tokens(tags_text) + 12 if tags_text else 0)
+            + (est_tokens(tags_text) + 12 if tags_text else 0) + (est_tokens(lang_text) + 10 if lang_text else 0)
 
     def pick(fixed: int) -> tuple[list[Any], int]:
         """Newest first until the budget is used; the minimum recent messages may go over the budget but never over the
@@ -670,9 +673,14 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
         if tags_text:  # small models follow a per-turn note far better than a system rule (v1.7 portrait tags)
             reminder = reminder.rstrip(")") + " Put [Name:N] before each named character's spoken line.)"
         msgs[-1] = ChatMessage("user", msgs[-1].content + reminder)
+    if lang_text and msgs and msgs[-1].role == "user" and chosen[-1].kind == "story" and not opening:
+        msgs[-1] = ChatMessage("user", msgs[-1].content + narration_language.reminder(lang_code))
     if tags_text:
         sections.append(Section("portrait_tags", "Portrait tags (removed before the player reads)", tags_text,
                                 [{"type": "prompt", "label": "Portrait tags"}]))
+    if lang_text:
+        sections.append(Section("narration_language", f"Story language: {narration_language.LANGUAGES[lang_code]}", lang_text,
+                                [{"type": "prompt", "label": f"Narration in {narration_language.LANGUAGES[lang_code]}"}]))
     if rules:
         sections.append(rules)
 

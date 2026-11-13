@@ -41,6 +41,12 @@ def prompt_profiles() -> dict[str, Any]:
     return {"default": DEFAULT_PROMPT_PROFILE, "profiles": [{"id": k, "label": v["label"]} for k, v in PROMPT_PROFILES.items()]}
 
 
+@router.get("/narration-languages")
+def narration_languages() -> dict[str, Any]:
+    from ..services.narration_language import DEFAULT, LANGUAGES
+    return {"default": DEFAULT, "languages": [{"code": k, "label": v} for k, v in LANGUAGES.items()]}
+
+
 @router.put("/settings")
 def put_settings(values: dict[str, Any], db: Session = Depends(get_db)) -> dict[str, Any]:
     bad = [k for k in values if k not in settings_service.DEFAULTS]
@@ -60,6 +66,10 @@ def put_settings(values: dict[str, Any], db: Session = Depends(get_db)) -> dict[
         raise ValueError("story_font must be sans or serif")
     if "dialogue_style" in values and values["dialogue_style"] not in ("emphasis", "classic"):
         raise ValueError("dialogue_style must be emphasis or classic")
+    if "narration_language" in values:
+        from ..services.narration_language import LANGUAGES
+        if values["narration_language"] not in LANGUAGES:
+            raise ValueError(f"narration_language must be one of {', '.join(LANGUAGES)}")
     return settings_service.set_many(db, values)
 
 
