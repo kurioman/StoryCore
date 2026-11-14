@@ -8,7 +8,9 @@ set "PYTHONHOME="
 set "PYTHONPATH="
 set "PYTHONUTF8=1"
 set "PYTHONDONTWRITEBYTECODE=1"
-"%PYEXE%" DEVONLY\run_tests.py %*
+rem --check-hash-based-pycs always: the release ships hash-based .pyc files; without it Python would run old compiled
+rem code instead of the current .py files (same flag as Start StoryCore.bat).
+"%PYEXE%" --check-hash-based-pycs always DEVONLY\run_tests.py %*
 set "RC=%errorlevel%"
 echo.
 if "%RC%"=="0" (echo  All tests passed.) else (echo  Some tests FAILED: see above.)
