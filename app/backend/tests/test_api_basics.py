@@ -50,3 +50,20 @@ class BasicsTest(AppTestCase):
     def test_developer_folders_are_not_offered_as_portrait_folders(self):
         names = {f["name"] for f in self.get("/onboarding")["image_folders"]}
         self.assertNotIn("DEVONLY", names)
+
+
+class InterfaceSwitchTest(AppTestCase):
+    import_packs = False
+
+    def test_root_opens_the_new_interface_and_old_stays_reachable(self):
+        r = self.client.get("/", follow_redirects=False)
+        from story.config import FRONTEND_DIST
+        if not (FRONTEND_DIST.parent / "dist-next" / "index.html").is_file():
+            self.skipTest("new interface not built")
+        self.assertEqual(r.status_code, 307)
+        self.assertEqual(r.headers["location"], "/next/")
+        self.assertIn('id="root"', self.client.get("/next/").text)
+        if (FRONTEND_DIST / "index.html").is_file():
+            old = self.client.get("/old")
+            self.assertEqual(old.status_code, 200)
+            self.assertIn("/assets/", old.text)

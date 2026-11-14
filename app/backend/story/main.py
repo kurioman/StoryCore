@@ -10,7 +10,7 @@ from pathlib import Path
 
 import httpx
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import select
 
@@ -216,6 +216,11 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
     async def spa(full_path: str):
         if full_path.startswith("api/"):
             return JSONResponse({"detail": "Not found"}, 404)
+        # v1.8: the new interface is the default; the previous one stays at /old while the switch settles
+        if full_path in ("", "index.html") and (next_dist / "index.html").is_file():
+            return RedirectResponse("/next/", status_code=307)
+        if full_path.strip("/") == "old":
+            full_path = ""
         f = (FRONTEND_DIST / full_path).resolve() if full_path else None
         if f and f.is_file() and FRONTEND_DIST.resolve() in f.parents:
             return FileResponse(f)
