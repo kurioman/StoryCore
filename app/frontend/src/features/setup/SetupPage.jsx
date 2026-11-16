@@ -255,7 +255,7 @@ function Cloud() {
         )}
       </p>
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
-        {CLOUD_MODELS.map((m) => (
+        {CLOUD_MODELS().map((m) => (
           <div key={m.id} className="sc-su-panel">
             <div className="flex items-baseline gap-2">
               <p className="sc-brand text-xl text-[#f3dca0]">{m.name}</p>

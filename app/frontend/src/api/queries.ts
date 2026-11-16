@@ -123,14 +123,14 @@ export const streamEventSchema = z.discriminatedUnion("type", [
 ]);
 
 /** The six portrait expressions (slot = image number in the character's folder). */
-export const EXPRESSIONS = [
+export const EXPRESSIONS = () => ([
   { slot: 1, short: msg("Neutral"), name: msg("Neutral") },
   { slot: 2, short: msg("Happy"), name: msg("Happy / Smiling") },
   { slot: 3, short: msg("Sad"), name: msg("Sad / Sobbing") },
   { slot: 4, short: msg("Angry"), name: msg("Angry / Aggressive") },
   { slot: 5, short: msg("Disdain"), name: msg("Disdain / Disgust") },
   { slot: 6, short: msg("Love"), name: msg("Love / Shy") },
-];
+]);
 
 export const queryKeys = {
   stories: ["stories"],

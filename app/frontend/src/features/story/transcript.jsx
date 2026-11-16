@@ -19,7 +19,7 @@ function speakerColorIndex(e) {
 }
 
 function BeatPortrait({ b }) {
-  let t = EXPRESSIONS[b.expression - 1],
+  let t = EXPRESSIONS()[b.expression - 1],
     n = b.beat === `speaking`;
   return (
     <figure
@@ -737,7 +737,7 @@ export function SpeakersPanel({ scene, onOpenCharacter }) {
         <ol className="flex items-center gap-2">
           {scene.speakers.map((n, r) => {
             let i = n.character_id === scene.active_speaker_id,
-              a = EXPRESSIONS[n.expression - 1];
+              a = EXPRESSIONS()[n.expression - 1];
             return (
               <li key={n.character_id}>
                 <button
@@ -767,7 +767,7 @@ export function SpeakersPanel({ scene, onOpenCharacter }) {
             );
           })}
           {r.map((e) => {
-            let n = EXPRESSIONS[e.expression - 1];
+            let n = EXPRESSIONS()[e.expression - 1];
             return (
               <li key={e.character_id}>
                 <button

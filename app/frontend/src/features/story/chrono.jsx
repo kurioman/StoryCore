@@ -156,12 +156,12 @@ function chronoParts(e, t = msg("Year", {})) {
   );
 }
 
-var CHRONO_TONES = {
+var CHRONO_TONES = () => ({
   before_reply: msg("Scene as it stood when this reply began (updated once the reply has been analysed)", {}),
   analysis: msg("Scene for this reply, including what the reply established", {}),
   manual: msg("Scene as you corrected it", {}),
   reconstructed: msg("Reconstructed from the story's saved state history (this reply predates per-reply headers)", {}),
-};
+});
 
 export function ChronoHeader({ c, yearLabel, onEdit, pending }) {
   if (c.basis === `not_recorded`)
@@ -187,7 +187,7 @@ export function ChronoHeader({ c, yearLabel, onEdit, pending }) {
         v0: a,
       })}
       aria-busy={pending || undefined}
-      title={CHRONO_TONES[c.basis ?? ``] ?? undefined}
+      title={CHRONO_TONES()[c.basis ?? ``] ?? undefined}
       data-basis={c.basis ?? undefined}
     >
       {i.map((e, t) => (
@@ -215,7 +215,7 @@ export function ChronoHeader({ c, yearLabel, onEdit, pending }) {
         </span>
       ))}
       {c.basis === `reconstructed` && (
-        <span className="text-faint" title={CHRONO_TONES.reconstructed}>
+        <span className="text-faint" title={CHRONO_TONES().reconstructed}>
           <span aria-hidden>≈</span>
           <span className="sr-only">{msg("(reconstructed from saved state)")}</span>
         </span>

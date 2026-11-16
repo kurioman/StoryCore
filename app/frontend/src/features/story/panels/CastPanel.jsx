@@ -176,7 +176,7 @@ function CastCharacterRow({ c, onSlot, onLock, onPresent, onOpen }) {
             </IconButton>
           </div>
           <p className="mt-1 text-[11px] text-muted">
-            {EXPRESSIONS[(c.expression.slot ?? 1) - 1]?.short}
+            {EXPRESSIONS()[(c.expression.slot ?? 1) - 1]?.short}
             {c.expression.source === `suggested` && (
               <span className="text-faint">
                 {" "}
@@ -196,7 +196,7 @@ function CastCharacterRow({ c, onSlot, onLock, onPresent, onOpen }) {
             )}
           </p>
           <div className="mt-1.5 flex flex-wrap gap-1" role="radiogroup" aria-label={`${c.name} expression`}>
-            {EXPRESSIONS.map((n) => (
+            {EXPRESSIONS().map((n) => (
               <button
                 role="radio"
                 aria-checked={c.expression.slot === n.slot}

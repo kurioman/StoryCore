@@ -887,7 +887,7 @@ export function ProvidersQuickSetup({ path, hideChooser = false } = {}) {
   );
 }
 
-var PARAM_INFO = {
+var PARAM_INFO = () => ({
   temperature: {
     label: msg("Temperature"),
     min: 0,
@@ -943,7 +943,7 @@ var PARAM_INFO = {
     max: 2 ** 31,
     step: 1,
   },
-};
+});
 
 export function AdvancedProviders() {
   let providers = useProviders(),
@@ -1257,7 +1257,7 @@ function ModelProfileRow({ m: e, p, isDefault }) {
                   </label>
                 );
 
-              let n = PARAM_INFO[e];
+              let n = PARAM_INFO()[e];
               return n ? (
                 <label className="flex items-center gap-2 text-xs text-muted" key={e}>
                   <span className="w-36 shrink-0">{n.label}</span>

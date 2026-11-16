@@ -22,13 +22,13 @@ import { cn } from "@/lib/util";
 import { navigate } from "@/lib/router";
 import { portraitSlot, usePortraitMap } from "@/lib/portraits";
 
-var WIZARD_STEPS = [
+var WIZARD_STEPS = () => ([
     msg("Story", {}),
     msg("World & start", {}),
     msg("Protagonist", {}),
     msg("Tone & model", {}),
     msg("Review", {}),
-  ],
+  ]),
   WIZARD_A = `medium (3–4 paragraphs)`,
   WIZARD_B = 3e3;
 
@@ -103,14 +103,14 @@ export function NewStoryWizard() {
         navigate(`/story/${l.id}`);
       }
     },
-    C = () => c((e) => Math.min(e + 1, WIZARD_STEPS.length - 1)),
+    C = () => c((e) => Math.min(e + 1, WIZARD_STEPS().length - 1)),
     w = s !== 0 || p.title.trim().length > 0;
   return (
     <div className="h-full overflow-y-auto">
       <div className="mx-auto max-w-3xl px-6 py-8">
         <h1 className="mb-1 text-xl font-semibold">{msg("New story")}</h1>
         <ol className="mb-6 flex flex-wrap gap-1 text-xs" aria-label={msg("Steps")}>
-          {WIZARD_STEPS.map((e, t) => (
+          {WIZARD_STEPS().map((e, t) => (
             <li key={e}>
               <button
                 onClick={() => !l && t <= s && c(t)}
@@ -515,7 +515,7 @@ export function NewStoryWizard() {
                 </Button>
               )}
               <div className="ml-auto flex gap-2">
-                {s < WIZARD_STEPS.length - 1 ? (
+                {s < WIZARD_STEPS().length - 1 ? (
                   <Button variant="primary" onClick={C} disabled={!w}>
                     {msg("Next")} <Icon.ArrowRight className="size-4" />
                   </Button>

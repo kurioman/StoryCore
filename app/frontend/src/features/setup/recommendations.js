@@ -22,7 +22,7 @@ export function rocinanteFor(vram) {
 }
 
 // Getters: the texts are read at render time, after the language is chosen.
-export const CLOUD_MODELS = [
+export const CLOUD_MODELS = () => ([
   {
     id: `claude`,
     name: `Claude`,
@@ -59,4 +59,4 @@ export const CLOUD_MODELS = [
     get cons() { return msg("Mid-range price; a little less creative than Claude.", {}); },
     cost: 2,
   },
-];
+]);

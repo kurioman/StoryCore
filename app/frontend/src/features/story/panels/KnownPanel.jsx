@@ -20,12 +20,12 @@ import { StatusList } from "@/features/story/panels/StatusPanel";
 import { cn, timeAgo } from "@/lib/util";
 import { relationEventSchema, useKnownCharacter, useKnownCharacters } from "@/features/story/api";
 
-var KNOWLEDGE_LABELS = {
+var KNOWLEDGE_LABELS = () => ({
     rumored: msg("Heard of", {}),
     encountered: msg("Met", {}),
     known: msg("Known", {}),
     removed: msg("Removed", {}),
-  },
+  }),
   KNOWLEDGE_TONES = {
     rumored: `neutral`,
     encountered: `info`,
@@ -115,7 +115,7 @@ function KnownCharacterRow({ c, onOpen }) {
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-1">
           <span className="truncate text-[13px] font-medium">{c.name}</span>
-          <Badge tone={KNOWLEDGE_TONES[c.status]}>{KNOWLEDGE_LABELS[c.status]}</Badge>
+          <Badge tone={KNOWLEDGE_TONES[c.status]}>{KNOWLEDGE_LABELS()[c.status]}</Badge>
         </div>
         <p className="truncate text-[11px] text-faint">
           {c.in_scene && <span className="text-accent">{msg("in scene ·")} </span>}
@@ -184,7 +184,7 @@ function KnownCharacterDetail({ storyId, cid, onClose, onStatus, onOpenJournal }
                     onClick={() => onStatus(cid, e, msg("Corrected manually", {}))}
                     key={e}
                   >
-                    {KNOWLEDGE_LABELS[e]}
+                    {KNOWLEDGE_LABELS()[e]}
                   </Button>
                 ))}
                 {o && (
@@ -366,7 +366,7 @@ function KnownCharacterDetail({ storyId, cid, onClose, onStatus, onOpenJournal }
           <ol className="space-y-1">
             {knownCharacter.data.discovery_history.map((e) => (
               <li className="text-xs text-muted" key={e.id}>
-                <Badge>{KNOWLEDGE_LABELS[e.status] ?? e.status}</Badge>{" "}
+                <Badge>{KNOWLEDGE_LABELS()[e.status] ?? e.status}</Badge>{" "}
                 {e.source_seq != null && (
                   <span className="text-faint">
                     #{e.source_seq}

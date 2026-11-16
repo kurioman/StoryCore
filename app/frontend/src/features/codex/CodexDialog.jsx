@@ -10,12 +10,12 @@ import { msg } from "@/i18n";
 import { ErrorCallout, Portrait, Spinner } from "@/components/ui";
 import { cn } from "@/lib/util";
 
-var STATUS = {
+var STATUS = () => ({
     rumored: { label: msg("Heard of", {}), tone: `sc-cx-badge-rumor` },
     encountered: { label: msg("Met", {}), tone: `sc-cx-badge-met` },
     known: { label: msg("Known", {}), tone: `sc-cx-badge-known` },
     visited: { label: msg("Visited", {}), tone: `sc-cx-badge-met` },
-  },
+  }),
   FIELD_LABELS = {
     type: msg("Role", {}),
     title: msg("Title", {}),
@@ -195,7 +195,7 @@ function Progress({ counts }) {
 }
 
 function Detail({ item, kind }) {
-  let st = STATUS[item.status],
+  let st = STATUS()[item.status],
     fields = Object.entries(item.fields || {}),
     shown = Object.entries(item.expressions || {}),
     hiddenCount = Math.max(0, (item.expressions_total || 0) - shown.length);

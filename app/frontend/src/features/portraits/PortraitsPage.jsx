@@ -98,7 +98,7 @@ export function PortraitsPage() {
           <TabPanel value="characters" className="p-5">
             <h1 className="sr-only">{msg("Portraits")}</h1>
             <p className="mb-4 max-w-3xl text-xs text-muted">
-              {msg("Six expressions per character:")} {EXPRESSIONS.map((e) => `${e.slot} ${e.short}`).join(` · `)}
+              {msg("Six expressions per character:")} {EXPRESSIONS().map((e) => `${e.slot} ${e.short}`).join(` · `)}
               {msg(
                 ". Image 1 is the fallback when an expression is missing. Original files are never modified; thumbnails are cached in the app data folder.",
               )}
@@ -145,7 +145,7 @@ function PortraitCharacterCard({ c, worldId, onChanged }) {
         )}
       </div>
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
-        {EXPRESSIONS.map((t) => {
+        {EXPRESSIONS().map((t) => {
           let n = c.slots[String(t.slot)];
           return (
             <button onClick={() => n && r(n)} className="group text-left" title={t.name} key={t.slot}>
@@ -251,7 +251,7 @@ function MapAssetRow({ a: e, chars, onDone }) {
         </optgroup>
       </Select>
       <Select value={o} onChange={(e) => s(e.target.value)} aria-label={msg("Expression")}>
-        {EXPRESSIONS.map((e) => (
+        {EXPRESSIONS().map((e) => (
           <option value={e.slot} key={e.slot}>
             {e.slot}
             {". "}

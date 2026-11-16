@@ -523,7 +523,7 @@ function StatsEditor({ stats, templates, onSave }) {
           value=""
           aria-label={msg("Add a template")}
           onChange={(e) => {
-            let t = STAT_TEMPLATES[e.target.value];
+            let t = STAT_TEMPLATES()[e.target.value];
             t &&
               i([
                 ...r,
@@ -537,7 +537,7 @@ function StatsEditor({ stats, templates, onSave }) {
         >
           <option value="">{msg("Add template…")}</option>
           {templates
-            .filter((e) => STAT_TEMPLATES[e])
+            .filter((e) => STAT_TEMPLATES()[e])
             .map((e) => (
               <option value={e} key={e}>
                 {e}
@@ -552,7 +552,7 @@ function StatsEditor({ stats, templates, onSave }) {
   );
 }
 
-var STAT_TEMPLATES = {
+var STAT_TEMPLATES = () => ({
   fantasy: [
     {
       label: msg("HP"),
@@ -593,7 +593,7 @@ var STAT_TEMPLATES = {
       value: `Healthy`,
     },
   ],
-};
+});
 
 function PlayerCardDialog({ s, onClose, onSave }) {
   let [r, i] = React.useState(s.player),

@@ -111,7 +111,7 @@ export function AvatarsPage({ selectedId }) {
   );
 }
 
-var AVATAR_STORY_FIELDS = [
+var AVATAR_STORY_FIELDS = () => ([
     {
       key: `backstory`,
       label: msg("Backstory"),
@@ -148,7 +148,7 @@ var AVATAR_STORY_FIELDS = [
       label: msg("Secrets"),
       hint: msg("Known to the narrator; NPCs only learn them through play."),
     },
-  ],
+  ]),
   AVATAR_ABILITY_FIELDS = [
     {
       key: `skills`,
@@ -613,7 +613,7 @@ function AvatarEditor({ avatar }) {
         </TabPanel>
         <TabPanel value="story" className="p-5">
           <div className="grid max-w-4xl gap-3">
-            {AVATAR_STORY_FIELDS.map((e) => (
+            {AVATAR_STORY_FIELDS().map((e) => (
               <Field label={e.label} hint={e.hint} key={e.key}>
                 <Textarea
                   value={String(c[e.key] ?? ``)}
