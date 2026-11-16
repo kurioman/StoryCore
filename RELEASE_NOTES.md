@@ -26,8 +26,10 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
   next adventure" button and a settings gear, over an animated starry sky: stars are born at the centre and drift out
   of the screen, twinkle and follow the mouse. On hover the button lights up, trembles and absorbs the stars that come
   near. The gear opens a small menu to switch the language on the spot or open all settings. The button opens the story
-  list (`#/library`; it becomes the story library later). With "reduce motion" switched on in Windows, the stars stay
-  still.
+  list (`#/library`; it becomes the story library later) after a jump to light speed. Stars are born from a light in
+  the middle of the screen. Footer: credits, Discord (link set in `app/frontend/src/lib/links.ts`) and the version.
+  With "reduce motion" switched on in Windows, the stars stay still.
+- **Night-blue dark theme** for the whole app, matching the welcome page (the light theme is unchanged).
 - **Recap and Report a problem buttons** always visible at the bottom of the right panel while playing. "Report a
   problem" asks what happened and puts that text in the bug report zip (`description.txt`), with the page and story
   it was made from (`context.json`: ids and counts only, never story text). A crashed screen also offers it.

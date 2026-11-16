@@ -10,7 +10,11 @@ export type AttractorRect = { x: number; y: number; width: number; height: numbe
 export type StarfieldHandle = {
   /** Pull the stars towards this element box (page coordinates), or release them with null. */
   setAttractor: (rect: AttractorRect | null) => void;
+  /** Jump to light speed: every star rushes out of the screen. Resolves when it is over. */
+  warp: () => Promise<void>;
 };
+
+const WARP_MS = 750;
 
 type Star = {
   x: number; // position in px (without the mouse parallax)
@@ -42,11 +46,18 @@ export const Starfield = React.forwardRef<StarfieldHandle, { className?: string 
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const attractor = React.useRef<AttractorRect | null>(null);
   const targetStrength = React.useRef(0);
+  const warpStart = React.useRef(0);
 
   React.useImperativeHandle(ref, () => ({
     setAttractor: (rect) => {
       if (rect) attractor.current = rect;
       targetStrength.current = rect ? 1 : 0;
+    },
+    warp: () => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return Promise.resolve();
+      warpStart.current = performance.now();
+      targetStrength.current = 0;
+      return new Promise((resolve) => setTimeout(resolve, WARP_MS));
     },
   }));
 
@@ -66,7 +77,7 @@ export const Starfield = React.forwardRef<StarfieldHandle, { className?: string 
     const comets: Comet[] = [];
     const flashes: Flash[] = [];
     const mouse = { x: 0, y: 0, sx: 0, sy: 0 }; // -1..1 from the centre, smoothed in sx/sy
-    const centre = () => ({ x: width / 2, y: height * 0.46 });
+    const centre = () => ({ x: width / 2, y: height * 0.5 }); // the light the stars are born from
 
     function newStar(anywhere: boolean): Star {
       const z = 0.25 + Math.random() ** 1.6 * 0.75;
@@ -102,7 +113,7 @@ export const Starfield = React.forwardRef<StarfieldHandle, { className?: string 
         s.age = 0;
       } else {
         const a = Math.random() * Math.PI * 2,
-          d = Math.random() * 24;
+          d = Math.random() * 10;
         s.x = c.x + Math.cos(a) * d;
         s.y = c.y + Math.sin(a) * d;
         s.age = 0;
@@ -151,6 +162,27 @@ export const Starfield = React.forwardRef<StarfieldHandle, { className?: string 
 
       mouse.sx += (mouse.x - mouse.sx) * Math.min(1, dt * 3);
       mouse.sy += (mouse.y - mouse.sy) * Math.min(1, dt * 3);
+      // warp: 0..1 while jumping to light speed
+      const warp = warpStart.current ? Math.min(1, (now - warpStart.current) / WARP_MS) : 0;
+
+      // the light at the centre that the stars are born from
+      {
+        const pulse = reduceMotion ? 0.5 : 0.5 + 0.5 * Math.sin(t * 1.3);
+        const base = Math.min(width, height);
+        const r = base * (0.12 + 0.015 * pulse) * (1 + warp * 2.5);
+        const g = ctx!.createRadialGradient(c.x, c.y, 0, c.x, c.y, r);
+        g.addColorStop(0, `rgba(255, 252, 238, ${0.95})`);
+        g.addColorStop(0.07, `rgba(255, 240, 196, ${0.85})`);
+        g.addColorStop(0.22, `rgba(246, 214, 140, ${0.32 + 0.08 * pulse})`);
+        g.addColorStop(0.5, `rgba(226, 189, 114, ${0.1 + 0.03 * pulse})`);
+        g.addColorStop(1, "rgba(226, 189, 114, 0)");
+        ctx!.globalAlpha = 1;
+        ctx!.fillStyle = g;
+        ctx!.beginPath();
+        ctx!.arc(c.x, c.y, r, 0, Math.PI * 2);
+        ctx!.fill();
+      }
+
       const goal = targetStrength.current;
       strength += (goal - strength) * Math.min(1, dt * (goal > strength ? 8 : 4));
 
@@ -197,10 +229,24 @@ export const Starfield = React.forwardRef<StarfieldHandle, { className?: string 
             s.vx += ((dx / dist) * v - s.vx) * k;
             s.vy += ((dy / dist) * v - s.vy) * k;
           }
-          s.x += s.vx * dt;
-          s.y += s.vy * dt;
+          const boost = 1 + warp * warp * 40;
+          const px = x;
+          const py = y;
+          s.x += s.vx * dt * boost;
+          s.y += s.vy * dt * boost;
           x = s.x + ox;
           y = s.y + oy;
+          if (warp > 0) {
+            // light-speed streak
+            ctx!.globalAlpha = Math.min(1, 0.3 + warp) * (0.4 + 0.6 * s.z);
+            ctx!.strokeStyle = s.color;
+            ctx!.lineWidth = s.r * (0.8 + warp);
+            ctx!.lineCap = "round";
+            ctx!.beginPath();
+            ctx!.moveTo(px - (x - px) * 2, py - (y - py) * 2);
+            ctx!.lineTo(x, y);
+            ctx!.stroke();
+          }
 
           // absorbed by the button: a flash, and the star is born again at the centre
           if (a && strength > 0.05) {
@@ -214,15 +260,20 @@ export const Starfield = React.forwardRef<StarfieldHandle, { className?: string 
               continue;
             }
           }
-          // left the screen: born again at the centre
+          // left the screen: born again at the centre (not during the warp: the sky empties)
           if (x < -30 || x > width + 30 || y < -30 || y > height + 30) {
+            if (warp > 0) {
+              s.age = -999;
+              continue;
+            }
             place(s, "centre");
             continue;
           }
         }
 
         const dist = Math.hypot(s.x - c.x, s.y - c.y);
-        const born = Math.min(1, s.age / 1.5) * Math.min(1, dist / 70); // fade in near the centre
+        if (s.age < 0) continue; // gone in the warp
+        const born = Math.min(1, s.age / 0.9) * Math.min(1, dist / 30); // fade in out of the light
         const grow = 0.55 + 0.75 * Math.min(1, dist / maxDist);
         const twinkle = reduceMotion ? 0.8 : 0.55 + 0.45 * Math.sin(t * s.speed + s.phase);
         const alpha = Math.min(1, ((0.4 + 0.6 * s.z) * twinkle + glow * 0.7) * born);
