@@ -170,3 +170,5 @@ body{background:var(--c-bg);color:var(--c-fg);font-family:var(--font-sans);-webk
 .sc-warp-flash{opacity:0;background:radial-gradient(circle at 50% 50%,#fffaf0 0%,#f4d27f99 30%,#0b103000 70%)}
 .sc-leaving .sc-warp-flash{animation:sc-flash .75s ease-in forwards}
 @keyframes sc-flash{0%,45%{opacity:0}75%{opacity:.9}100%{opacity:0}}
+.sc-discord-logo{width:1.75rem;height:auto;transition:transform .3s ease}
+.sc-glow-btn:hover .sc-discord-logo,.sc-glow-btn:focus-visible .sc-discord-logo{transform:translateY(-1px)}

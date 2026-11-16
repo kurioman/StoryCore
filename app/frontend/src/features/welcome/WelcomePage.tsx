@@ -5,7 +5,8 @@
 import * as React from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { useQuery } from "@tanstack/react-query";
-import { Check, History, Languages, MessagesSquare, Settings, SlidersHorizontal } from "lucide-react";
+import { Check, History, Languages, Settings, SlidersHorizontal } from "lucide-react";
+import discordLogo from "@/assets/discord.png"; // official Discord symbol: keep its colours as they are
 import { apiGet } from "@/api/legacy";
 import { LANGUAGES, msg, setLanguageLive, shownLanguage, type Language } from "@/i18n";
 import { CREDITS, DISCORD_URL } from "@/lib/links";
@@ -146,7 +147,7 @@ export function WelcomePage() {
             title={DISCORD_URL ? msg("Join us on Discord") : msg("Discord (link coming soon)")}
             className="sc-glow-btn relative inline-flex size-11 items-center justify-center rounded-full"
           >
-            <MessagesSquare className="size-6" strokeWidth={1.75} />
+            <img src={discordLogo} alt="" className="sc-discord-logo" draggable={false} />
           </button>
           <p className="text-right text-[#e2bd7299]">{health.data?.version ? `v${health.data.version}` : ``}</p>
         </footer>
