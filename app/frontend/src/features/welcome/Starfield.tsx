@@ -6,7 +6,8 @@
 // system, the stars are drawn once and stay still.
 import * as React from "react";
 
-export type AttractorRect = { x: number; y: number; width: number; height: number };
+/** The button box (absorbs the stars) and the point the stars fly to (the mouse), in page coordinates. */
+export type AttractorRect = { x: number; y: number; width: number; height: number; px?: number; py?: number };
 export type StarfieldHandle = {
   /** Pull the stars towards this element box (page coordinates), or release them with null. */
   setAttractor: (rect: AttractorRect | null) => void;
@@ -33,10 +34,10 @@ type Comet = { x: number; y: number; vx: number; vy: number; life: number };
 type Flash = { x: number; y: number; life: number; size: number };
 
 const COLORS = ["#f6d98f", "#e9c477", "#fff3cf", "#d9ae5f", "#ffe6a6"];
-const ATTRACT_RADIUS = 600; // px around the button
+const ATTRACT_RADIUS = 400; // px around the mouse
 const ATTRACT_FORCE = 2600; // px/s² at full strength, near the button
-const DRIFT_BASE = 6; // outward speed (px/s) at the centre...
-const DRIFT_PER_PX = 0.2; // ...plus this much per px of distance from the centre
+const DRIFT_BASE = 9; // outward speed (px/s) at the centre...
+const DRIFT_PER_PX = 0.25; // ...plus this much per px of distance from the centre
 const PARALLAX = 16;
 
 export const Starfield = React.forwardRef<StarfieldHandle, { className?: string }>(function Starfield(
@@ -100,11 +101,12 @@ export const Starfield = React.forwardRef<StarfieldHandle, { className?: string 
 
     /** "centre": born at the centre (it left the screen); "ray": absorbed by the button, born again somewhere on a
      *  ray from the centre so the sky never empties; "anywhere": first fill of the screen. */
-    function place(s: Star, where: "anywhere" | "centre" | "ray") {
+    function place(s: Star, where: "anywhere" | "centre" | "ray" | "fade") {
       const c = centre();
-      if (where === "anywhere") {
+      if (where === "anywhere" || where === "fade") {
         s.x = Math.random() * width;
         s.y = Math.random() * height;
+        if (where === "fade") s.age = 0;
       } else if (where === "ray") {
         const a = Math.random() * Math.PI * 2,
           d = 40 + Math.random() * Math.hypot(width, height) * 0.38;
@@ -134,7 +136,7 @@ export const Starfield = React.forwardRef<StarfieldHandle, { className?: string 
       canvas!.width = Math.round(width * dpr);
       canvas!.height = Math.round(height * dpr);
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const count = Math.max(110, Math.min(420, Math.round((width * height) / 4000)));
+      const count = Math.max(130, Math.min(500, Math.round((width * height) / 3300)));
       stars = Array.from({ length: count }, () => newStar(true));
       if (reduceMotion) draw(performance.now(), 0);
     }
@@ -189,8 +191,10 @@ export const Starfield = React.forwardRef<StarfieldHandle, { className?: string 
       // the button box, in canvas coordinates
       const box = canvas!.getBoundingClientRect();
       const a = attractor.current;
-      const bx = a ? a.x - box.left + a.width / 2 : 0,
+      const bx = a ? a.x - box.left + a.width / 2 : 0, // button centre (absorption)
         by = a ? a.y - box.top + a.height / 2 : 0;
+      const tx = a ? (a.px ?? a.x + a.width / 2) - box.left : 0, // where the stars fly to: the mouse
+        ty = a ? (a.py ?? a.y + a.height / 2) - box.top : 0;
 
       for (const s of stars) {
         s.age += dt;
@@ -204,8 +208,8 @@ export const Starfield = React.forwardRef<StarfieldHandle, { className?: string 
           let pulled = false;
           const grown = Math.min(1, Math.max(0, (s.age - 0.6) / 1.6));
           if (a && strength > 0.02 && grown > 0) {
-            const dx = bx - x,
-              dy = by - y,
+            const dx = tx - x,
+              dy = ty - y,
               d = Math.hypot(dx, dy) || 1;
             if (d < ATTRACT_RADIUS) {
               const f = (1 - d / ATTRACT_RADIUS) ** 0.8 * strength * grown;
@@ -256,7 +260,7 @@ export const Starfield = React.forwardRef<StarfieldHandle, { className?: string 
               ey = (y - by) / hy;
             if (ex * ex + ey * ey < 1) {
               flashes.push({ x, y, life: 1, size: 3 + s.r * 2 });
-              place(s, "ray");
+              place(s, Math.random() < 0.5 ? "fade" : "ray");
               continue;
             }
           }
@@ -266,7 +270,7 @@ export const Starfield = React.forwardRef<StarfieldHandle, { className?: string 
               s.age = -999;
               continue;
             }
-            place(s, "centre");
+            place(s, Math.random() < 0.5 ? "fade" : "centre");
             continue;
           }
         }

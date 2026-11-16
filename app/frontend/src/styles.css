@@ -162,7 +162,7 @@ body{background:var(--c-bg);color:var(--c-fg);font-family:var(--font-sans);-webk
 .sc-menu-item[aria-pressed=true]{color:#fff0c4}
 
 /* quiet "Resume" link under the big button (not active yet) */
-.sc-resume{margin-top:1.1rem;display:inline-flex;align-items:center;gap:.4rem;font-size:.85rem;color:#e2bd7266;cursor:default;transition:color .2s ease}
+.sc-resume{margin-top:clamp(1.6rem,4vh,2.6rem);display:inline-flex;align-items:center;gap:.45rem;font-size:1rem;color:#e2bd7266;cursor:default;transition:color .2s ease}
 .sc-resume:hover{color:#e2bd7299}
 /* leaving: the content fades and grows, then a soft flash as the stars jump to light speed */
 .sc-welcome-layout{transition:opacity .55s ease,transform .7s cubic-bezier(.5,0,.75,0),filter .55s ease}

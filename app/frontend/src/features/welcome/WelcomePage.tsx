@@ -22,10 +22,13 @@ export function WelcomePage() {
   const [leaving, setLeaving] = React.useState(false);
   const health = useQuery({ queryKey: [`health`], queryFn: () => apiGet<{ version: string }>(`/health`) });
 
-  function attract(on: boolean) {
+  /** Stars fly to the mouse while it is over the button (to the button centre with the keyboard). */
+  function attract(on: boolean, e?: { clientX: number; clientY: number }) {
     if (leaving) return;
     const r = button.current?.getBoundingClientRect();
-    stars.current?.setAttractor(on && r ? { x: r.left, y: r.top, width: r.width, height: r.height } : null);
+    stars.current?.setAttractor(
+      on && r ? { x: r.left, y: r.top, width: r.width, height: r.height, px: e?.clientX, py: e?.clientY } : null,
+    );
   }
 
   function pickLanguage(code: Language) {
@@ -104,7 +107,8 @@ export function WelcomePage() {
             ref={button}
             type="button"
             onClick={start}
-            onPointerEnter={() => attract(true)}
+            onPointerEnter={(e) => attract(true, e)}
+            onPointerMove={(e) => attract(true, e)}
             onPointerLeave={() => attract(false)}
             onFocus={() => attract(true)}
             onBlur={() => attract(false)}
@@ -120,7 +124,7 @@ export function WelcomePage() {
             onClick={(e) => e.preventDefault()}
             className="sc-resume"
           >
-            <History className="size-3.5" /> {msg("Resume my last adventure")}
+            <History className="size-4" /> {msg("Resume my last adventure")}
           </button>
         </div>
 
