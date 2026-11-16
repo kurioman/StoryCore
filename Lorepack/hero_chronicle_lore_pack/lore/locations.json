@@ -1,96 +1,112 @@
 {
   "regions": [
     {
+      "id": "grandel",
       "name": "Grandel",
       "description": "The capital of the Central Empire (Aether). Splendid on the surface, but where the intrigues of nobles and the shadows of the poor coexist. Main capital of the humans, who live everywhere on the continent.",
       "type": "City",
       "map_hint": "Approximate, from the author's map: centre"
     },
     {
+      "id": "avalon",
       "name": "Avalon",
       "description": "The royal palace of Grandel, capital of the Central Empire (Aether). Heroes summoned by the Heavenly God Lily can arrive in its summoning hall.",
       "type": "Landmark",
       "location": "Grandel"
     },
     {
+      "id": "venezia",
       "name": "Venezia",
       "description": "Located in the Valerius Marquisate. Overflowing with grand merchant alliances and hedonism.",
       "type": "City",
       "map_hint": "Approximate, from the author's map: south"
     },
     {
+      "id": "chalcedon",
       "name": "Chalcedon",
       "description": "Located in the Valentia Grand Duchy. The first line of defense against the Demon Realm.",
       "type": "City",
       "map_hint": "Approximate, from the author's map: north"
     },
     {
+      "id": "rondel",
       "name": "Rondel",
       "description": "A lawless city. The stronghold of the information guild 'Tenebris.'",
       "type": "City",
       "map_hint": "Approximate, from the author's map: east-centre"
     },
     {
+      "id": "enigma",
       "name": "Enigma",
       "description": "An academy city built in a spiral within an enormous meteor crater.",
       "type": "City",
       "map_hint": "Approximate, from the author's map: centre-west"
     },
     {
+      "id": "alshad",
       "name": "Alshad",
       "description": "A desert oasis at the far southwest of the Empire. A hub for slave trading and mercenary companies.",
       "type": "City",
       "map_hint": "Approximate, from the author's map: far south-west"
     },
     {
+      "id": "lumina",
       "name": "Lumina",
       "description": "A religious nation whose state religion is the Church of Lily, which follows the Heavenly God Lily.",
       "type": "Nation",
       "map_hint": "Approximate, from the author's map: south-east"
     },
     {
+      "id": "moonlight_forest",
       "name": "Moonlight Forest",
       "description": "Homeland of the Beastkin, in the southern forest, under a chieftain system. They value both bloodline and skill.",
       "type": "Region",
       "map_hint": "Approximate, from the author's map: south"
     },
     {
+      "id": "wyvern_pavilion",
       "name": "Wyvern Pavilion",
       "description": "Homeland of the Dragonkin, in the caldera of the Vendetta Mountains. The degree of dragon blood manifestation determines power.",
       "type": "Region",
       "map_hint": "Approximate, from the author's map: north"
     },
     {
+      "id": "dorvalkar",
       "name": "Dorvalkar",
       "description": "Homeland of the Dwarves, in the underground mountains of the northwest. Power is split between the council of chieftains and the artisans' guild.",
       "type": "Region",
       "map_hint": "Approximate, from the author's map: west / north-west"
     },
     {
+      "id": "lumirien",
       "name": "Lumirien",
       "description": "Homeland of the Elves, in the northern forest, centered on the Council of Elders. Hostile to the Dwarves.",
       "type": "Region",
       "map_hint": "Approximate, from the author's map: north-west"
     },
     {
+      "id": "demon_realm",
       "name": "Demon Realm",
       "description": "The territory of monsters located in the eastern part of the continent. A cruel land ruled by survival of the fittest. Demons have no capital or homeland zone: they live all over the Demon Realm.",
       "type": "Region",
       "map_hint": "Approximate, from the author's map: east"
     },
     {
+      "id": "elysium",
       "name": "Elysium",
       "description": "An elusive, corrupted region somewhere inside the Demon Realm, shrouded in a deceptive gray mist. Seat of the 1st Legion (Iris).",
       "type": "Region",
       "map_hint": "Approximate, from the author's map: far north-east"
     },
     {
+      "id": "demon_king_s_castle",
       "name": "Demon King's Castle",
       "description": "The seat of the Demon King in the Demon Realm.",
       "type": "Landmark",
       "map_hint": "Approximate, from the author's map: east"
     },
     {
+      "id": "the_sword_s_grave",
       "name": "The Sword's Grave",
       "description": "Seat of the 4th Legion in the Demon Realm. A place where extreme killing intent and formless sword energy rage.",
       "type": "Region",
@@ -98,12 +114,14 @@
       "hidden": "The 4th Legion's commander is Kriemhild, the Sword Saint, bound to the Demon King by a soul-bond. Publicly, nobody knows who leads it."
     },
     {
+      "id": "palace_of_nightmares",
       "name": "Palace of Nightmares",
       "description": "Seat of the 3rd Legion (Lilith) in the Demon Realm. A decadent gothic castle and a dreamlike ball.",
       "type": "Landmark",
       "map_hint": "Approximate, from the author's map: east / south-east"
     },
     {
+      "id": "scratch",
       "name": "Scratch",
       "description": "Seat of the 2nd Legion (Kashar) in the Demon Realm: the Blood Arena, an endless wasteland of red sandstorms and a vast ruined city.",
       "type": "Region",

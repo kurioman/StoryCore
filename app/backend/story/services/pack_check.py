@@ -146,7 +146,9 @@ def _from_import_report(r: dict[str, Any], rep: Report) -> None:
     for u in r.get("unresolved_references", []):
         rep.warnings.append(f"{u['file']}: record \"{u['record']}\", field {u['field']}: \"{u['value']}\" does not "
                             "match any id in the pack.")
-    gen = r.get("generated_ids", [])
+    # only ids made from a display name are fragile (renaming the record changes its id); ids taken from an object key
+    # or a file name stay put
+    gen = [g for g in r.get("generated_ids", []) if g.get("from", "name") == "name"]
     if gen:
         rep.info.append(f"{len(gen)} record(s) had no \"id\"; one was made from the name "
                         f"(e.g. {gen[0]['file']}: \"{gen[0]['id']}\"). Give them an explicit id to keep links stable.")

@@ -309,7 +309,7 @@ def import_pack(db: Session, pack_dir: Path, world_slug: str | None = None) -> d
                     # an entry with a name but no id: the id is made from the name (reported, never silent)
                     item = {"id": _slug(item["name"]), **item}
                     item.setdefault("group", key.replace("_", " "))
-                    report["generated_ids"].append({"file": rel, "id": item["id"], "name": item["name"]})
+                    report["generated_ids"].append({"file": rel, "id": item["id"], "name": item["name"], "from": "name"})
                 if isinstance(item, dict) and item.get("id"):
                     _collect(entities, entity_meta, report, cat, item, rel)
         stem_cat = STEM_CATEGORY.get(f.stem)
@@ -320,11 +320,11 @@ def import_pack(db: Session, pack_dir: Path, world_slug: str | None = None) -> d
             if entries and len(entries) == len([v for v in data.values() if not isinstance(v, (str, int, float, bool))]):
                 for k, v in entries.items():
                     item = {"id": _slug(k), "name": str(v.get("name") or k.replace("_", " ").title()), **v}
-                    report["generated_ids"].append({"file": rel, "id": item["id"], "name": item["name"]})
+                    report["generated_ids"].append({"file": rel, "id": item["id"], "name": item["name"], "from": "key"})
                     _collect(entities, entity_meta, report, stem_cat, item, rel)
             else:
                 item = {"id": _slug(f.stem), "name": f"{world_name} — {f.stem.replace('_', ' ')}", **data}
-                report["generated_ids"].append({"file": rel, "id": item["id"], "name": item["name"]})
+                report["generated_ids"].append({"file": rel, "id": item["id"], "name": item["name"], "from": "file"})
                 _collect(entities, entity_meta, report, stem_cat, item, rel)
         if "calendar" in rel:
             cal = strip_hidden(data)[0]

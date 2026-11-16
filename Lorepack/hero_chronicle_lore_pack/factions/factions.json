@@ -1,6 +1,7 @@
 {
   "empires": [
     {
+      "id": "central_empire_aether",
       "name": "Central Empire (Aether)",
       "aliases": [
         "Aether",
@@ -13,6 +14,7 @@
   ],
   "nations": [
     {
+      "id": "eastern_holy_nation_lumina",
       "name": "Eastern Holy Nation (Lumina)",
       "description": "A religious nation whose state religion is the Church of Lily.",
       "privileges": [
@@ -26,11 +28,13 @@
   ],
   "organizations": [
     {
+      "id": "information_guild_tenebris",
       "name": "Information Guild Tenebris",
       "description": "A vast underground crime/information cartel that evolved from former imperial intelligence operatives. ('The truth is more expensive than blood')",
       "base": "Rondel"
     },
     {
+      "id": "demon_realm_legions",
       "name": "Demon Realm Legions",
       "description": "Strict vertical hierarchy based on magical talent and power.",
       "legions": [
