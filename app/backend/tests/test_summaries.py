@@ -153,3 +153,96 @@ class SummariesWithoutCaptureTest(SummaryHelpers, AppTestCase):
             self.assertEqual(self.rows(story["id"]), [])
         finally:
             self.client.put("/api/settings", json={"scene_summaries_enabled": True})
+
+
+class LayersTest(SummaryHelpers, AppTestCase):
+    """Phase 7.2: scenes merge into chapters, chapters into the story so far; notes, threads, edits (capture off)."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.client.put("/api/settings", json={"event_capture_mode": "off"})
+
+    def all_rows(self, sid):
+        from story.models import MemorySummary
+        with self.ctx.db.session() as s:
+            return [r.to_dict() for r in s.query(MemorySummary).filter_by(story_id=sid)]
+
+    def check_partition(self, sid):
+        """What is active never overlaps and covers every summarised message."""
+        rows = self.all_rows(sid)
+        active = [r for r in rows if r["status"] == "active"]
+        seen = set()
+        for r in active:
+            ids = set(r["message_ids_json"])
+            self.assertFalse(ids & seen, f"overlap in {r['level']} #{r['start_seq']}")
+            seen |= ids
+        scene_ids = {i for r in rows if r["level"] == "scene" and r["status"] in ("active", "superseded")
+                     for i in r["message_ids_json"]}
+        self.assertEqual(seen, scene_ids)
+        return active
+
+    def test_layers_notes_threads_and_edits(self):
+        from story.services import summaries
+        saved = {k: getattr(summaries, k) for k in ("KEEP_SCENES", "CHAPTER_SCENES", "KEEP_CHAPTERS", "STORY_CHAPTERS",
+                                                     "CHUNK_MESSAGES", "MIN_NEW")}
+        summaries.KEEP_SCENES, summaries.CHAPTER_SCENES, summaries.KEEP_CHAPTERS, summaries.STORY_CHAPTERS = 3, 3, 2, 2
+        summaries.CHUNK_MESSAGES, summaries.MIN_NEW = 4, 4
+        try:
+            story = self.new_story("Layers")
+            sid = story["id"]
+            self.play(sid, 30)
+            self.catch_up(sid, max_chunks=30, max_merges=30)
+            active = self.check_partition(sid)
+            levels = [r["level"] for r in sorted(active, key=lambda r: r["start_seq"])]
+            self.assertEqual(levels[0], "story", levels)
+            self.assertIn("chapter", levels)
+            self.assertEqual(levels[-1], "scene")
+            self.assertLessEqual(levels.count("scene"), summaries.KEEP_SCENES + summaries.CHAPTER_SCENES - 1)
+            self.assertLessEqual(levels.count("chapter"), summaries.KEEP_CHAPTERS + summaries.STORY_CHAPTERS - 1)
+            story_row = next(r for r in active if r["level"] == "story")
+            self.assertTrue(story_row["content"].startswith("[Mock story so far]"))
+
+            # notes and threads come from every scene, merged or not
+            with self.ctx.db.session() as s:
+                path_ids = {m["id"] for m in self.path(sid)}
+                scenes = summaries.scenes(s, sid, path_ids)
+                self.assertTrue(all(r.data_json.get("notes") for r in scenes))
+                threads = summaries.open_threads(scenes)
+                opened = sum(len(r.data_json.get("threads_opened") or []) for r in scenes)
+                resolved = sum(len(r.data_json.get("threads_resolved") or []) for r in scenes)
+                self.assertGreater(resolved, 0)
+                self.assertEqual(len(threads), opened - resolved)
+                mem = summaries.character_memory(scenes, [], "the mock innkeeper smiles")
+                self.assertEqual(mem[0][0], "Mock Innkeeper")
+                self.assertEqual(len(mem[0][1]), 3)
+
+            # the context: story so far first, open threads, no "no summary" warning
+            from story.services import context_builder, story_tree
+            with self.ctx.db.session() as s:
+                st = story_tree.get_story(s, sid)
+                st.settings_json = {**(st.settings_json or {}), "context_budget_tokens": 4500}
+            with self.ctx.db.session() as s:
+                st = story_tree.get_story(s, sid)
+                built = context_builder.build(s, st, story_tree.get_branch(s, st))
+            keys = [x["key"] for x in built.manifest["sections"]]
+            self.assertIn("scene_summaries", keys)
+            self.assertIn("threads", keys)
+            self.assertIn("- Story so far (#", built.system)
+            self.assertFalse([w for w in built.manifest["warnings"] if "have no summary yet" in w], built.manifest["warnings"])
+
+            # editing a message inside the story so far: the layers covering it are redone, the partition holds
+            target = self.path(sid)[2]
+            self.assertIn(target["id"], story_row["message_ids_json"])
+            r = self.client.patch(f"/api/stories/{sid}/messages/{target['id']}", json={"content": target["content"] + " !"})
+            self.assertLess(r.status_code, 400, r.text[:300])
+            stale = {x["level"] for x in self.all_rows(sid) if x["status"] == "stale"}
+            self.assertEqual(stale, {"scene", "chapter", "story"})
+            self.check_partition(sid)
+            self.catch_up(sid, max_chunks=10, max_merges=30)
+            self.check_partition(sid)
+            covered = {i for x in self.all_rows(sid) if x["status"] == "active" for i in x["message_ids_json"]}
+            self.assertIn(target["id"], covered)
+        finally:
+            for k, v in saved.items():
+                setattr(summaries, k, v)

@@ -159,6 +159,16 @@ class Extraction(BaseModel):
     contradictions: list[XContradiction] = Field(default_factory=list)
     character_moods: list[XMood] = Field(default_factory=list)
     scene_summary: str = ""  # v1.8 phase 7.1: asked only when automatic summaries are on (services/summaries.py)
+    character_notes: list[dict[str, Any]] = Field(default_factory=list)  # 7.2: one memory line per character
+    threads_opened: list[str] = Field(default_factory=list)
+    threads_resolved: list[str] = Field(default_factory=list)
+
+    @field_validator("character_notes", "threads_opened", "threads_resolved", mode="before")
+    @classmethod
+    def _lists(cls, v: Any) -> list:
+        if not isinstance(v, list):
+            return []
+        return [x for x in v if isinstance(x, (dict, str))][:8]
 
     @field_validator("scene_summary", mode="before")
     @classmethod
@@ -240,7 +250,9 @@ def extraction_schema(axes: list[str] | None = None, summary: bool = False) -> d
             "confidence": num, "source_message_ids": ids})},
         "contradictions": {"type": "array", "items": obj({"description": s, "conflicting_record": s, "source_message_ids": ids})},
         "character_moods": {"type": "array", "items": obj({"character": s, "slot": {"type": "integer"}, "confidence": num})},
-        **({"scene_summary": s} if summary else {}),
+        **({"scene_summary": s, "character_notes": {"type": "array", "items": obj({"character": s, "note": s})},
+            "threads_opened": {"type": "array", "items": s}, "threads_resolved": {"type": "array", "items": s}}
+           if summary else {}),
     })
 
 
@@ -516,8 +528,14 @@ class ExtractionService:
                     player_text, scene_text = render_state(state_service.normalize(state), index)
                     known = ", ".join(f"{e.name} [{e.id}]" for e in list(index.entities.values())[:80] if e.category == "character")
                     want_summary = summaries_svc.enabled(db)
+                    threads_text, thread_map = "", {}
+                    if want_summary:  # the threads still open before these messages, for "threads_resolved"
+                        path_ids = {m.id for m in summaries_svc.path_messages(db, branch)}
+                        threads_text, thread_map = summaries_svc.thread_labels(summaries_svc.open_threads(
+                            [r for r in summaries_svc.scenes(db, story.id, path_ids) if r.end_seq < pending[0].seq]))
                     head = "\n\n".join(x for x in [
                         schema_text(state, want_summary), f"Known characters: {known}" if known else "",
+                        f"Open threads (ids for threads_resolved):\n{threads_text}" if threads_text else "",
                         f"Current state:\n{player_text}\n{scene_text}".strip(),
                         "PRIOR CONTEXT (do not extract from these):\n" + _transcript_block(prior_all[-3:], "prior") if prior_all else "",
                     ] if x)
@@ -552,9 +570,15 @@ class ExtractionService:
                                           resolved.provider.provider_type, resolved.profile.model_id)
                     if want_summary and data.scene_summary:  # the memory summary of the same messages (no extra request)
                         msgs = [db.get(Message, i) for i in ids]
+                        extra_data = summaries_svc.extras(
+                            [n for n in data.character_notes if isinstance(n, dict)],
+                            [t for t in data.threads_opened if isinstance(t, str)],
+                            [t for t in data.threads_resolved if isinstance(t, str)], thread_map,
+                            summaries_svc._index(db, story, branch), summaries_svc.protagonist(db, story))
                         counts["summaries"] = int(summaries_svc.store(db, story, branch, [m for m in msgs if m],
                                                                       data.scene_summary, source="capture",
-                                                                      model_id=resolved.profile.model_id) is not None)
+                                                                      model_id=resolved.profile.model_id,
+                                                                      data=extra_data) is not None)
                     cur = db.get(ExtractionCursor, branch.id)
                     pos = part[-1].seq
                     cur.last_seq, cur.last_message_id, cur.updated_at = max(cur.last_seq, pos), ids[-1], now_iso()

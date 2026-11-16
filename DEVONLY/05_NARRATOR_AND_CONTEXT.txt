@@ -34,13 +34,18 @@ Sections, in order (key in brackets; [optional] ones are dropped first when spac
                    approved local canon. About 20 % of the budget; long chunks cut at 2400 characters.
    8b secrets      Narrator-only "hidden" notes of the records in play (never dropped). See 04_LOREPACK.txt.
    9 recap         [optional] Rolling "story so far" recap.
-   9a scene_summaries [optional, dropped last] (v1.8) Automatic summaries of the scenes no longer sent word for word
-                   (services/summaries.py), newer than the rolling recap, about 15 % of the budget (newest kept first).
+   9a scene_summaries [optional, dropped last] (v1.8) The automatic memory (services/summaries.py), newer than the
+                   rolling recap: the story so far (always), then the newest chapters and scenes no longer sent word
+                   for word, about 15 % of the budget.
+   9b recalled     [optional] (v1.8) Up to 2 merged scenes whose detail matches the recent text (full-text search on
+                   names and places).
+   9c character_memory [optional] (v1.8) The last 3 memory lines of each character in focus (from the scenes).
+   9d threads      [optional] (v1.8) Open threads: promises, debts, quests, mysteries still pending (12 at most).
    9b portrait_tags  The [Name:N] portrait tag rule (worlds only; setting portrait_tags_enabled). See 04_LOREPACK.txt.
   10 narration_rules  Short operational rules placed LAST (small models obey the last instructions best).
 Then the recent messages, newest first until the budget is used (at least "recent_messages_min", default 6).
-When even that does not fit, optional sections are dropped in this order: lore, encounters, events, facts, recap,
-scene_summaries.
+When even that does not fit, optional sections are dropped in this order: lore, encounters, events, facts, recalled,
+character_memory, recap, threads, scene_summaries.
 
 Automatic summaries (v1.8, phase 7): memory capture (batch mode, every 3 replies) also returns "scene_summary", 2-5
 English sentences about the messages it just read, in the same request (setting scene_summaries_enabled). Anything left
@@ -48,6 +53,12 @@ without a summary (capture off or manual, an older game, an empty field) is summ
 summaries.catch_up with the story's own model: at most 2 short requests, oldest messages first, chunks of up to 10
 messages; with capture off the newest messages wait for 6 of them. A summary covers exact message ids: it is used only
 on a path containing all of them, and editing / regenerating / deleting one marks it stale (written again).
+Layers (phase 7.2): with 12 active scenes the 8 oldest are merged into a chapter; with 6 chapters the 2 oldest are folded
+(with the previous one) into a single "story so far". Merged rows become "superseded" with parent_id, so the active rows
+always partition the story and the memory sent stays bounded. A stale row gives its other children back (active).
+Each scene also stores, in data_json, one memory line per character ("notes", keyed by lore id or "name:<name>") and
+the threads it opened or settled ("threads_opened", "threads_resolved" as keys "<summary id>:<n>"); the prompts show the
+open threads as T1, T2... Capture returns them as character_notes / threads_opened / threads_resolved.
 
 Budget: setting context_budget_tokens (default 10 000) or the story's own; never more than the model's window
 (model profile context_limit, or Ollama num_ctx) minus the reply size, with a 10 % safety margin. Token counts are

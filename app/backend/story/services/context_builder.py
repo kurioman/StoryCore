@@ -288,7 +288,8 @@ SAFETY_MARGIN = 0.9  # the chars/4 estimate can undercount real tokens; never pl
 # v1.6: lore first. Encounters were first until the owner's story showed a ~100-token section dropped ahead of a
 # ~1,400-token one: 0 of 84 replies ever carried it.
 # trimmed in this order when space runs out; the automatic summaries go last (they replace whole scenes)
-OPTIONAL_SECTIONS = ("lore", "encounters", "events", "facts", "recap", "scene_summaries")
+OPTIONAL_SECTIONS = ("lore", "encounters", "events", "facts", "recalled", "character_memory", "recap", "threads",
+                     "scene_summaries")
 MIN_MESSAGES_HARD = 2  # below the configured minimum only when the model window leaves no other choice
 
 
@@ -589,35 +590,69 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
     if recap:
         sections.append(Section("recap", f"Story so far (rolling recap v{recap.version}, covers messages up to #{recap.end_seq})",
                                 recap.content, [{"type": "recap", "id": recap.id, "label": f"Recap v{recap.version}"}]))
-    # 9b. v1.8 phase 7.1: automatic scene summaries of the messages no longer sent word for word (services/summaries.py).
-    # Prepared before the recent messages are picked (so their size counts), then narrowed to what was really left out.
+    # 9b. v1.8 phase 7: the automatic memory (services/summaries.py), in layers: the story so far, chapters, then the
+    # scenes no longer sent word for word. Prepared before the recent messages are picked (so their size counts), then
+    # narrowed to what was really left out.
     from . import summaries as summaries_svc
-    summ_rows = [r for r in summaries_svc.visible(db, story.id, path_ids)
-                 if r.end_seq > (recap.end_seq if recap and recap.end_seq is not None else -1)]
+    recap_end = recap.end_seq if recap and recap.end_seq is not None else -1
+    summ_rows = [r for r in summaries_svc.visible(db, story.id, path_ids, ("story", "chapter", "scene"))
+                 if r.end_seq > recap_end]
     summ_section = None
     if summ_rows:
-        summ_section = Section("scene_summaries", "Earlier in the story (automatic summaries of the scenes no longer shown "
-                                                  "word for word; oldest first)", "", [])
+        summ_section = Section("scene_summaries", "Earlier in the story (automatic memory of what is no longer shown word "
+                                                  "for word; oldest first)", "", [])
         sections.append(summ_section)
 
     def fill_summaries(before_seq: int | None) -> None:
-        """Newest summaries first within their share of the budget, shown oldest first; only scenes that start
-        before the oldest message sent word for word."""
+        """The story so far always; then the newest chapters and scenes within their share of the budget, shown oldest
+        first; only parts that start before the oldest message sent word for word."""
         if summ_section is None:
             return
         cap, used_, keep = max(600, int(budget * 0.15)), 0, []
-        for r in reversed(summ_rows):
+        for r in [r for r in summ_rows if r.level == "story"][-1:]:
+            keep.append((r, f"- Story so far (#{r.start_seq}–#{r.end_seq}): {r.content}"))
+            used_ += est_tokens(keep[-1][1])
+        for r in reversed([r for r in summ_rows if r.level != "story"]):
             if before_seq is not None and r.start_seq >= before_seq:
                 continue
-            line = f"- (#{r.start_seq}–#{r.end_seq}) {r.content}"
+            line = f"- {'Chapter' if r.level == 'chapter' else 'Scene'} #{r.start_seq}–#{r.end_seq}: {r.content}"
             if keep and used_ + est_tokens(line) > cap:
                 break
             keep.append((r, line))
             used_ += est_tokens(line)
-        keep.reverse()
+        keep.sort(key=lambda x: (x[0].start_seq, x[0].end_seq))
         summ_section.text = "\n".join(line for _, line in keep)
-        summ_section.items = [{"type": "summary", "id": r.id, "label": f"#{r.start_seq}–#{r.end_seq}: {r.content[:60]}"}
-                              for r, _ in keep]
+        summ_section.items = [{"type": "summary", "id": r.id, "label": f"{r.level} #{r.start_seq}–#{r.end_seq}: "
+                                                                       f"{r.content[:60]}"} for r, _ in keep]
+
+    # 9c. older scenes that come back (names or places of the recent turns found in a merged scene: its detail)
+    all_scenes = summaries_svc.scenes(db, story.id, path_ids)
+    if fts_q and all_scenes:
+        absorbed = {r.id: r for r in all_scenes if r.status == "superseded"}
+        try:
+            hits = [r[0] for r in db.execute(text("SELECT id FROM summaries_fts WHERE summaries_fts MATCH :q AND "
+                                                  "story_id = :s ORDER BY rank LIMIT 20"), {"q": fts_q, "s": story.id})]
+        except Exception:
+            hits = []
+        recalled = [absorbed[i] for i in hits if i in absorbed][:2]
+        if recalled:
+            sections.append(Section("recalled", "Recalled details of older scenes (they may matter now)",
+                                    "\n".join(f"- Scene #{r.start_seq}–#{r.end_seq}: {r.content}" for r in recalled),
+                                    [{"type": "summary", "id": r.id, "label": f"recalled #{r.start_seq}–#{r.end_seq}"}
+                                     for r in recalled]))
+    # 9d. what happened before with the characters in focus, and the threads still open
+    char_mem = summaries_svc.character_memory(all_scenes, list(focus_entities[:8]), recent_text)
+    if char_mem:
+        sections.append(Section("character_memory", "Memory of these characters (what happened with them before, newest "
+                                                    "first)",
+                                "\n".join(f"- {name}: " + " | ".join(lines) for name, lines in char_mem),
+                                [{"type": "memory", "label": name} for name, _ in char_mem]))
+    threads = summaries_svc.open_threads(all_scenes)[-summaries_svc.MAX_THREADS:]
+    if threads:
+        sections.append(Section("threads", "Open threads (promises, debts, quests and mysteries still pending: keep them "
+                                           "in mind, never force them)",
+                                "\n".join(f"- {t['text']} (since #{t['seq']})" for t in threads),
+                                [{"type": "thread", "label": t["text"][:80]} for t in threads]))
 
     # 10. recent messages within budget (the final rules section is sent too, so it counts against the budget)
     pname = (av or {}).get("name") or "the protagonist"
@@ -694,7 +729,6 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
     omitted = len(convo) - len(chosen)
     if omitted:
         sent_ids = {m.id for m in chosen}
-        recap_end = recap.end_seq if recap and recap.end_seq is not None else -1
         summarised = summaries_svc.covered_ids([r for r in summ_rows if summ_section is not None and summ_section in sections
                                                 and any(i.get("id") == r.id for i in summ_section.items)])
         gaps = [m for m in convo if m.id not in sent_ids and m.seq > recap_end and m.id not in summarised

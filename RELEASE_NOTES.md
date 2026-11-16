@@ -81,6 +81,10 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
   (the default) they come in the same request, at no extra cost; otherwise, and for games started before, a short
   request after a reply catches up, oldest messages first. Editing or regenerating a message rewrites its summary.
   Switch: Settings > Memory capture > Automatic summaries.
+  The memory works in layers: older scenes are merged into chapters, older chapters into a "story so far", so it
+  stays the same size however long the game. Each summary also remembers what happened with each character (sent
+  when that character is in the scene again) and the promises, quests and mysteries still open; the detail of an old
+  scene comes back when its names or places are mentioned again.
 - The recommended-models cards (Settings > Providers & models) are translated too ("Tested with StoryCore", pros
   and cons...).
 

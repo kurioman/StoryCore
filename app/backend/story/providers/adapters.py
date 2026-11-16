@@ -65,11 +65,21 @@ class MockAdapter(ProviderAdapter):
                 }] if ids else [],
                 "facts": [], "state_changes": [], "contradictions": [], "character_moods": [],
                 **({"scene_summary": f"[Mock summary] {len(ids)} message(s) captured; configure a real model for real "
-                                     "memory."} if "scene_summary" in (messages[-1].content if messages else "") else {}),
+                                     "memory.", "character_notes": [], "threads_opened": [f"[Mock] thread opened #{len(ids)}"],
+                    "threads_resolved": ["T1"] if "\nT1:" in messages[-1].content else []}
+                   if "scene_summary" in (messages[-1].content if messages else "") else {}),
             })
         if "SCENE SUMMARY" in (system or ""):  # the memory catch-up (services/summaries.py)
-            n = len(re.findall(r"\[NEW #\d+\]", messages[-1].content if messages else ""))
-            return f"[Mock summary] {n} message(s) summarised; configure a real model for real memory."
+            body = messages[-1].content if messages else ""
+            seqs = re.findall(r"\[NEW #(\d+)\]", body)
+            return (f"SUMMARY: [Mock summary] {len(seqs)} message(s) summarised; configure a real model for real memory.\n"
+                    "CHARACTERS:\n- Mock Innkeeper: [Mock] served the protagonist a drink.\n"
+                    f"OPENED:\n- [Mock] thread opened at #{seqs[0] if seqs else 0}\n"
+                    f"RESOLVED:\n- {'T1' if chr(10) + 'T1:' in body else 'none'}")
+        if "CHAPTER SUMMARY" in (system or "") or "STORY SO FAR" in (system or ""):
+            n = (messages[-1].content if messages else "").count("(messages #")
+            kind = "chapter" if "CHAPTER SUMMARY" in system else "story so far"
+            return f"[Mock {kind}] {n} part(s) merged; configure a real model for real memory."
         return "[Mock recap] The mock provider cannot summarise real content. Configure a real model to generate recaps."
 
 
