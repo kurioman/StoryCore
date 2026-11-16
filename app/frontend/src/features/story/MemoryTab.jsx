@@ -1,4 +1,4 @@
-// "AI memory" tab of the Journal (v1.8 phase 7.4): what the narrator remembers of the story (services/summaries.py):
+// "AI memory" tab of the Journal (v0.5 phase 7.4): what the narrator remembers of the story (services/summaries.py):
 // the story so far, chapters and scenes (editable, can be pinned as a memory), open threads (settle / reopen),
 // what each character remembers, and two buttons: summarise now, close the chapter here.
 import * as React from "react";

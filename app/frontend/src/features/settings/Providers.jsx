@@ -793,7 +793,7 @@ function LMStudioQuickSetup({ onChanged }) {
   );
 }
 
-// v1.8: also used by the first-run assistant (features/setup) with a fixed path and without the chooser
+// v0.5: also used by the first-run assistant (features/setup) with a fixed path and without the chooser
 export function ProvidersQuickSetup({ path, hideChooser = false } = {}) {
   let providers = useProviders(),
     queryClient = useQueryClient(),

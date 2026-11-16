@@ -1,4 +1,4 @@
-// Story library (v1.8, roadmap phase 3) at #/library, where "Start your next adventure" leads.
+// Story library (v0.5, roadmap phase 3) at #/library, where "Start your next adventure" leads.
 // "Resume": the latest story in a big card, then the other stories in progress. "Stories": one card per lore pack
 // (cover, name, tags, summary from pack.json format 2, in the interface language). A card opens the story sheet:
 // openings, "New game" (wizard with the world and opening chosen) and the games already started in that world.

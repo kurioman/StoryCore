@@ -1,4 +1,4 @@
-"""Automatic memory summaries (v1.8, phase 7): the table and its full-text index.
+"""Automatic memory summaries (v0.5, phase 7): the table and its full-text index.
 
 Revision ID: 0010
 Revises: 0009

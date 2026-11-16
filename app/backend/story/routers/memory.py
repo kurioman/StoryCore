@@ -1,4 +1,4 @@
-"""The AI's memory of a story (v1.8, phase 7.4): the memory panel, summarise / close a chapter now, the player recap."""
+"""The AI's memory of a story (v0.5, phase 7.4): the memory panel, summarise / close a chapter now, the player recap."""
 from __future__ import annotations
 
 from typing import Any, Optional
@@ -78,7 +78,7 @@ async def summarise_now(sid: str, body: SummariseIn | None = None, ctx: AppConte
 
 @router.get("/stories/{sid}/usage")
 def usage_of(sid: str, db: Session = Depends(get_db)) -> dict[str, Any]:
-    """v1.8 phase 7.5: token use of the story (narrator replies on this path, side requests, the latest turn)."""
+    """v0.5 phase 7.5: token use of the story (narrator replies on this path, side requests, the latest turn)."""
     from ..services import usage
     s = story_tree.get_story(db, sid)
     return usage.summary(db, s, story_tree.path_ids(db, story_tree.get_branch(db, s)))

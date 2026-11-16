@@ -1,4 +1,4 @@
-"""Automatic memory summaries (v1.8 phase 7.1): written with memory capture or by the catch-up, never twice, tied to
+"""Automatic memory summaries (v0.5 phase 7.1): written with memory capture or by the catch-up, never twice, tied to
 their messages (edits, branches), and sent for the messages that no longer fit the context."""
 import time
 

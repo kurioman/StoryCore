@@ -1,4 +1,4 @@
-// Codex (v1.8): the in-story encyclopedia, opened from the play screen's header. Characters and places the protagonist
+// Codex (v0.5): the in-story encyclopedia, opened from the play screen's header. Characters and places the protagonist
 // has discovered on this branch; the others are locked "???" cards (no name, no spoiler). Data: GET /stories/:id/codex
 // (backend services/codex.py). Only public lore: narrator-only notes never reach this screen.
 import * as React from "react";

@@ -28,7 +28,7 @@ STORY_TABLES: list[tuple[str, type]] = [
     ("local_canon", LocalCanon), ("commands", SlashCommand),
     # added in 1.1 (packages from 1.0 simply have none of these)
     ("turn_analyses", TurnAnalysis), ("discoveries", CharacterDiscovery),
-    # added in 1.8 (phase 7: automatic memory summaries)
+    # added in 0.5 (phase 7: automatic memory summaries)
     ("summaries", MemorySummary),
 ]
 NEVER_EXPORTED = ["API keys and other secrets", "provider credentials", "app logs"]

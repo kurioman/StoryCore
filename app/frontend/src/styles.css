@@ -35,7 +35,7 @@
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
-/* v1.8: dark theme in night blue, matching the welcome page (was neutral grey-black) */
+/* v0.5: dark theme in night blue, matching the welcome page (was neutral grey-black) */
 :root,[data-theme=dark]{--c-bg:#0a0e22;--c-panel:#0e1330;--c-panel-2:#131a3b;--c-raised:#19214a;--c-border:#222b55;--c-border-strong:#303a6b;--c-fg:#ece6d8;--c-muted:#aba597;--c-faint:#958f87;--c-narration:#b4aea1;--c-accent:#c9a25b;--c-accent-soft:#c9a25b1f;--c-accent-fg:#17140e;--c-user:#121a3e;--c-ooc:#0f1f3a;--c-ooc-border:#2a4a78;--c-danger:#e0715f;--c-danger-soft:#e0715f1f;--c-ok:#79b38a;--c-ok-soft:#79b38a1f;--c-warn:#d9b25c;--c-warn-soft:#d9b25c1f;--c-info:#7fa7d6;--c-info-soft:#7fa7d61f;--c-scroll:#2a3466;--lightningcss-light: ;--lightningcss-dark:initial;color-scheme:dark}
 [data-theme=light]{--c-bg:#f4f1ea;--c-panel:#fbf9f4;--c-panel-2:#f1ede4;--c-raised:#fff;--c-border:#e2dccf;--c-border-strong:#cfc7b6;--c-fg:#26231d;--c-muted:#57524a;--c-faint:#6b665c;--c-narration:#5c574e;--c-accent:#745515;--c-accent-soft:#7455151a;--c-accent-fg:#fff;--c-user:#ece6da;--c-ooc:#e6eef2;--c-ooc-border:#a9c4d1;--c-danger:#a03c26;--c-danger-soft:#a03c261a;--c-ok:#336a42;--c-ok-soft:#336a421a;--c-warn:#785a10;--c-warn-soft:#785a101a;--c-info:#335d88;--c-info-soft:#335d881a;--c-scroll:#d6cfc0;--lightningcss-light:initial;--lightningcss-dark: ;color-scheme:light}
 html,body,#root{height:100%}
@@ -100,7 +100,7 @@ body{background:var(--c-bg);color:var(--c-fg);font-family:var(--font-sans);-webk
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}
 }
 
-/* v1.8 play screen: the two permanent buttons at the bottom of the right panel (features/report/ReportProblem.jsx) */
+/* v0.5 play screen: the two permanent buttons at the bottom of the right panel (features/report/ReportProblem.jsx) */
 .sc-action{border:1px solid transparent;transition:transform .15s ease,box-shadow .2s ease,filter .2s ease,border-color .2s ease}
 .sc-action:hover{transform:translateY(-1px)}
 .sc-action:active{transform:translateY(0)}
@@ -109,7 +109,7 @@ body{background:var(--c-bg);color:var(--c-fg);font-family:var(--font-sans);-webk
 .sc-action-red{color:#fff4f1;background:linear-gradient(180deg,#c9503d,#a63a2a);border-color:#ff9a8a40;box-shadow:0 1px 0 #ffffff25 inset,0 4px 14px -6px #c9503d90}
 .sc-action-red:hover{filter:brightness(1.08);box-shadow:0 1px 0 #ffffff30 inset,0 6px 20px -6px #e0715fb0}
 
-/* v1.8 welcome page (features/welcome). Always the night-blue look, whatever the dark / light theme.
+/* v0.5 welcome page (features/welcome). Always the night-blue look, whatever the dark / light theme.
    To change the background colour, change --sc-night. */
 .sc-welcome{--sc-night:#0b1030;--sc-gold:#e2bd72;--sc-gold-deep:#c9a25b;--sc-gold-light:#fbe4a3;background:var(--sc-night);color:var(--sc-gold);color-scheme:dark}
 .sc-welcome-vignette{background:radial-gradient(ellipse at 50% 50%,transparent 55%,#04061499 100%)}
@@ -179,7 +179,7 @@ body{background:var(--c-bg);color:var(--c-fg);font-family:var(--font-sans);-webk
 .sc-glow-btn:hover .sc-discord-logo,.sc-glow-btn:focus-visible .sc-discord-logo{transform:translateY(-1px)}
 .sc-brand{font-family:var(--font-brand);font-weight:700;letter-spacing:.04em}
 
-/* v1.8 codex (features/codex): a night-blue book with gold, whatever the app theme */
+/* v0.5 codex (features/codex): a night-blue book with gold, whatever the app theme */
 .sc-cx-open{color:#1d1508;background:linear-gradient(180deg,#e2bd72,#c9a25b);border:1px solid #f0d39a55;box-shadow:0 2px 10px -4px #c9a25b90;transition:filter .2s ease,transform .15s ease}
 .sc-cx-open:hover{filter:brightness(1.08);transform:translateY(-1px)}
 .sc-cx{background:radial-gradient(ellipse at 30% 0%,#18205033,transparent 60%),linear-gradient(180deg,#0e1438,#0a0e26);border:1px solid #e2bd7240;box-shadow:0 30px 80px -20px #000c,0 0 60px -20px #e2bd7240;color:#ece6d8;font-family:var(--font-sans);color-scheme:dark}
@@ -203,7 +203,7 @@ button.sc-cx-card:hover{transform:translateY(-2px);border-color:#e2bd7270;box-sh
 .sc-cx-badge-known{background:#79b38a29;color:#9fd3ad}
 .sc-cx-lockslot{border:1px dashed #e2bd7244;color:#e2bd72;background:#0d1230}
 
-/* v1.8 story library (features/library) */
+/* v0.5 story library (features/library) */
 .sc-lib{background:radial-gradient(ellipse 80% 40% at 50% 0%,#141b4580,transparent 70%),var(--c-bg)}
 .sc-lib-h2{margin-bottom:.9rem;font-family:var(--font-brand);font-weight:700;letter-spacing:.06em;font-size:1.05rem;color:#e2bd72}
 .sc-lib-h3{margin-bottom:.6rem;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#e2bd72b0}
@@ -230,7 +230,7 @@ button.sc-cx-card:hover{transform:translateY(-2px);border-color:#e2bd7270;box-sh
 .sc-lib-game{display:flex;width:100%;align-items:center;gap:.6rem;border-radius:.6rem;padding:.5rem .7rem;transition:background .2s ease}
 .sc-lib-game:hover{background:#e2bd7214}
 
-/* v1.8 music library page (features/music) */
+/* v0.5 music library page (features/music) */
 .sc-mu-drop{display:flex;align-items:center;justify-content:center;gap:.6rem;border-radius:1rem;border:1.5px dashed #e2bd7240;padding:1.1rem;font-size:.85rem;color:#e2bd72aa;transition:all .2s ease}
 .sc-mu-drop-on{border-color:#f3d48c;background:#e2bd7214;color:#fff0c4}
 .sc-mu-chip{border-radius:999px;border:1px solid #e2bd7238;padding:.2rem .7rem;font-size:.78rem;color:#e2bd72;background:#e2bd720d;transition:all .15s ease}
@@ -250,7 +250,7 @@ button.sc-cx-card:hover{transform:translateY(-2px);border-color:#e2bd7270;box-sh
 .sc-mu-del{border-radius:.5rem;padding:.45rem;color:#e0715f99;transition:all .15s ease}
 .sc-mu-del:hover{color:#e0715f;background:#e0715f1a}
 
-/* v1.8 in-game music player (features/music/MusicPlayer.jsx) */
+/* v0.5 in-game music player (features/music/MusicPlayer.jsx) */
 .sc-mp{display:flex;width:100%;flex-direction:column;gap:.5rem;border-radius:.8rem;border:1px solid #e2bd7238;background:linear-gradient(180deg,#141c48,#0e1336);padding:.65rem .75rem;color:#e2bd72;box-shadow:0 8px 24px -16px #000}
 .sc-mp-off{flex-direction:row;align-items:center;justify-content:center;gap:.5rem;font-size:.85rem;font-weight:600;color:#f3dca0;transition:border-color .2s ease,box-shadow .2s ease}
 .sc-mp-off:hover{border-color:#e2bd72a0;box-shadow:0 0 22px -8px #e2bd72aa}
@@ -266,7 +266,7 @@ button.sc-cx-card:hover{transform:translateY(-2px);border-color:#e2bd7270;box-sh
 .sc-mp-vol::-webkit-slider-thumb{-webkit-appearance:none;width:.8rem;height:.8rem;border-radius:999px;background:#fbe4a3;box-shadow:0 0 6px #e2bd72aa}
 .sc-mp-vol::-moz-range-thumb{width:.8rem;height:.8rem;border:none;border-radius:999px;background:#fbe4a3}
 
-/* v1.8 first-run assistant (features/setup) */
+/* v0.5 first-run assistant (features/setup) */
 .sc-su-dot{width:2.2rem;height:.3rem;border-radius:999px;background:#e2bd7230;transition:background .3s ease}
 .sc-su-dot-done{background:#e2bd7299}
 .sc-su-dot-on{background:linear-gradient(90deg,#f3d48c,#d4a650);box-shadow:0 0 10px #e2bd7288}
@@ -281,7 +281,7 @@ button.sc-cx-card:hover{transform:translateY(-2px);border-color:#e2bd7270;box-sh
 .sc-su-ghost{display:inline-flex;align-items:center;gap:.4rem;border-radius:999px;padding:.5rem 1rem;font-size:.9rem;color:#e2bd72;transition:background .2s ease}
 .sc-su-ghost:hover{background:#e2bd7214;color:#fff0c4}
 
-/* v1.8 phase 6: the welcome page on a phone (narrow screens) */
+/* v0.5 phase 6: the welcome page on a phone (narrow screens) */
 .sc-welcome-layout{grid-template-columns:minmax(0,1fr)}
 @media (max-width:640px){
 .sc-welcome-title{font-size:clamp(2.2rem,12.5vw,4rem)}

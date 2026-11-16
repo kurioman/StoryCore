@@ -49,7 +49,7 @@ Stories
   entity_facts        Facts and beliefs (who knows what), with sources and validity.
   memory_extraction_runs / extraction_cursors   Memory capture bookkeeping (what range was analysed).
   recaps              Rolling and chapter summaries ("story so far").
-  memory_summaries    (v1.8, migration 0010) Automatic memory summaries: level (scene | chapter), the exact
+  memory_summaries    (v0.5, migration 0010) Automatic memory summaries: level (scene | chapter), the exact
                       message ids covered (message_ids_json), seq range, status (active | stale | superseded),
                       source (capture | summary | edited). Full-text index summaries_fts.
   savepoints          Snapshots of a branch.

@@ -1,4 +1,4 @@
-// "Play on a phone" (v1.8, phase 6), at #/mobile and in Settings: opens StoryCore to the Wi-Fi on request and shows the
+// "Play on a phone" (v0.5, phase 6), at #/mobile and in Settings: opens StoryCore to the Wi-Fi on request and shows the
 // QR code a phone scans to pair (backend: services/remote.py). Only ever shown on the computer itself.
 import * as React from "react";
 import * as Icon from "lucide-react";

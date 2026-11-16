@@ -12,10 +12,10 @@ context_builder.build() returns:
   messages  the most recent player/narrator messages that fit
   manifest  token counts per section, what was left out and why, warnings (shown in the Context Inspector)
   secrets   the narrator-only text (so the preview can mask it)
-  turn_context  (v1.8, "stable" layout) the per-turn sections, sent at the top of the player's last message
+  turn_context  (v0.5, "stable" layout) the per-turn sections, sent at the top of the player's last message
   instructions  system + turn_context (for side requests that send only a system prompt: continuity check)
 
-Layout (v1.8 phase 7.3, setting context_layout):
+Layout (v0.5 phase 7.3, setting context_layout):
   stable (default)  STABLE_SECTIONS stay in the system prompt: core, global_note, story_note, avatar (profile only),
                     roles, known, recap, scene_summaries, portrait_tags, music_tags, narration_language. Every other
                     section (player_state, scene, canon, events, facts, lore, secrets, memories, threads, narration
@@ -69,7 +69,7 @@ Sections, in order (key in brackets; [optional] ones are dropped first when spac
    2 global_note   The player's global note (Settings).
    3 story_note    The story's own note (overrides the global note and base lore).
    4 avatar        The protagonist (player's avatar profile).
-   4b player_state The player state (stats, inventory...), separate since v1.8 (it changes every turn).
+   4b player_state The player state (stats, inventory...), separate since v0.5 (it changes every turn).
    5 scene         Current place/time/weather/day, characters present and mentioned (with short lore summaries
                    and looks), relationships between them (lore background + values evolved in the story).
    5b roles        Established posts and closed groups: never reassign, never invent a second holder.
@@ -84,20 +84,20 @@ Sections, in order (key in brackets; [optional] ones are dropped first when spac
                    approved local canon. About 20 % of the budget; long chunks cut at 2400 characters.
    8b secrets      Narrator-only "hidden" notes of the records in play (never dropped). See 04_LOREPACK.txt.
    9 recap         [optional] Rolling "story so far" recap.
-   9a scene_summaries [optional, dropped last] (v1.8) The automatic memory (services/summaries.py), newer than the
+   9a scene_summaries [optional, dropped last] (v0.5) The automatic memory (services/summaries.py), newer than the
                    rolling recap: the story so far (always), then the newest chapters and scenes no longer sent word
                    for word, about 15 % of the budget.
-   9b recalled     [optional] (v1.8) Up to 2 merged scenes whose detail matches the recent text (full-text search on
+   9b recalled     [optional] (v0.5) Up to 2 merged scenes whose detail matches the recent text (full-text search on
                    names and places).
-   9c character_memory [optional] (v1.8) The last 3 memory lines of each character in focus (from the scenes).
-   9d threads      [optional] (v1.8) Open threads: promises, debts, quests, mysteries still pending (12 at most).
+   9c character_memory [optional] (v0.5) The last 3 memory lines of each character in focus (from the scenes).
+   9d threads      [optional] (v0.5) Open threads: promises, debts, quests, mysteries still pending (12 at most).
    9b portrait_tags  The [Name:N] portrait tag rule (worlds only; setting portrait_tags_enabled). See 04_LOREPACK.txt.
   10 narration_rules  Short operational rules placed LAST (small models obey the last instructions best).
 Then the recent messages, newest first until the budget is used (at least "recent_messages_min", default 6).
 When even that does not fit, optional sections are dropped in this order: lore, encounters, events, facts, recalled,
 character_memory, recap, threads, scene_summaries.
 
-Automatic summaries (v1.8, phase 7): memory capture (batch mode, every 3 replies) also returns "scene_summary", 2-5
+Automatic summaries (v0.5, phase 7): memory capture (batch mode, every 3 replies) also returns "scene_summary", 2-5
 English sentences about the messages it just read, in the same request (setting scene_summaries_enabled). Anything left
 without a summary (capture off or manual, an older game, an empty field) is summarised after a reply by
 summaries.catch_up with the story's own model: at most 2 short requests, oldest messages first, chunks of up to 10
@@ -126,7 +126,7 @@ replies from the model (the saved story is unchanged). Defined in context_builde
   Per-story options (model, preset, tone, notes, exclusions, pinned lore, story language)   -> stories.settings_json
   Scene, cast, clock, relationships, stats                                                  -> story_states (versioned)
   Journal, facts, recaps, discoveries                                                       -> memory tables
-Story language (v1.8, services/narration_language.py): app setting narration_language (en | fr), overridable per
+Story language (v0.5, services/narration_language.py): app setting narration_language (en | fr), overridable per
 story (settings_json.narration_language). For French, a "Story language" section is added after the portrait-tag rule,
 and "(Write your reply in French.)" after each player turn (not after the opening request). Lore, instructions, portrait
 tags, names and the analysis JSON stay in English; suggested replies follow the reply's language on their own.

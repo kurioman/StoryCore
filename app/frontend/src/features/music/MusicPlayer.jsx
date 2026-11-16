@@ -1,4 +1,4 @@
-// In-game music player (v1.8), at the bottom of the play screen's right panel. It plays what the story asks for
+// In-game music player (v0.5), at the bottom of the play screen's right panel. It plays what the story asks for
 // (GET /stories/:id/music: the narrator's [Music:tag], else the scene's place, else any track) and crossfades when
 // the track changes. Browsers block sound until the player clicks, hence "Turn the music on" the first time.
 // Volume, mute and on/off are remembered in this browser.

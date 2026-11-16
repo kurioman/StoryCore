@@ -1,5 +1,5 @@
 // Reconstructed from the StoryCore v1.7.0 compiled bundle (see DEVONLY/13_FRONTEND_SOURCE.md).
-// v1.8: only the set-up notices are left (lore pack found, portrait folder found, connect a model, import reports);
+// v0.5: only the set-up notices are left (lore pack found, portrait folder found, connect a model, import reports);
 // they are shown at the top of the story library (features/library). The old home page is gone.
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { apiGet, apiPost, errorMessage } from "@/api/legacy";
@@ -56,7 +56,7 @@ export function SetupNotices() {
     p = (n.data?.providers ?? []).filter((e) => e.provider_type !== `mock`),
     g = query.data?.lore_candidates.filter((e) => !e.imported) ?? [],
     v = query.data?.image_folders.filter((e) => !e.registered) ?? [];
-  // setting up (lore, portraits, models) happens on the computer, not on a paired phone (v1.8)
+  // setting up (lore, portraits, models) happens on the computer, not on a paired phone (v0.5)
   if (IS_REMOTE) return null;
   return (
     <div>

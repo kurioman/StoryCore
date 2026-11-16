@@ -1,4 +1,4 @@
-// First-run assistant (v1.8, roadmap phase 5) at #/setup, full screen over the starry sky. Shown the first time
+// First-run assistant (v0.5, roadmap phase 5) at #/setup, full screen over the starry sky. Shown the first time
 // "Start your next adventure" is clicked (setting onboarding_done), and from the welcome gear menu. Steps: language,
 // where the AI runs (this PC / online), model advice and connection (reusing Settings > Providers' guides), a short
 // tour, then the story library. "Skip" is always there.

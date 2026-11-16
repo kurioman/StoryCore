@@ -1,4 +1,4 @@
-"""Graphics card detection (v1.8) for the first-run assistant's model advice.
+"""Graphics card detection (v0.5) for the first-run assistant's model advice.
 
 Only NVIDIA cards can be read reliably (nvidia-smi ships with their driver). Other cards: the assistant asks the player
 to pick their video memory. Never fails: no card found is an empty list.

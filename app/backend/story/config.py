@@ -12,7 +12,7 @@ from typing import Optional
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 FRONTEND_DIST = PROJECT_ROOT / "app" / "frontend" / "dist"
-APP_VERSION = "1.7.0"
+APP_VERSION = "0.5.0"
 EXPORT_FORMAT_VERSION = 1
 
 
@@ -29,7 +29,7 @@ class Settings:
 
     @property
     def music_dir(self) -> Path:
-        """The app's music library (v1.8): <project>/Music with library.json, shared by every story."""
+        """The app's music library (v0.5): <project>/Music with library.json, shared by every story."""
         return self.music_dir_override or (self.project_root / "Music")
 
     @property

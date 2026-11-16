@@ -1,4 +1,4 @@
-"""v1.8 story language: the instruction reaches the narrator only for non-English stories."""
+"""v0.5 story language: the instruction reaches the narrator only for non-English stories."""
 from support import AppTestCase
 
 

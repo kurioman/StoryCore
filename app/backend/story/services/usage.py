@@ -1,4 +1,4 @@
-"""Token use of a story (v1.8, phase 7.5): what each request really cost, and the estimate corrected with it.
+"""Token use of a story (v0.5, phase 7.5): what each request really cost, and the estimate corrected with it.
 
 * The narrator's replies keep the provider's own figures in their metadata (``generation_metadata_json.usage``).
 * Side requests (scene analysis, memory capture, summaries, the player recap) are added up per story in

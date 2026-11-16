@@ -625,7 +625,7 @@ function LoreConflicts({ items }) {
   ) : null;
 }
 
-// v1.8 phase 7.6: continuity notices found after the reply (no model call, or inside the scene analysis)
+// v0.5 phase 7.6: continuity notices found after the reply (no model call, or inside the scene analysis)
 function ContinuityAlerts({ items }) {
   let list = (Array.isArray(items) ? items : []).filter((e) => e && typeof e.kind == `string`),
     text = (e) =>

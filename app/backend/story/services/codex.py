@@ -1,4 +1,4 @@
-"""Codex (v1.8): the in-story encyclopedia of characters and places the protagonist has discovered.
+"""Codex (v0.5): the in-story encyclopedia of characters and places the protagonist has discovered.
 
 Characters come from the per-story discovery roster (heard of / met / known, see discovery.py), plus anyone who has
 been in a scene. Places are derived from the story itself, so they follow branches exactly like everything else:

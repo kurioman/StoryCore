@@ -1,4 +1,4 @@
-"""Music library (v1.8): one library for the whole app, in <project>/Music, described by Music/library.json.
+"""Music library (v0.5): one library for the whole app, in <project>/Music, described by Music/library.json.
 
 * Tracks have a title and tags (TAGS below, plus any custom tag). The player adds them in the app (Music page) or by
   copying files and editing library.json.

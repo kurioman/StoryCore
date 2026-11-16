@@ -162,7 +162,7 @@ to the model WITH their tags so it keeps the habit. Code: services/portrait_tags
 In an opening blueprint you can write the tags yourself (see the_hero_summoned).
 Matching uses ids, names and unique aliases. Unmatched files are listed in the Portraits page, where the player can
 assign them by hand (stored as overrides; the image files are never modified).
-Portraits belong to their world (v1.8): a pack's image folder is tied to the pack's world (asset_roots.world_id), its
+Portraits belong to their world (v0.5): a pack's image folder is tied to the pack's world (asset_roots.world_id), its
 files are matched against that world's characters only, and a story only looks at its own world's folders (plus
 folders the player added by hand, which are shared). So two packs may both have a character with the same id
 ("lily"): each keeps its own pictures. The pack checker lists such shared ids as a note.
@@ -213,7 +213,7 @@ no longer exists is ignored (verified against lore at use).
   8. New story > choose the world > an opening > generate. Use the Context Inspector to see what the narrator got.
 
 
-10. CHECKING A PACK (v1.8)
+10. CHECKING A PACK (v0.5)
 --------------------------
 "Check Lore Packs.bat" (or python -m story.pack_check [folder ...], or GET /api/lore/packs/check[?world_id=...])
 runs the real import and portrait scan on a throw-away database and prints one report per pack. Code:

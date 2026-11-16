@@ -1,4 +1,4 @@
-// Animated starfield behind the welcome page (v1.8). One <canvas>, no images.
+// Animated starfield behind the welcome page (v0.5). One <canvas>, no images.
 // Stars are born at the centre of the screen and drift outwards, faster and bigger as they go, like travelling
 // through space; a star that leaves the screen is born again at the centre, so the sky loops forever. They twinkle
 // and shift a little with the mouse. The "Start" button can pull them in (setAttractor): a star that touches the

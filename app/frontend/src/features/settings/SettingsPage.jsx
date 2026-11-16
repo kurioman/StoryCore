@@ -16,7 +16,7 @@ import { useUi } from "@/components/ui";
 import { PhonePanel } from "@/features/mobile/PhonePanel";
 import { IS_REMOTE } from "@/lib/remote";
 
-// built when shown (msg() needs the chosen language); a paired phone only gets its own preferences (v1.8)
+// built when shown (msg() needs the chosen language); a paired phone only gets its own preferences (v0.5)
 function settingsTabs() {
   let tabs = [
   {

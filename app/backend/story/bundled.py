@@ -108,7 +108,7 @@ def _sync_pack(ctx: AppContext, folder: Path, seen: dict[str, Path]) -> str:
             world = db.scalar(select(World).where(World.slug == pid))
             root = db.scalar(select(AssetRoot).where(AssetRoot.path == str(images)))
             # rescan when the images changed, or the lore did (new characters can claim existing portraits)
-            # (v1.8) and when the folder is not yet tied to its world: portraits are matched within one world only
+            # (v0.5) and when the folder is not yet tied to its world: portraits are matched within one world only
             if (root is None or reimported or root.world_id != world.id
                     or (world.data_json or {}).get("images_fingerprint") != img_fp):
                 if root is None:

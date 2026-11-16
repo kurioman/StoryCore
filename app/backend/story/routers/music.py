@@ -1,4 +1,4 @@
-"""Music library (v1.8): list, add (.mp3 upload), edit title/tags, delete, stream; and what a story should play now."""
+"""Music library (v0.5): list, add (.mp3 upload), edit title/tags, delete, stream; and what a story should play now."""
 from __future__ import annotations
 
 from typing import Any, Optional

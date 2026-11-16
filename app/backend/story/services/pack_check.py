@@ -103,7 +103,7 @@ def check_all(packs_dir: Path) -> list[dict[str, Any]]:
 
 
 def cross_pack_notes(reports: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Characters with the same id in several packs. Fine since v1.8 (portraits and lore are kept per world), but
+    """Characters with the same id in several packs. Fine since v0.5 (portraits and lore are kept per world), but
     worth knowing: a player who sees "Lily" in two stories meets two different characters."""
     owners: dict[str, list[tuple[str, str]]] = {}
     for r in reports:

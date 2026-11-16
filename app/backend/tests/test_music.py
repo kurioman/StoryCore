@@ -1,4 +1,4 @@
-"""Music library (v1.8): add / tag / delete tracks, hidden [Music:tag] in replies, what a story plays."""
+"""Music library (v0.5): add / tag / delete tracks, hidden [Music:tag] in replies, what a story plays."""
 from support import AppTestCase
 
 FAKE_MP3 = b"ID3\x04\x00\x00\x00\x00\x00\x00" + b"\x00" * 2000

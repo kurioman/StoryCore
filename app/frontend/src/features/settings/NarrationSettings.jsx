@@ -36,7 +36,7 @@ function PromptProfilePicker({ value, onChange }) {
   );
 }
 
-// v1.8: language of the story text (the narrator writes in it; the interface language is separate)
+// v0.5: language of the story text (the narrator writes in it; the interface language is separate)
 function NarrationLanguagePicker({ value, onChange }) {
   const languages = useQuery({ queryKey: [`narration-languages`], queryFn: () => apiGet(`/narration-languages`) });
   return (

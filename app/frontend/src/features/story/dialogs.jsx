@@ -62,7 +62,7 @@ export function RecapDialog({ storyId, action, onClose, onOpenJournal, onFocusSt
   }
 }
 
-// v1.8 phase 7.4: the golden Recap button. A recap for the player, in the story's language, written from the AI's
+// v0.5 phase 7.4: the golden Recap button. A recap for the player, in the story's language, written from the AI's
 // memory (one short request; shown again at once while the story has not moved on).
 function PlayerRecapDialog({ storyId, onClose, onOpenJournal }) {
   let mutation = useMutation({ mutationFn: (refresh) => apiPost(`/stories/${storyId}/player-recap`, { refresh }) });
@@ -108,7 +108,7 @@ function PlayerRecapDialog({ storyId, onClose, onOpenJournal }) {
   );
 }
 
-// v1.8 phase 7.4: /chapter (/chapitre) closes the current chapter of the AI's memory, with an optional title
+// v0.5 phase 7.4: /chapter (/chapitre) closes the current chapter of the AI's memory, with an optional title
 function ChapterDialog({ storyId, input, onClose, onOpenJournal }) {
   let close = useCloseChapter(storyId),
     [title, setTitle] = React.useState(input ?? ``);
@@ -142,7 +142,7 @@ function ChapterDialog({ storyId, input, onClose, onOpenJournal }) {
   );
 }
 
-/** A small offer above the message box when a long story is opened again after a break (v1.8 phase 7.4). */
+/** A small offer above the message box when a long story is opened again after a break (v0.5 phase 7.4). */
 export function ResumeOffer({ storyId, messages, onRecap }) {
   let key = `resume-offer-dismissed:${storyId}`,
     [hidden, setHidden] = React.useState(() => {

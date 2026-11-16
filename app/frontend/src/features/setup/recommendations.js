@@ -1,4 +1,4 @@
-// First-run assistant (v1.8): model advice. Sizes are the GGUF files of TheDrummer/Rocinante-12B-v1.1 (Hugging Face);
+// First-run assistant (v0.5): model advice. Sizes are the GGUF files of TheDrummer/Rocinante-12B-v1.1 (Hugging Face);
 // the video memory also has to hold the story context (about 2.5 GB for 16k tokens on this model), hence the margins.
 import { msg } from "@/i18n";
 

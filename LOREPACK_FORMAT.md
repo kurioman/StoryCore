@@ -97,7 +97,7 @@ Lorepack/
 
 | Field | Meaning |
 |---|---|
-| `format_version` | `2` (v1.8: adds the library card below). Packs with `1` still load unchanged. |
+| `format_version` | `2` (v0.5: adds the library card below). Packs with `1` still load unchanged. |
 | `id` | Permanent identifier: lowercase letters, digits and `_` (e.g. `lumencia_academy`). Stories are linked to it, so **never change it** once stories exist. |
 | `name` | Title shown in the app. Can be changed at any time. |
 | `description` | Optional short text for the world list. Without it, the first section of the premise is used. |
@@ -186,7 +186,7 @@ wizard win). Keys: `location`, `time` (e.g. `"09:00"`), `weather`, `weekday`, `d
 
 Format 2: `name` and `purpose` may be given per interface language, like the library card:
 `"name": {"en": "Alternative start: The Demon King", "fr": "Début alternatif : le Roi Démon"}`. The blueprint stays one
-text (it is written for the narrator). Since v1.8 the app has no generic openings: a pack without `starters` (or lore
+text (it is written for the narrator). Since v0.5 the app has no generic openings: a pack without `starters` (or lore
 scenarios) leaves the narrator to improvise the first scene, and the checker warns about it.
 
 ### `posts`

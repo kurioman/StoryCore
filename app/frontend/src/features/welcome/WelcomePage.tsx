@@ -1,4 +1,4 @@
-// Welcome page (v1.8, roadmap phase 1): full screen, no sidebar. Logo and outlined title near the top, a light in the
+// Welcome page (v0.5, roadmap phase 1): full screen, no sidebar. Logo and outlined title near the top, a light in the
 // middle that the stars are born from, the big "Start your next adventure" button (to the story library), a quiet
 // "Resume" link (not active yet), the settings gear (language, all settings) and a footer: credits, Discord, version.
 // On hover the button lights up, trembles and absorbs the stars that come near; on click the stars jump to light speed.

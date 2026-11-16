@@ -94,7 +94,7 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
             await turn_analysis.analyse(ctx, message_id, force=tagged)
         except Exception:  # never let optional metadata affect the finished reply or the extraction that follows
             log.exception("turn analysis crashed for %s", message_id)
-        try:  # v1.8 phase 7.6: a character recorded as dead who speaks (no model call)
+        try:  # v0.5 phase 7.6: a character recorded as dead who speaks (no model call)
             from .services import continuity
             with ctx.db.session() as s:
                 continuity.check_speakers(s, message_id)
@@ -107,13 +107,13 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
             mode = settings_service.get(s, "event_capture_mode")
         if method_branch:
             await ctx.extraction.run(story_id, method_branch, "after_each_turn" if mode == "after_each_turn" else "automatic_batch")
-        try:  # v1.8 phase 7.5: the real prompt size corrects the token estimate of this story
+        try:  # v0.5 phase 7.5: the real prompt size corrects the token estimate of this story
             from .services import usage
             with ctx.db.session() as s:
                 usage.calibrate(s, message_id)
         except Exception:
             log.exception("token calibration failed for %s", message_id)
-        try:  # v1.8 phase 7.1: summaries that memory capture did not write (older games, capture off, an empty field)
+        try:  # v0.5 phase 7.1: summaries that memory capture did not write (older games, capture off, an empty field)
             from .services import summaries
             await summaries.catch_up(ctx, story_id, branch_id)
         except Exception:
@@ -167,7 +167,7 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
         hostname = re.sub(r":\d+$", "", host)
         path = request.url.path
         if remote.is_network_request(request.scope):
-            # v1.8 phone access: the network listener answers only by IP address (no DNS rebinding) and only to
+            # v0.5 phone access: the network listener answers only by IP address (no DNS rebinding) and only to
             # paired devices; PC-only areas stay closed (services/remote.py).
             if not IP_HOST.match(hostname):
                 return JSONResponse({"detail": "Host not allowed."}, 403)
@@ -238,7 +238,7 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
 
     app.include_router(remote_r.pair_router)
 
-    # v1.8: the interface (built from app/frontend/src into app/frontend/dist) is served at /. The addresses used
+    # v0.5: the interface (built from app/frontend/src into app/frontend/dist) is served at /. The addresses used
     # while the old and the new interface lived side by side (/next/, /old) lead back to it (the #/... part is kept).
     if (FRONTEND_DIST / "assets").is_dir():
         app.mount("/assets", StaticFiles(directory=FRONTEND_DIST / "assets"), name="assets")

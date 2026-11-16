@@ -1,4 +1,4 @@
-// Welcome page logo (v1.8): a star born from an open book. Used ONLY on the welcome page; the rest of the app keeps
+// Welcome page logo (v0.5): a star born from an open book. Used ONLY on the welcome page; the rest of the app keeps
 // the four-point star (Logo in features/sidebar/Sidebar.jsx, favicon in index.html). "full" adds the page lines and
 // the little sparkles; the plain version is for small sizes.
 import * as React from "react";

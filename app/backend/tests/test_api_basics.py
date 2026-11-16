@@ -70,7 +70,7 @@ class InterfaceSwitchTest(AppTestCase):
 
 
 class PortraitsPerWorldTest(AppTestCase):
-    """v1.8: both shipped packs have a character with the id "lily" (and "beelzebub"). Each world must show its own
+    """v0.5: both shipped packs have a character with the id "lily" (and "beelzebub"). Each world must show its own
     pictures, never the other pack's."""
 
     def test_same_character_id_in_two_packs_keeps_its_own_portraits(self):
@@ -90,7 +90,7 @@ class PortraitsPerWorldTest(AppTestCase):
 
 
 class LibraryCardTest(AppTestCase):
-    """pack.json format 2 (v1.8): summary and tags per language reach the world; no cover gives a clean 404."""
+    """pack.json format 2 (v0.5): summary and tags per language reach the world; no cover gives a clean 404."""
 
     def test_library_card(self):
         for slug, tag_fr in (("hero_chronicle", "Isekai"), ("lumencia_academy", "Académie")):
@@ -114,7 +114,7 @@ class LibraryCardTest(AppTestCase):
 
 
 class OpeningsTest(AppTestCase):
-    """v1.8: Hero's Chronicle has two openings (Avalon, the Demon King), Lumencia Academy one (Enrollment, 1 March)."""
+    """v0.5: Hero's Chronicle has two openings (Avalon, the Demon King), Lumencia Academy one (Enrollment, 1 March)."""
 
     def test_pack_openings(self):
         hc = {s["id"]: s for s in self.world("hero_chronicle")["data_json"]["starters"]}
@@ -132,7 +132,7 @@ class OpeningsTest(AppTestCase):
 
 
 class FirstRunTest(AppTestCase):
-    """v1.8 first-run assistant: the setting that remembers it, and the graphics card endpoint (never fails)."""
+    """v0.5 first-run assistant: the setting that remembers it, and the graphics card endpoint (never fails)."""
 
     def test_onboarding_setting_and_gpu(self):
         self.assertFalse(self.get("/settings")["onboarding_done"])

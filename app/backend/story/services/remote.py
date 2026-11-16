@@ -1,4 +1,4 @@
-"""Play from a phone on the same Wi-Fi (v1.8, phase 6).
+"""Play from a phone on the same Wi-Fi (v0.5, phase 6).
 
 StoryCore normally listens on 127.0.0.1 only. When the player switches "Play on a phone" on (on the PC), a second
 listener is opened on every network interface (0.0.0.0) on its own port, serving the same app. Everything that

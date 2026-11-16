@@ -216,7 +216,7 @@ def character_detail(sid: str, cid: str, db: Session = Depends(get_db)) -> dict[
             "canon": canon_svc.for_character(canon_svc.facts(db, s.world_id, index), cid, index)}
 
 
-# --------------------------------------------------------------------------- codex (v1.8)
+# --------------------------------------------------------------------------- codex (v0.5)
 @router.get("/stories/{sid}/codex")
 def codex(sid: str, db: Session = Depends(get_db)) -> dict[str, Any]:
     """Characters and places discovered in this story (active branch); undiscovered ones are counted as locked."""

@@ -111,7 +111,7 @@ LORE  (routers/lore.py)
   POST   /api/lore/import-zip                                     import lore zip
   POST   /api/worlds/{wid}/reimport                               reimport
   GET    /api/lore/import-runs                                    import runs
-  GET    /api/lore/packs/check[?world_id=]                        lore pack checker report (v1.8, read-only)
+  GET    /api/lore/packs/check[?world_id=]                        lore pack checker report (v0.5, read-only)
   GET    /api/worlds/{wid}/entities                               entities
   GET    /api/worlds/{wid}/entities/{entity_id}                   entity
   GET    /api/worlds/{wid}/search                                 search
@@ -150,8 +150,8 @@ PROVIDERS  (routers/providers.py)
   POST   /api/ollama/pulls/{job_id}/cancel                        ollama pull cancel
   POST   /api/ollama/{pid}/delete                                 ollama delete
   POST   /api/ollama/quick-setup                                  Create the default local Ollama provider if it doesn't exist yet.
-  GET    /api/lmstudio/detect?base_url=                           (v1.8) find LM Studio, list models with state and context sizes
-  POST   /api/lmstudio/setup                                      (v1.8) {base_url, model_id, make_default}: provider + sized profile
+  GET    /api/lmstudio/detect?base_url=                           (v0.5) find LM Studio, list models with state and context sizes
+  POST   /api/lmstudio/setup                                      (v0.5) {base_url, model_id, make_default}: provider + sized profile
 
 STATE  (routers/state.py)
   GET    /api/stories/{sid}/state                                 get state
@@ -205,24 +205,24 @@ SYSTEM  (routers/system.py)
   GET    /api/health                                              health
   GET    /api/settings                                            get settings
   GET    /api/prompt-profiles                                     prompt profiles
-  GET    /api/narration-languages                                 story languages (v1.8): en, fr
+  GET    /api/narration-languages                                 story languages (v0.5): en, fr
   PUT    /api/settings                                            put settings
   GET    /api/onboarding                                          onboarding
-  GET    /api/stories/{sid}/memory                                (v1.8) the AI's memory: layers, open threads, character notes
-  PATCH  /api/stories/{sid}/memory/{id}                           (v1.8) {content}: correct a summary (source "edited")
-  POST   /api/stories/{sid}/memory/threads/close | /reopen        (v1.8) {key}: settle / reopen a thread by hand
-  POST   /api/stories/{sid}/memory/summarise                      (v1.8) {chapter, title}: summarise now / close a chapter
-  GET    /api/stories/{sid}/usage                                 (v1.8) tokens: latest turn (cache share), narrator, side requests
-  POST   /api/stories/{sid}/player-recap                          (v1.8) {refresh}: recap for the player (kept until the story moves)
-  GET    /api/remote/whoami                                       (v1.8) {remote, device}: is this a paired phone?
-  GET    /api/remote/status                                       (v1.8, PC only) phone access: enabled, port, urls, code, devices
-  POST   /api/remote/enable | /disable | /new-code | /forget-all  (v1.8, PC only) open/close the network listener...
-  DELETE /api/remote/devices/{id}                                 (v1.8, PC only) disconnect one phone
-  GET    /pair?code=  ·  POST /pair (form)                        (v1.8, network listener only) pairing page, sets the badge
+  GET    /api/stories/{sid}/memory                                (v0.5) the AI's memory: layers, open threads, character notes
+  PATCH  /api/stories/{sid}/memory/{id}                           (v0.5) {content}: correct a summary (source "edited")
+  POST   /api/stories/{sid}/memory/threads/close | /reopen        (v0.5) {key}: settle / reopen a thread by hand
+  POST   /api/stories/{sid}/memory/summarise                      (v0.5) {chapter, title}: summarise now / close a chapter
+  GET    /api/stories/{sid}/usage                                 (v0.5) tokens: latest turn (cache share), narrator, side requests
+  POST   /api/stories/{sid}/player-recap                          (v0.5) {refresh}: recap for the player (kept until the story moves)
+  GET    /api/remote/whoami                                       (v0.5) {remote, device}: is this a paired phone?
+  GET    /api/remote/status                                       (v0.5, PC only) phone access: enabled, port, urls, code, devices
+  POST   /api/remote/enable | /disable | /new-code | /forget-all  (v0.5, PC only) open/close the network listener...
+  DELETE /api/remote/devices/{id}                                 (v0.5, PC only) disconnect one phone
+  GET    /pair?code=  ·  POST /pair (form)                        (v0.5, network listener only) pairing page, sets the badge
   GET    /api/system/paths                                        paths
   POST   /api/system/open-data-folder                             open data folder
   POST   /api/system/clear-logs                                   clear logs
   GET    /api/system/logs                                         read logs
   GET    /api/system/integrity                                    integrity
-  GET    /api/system/bug-report                                   (v1.8) zip for bug reports: versions, settings, recent
+  GET    /api/system/bug-report                                   (v0.5) zip for bug reports: versions, settings, recent
                                                                   generation errors, pack check, last logs. No keys, no story text.

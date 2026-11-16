@@ -1,4 +1,4 @@
-STORYCORE v1.7.0 (Windows)
+STORYCORE v0.5 (Windows)
 Quick start. Takes about a minute to read.
 
 You do not need to install Python, Node.js or anything else.

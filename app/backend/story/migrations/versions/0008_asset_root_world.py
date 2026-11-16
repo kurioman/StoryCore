@@ -1,6 +1,6 @@
 """Portrait folders belong to a world (asset_roots.world_id).
 
-Before v1.8 every portrait was looked up by character id across all worlds, so two lore packs with a character of the
+Before v0.5 every portrait was looked up by character id across all worlds, so two lore packs with a character of the
 same id (Lily in Hero's Chronicle and in Lumencia Academy) could show each other's pictures. The pack's image folder now
 records its world; the next start fills it in and rescans (bundled.py). Folders added by hand stay shared (NULL).
 

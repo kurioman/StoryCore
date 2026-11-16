@@ -1,4 +1,4 @@
-"""LM Studio in one click (v1.8): find the local server, list its models with their real context size, and create the
+"""LM Studio in one click (v0.5): find the local server, list its models with their real context size, and create the
 provider + model profile with settings that fit.
 
 LM Studio speaks the OpenAI format at <host>/v1, and has its own REST API at <host>/api/v0/models that also says which

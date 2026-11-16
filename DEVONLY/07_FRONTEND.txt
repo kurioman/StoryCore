@@ -4,7 +4,7 @@ FRONTEND (THE WEB INTERFACE)
 Source: app/frontend/src (React 19 + Vite + Tailwind 4). Built into app/frontend/dist (index.html + assets/), which
 is committed so players do not need Node. How to work on it, build it and translate it: 13_FRONTEND_SOURCE.md.
 
-v1.8: the v1.7 interface (a compiled bundle without source, patched by hand) is gone. The rebuilt interface replaced
+v0.5: the v1.7 interface (a compiled bundle without source, patched by hand) is gone. The rebuilt interface replaced
 it at / ; the addresses used during the switch (/next/..., /old) redirect to /.
 
 

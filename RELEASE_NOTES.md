@@ -1,9 +1,13 @@
-# Release notes: StoryCore v1.7.0 for Windows
+# Release notes: StoryCore v0.5 for Windows
 
 StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine: every world is a lore pack in the
 `Lorepack` folder, loaded automatically at start.
 
-## In progress for v1.8 (not released yet)
+## New in v0.5
+
+The version number starts again: v0.5 follows v1.7.0. StoryCore is about halfway to its first complete version (1.0),
+and the numbering now says so.
+
 
 - **New interface, with its source code** (`app/frontend/src`). Same screens and behaviour; every text is ready for
   translation. It replaces the v1.7 interface, which is removed (old bookmarks to `/next/` or `/old` still work).

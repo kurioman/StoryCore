@@ -1,4 +1,4 @@
-"""Language of the story text (v1.8): English by default, French as an option.
+"""Language of the story text (v0.5): English by default, French as an option.
 
 Only what the player reads changes language: the narration and dialogue. Everything the engine parses stays as it is:
 portrait tags ([Selphina:3]), character and place names as the lore writes them, and the JSON of the scene analysis.

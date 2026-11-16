@@ -23,7 +23,7 @@ NARRATION_PRESETS = [
     {"id": "dark_fantasy", "name": "Dark Fantasy", "instructions": "Lean into tension, dread, moral ambiguity and real danger while staying grounded in established lore."},
 ]
 
-# v1.8: no generic openings any more. A story's openings come only from its lore pack (pack.json starters or its
+# v0.5: no generic openings any more. A story's openings come only from its lore pack (pack.json starters or its
 # scenarios files), chosen by the pack's author. The setting stays (empty) so older stored values are harmless.
 STARTER_PRESETS: list[dict] = []
 
@@ -33,7 +33,7 @@ ANALYSIS_MODES = ("always", "local_only", "off")  # always is shown as "Automati
 RELATIONSHIP_MODES = ("auto_conservative", "review", "off")
 
 DEFAULTS: dict[str, Any] = {
-    "onboarding_done": False,  # v1.8: the first-run assistant (#/setup) was completed or skipped
+    "onboarding_done": False,  # v0.5: the first-run assistant (#/setup) was completed or skipped
     "default_model_profile_id": None,
     "extraction_model_source": "narration",  # narration | separate | none
     "extraction_model_profile_id": None,
@@ -63,20 +63,20 @@ DEFAULTS: dict[str, Any] = {
     "recent_messages_min": 6,
     "context_warning_ratio": 0.85,
     "auto_recap_policy": "offer",  # off | offer
-    # v1.8 phase 7.1: short summaries of the story written while playing (services/summaries.py) and sent for the messages
+    # v0.5 phase 7.1: short summaries of the story written while playing (services/summaries.py) and sent for the messages
     # that no longer fit word for word
     "scene_summaries_enabled": True,
-    # v1.8 phase 7.3: "stable" keeps the rarely changing sections in the system prompt and sends the per-turn ones with the
+    # v0.5 phase 7.3: "stable" keeps the rarely changing sections in the system prompt and sends the per-turn ones with the
     # player's message (the beginning of the request can be cached); "classic" sends everything in the system prompt
     "context_layout": "stable",
-    # v1.8 phase 7.3: a character's full lore entry is sent when they arrive; while they stay, their cast line only
+    # v0.5 phase 7.3: a character's full lore entry is sent when they arrive; while they stay, their cast line only
     "lore_short_cards": True,
-    # v1.8 phase 7.6: tell the narrator which phrasing it keeps reusing (computed locally, a few words per request)
+    # v0.5 phase 7.6: tell the narrator which phrasing it keeps reusing (computed locally, a few words per request)
     "anti_repetition": True,
     "recap_auto_replace": False,
     "enter_to_send": True,
     "theme": "dark",
-    # v1.8: language of the story text (narration and dialogue): en | fr. Stories may override it (settings_json).
+    # v0.5: language of the story text (narration and dialogue): en | fr. Stories may override it (settings_json).
     "narration_language": "en",
     # in-app corrections layered over each world's pack.json (scoped by a "world" slug): post holders (services/roles.py)
     # and kinship, family branches and gatherings (services/canon.py), verified against lore at use

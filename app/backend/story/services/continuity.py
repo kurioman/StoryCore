@@ -1,4 +1,4 @@
-"""Continuity checks that cost no tokens (v1.8, phase 7.6).
+"""Continuity checks that cost no tokens (v0.5, phase 7.6).
 
 * Repetition: phrases the narrator used in several recent replies, and replies that open the same way. The next
   request asks to vary them (a few words in the per-turn context). Small local models repeat a lot.

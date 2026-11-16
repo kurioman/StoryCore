@@ -1,4 +1,4 @@
-"""Bug report (v1.8): one zip with what a developer needs to understand a problem, and nothing private.
+"""Bug report (v0.5): one zip with what a developer needs to understand a problem, and nothing private.
 
 Inside: app and system versions, the app log (already redacted when written, and redacted again here), all settings,
 the AI providers and model profiles (never an API key), the lore pack check, the database integrity check, and

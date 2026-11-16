@@ -52,7 +52,7 @@ class TagFilter:
         self.buf = ""
         self.clean = ""
         self.tags: list[dict[str, Any]] = []
-        self.music: list[dict[str, Any]] = []  # v1.8 music tags: [Music:combat] (services/music.py)
+        self.music: list[dict[str, Any]] = []  # v0.5 music tags: [Music:combat] (services/music.py)
         self._eat = False  # drop the spaces (and one line break) right after a tag
         self._at_line_start = True
 
@@ -221,7 +221,7 @@ def retag(m: Message, content: str) -> str:
     if (not tags and not music) or m.edited_at or content != m.content:
         return content
     out = content
-    for t in sorted(music, key=lambda t: t.get("offset") or 0, reverse=True):  # v1.8: the narrator's music tags too
+    for t in sorted(music, key=lambda t: t.get("offset") or 0, reverse=True):  # v0.5: the narrator's music tags too
         p = t.get("offset")
         if isinstance(p, int) and 0 <= p <= len(out) and not tags:
             out = f"{out[:p]}[Music:{t['tag']}]\n{out[p:]}"

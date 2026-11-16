@@ -252,7 +252,7 @@ class GenerationManager:
         if job.tag_filter is not None and job.tag_filter.tags:
             meta["portrait_tags_raw"] = job.tag_filter.found()  # resolved to characters by portrait_tags.apply
         if job.tag_filter is not None and job.tag_filter.music:
-            meta["music_tags"] = job.tag_filter.music  # v1.8: what the story's music player follows (services/music.py)
+            meta["music_tags"] = job.tag_filter.music  # v0.5: what the story's music player follows (services/music.py)
         log.info("generation %s: %s", job.message_id, meta["diagnostics"])  # figures and ids only, never story text
         if job.marker_filter is not None:
             try:

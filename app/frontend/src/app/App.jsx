@@ -80,7 +80,7 @@ function App() {
       />
     );
 
-  // v1.8: the welcome page is full screen, without the sidebar (every unknown address lands there too)
+  // v0.5: the welcome page is full screen, without the sidebar (every unknown address lands there too)
   if (!l)
     return (
       <div className="h-full">

@@ -1,4 +1,4 @@
-// Music library page (v1.8) at #/music: the app's one music library (<project>/Music). Add .mp3 files, listen,
+// Music library page (v0.5) at #/music: the app's one music library (<project>/Music). Add .mp3 files, listen,
 // rename, tag (predefined tags by family, or your own), delete. Lore packs pick from this library by tag.
 import * as React from "react";
 import * as Icon from "lucide-react";

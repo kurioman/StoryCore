@@ -1,7 +1,7 @@
 # StoryCore frontend: source code (roadmap step 2)
 
 Since November 2026 the interface has its source code, in `app/frontend/src`. Until then only the compiled file
-existed (`app/frontend/dist/assets/index-storycore-p6.js`, removed in v1.8), patched by hand.
+existed (`app/frontend/dist/assets/index-storycore-p6.js`, removed in v0.5), patched by hand.
 
 ## Where things are
 
@@ -99,11 +99,11 @@ npm run typecheck
 
 ## Serving
 
-`app/backend/story/main.py` serves `dist/` at `/`. The v1.7 compiled interface is gone (v1.8); the addresses used
+`app/backend/story/main.py` serves `dist/` at `/`. The v1.7 compiled interface is gone (v0.5); the addresses used
 while both lived side by side (`/next/...`, `/old`) redirect to `/`.
 
 ## Building from a Windows-mounted folder
 
 `npm install` straight into `app/frontend/node_modules` is very slow on some setups. Copying `app/frontend` (without
 `node_modules` and `dist`) to a local folder, building there and copying `dist/` back works the same.
-Welcome page styles are in `styles.css` under "v1.8 welcome page"; the background colour is `--sc-night`.
+Welcome page styles are in `styles.css` under "v0.5 welcome page"; the background colour is `--sc-night`.

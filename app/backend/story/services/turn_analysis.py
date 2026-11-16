@@ -29,7 +29,7 @@ EXPRESSION_GUIDE = ", ".join(f"{e['slot']} {e['name'].lower()}" for e in EXPRESS
 WEAK_EVIDENCE = 0.4  # below this confidence an expression falls back to neutral (01)
 # The analysis has its own output budget (the story's reply limit can be too small for the JSON; observed: mistral-nemo
 # repeating speaker entries until cut off at 700 tokens) and bounded arrays in the schema.
-PINNED_CHECK = 8  # pinned memories sent to the analysis for the contradiction check (v1.8 phase 7.6)
+PINNED_CHECK = 8  # pinned memories sent to the analysis for the contradiction check (v0.5 phase 7.6)
 LIGHT_SKIP_CHARS = 700
 LIGHT_SKIP_REASON = "Nothing to analyse in this short reply (no character in the scene)."
 ANALYSIS_MAX_TOKENS = 1800  # v1.6: three written drafts instead of three 14-word labels
@@ -656,7 +656,7 @@ async def _analyse(ctx: AppContext, message_id: str, *, force: bool = False) -> 
             if r.character_id not in mentioned:
                 mentioned.append(r.character_id)
         named = identity.resolver(index, registry, canon, set(mentioned) | set(state["scene"].get("present", [])))
-        # v1.8 phase 7.5: a short reply with no character, in a scene whose place and time are known, gives the analysis
+        # v0.5 phase 7.5: a short reply with no character, in a scene whose place and time are known, gives the analysis
         # nothing to do (no speaker, reaction, relationship or discovery): no request is spent on it
         if (not tagged and not force and not cfg.get("action_suggestions_enabled", True) and not mentioned
                 and not state["scene"].get("present") and len(reply) < LIGHT_SKIP_CHARS
@@ -696,7 +696,7 @@ async def _analyse(ctx: AppContext, message_id: str, *, force: bool = False) -> 
             parts = [x for x in (posts.get(c), hints.get(c)) if x]
             return f" ({'; '.join(parts)})" if parts else ""
         chars = "\n".join(f"- {c}: {index.name(c)}{hint(c)}" for c in sorted(allowed, key=index.name)) or "(none)"
-        # v1.8 phase 7.6: the pinned memories, so that a clear contradiction is reported in "warnings" (same request)
+        # v0.5 phase 7.6: the pinned memories, so that a clear contradiction is reported in "warnings" (same request)
         from .context_builder import visible_facts
         pinned = [f.content for f in visible_facts(db, story, branch, story_tree.path_ids(db, branch))
                   if f.pinned and f.status in ("active", "disputed")][:PINNED_CHECK]

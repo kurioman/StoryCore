@@ -21,7 +21,7 @@ import { cn, timeAgo } from "@/lib/util";
 import { navigate } from "@/lib/router";
 import { IS_REMOTE } from "@/lib/remote";
 
-// v1.8: a paired phone is a player; computer-only pages are not offered there
+// v0.5: a paired phone is a player; computer-only pages are not offered there
 var PHONE_PAGES = [`/avatars`, `/lore`, `/music`, `/commands`, `/settings`];
 
 export function Logo({ small }) {

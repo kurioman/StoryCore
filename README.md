@@ -1,4 +1,4 @@
-# StoryCore v1.7.0 for Windows
+# StoryCore v0.5 for Windows
 
 ## What this is
 
@@ -192,7 +192,7 @@ Deleting the `data` folder deletes your stories for good.
 Send your report to the person who shared StoryCore with you. Please include:
 
 - What you did, what you expected and what happened.
-- Your Windows version and the app version: v1.7.0.
+- Your Windows version and the app version: v0.5 (shown at the bottom of the welcome page).
 - The model you used, if the problem is about a reply. The **ⓘ** button on a reply shows useful figures.
 - The end of the log, from **Settings > Data & backups**, or `data\logs\app.log`.
 

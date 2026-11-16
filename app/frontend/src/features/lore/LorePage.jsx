@@ -154,7 +154,7 @@ export function LorePage() {
             ) : (
               <h1 className="flex-1 text-sm font-semibold">{r.name}</h1>
             )}
-            {/* importing reads the computer's folders: offered on the computer only (v1.8) */}
+            {/* importing reads the computer's folders: offered on the computer only (v0.5) */}
             {!IS_REMOTE && (<>
             <Button
               size="sm"

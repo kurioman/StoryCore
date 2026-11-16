@@ -406,7 +406,7 @@ class Recap(Base):
 
 
 class MemorySummary(Base):
-    """v1.8 (phase 7): the AI's own memory of the story, written automatically while playing.
+    """v0.5 (phase 7): the AI's own memory of the story, written automatically while playing.
 
     A "scene" summary covers a short run of consecutive messages (the ones memory capture just read, or a catch-up
     request). It is valid on any path that contains all of ``message_ids_json``, so regenerated replies and other
@@ -528,7 +528,7 @@ class AssetRoot(Base):
     path: Mapped[str] = mapped_column(Text)
     kind: Mapped[str] = mapped_column(String(20), default="folder")  # folder | uploaded
     label: Mapped[str] = mapped_column(String(200), default="")
-    # v1.8: the world whose portraits these are (a lore pack's image folder). None = shared by every world (folders
+    # v0.5: the world whose portraits these are (a lore pack's image folder). None = shared by every world (folders
     # the player added by hand). Portraits are matched and looked up per world, so two packs can both have a "lily".
     world_id: Mapped[Optional[str]] = mapped_column(String(36), index=True)
     links_file_info_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)

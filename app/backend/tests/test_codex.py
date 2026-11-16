@@ -1,4 +1,4 @@
-"""Codex (v1.8): discovered characters and places per story, locked entries without spoilers."""
+"""Codex (v0.5): discovered characters and places per story, locked entries without spoilers."""
 from support import AppTestCase
 
 

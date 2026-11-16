@@ -64,7 +64,7 @@ One object shared by the whole app (request.app.state.ctx):
   - POST/PUT/PATCH/DELETE under /api need the header  X-Story-Client: 1  (old name X-Lumencia-Client also accepted)
     and, if an Origin header is present, a loopback origin. This blocks other websites from driving the app.
   - API keys: stored server-side only, never returned to the browser, masked in logs, never exported.
-  - Phone access (v1.8, services/remote.py + routers/remote.py), off by default and never remembered:
+  - Phone access (v0.5, services/remote.py + routers/remote.py), off by default and never remembered:
       * POST /api/remote/enable opens a SECOND uvicorn server on 0.0.0.0:<main port + 1 or next free>, in the same
         event loop as the main one (lifespan off, its own signal handling disabled). /disable and the app shutdown close
         it and forget every badge. The main server stays on 127.0.0.1.
@@ -109,8 +109,8 @@ After each reply (see 05_NARRATOR_AND_CONTEXT.txt, section 4)
   expressions.py      Cheap offline speaker / mood guesses (fallback when no analysis).
   extraction.py       Memory capture: journal events, facts, rolling recaps, continuity checks, state-change
                       proposals. Runs in batches, in bounded chunks, never modifies the transcript. Also returns the
-                      scene summary of the chunk it reads (v1.8).
-  summaries.py        (v1.8) Automatic memory summaries: storage, visibility per path, staleness, catch-up requests.
+                      scene summary of the chunk it reads (v0.5).
+  summaries.py        (v0.5) Automatic memory summaries: storage, visibility per path, staleness, catch-up requests.
   state_service.py    Versioned story state per branch (stats, inventory, quests, scene, relationships...). Every
                       change is a new version; undo creates a new version too.
 

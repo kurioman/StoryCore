@@ -1,4 +1,4 @@
-// "Report a problem" (v1.8): the player describes what happened, and the bug report zip is downloaded with that
+// "Report a problem" (v0.5): the player describes what happened, and the bug report zip is downloaded with that
 // text inside (description.txt) and where they were (context.json: page, story id). Never any story text.
 import * as React from "react";
 import { IS_REMOTE } from "@/lib/remote";
@@ -108,7 +108,7 @@ export function StoryPanelActions({ storyId, onRecap, className }) {
       >
         <Icon.ScrollText className="size-4" /> {msg("Recap")}
       </button>
-      {/* the bug report reads the computer's logs: offered on the computer only (v1.8) */}
+      {/* the bug report reads the computer's logs: offered on the computer only (v0.5) */}
       {!IS_REMOTE && <button
         type="button"
         onClick={() => setOpen(true)}

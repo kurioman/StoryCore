@@ -1,4 +1,4 @@
-// Music tags (v1.8): the vocabulary comes from the server (services/music.py TAGS), labels in English and French.
+// Music tags (v0.5): the vocabulary comes from the server (services/music.py TAGS), labels in English and French.
 import { useQuery } from "@tanstack/react-query";
 import { apiGet } from "@/api/legacy";
 import { shownLanguage } from "@/i18n";

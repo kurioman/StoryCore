@@ -1,4 +1,4 @@
-"""Automatic memory summaries (v1.8, phase 7): the story compressed while it is played.
+"""Automatic memory summaries (v0.5, phase 7): the story compressed while it is played.
 
 Layers (phase 7.2), all tied to the exact messages they cover:
 * scene    — a short summary of a few consecutive messages. Memory capture (services/extraction.py) writes it in the

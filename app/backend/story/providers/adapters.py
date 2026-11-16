@@ -29,7 +29,7 @@ class MockAdapter(ProviderAdapter):
 
     def _reply(self, messages: list[ChatMessage]) -> str:
         last = next((m.content for m in reversed(messages) if m.role == "user"), "")
-        last = last.split("[The player's turn]")[-1]  # v1.8 "stable" layout: the app's context block is not the action
+        last = last.split("[The player's turn]")[-1]  # v0.5 "stable" layout: the app's context block is not the action
         snippet = re.sub(r"\s+", " ", last).strip()[:160]
         return (
             "*[Mock provider — offline demo text, not a real model]*\n\n"
@@ -312,7 +312,7 @@ class AnthropicAdapter(ProviderAdapter):
             "messages": [{"role": m.role, "content": m.content} for m in normalize_alternating(messages)],
             "stream": stream,
         }
-        if system:  # v1.8 phase 7.3: the system prompt and the history are cached (cheaper repeated input)
+        if system:  # v0.5 phase 7.3: the system prompt and the history are cached (cheaper repeated input)
             body["system"] = [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}]
         cache_last_stable(body["messages"])
         body.update(p)
@@ -585,7 +585,7 @@ class OpenAICompatAdapter(ProviderAdapter):
         msgs = ([{"role": "system", "content": system}] if system else []) + [
             {"role": m.role, "content": m.content} for m in messages if m.content.strip()]
         if self.is_openrouter and str(model).startswith("anthropic/"):
-            # v1.8 phase 7.3: Claude caches only what is marked (other models cache an identical beginning by themselves)
+            # v0.5 phase 7.3: Claude caches only what is marked (other models cache an identical beginning by themselves)
             if system:
                 msgs[0]["content"] = [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}]
             cache_last_stable(msgs)
@@ -601,7 +601,7 @@ class OpenAICompatAdapter(ProviderAdapter):
         # all 1,024 tokens on it, leaving "The". Off for narration unless the model's Thinking setting turns it on.
         if self.is_openrouter and OllamaAdapter._think(params) is not True:
             body["reasoning"] = {"enabled": False}
-        body["stream_options"] = {"include_usage": True}  # v1.8: token counts (LM Studio, llama.cpp, vLLM...)
+        body["stream_options"] = {"include_usage": True}  # v0.5: token counts (LM Studio, llama.cpp, vLLM...)
         self.last_finish = {"reasoning": "off" if "reasoning" in body else "model default"}
         try:
             async with self.client() as c:
@@ -734,7 +734,7 @@ def _listed_price(m: dict[str, Any]) -> dict[str, Any]:
 
 
 def _usage(data: dict[str, Any]) -> dict[str, Any] | None:
-    """Token counts and cost exactly as the provider reported them (never estimated here). v1.8 phase 7.5: the same
+    """Token counts and cost exactly as the provider reported them (never estimated here). v0.5 phase 7.5: the same
     keys for every provider (OpenAI-compatible, Ollama, Anthropic, OpenAI Responses), plus ``cached_tokens``: the part
     of the prompt the provider read from its cache."""
     u = data.get("usage")

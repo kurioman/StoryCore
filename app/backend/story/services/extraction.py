@@ -158,7 +158,7 @@ class Extraction(BaseModel):
     state_changes: list[XChange] = Field(default_factory=list)
     contradictions: list[XContradiction] = Field(default_factory=list)
     character_moods: list[XMood] = Field(default_factory=list)
-    scene_summary: str = ""  # v1.8 phase 7.1: asked only when automatic summaries are on (services/summaries.py)
+    scene_summary: str = ""  # v0.5 phase 7.1: asked only when automatic summaries are on (services/summaries.py)
     character_notes: list[dict[str, Any]] = Field(default_factory=list)  # 7.2: one memory line per character
     threads_opened: list[str] = Field(default_factory=list)
     threads_resolved: list[str] = Field(default_factory=list)
@@ -200,7 +200,7 @@ Mood slots: 1 neutral, 2 happy/smiling, 3 sad/sobbing, 4 angry/aggressive, 5 dis
 
 def schema_text(state: dict[str, Any] | None, summary: bool = False) -> str:
     """SCHEMA_TEXT with this story's own relationship axes (users can add axes; a fixed list hid them from the extractor).
-    ``summary``: also ask for the scene summary of the NEW messages (v1.8 phase 7.1, the same request)."""
+    ``summary``: also ask for the scene summary of the NEW messages (v0.5 phase 7.1, the same request)."""
     from .summaries import CAPTURE_FIELD
 
     axes = state_service.normalize(state or {}).get("relationship_axes") or ["trust", "affection", "respect", "fear"]

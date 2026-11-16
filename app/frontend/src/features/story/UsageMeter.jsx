@@ -1,4 +1,4 @@
-// Token counter of the play screen (v1.8 phase 7.5): what the latest turn sent (and how much came from the provider's
+// Token counter of the play screen (v0.5 phase 7.5): what the latest turn sent (and how much came from the provider's
 // cache), and what the whole story used, narrator and side requests (scene analysis, memory, summaries, recap).
 // Figures are the provider's own; "≈" marks the app's estimate when the provider reports nothing (some local servers).
 import * as React from "react";

@@ -1,4 +1,4 @@
-"""Phone access (v1.8, phase 6): closed by default, pairing with a one-time code, PC-only areas refused."""
+"""Phone access (v0.5, phase 6): closed by default, pairing with a one-time code, PC-only areas refused."""
 import time
 
 import httpx

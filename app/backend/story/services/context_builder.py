@@ -55,7 +55,7 @@ class BuiltContext:
     messages: list[ChatMessage]
     manifest: dict[str, Any]
     secrets: list[str] = field(default_factory=list)  # narrator-only text inside `system`; redact before showing it
-    # v1.8 phase 7.3 ("stable" layout): the per-turn sections, sent at the top of the player's last message
+    # v0.5 phase 7.3 ("stable" layout): the per-turn sections, sent at the top of the player's last message
     turn_context: str = ""
 
     @property
@@ -295,7 +295,7 @@ SAFETY_MARGIN = 0.9  # the chars/4 estimate can undercount real tokens; never pl
 # v1.6: lore first. Encounters were first until the owner's story showed a ~100-token section dropped ahead of a
 # ~1,400-token one: 0 of 84 replies ever carried it.
 # trimmed in this order when space runs out; the automatic summaries go last (they replace whole scenes)
-# v1.8 phase 7.3 "stable" layout: these stay in the system prompt (they rarely change, so its beginning can be cached);
+# v0.5 phase 7.3 "stable" layout: these stay in the system prompt (they rarely change, so its beginning can be cached);
 # every other section goes with the player's latest message, under TURN_OPEN (narration rules last)
 STABLE_SECTIONS = {"core", "global_note", "story_note", "avatar", "roles", "known", "recap", "scene_summaries",
                    "portrait_tags", "music_tags", "narration_language"}
@@ -329,7 +329,7 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
     budget = min(budget_cfg, window or budget_cfg) - reserve
     if hard_input is not None:
         budget = min(budget, hard_input)
-    # v1.8 phase 7.5: sizes are estimated (characters / 4); the provider's real counts correct them per story
+    # v0.5 phase 7.5: sizes are estimated (characters / 4); the provider's real counts correct them per story
     from .usage import ratio_of
     token_ratio = ratio_of(ssettings)
     if token_ratio != 1.0:
@@ -402,7 +402,7 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
             av = {"name": a.name, "profile": a.profile_json}
     from .world_state import calendar_of
     player_text, scene_text = render_state(state, index, calendar_of(db, story.world_id)["year_label"])
-    if av:  # v1.8: the profile (stable) and the current state (changes every turn) are separate sections
+    if av:  # v0.5: the profile (stable) and the current state (changes every turn) are separate sections
         sections.append(Section("avatar", "Protagonist (controlled by the user — never act or speak for them)",
                                 render_avatar(av), [{"type": "avatar", "label": av.get("name") or "Avatar"}]))
     if player_text:
@@ -558,7 +558,7 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
             except Exception:
                 pass
         seen = set()
-        # v1.8 phase 7.3: a character's full lore entry is sent when they come into the scene; while they stay (already
+        # v0.5 phase 7.3: a character's full lore entry is sent when they come into the scene; while they stay (already
         # named in the recent messages before this exchange) the cast notes above (traits, looks) are their short card
         short_cards = cfg.get("lore_short_cards", True) is not False
         staying = set(index.find_mentions(" ".join(m.content for m in convo[-12:-2]))) if short_cards else set()
@@ -618,7 +618,7 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
     if recap:
         sections.append(Section("recap", f"Story so far (rolling recap v{recap.version}, covers messages up to #{recap.end_seq})",
                                 recap.content, [{"type": "recap", "id": recap.id, "label": f"Recap v{recap.version}"}]))
-    # 9b. v1.8 phase 7: the automatic memory (services/summaries.py), in layers: the story so far, chapters, then the
+    # 9b. v0.5 phase 7: the automatic memory (services/summaries.py), in layers: the story so far, chapters, then the
     # scenes no longer sent word for word. Prepared before the recent messages are picked (so their size counts), then
     # narrowed to what was really left out.
     from . import summaries as summaries_svc
@@ -681,7 +681,7 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
                                            "in mind, never force them)",
                                 "\n".join(f"- {t['text']} (since #{t['seq']})" for t in threads),
                                 [{"type": "thread", "label": t["text"][:80]} for t in threads]))
-    # 9e. v1.8 phase 7.6: phrasing the narrator keeps reusing (found without any model call)
+    # 9e. v0.5 phase 7.6: phrasing the narrator keeps reusing (found without any model call)
     if cfg.get("anti_repetition", True) is not False:
         from . import continuity
         rep = continuity.repetition_block(convo)
@@ -696,7 +696,7 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
     min_recent = int(cfg.get("recent_messages_min") or 6)
     # v1.7 portrait tags: the narrator marks who speaks and how ([Selphina:3]); the app shows the portrait at once
     tags_text = portrait_tags.instruction(pname) if story.world_id and cfg.get("portrait_tags_enabled", True) else ""
-    # v1.8 story language: the narrator writes in it; tags, names and the analysis JSON stay as they are
+    # v0.5 story language: the narrator writes in it; tags, names and the analysis JSON stay as they are
     lang_code = narration_language.of(cfg, ssettings)
     lang_text = narration_language.instruction(lang_code)
     candidates = []  # newest first: (message, body as sent, tokens, trailing menu left out)
@@ -750,7 +750,7 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
                         f"time: {', '.join(trimmed)} ({len(picked)} recent messages sent).")
     layout = cfg.get("context_layout") or "stable"
     if layout == "stable" and len(picked) > want and len(picked) < len(candidates):
-        # v1.8 phase 7.3: old messages leave in steps, at the end of a memory summary (or every 8 messages), so the
+        # v0.5 phase 7.3: old messages leave in steps, at the end of a memory summary (or every 8 messages), so the
         # beginning of the request stays identical for several turns (prompt caches: LM Studio, DeepSeek, Claude...)
         pos = {m.id: i for i, m in enumerate(convo)}
         oldest = min(pos[m.id] for m, *_ in picked if m.id in pos) if picked else 0
@@ -817,7 +817,7 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
     if tags_text:
         sections.append(Section("portrait_tags", "Portrait tags (removed before the player reads)", tags_text,
                                 [{"type": "prompt", "label": "Portrait tags"}]))
-    # v1.8 background music: the narrator marks mood / place changes with [Music:tag] (services/music.py)
+    # v0.5 background music: the narrator marks mood / place changes with [Music:tag] (services/music.py)
     music_text = (music_svc.instruction(music_svc.folder())
                   if world is not None and music_svc.pack_settings(world)["enabled"] else "")
     if music_text:

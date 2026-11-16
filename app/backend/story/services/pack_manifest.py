@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Any
 
 MANIFEST = "pack.json"
-FORMAT_VERSION = 2  # 2 (v1.8): summary, tags, cover for the story library. Format 1 packs still load unchanged.
+FORMAT_VERSION = 2  # 2 (v0.5): summary, tags, cover for the story library. Format 1 packs still load unchanged.
 SUPPORTED_FORMATS = (1, 2)
 COVER_EXTS = {".webp", ".png", ".jpg", ".jpeg", ".avif"}
 SUMMARY_MAX = 600
@@ -92,7 +92,7 @@ def load(pack_dir: Path) -> tuple[dict[str, Any] | None, dict[str, list[str]]]:
     if fv == 1 and any(k in raw for k in LIBRARY_KEYS):
         rep.warnings.append(f"{MANIFEST}: summary, tags and cover need format_version 2; they are read anyway.")
     out["library"] = _library(pack_dir, raw, rep)
-    # codex (v1.8): on unless the pack says "codex": false (or {"enabled": false})
+    # codex (v0.5): on unless the pack says "codex": false (or {"enabled": false})
     cx = raw.get("codex", True)
     if isinstance(cx, dict):
         cx = cx.get("enabled", True)
@@ -100,7 +100,7 @@ def load(pack_dir: Path) -> tuple[dict[str, Any] | None, dict[str, list[str]]]:
         rep.warnings.append("codex: must be true or false; the codex stays on.")
         cx = True
     out["codex"] = cx
-    # music (v1.8): packs never ship music; they may switch it off or pick tracks of the app's library per tag
+    # music (v0.5): packs never ship music; they may switch it off or pick tracks of the app's library per tag
     mu = raw.get("music")
     if mu is False or isinstance(mu, dict):
         out["music"] = mu

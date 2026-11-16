@@ -1,4 +1,4 @@
-"""Phone access (v1.8, phase 6): switched on and off from the PC; ``/pair`` is where a phone gets its badge."""
+"""Phone access (v0.5, phase 6): switched on and off from the PC; ``/pair`` is where a phone gets its badge."""
 from __future__ import annotations
 
 import html

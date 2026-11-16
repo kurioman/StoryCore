@@ -36,7 +36,7 @@ Supported generation settings per adapter (unsupported ones are never sent):
 ------------------------------------------------------------
   1. LM Studio: download a model, load it, then Developer tab > Start Server (default port 1234).
      Set the model's Context Length (e.g. 8192 or more).
-  2. New interface (v1.8): Settings > Providers & models > LM Studio > Detect > "Use this model". This creates
+  2. New interface (v0.5): Settings > Providers & models > LM Studio > Detect > "Use this model". This creates
      the provider, a profile with LM Studio's loaded context length and max_tokens sized to it (1024 below a
      16,384 window, 3000 above), and makes it the default (services/lmstudio.py, /api/lmstudio/detect and
      /api/lmstudio/setup; detection reads LM Studio's /api/v0/models, which gives state and context lengths).

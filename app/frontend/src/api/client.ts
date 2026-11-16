@@ -27,7 +27,7 @@ async function readResponse<T>(res: Response): Promise<T> {
   }
   if (!res.ok) {
     const data = (body ?? {}) as Record<string, unknown>;
-    // v1.8 phone access: the computer disconnected this phone (or restarted): back to the pairing page
+    // v0.5 phone access: the computer disconnected this phone (or restarted): back to the pairing page
     if (res.status === 401 && data.code === "not_paired") window.location.assign("/pair");
     let message = typeof data.detail === "string" ? data.detail : `Request failed (${res.status})`;
     if (Array.isArray(data.detail)) message = data.detail.map((d: { msg?: string }) => d.msg).join("; ");
