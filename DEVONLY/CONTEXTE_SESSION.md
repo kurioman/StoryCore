@@ -72,16 +72,31 @@ local de jeu de rôle textuel par IA, basé sur des « Lore packs » (des mondes
 - Phase 7 avec mon modèle LM Studio (qualité des résumés et du récap, vitesse avec la requête stable).
 
 ## Feuille de route restante
+Vision : après la Phase 8 (version **0.6.0**), le reste du travail jusqu'à la **V1** sera surtout des optimisations
+(comme celles ci-dessous) et l'ajout de nouveaux Lore packs.
+
 1. **Phase 8** : créateur de Lore packs dans l'application. Y inclure : rendre lisible le code de l'interface reconstruit
    (variables d'une lettre, très gros fichiers : `journal.jsx`, `Providers.jsx`, `dialogs.jsx`) au fur et à mesure des fichiers touchés.
    Une fois la Phase 8 finie, la version passe en **0.6.0**.
-2. Petits restes : conseils LM Studio (Flash Attention, cache K/V en Q8) dans l'assistant ; chapitre fermé automatiquement
-   après un changement de lieu ou un saut dans le temps ; le narrateur de démonstration recopie le texte des consignes.
-3. Phase 9 : mécaniques de jeu optionnelles.
-4. Phase 10 : installateur Windows.
-5. À décider plus tard : arbre de choix.
-6. Projet final : application Android (APK) utilisant une IA en ligne.
-7. En tout dernier : lien d'invitation Discord (`DISCORD_URL` vide dans `lib/links.ts`). Moi : les images manquantes de Lumencia Academy.
+2. **Optimisations images et vitesse** (après la Phase 8) :
+   - **Vérification d'abord** : contrôler à quel moment le portrait s'affiche aujourd'hui. Il doit apparaître dès que
+     l'IA écrit la balise `[Nom:N]` pendant la génération, et non après la fin de la réponse ou après l'analyse de scène.
+     (D'après les notes de la v1.7, il s'affiche à la fin de la réponse : à confirmer dans le code, `portrait_tags.py`,
+     `runtime.py` (tag_filter) et l'écran de jeu, puis par un test.)
+   - **Portrait en direct** : dès que la balise est reconnue pendant le flux, envoyer un événement à l'interface
+     et afficher le portrait tout de suite (même principe que l'URL d'image d'une application concurrente, mais avec
+     notre balise courte : ~5 tokens au lieu de 15–30, pas d'adresse inventée, portraits du monde de l'histoire).
+   - **Préchargement** des 6 expressions des personnages présents dans la scène (changement d'expression instantané).
+   - **Narration prioritaire** : LM Studio traite une requête à la fois. Les requêtes secondaires (analyse de scène,
+     capture mémoire, résumés) ne doivent pas faire attendre le message du joueur ni effacer le cache du narrateur :
+     les mettre en pause ou les reporter quand le joueur envoie un message.
+3. Petits restes : conseils LM Studio (Flash Attention, cache K/V en Q8) dans l'assistant ; mettre en avant l'option
+   « réponses courtes » (préréglage Fast) ; chapitre fermé automatiquement après un changement de lieu ou un saut dans
+   le temps ; le narrateur de démonstration recopie le texte des consignes.
+4. Nouveaux Lore packs (moi), avec le créateur de la Phase 8. Moi aussi : les images manquantes de Lumencia Academy.
+5. Prévus plus tôt, à confirmer selon la vision ci-dessus : mécaniques de jeu optionnelles, installateur Windows,
+   arbre de choix, application Android (APK) avec une IA en ligne.
+6. En tout dernier : lien d'invitation Discord (`DISCORD_URL` vide dans `lib/links.ts`).
 
 ## Ce que je te demande maintenant
 (à compléter)
