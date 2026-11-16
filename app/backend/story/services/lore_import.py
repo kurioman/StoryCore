@@ -401,6 +401,8 @@ def import_pack(db: Session, pack_dir: Path, world_slug: str | None = None) -> d
         "characters": [{"id": eid, "name": r.get("name", eid), "type": r.get("type") or r.get("_index_type")}
                        for (c, eid), r in entities.items() if c == "character"],
         # the banner shown when choosing the world: the pack's own canon_note (packs without pack.json keep the old note)
+        # story library card (pack.json format 2): {"summary": {lang: text}, "tags": {lang: [...]}, "cover": path}
+        "library": (manifest or {}).get("library") or {},
         "canon_note": (manifest or {}).get("canon_note", "") if manifest else
                       "Imported from a research-based reference pack. Records carry confidence and canon_status; "
                       "community reconstructions are not guaranteed official canon.",

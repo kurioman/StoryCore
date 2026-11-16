@@ -36,6 +36,21 @@ def worlds(db: Session = Depends(get_db)) -> dict[str, Any]:
     return {"worlds": out}
 
 
+@router.get("/worlds/{wid}/cover")
+def world_cover(wid: str, db: Session = Depends(get_db)):
+    """The pack's cover image for the story library (pack.json "cover", format 2). 404 when there is none."""
+    from fastapi.responses import FileResponse
+    w = db.get(World, wid)
+    rel = ((w.data_json or {}).get("library") or {}).get("cover") if w else None
+    if not w or not rel or not w.source_path:
+        raise HTTPException(404, "No cover")
+    base = Path(w.source_path).resolve()
+    f = (base / rel).resolve()
+    if base not in f.parents or not f.is_file():
+        raise HTTPException(404, "No cover")
+    return FileResponse(f, headers={"Cache-Control": "no-cache"})
+
+
 @router.get("/worlds/{wid}/roles")
 def world_roles(wid: str, db: Session = Depends(get_db)) -> dict[str, Any]:
     """Established posts and closed groups (lore-derived + owner-confirmed), ambiguous titles and lore/owner conflicts."""

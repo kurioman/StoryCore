@@ -1,4 +1,4 @@
-# Lore Pack Format (pack.json) — version 1
+# Lore Pack Format (pack.json) — version 2
 
 A **lore pack** is a folder inside `Lorepack/` that holds one story world. It contains:
 
@@ -35,7 +35,7 @@ Lorepack/
 
 ```json
 {
-  "format_version": 1,
+  "format_version": 2,
   "id": "my_story",
   "name": "My Story",
   "description": "One or two sentences shown when choosing a world.",
@@ -97,11 +97,28 @@ Lorepack/
 
 | Field | Meaning |
 |---|---|
-| `format_version` | Always `1` for this format. |
+| `format_version` | `2` (v1.8: adds the library card below). Packs with `1` still load unchanged. |
 | `id` | Permanent identifier: lowercase letters, digits and `_` (e.g. `lumencia_academy`). Stories are linked to it, so **never change it** once stories exist. |
 | `name` | Title shown in the app. Can be changed at any time. |
 | `description` | Optional short text for the world list. Without it, the first section of the premise is used. |
 | `canon_note` | Optional notice shown when this world is chosen for a new story (e.g. how reliable the lore is). |
+
+### Library card (format 2, optional)
+
+What the story library shows for the pack. Texts can be given once, or per interface language (`en`, `fr`...); the
+library uses the player's language, then English, then the first one given.
+
+| Key | Meaning |
+|---|---|
+| `summary` | Short pitch, 2-3 sentences (under 600 characters). `"..."` or `{"en": "...", "fr": "..."}`. |
+| `tags` | A few genre labels. `["Fantasy", "Action"]` or `{"en": [...], "fr": [...]}`. |
+| `cover` | Cover image inside the pack, e.g. `"cover.webp"` (webp, png, jpg, avif). Served at `/api/worlds/<id>/cover`. |
+
+```json
+"summary": {"en": "You arrive as a new student...", "fr": "Vous arrivez comme nouvel élève..."},
+"tags": {"en": ["Academy", "Fantasy"], "fr": ["Académie", "Fantasy"]},
+"cover": "cover.webp"
+```
 
 ### `modules`
 List of genre names, e.g. `["school"]`. A module switches on genre-specific engine behaviour. Unknown names are kept

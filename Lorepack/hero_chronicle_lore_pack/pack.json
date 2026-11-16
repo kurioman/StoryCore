@@ -1,8 +1,11 @@
 {
-  "format_version": 1,
+  "format_version": 2,
   "id": "hero_chronicle",
   "name": "Hero's Chronicle",
   "description": "The Arche Continent: a medieval fantasy world where aura and magic coexist, where noble houses, a holy nation and the Demon Realm struggle for power.",
+  "summary": {"en": "Summoned from another world as the hero of the Arche Continent, you wake before the goddess Lily, who offers you a blessing... at a price. Then your story begins: in the royal palace of Avalon, or face to face with the Demon King herself. Aura, magic, noble intrigue and the Demon Realm await.", "fr": "Invoqué depuis un autre monde comme héros du continent d'Arche, vous vous éveillez face à la déesse Lily, qui vous offre une bénédiction… à un prix. Puis votre histoire commence : au palais royal d'Avalon, ou face au Roi Démon en personne. Aura, magie, intrigues nobles et Royaume démoniaque vous attendent."},
+  "tags": {"en": ["Isekai", "Fantasy", "Action"], "fr": ["Isekai", "Fantasy", "Action"]},
+  "_cover": "Story library cover: put an image in this folder (e.g. cover.webp) and add  \"cover\": \"cover.webp\"",
   "modules": [],
   "_note": "Provisional settings written during the multi-story refactor from what the lore already states (character types, premise, power systems). To be reviewed by the author.",
   "files": {

@@ -79,6 +79,11 @@ def check_pack(pack_dir: Path) -> dict[str, Any]:
                 rep.stats["character_ids"] = {cid: index.name(cid) for cid in sorted(index.entities)}
                 if world is not None:
                     _check_starters(world, index, rep)
+                lib = (manifest or {}).get("library") or {}
+                if manifest and not lib.get("summary"):
+                    rep.info.append("No summary (pack.json \"summary\", format 2): the story library card has no text.")
+                if manifest and not lib.get("cover"):
+                    rep.info.append("No cover image (pack.json \"cover\", format 2): the story library shows a plain card.")
                 if manifest and manifest["files"].get("images"):
                     _check_portraits(s, pack_dir / manifest["files"]["images"], index, rep)
                 elif manifest:

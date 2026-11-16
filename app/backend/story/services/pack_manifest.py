@@ -22,14 +22,18 @@ from pathlib import Path
 from typing import Any
 
 MANIFEST = "pack.json"
-FORMAT_VERSION = 1
+FORMAT_VERSION = 2  # 2 (v1.8): summary, tags, cover for the story library. Format 1 packs still load unchanged.
+SUPPORTED_FORMATS = (1, 2)
+COVER_EXTS = {".webp", ".png", ".jpg", ".jpeg", ".avif"}
+SUMMARY_MAX = 600
 ID_RE = re.compile(r"^[a-z0-9][a-z0-9_]{0,79}$")
 KNOWN_MODULES = {"school"}  # genre modules the engine has behaviour for; other names are accepted and kept
 STAT_TYPES = {"current_max", "number", "text"}
 FACT_KINDS = {"aunt_of", "sibling_of", "parent_of", "spouse_of", "family_branch", "other"}
 DEFAULT_FILES = {"system_prompt": "ai/narrative_system_prompt.md", "premise": "lore/premise.md", "images": None}
 SECTIONS = ("stats", "starters", "posts", "closed_groups", "facts", "gatherings", "places", "calendar", "never_random")
-TOP_KEYS = {"format_version", "id", "name", "description", "canon_note", "modules", "files", *SECTIONS}
+LIBRARY_KEYS = ("summary", "tags", "cover")
+TOP_KEYS = {"format_version", "id", "name", "description", "canon_note", "modules", "files", *LIBRARY_KEYS, *SECTIONS}
 MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November",
           "December"]
 
@@ -63,8 +67,9 @@ def load(pack_dir: Path) -> tuple[dict[str, Any] | None, dict[str, list[str]]]:
         return None, rep.to_dict()
 
     fv = raw.get("format_version")
-    if fv != FORMAT_VERSION:
-        rep.errors.append(f"{MANIFEST}: format_version must be {FORMAT_VERSION} (found {fv!r}).")
+    if fv not in SUPPORTED_FORMATS:
+        rep.errors.append(f"{MANIFEST}: format_version must be one of {', '.join(map(str, SUPPORTED_FORMATS))} "
+                          f"(found {fv!r}).")
     pid, name = raw.get("id"), raw.get("name")
     if not isinstance(pid, str) or not ID_RE.match(pid):
         rep.errors.append(f"{MANIFEST}: id must be lowercase letters, digits and underscores, starting with a letter or "
@@ -78,11 +83,14 @@ def load(pack_dir: Path) -> tuple[dict[str, Any] | None, dict[str, list[str]]]:
         if k not in TOP_KEYS and not k.startswith("_"):
             rep.warnings.append(f"{MANIFEST}: unknown section \"{k}\" ignored (check the spelling).")
 
-    out: dict[str, Any] = {"format_version": FORMAT_VERSION, "id": pid, "name": name.strip(),
+    out: dict[str, Any] = {"format_version": fv, "id": pid, "name": name.strip(),
                            "description": _str(raw.get("description")), "canon_note": _str(raw.get("canon_note"))}
     out["sources"] = [MANIFEST]  # files read for the manifest (the lore import skips them)
     out["modules"] = _modules(raw.get("modules"), rep)
     out["files"] = _files(pack_dir, raw.get("files"), rep)
+    if fv == 1 and any(k in raw for k in LIBRARY_KEYS):
+        rep.warnings.append(f"{MANIFEST}: summary, tags and cover need format_version 2; they are read anyway.")
+    out["library"] = _library(pack_dir, raw, rep)
     for sec in SECTIONS:
         if sec not in raw:
             continue
@@ -206,6 +214,49 @@ def _modules(v: Any, rep: _Report) -> list[str]:
         if m not in KNOWN_MODULES:
             rep.warnings.append(f"modules: \"{m}\" is kept, but the engine has no behaviour for it yet.")
     return list(dict.fromkeys(mods))
+
+
+def _localized(v: Any) -> Any:
+    """A text or list given once ("...") or per interface language ({"en": "...", "fr": "..."})."""
+    return {k.strip().lower(): x for k, x in v.items() if isinstance(k, str) and k.strip()} if isinstance(v, dict) else v
+
+
+def _library(pack_dir: Path, raw: dict[str, Any], rep: _Report) -> dict[str, Any]:
+    """Story library card (format 2): short summary, tags, cover image. Texts may be per language."""
+    out: dict[str, Any] = {}
+    summary = _localized(raw.get("summary"))
+    if isinstance(summary, str) and summary.strip():
+        out["summary"] = {"default": summary.strip()}
+    elif isinstance(summary, dict):
+        out["summary"] = {k: v.strip() for k, v in summary.items() if isinstance(v, str) and v.strip()}
+    elif summary is not None:
+        rep.warnings.append("summary: must be a text, or texts per language {\"en\": \"...\", \"fr\": \"...\"}; ignored.")
+    for lang, text in (out.get("summary") or {}).items():
+        if len(text) > SUMMARY_MAX:
+            rep.warnings.append(f"summary ({lang}): {len(text)} characters; keep it under {SUMMARY_MAX} so it fits on "
+                                "the library card.")
+    tags = _localized(raw.get("tags"))
+    if isinstance(tags, list):
+        out["tags"] = {"default": _strs(tags)}
+    elif isinstance(tags, dict):
+        out["tags"] = {k: _strs(v) for k, v in tags.items() if isinstance(v, list)}
+    elif tags is not None:
+        rep.warnings.append("tags: must be a list [\"Fantasy\", ...], or lists per language; ignored.")
+    cover = raw.get("cover")
+    if isinstance(cover, str) and cover.strip():
+        rel = cover.strip().replace("\\", "/")
+        f = (pack_dir / rel).resolve()
+        if pack_dir.resolve() not in f.parents:
+            rep.warnings.append("cover: must be a path inside the pack; ignored.")
+        elif f.suffix.lower() not in COVER_EXTS:
+            rep.warnings.append(f"cover: use a {', '.join(sorted(COVER_EXTS))} image; ignored.")
+        else:
+            out["cover"] = rel
+            if not f.is_file():
+                rep.warnings.append(f"cover: file \"{rel}\" not found yet; the library shows a plain card until it exists.")
+    elif cover not in (None, ""):
+        rep.warnings.append("cover: must be a path inside the pack, e.g. \"cover.webp\"; ignored.")
+    return out
 
 
 def _files(pack_dir: Path, v: Any, rep: _Report) -> dict[str, str | None]:

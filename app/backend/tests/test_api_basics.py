@@ -87,3 +87,27 @@ class PortraitsPerWorldTest(AppTestCase):
                 self.assertTrue(slots, f"{slug}: {cid} has no portrait")
                 for asset_id in slots.values():
                     self.assertIn(folder, folder_of[asset_id], f"{slug}: {cid} uses a picture from another pack")
+
+
+class LibraryCardTest(AppTestCase):
+    """pack.json format 2 (v1.8): summary and tags per language reach the world; no cover gives a clean 404."""
+
+    def test_library_card(self):
+        for slug, tag_fr in (("hero_chronicle", "Isekai"), ("lumencia_academy", "Académie")):
+            w = self.world(slug)
+            lib = w["data_json"]["library"]
+            self.assertTrue(lib["summary"]["en"] and lib["summary"]["fr"])
+            self.assertIn(tag_fr, lib["tags"]["fr"])
+            if not lib.get("cover"):
+                self.assertEqual(self.client.get(f"/api/worlds/{w['id']}/cover").status_code, 404)
+
+    def test_format_1_still_loads(self):
+        import json
+        import tempfile
+        from pathlib import Path
+        from story.services import pack_manifest
+        with tempfile.TemporaryDirectory() as d:
+            Path(d, "pack.json").write_text(json.dumps({"format_version": 1, "id": "old_pack", "name": "Old"}), "utf-8")
+            m, rep = pack_manifest.load(Path(d))
+            self.assertIsNotNone(m, rep)
+            self.assertEqual(m["library"], {})

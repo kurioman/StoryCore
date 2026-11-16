@@ -31,7 +31,7 @@ PACKS_DIR = "Lorepack"  # every lore pack lives in <project>/Lorepack/<pack fold
 LORE_SUFFIXES = (".json", ".md")
 IMAGE_SUFFIXES = (".png", ".jpg", ".jpeg", ".webp", ".gif")
 # Raise when the lore importer changes what it reads, so every pack is re-imported once with the new rules.
-IMPORTER_VERSION = "4"  # 3: narrator-only "hidden" fields; 4: starters[].scene
+IMPORTER_VERSION = "5"  # 3: narrator-only "hidden" fields; 4: starters[].scene; 5: library card (pack.json format 2)
 
 
 def _fingerprint(folder: Path, suffixes: tuple[str, ...], skip: Path | None = None) -> str:
