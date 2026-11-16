@@ -85,6 +85,12 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
   stays the same size however long the game. Each summary also remembers what happened with each character (sent
   when that character is in the scene again) and the promises, quests and mysteries still open; the detail of an old
   scene comes back when its names or places are mentioned again.
+- **A better Recap.** The golden Recap button now writes a recap for you, in the story's language ("Previously…" and
+  what is still pending), from the AI's memory: one short request instead of re-reading the whole story, and shown
+  again at once while nothing new has happened. A long story opened again after a few hours offers it above the
+  message box. The Journal has a new "AI memory" tab: the story so far, chapters and scenes (correct one, or pin it as a
+  permanent memory), the open threads (mark one settled), what each character remembers, "Summarise now" and "Close the
+  chapter here". The /chapter command (/chapitre) closes a chapter with an optional title.
 - **Faster and cheaper requests.** What changes every turn (scene, lore found, memories, narration rules) now travels
   with your message, and older messages leave the request in steps rather than one by one: the beginning of the
   request stays the same for several turns. LM Studio reuses what it already read (replies start sooner); DeepSeek and

@@ -208,6 +208,11 @@ SYSTEM  (routers/system.py)
   GET    /api/narration-languages                                 story languages (v1.8): en, fr
   PUT    /api/settings                                            put settings
   GET    /api/onboarding                                          onboarding
+  GET    /api/stories/{sid}/memory                                (v1.8) the AI's memory: layers, open threads, character notes
+  PATCH  /api/stories/{sid}/memory/{id}                           (v1.8) {content}: correct a summary (source "edited")
+  POST   /api/stories/{sid}/memory/threads/close | /reopen        (v1.8) {key}: settle / reopen a thread by hand
+  POST   /api/stories/{sid}/memory/summarise                      (v1.8) {chapter, title}: summarise now / close a chapter
+  POST   /api/stories/{sid}/player-recap                          (v1.8) {refresh}: recap for the player (kept until the story moves)
   GET    /api/remote/whoami                                       (v1.8) {remote, device}: is this a paired phone?
   GET    /api/remote/status                                       (v1.8, PC only) phone access: enabled, port, urls, code, devices
   POST   /api/remote/enable | /disable | /new-code | /forget-all  (v1.8, PC only) open/close the network listener...

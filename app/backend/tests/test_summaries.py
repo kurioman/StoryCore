@@ -246,3 +246,59 @@ class LayersTest(SummaryHelpers, AppTestCase):
         finally:
             for k, v in saved.items():
                 setattr(summaries, k, v)
+
+
+class MemoryPanelTest(SummaryHelpers, AppTestCase):
+    """Phase 7.4: the memory panel, settling threads, editing, closing a chapter now, the player recap."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.client.put("/api/settings", json={"event_capture_mode": "off"})
+
+    def test_panel_chapter_and_player_recap(self):
+        story = self.new_story("Panel")
+        sid = story["id"]
+        self.play(sid, 8)
+        self.assertTrue(wait_for(lambda: len(self.rows(sid)) >= 2))
+        time.sleep(1)
+        self.play(sid, 1, start=False)  # two new messages: they wait for a full chunk
+        time.sleep(0.5)
+        mem = self.get(f"/stories/{sid}/memory")
+        self.assertTrue(mem["enabled"])
+        self.assertEqual(mem["summarised_messages"] + mem["pending_messages"], mem["messages"])
+        self.assertGreater(mem["pending_messages"], 0)  # the newest wait for a full chunk
+        self.assertEqual(mem["characters"][0]["name"], "Mock Innkeeper")
+        self.assertTrue(mem["threads"])
+
+        # edit a summary, settle a thread by hand (it leaves the narrator's context too), reopen it
+        first = mem["layers"][0]
+        r = self.client.patch(f"/api/stories/{sid}/memory/{first['id']}", json={"content": "Edited by the player."})
+        self.assertEqual(r.status_code, 200, r.text[:300])
+        self.assertEqual(r.json()["layers"][0]["source"], "edited")
+        key = mem["threads"][0]["key"]
+        after = self.post(f"/stories/{sid}/memory/threads/close", {"key": key})
+        self.assertNotIn(key, [t["key"] for t in after["threads"]])
+        self.assertIn(key, [t["key"] for t in after["closed_threads"]])
+        after = self.post(f"/stories/{sid}/memory/threads/reopen", {"key": key})
+        self.assertIn(key, [t["key"] for t in after["threads"]])
+
+        # /chapter: the newest messages are summarised now and every scene becomes one titled chapter
+        out = self.post(f"/stories/{sid}/memory/summarise", {"chapter": True, "title": "Act I"})
+        mem = out["memory"]
+        self.assertEqual(mem["pending_messages"], 0, mem)
+        self.assertEqual([x["level"] for x in mem["layers"]], ["chapter"])
+        self.assertEqual(mem["layers"][0]["title"], "Act I")
+        self.assertIn("Edited by the player.", [x["content"] for x in self.rows(sid, "superseded")])
+
+        # the player recap: written once, shown again at once until the story moves on
+        a = self.post(f"/stories/{sid}/player-recap")
+        self.assertFalse(a["cached"])
+        self.assertIn("[Mock recap for the player]", a["text"])
+        self.assertTrue(self.post(f"/stories/{sid}/player-recap")["cached"])
+        self.assertFalse(self.post(f"/stories/{sid}/player-recap", {"refresh": True})["cached"])
+        self.play(sid, 1, start=False)
+        self.assertFalse(self.post(f"/stories/{sid}/player-recap")["cached"])
+
+        names = {c["name"]: c for c in self.get("/commands")["commands"]}
+        self.assertIn("chapitre", names["chapter"]["aliases_json"])

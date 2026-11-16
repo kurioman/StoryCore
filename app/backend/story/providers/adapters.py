@@ -77,6 +77,10 @@ class MockAdapter(ProviderAdapter):
                     "CHARACTERS:\n- Mock Innkeeper: [Mock] served the protagonist a drink.\n"
                     f"OPENED:\n- [Mock] thread opened at #{seqs[0] if seqs else 0}\n"
                     f"RESOLVED:\n- {'T1' if chr(10) + 'T1:' in body else 'none'}")
+        if "PLAYER RECAP" in (system or ""):
+            pending = "Encore en suspens" if "French" in system else "Still pending"
+            return (f"[Mock recap for the player] Previously… the story went on; configure a real model for a real recap.\n\n"
+                    f"{pending}:\n- [Mock] an open thread")
         if "CHAPTER SUMMARY" in (system or "") or "STORY SO FAR" in (system or ""):
             n = (messages[-1].content if messages else "").count("(messages #")
             kind = "chapter" if "CHAPTER SUMMARY" in system else "story so far"

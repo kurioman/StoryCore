@@ -23,6 +23,7 @@ import {
   useUi,
 } from "@/components/ui";
 import { MemoryList } from "@/features/story/dialogs";
+import { MemoryTab } from "@/features/story/MemoryTab";
 import { ProposalRow } from "@/features/story/panels/StatusPanel";
 import { cn, timeAgo } from "@/lib/util";
 import { portraitSlot, usePortraitMap } from "@/lib/portraits";
@@ -67,7 +68,7 @@ var EVENT_TYPES = [
           : `info`;
 
 export function JournalView({ storyId, worldId, focus, onJump }) {
-  let [i, a] = React.useState(focus?.character ? `characters` : `timeline`),
+  let [i, a] = React.useState(focus?.tab ?? (focus?.character ? `characters` : `timeline`)),
     query = useQuery({
       queryKey: [`journal`, storyId, `review`],
       queryFn: () => apiGet(`/stories/${storyId}/review`),
@@ -75,7 +76,8 @@ export function JournalView({ storyId, worldId, focus, onJump }) {
   return (
     React.useEffect(() => {
       focus?.character && a(`characters`);
-    }, [focus?.character]),
+      focus?.tab && a(focus.tab);
+    }, [focus?.character, focus?.tab]),
     (
       <Tabs
         value={i}
@@ -91,6 +93,10 @@ export function JournalView({ storyId, worldId, focus, onJump }) {
             value: `review`,
             label: msg("Review"),
             badge: query.data?.count ? <Badge tone="accent">{query.data.count}</Badge> : undefined,
+          },
+          {
+            value: `ai_memory`,
+            label: msg("AI memory"),
           },
           {
             value: `memories`,
@@ -119,6 +125,9 @@ export function JournalView({ storyId, worldId, focus, onJump }) {
         </TabPanel>
         <TabPanel value="review" className="p-4">
           <ReviewTab storyId={storyId} data={query.data} onJump={onJump} />
+        </TabPanel>
+        <TabPanel value="ai_memory" className="p-4">
+          <MemoryTab storyId={storyId} />
         </TabPanel>
         <TabPanel value="memories" className="p-4">
           <MemoriesTab storyId={storyId} onJump={onJump} />

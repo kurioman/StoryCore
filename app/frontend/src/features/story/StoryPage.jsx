@@ -20,7 +20,7 @@ import { Button, Callout, EmptyState, ErrorCallout, IconButton, Modal, Spinner, 
 import { Composer, ContextInspector } from "@/features/story/composer";
 import { JournalView } from "@/features/story/journal";
 import { MessageItem, SpeakersPanel, TurnAnalysisBar } from "@/features/story/transcript";
-import { RecapDialog } from "@/features/story/dialogs";
+import { RecapDialog, ResumeOffer } from "@/features/story/dialogs";
 import { StatusSection } from "@/features/story/panels/StatusPanel";
 import { StoryPanelActions } from "@/features/report/ReportProblem";
 import { MusicPlayer } from "@/features/music/MusicPlayer";
@@ -404,7 +404,7 @@ export function StoryPage({ storyId }) {
       <div className="border-t border-line p-3 pb-0">
         <MusicPlayer storyId={storyId} refreshKey={`${n.data?.messages?.length ?? 0}:${de.generating ? 1 : 0}`} />
       </div>
-      <StoryPanelActions storyId={storyId} onRecap={() => ne({ name: `recap`, input: `` })} />
+      <StoryPanelActions storyId={storyId} onRecap={() => ne({ name: `player_recap`, input: `` })} />
       </div>
     );
 
@@ -519,6 +519,7 @@ export function StoryPage({ storyId }) {
               )}
             </AutoScroll>
             {!de.generating && <SpeakersPanel scene={scene.data} onOpenCharacter={De} />}
+            <ResumeOffer storyId={storyId} messages={be} onRecap={() => ne({ name: `player_recap`, input: `` })} />
             <Composer
               ref={le}
               storyId={storyId}
@@ -531,7 +532,7 @@ export function StoryPage({ storyId }) {
                 e === `journal`
                   ? fe()
                   : ne({
-                      name: `recap`,
+                      name: `player_recap`,
                       input: ``,
                     })
               }
@@ -565,7 +566,7 @@ export function StoryPage({ storyId }) {
         storyId={storyId}
         action={te}
         onClose={() => ne(null)}
-        onOpenJournal={() => fe()}
+        onOpenJournal={(tab) => (tab ? (ee({ tab }), D(`journal`)) : fe())}
         onFocusStatus={() => {
           (C(true), T(`status`));
         }}

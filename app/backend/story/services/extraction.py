@@ -532,7 +532,8 @@ class ExtractionService:
                     if want_summary:  # the threads still open before these messages, for "threads_resolved"
                         path_ids = {m.id for m in summaries_svc.path_messages(db, branch)}
                         threads_text, thread_map = summaries_svc.thread_labels(summaries_svc.open_threads(
-                            [r for r in summaries_svc.scenes(db, story.id, path_ids) if r.end_seq < pending[0].seq]))
+                            [r for r in summaries_svc.scenes(db, story.id, path_ids) if r.end_seq < pending[0].seq],
+                            summaries_svc.closed_by_player(story)))
                     head = "\n\n".join(x for x in [
                         schema_text(state, want_summary), f"Known characters: {known}" if known else "",
                         f"Open threads (ids for threads_resolved):\n{threads_text}" if threads_text else "",

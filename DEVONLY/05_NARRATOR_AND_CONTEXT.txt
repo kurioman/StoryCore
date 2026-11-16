@@ -27,6 +27,14 @@ Layout (v1.8 phase 7.3, setting context_layout):
                     the message before the player's turn; AnthropicAdapter and OpenRouter "anthropic/" models). The
                     opening request keeps everything in the system prompt.
   classic           Everything in the system prompt (v1.7 behaviour).
+Player side (phase 7.4): the golden Recap button calls POST /player-recap: one request built from the memory layers,
+the open threads and the latest messages not yet summarised, written in the story language for the player ("Previously…"
++ "Still pending"); kept in story.settings_json.player_recap and returned again while the head message is the same. The
+Journal's "AI memory" tab (MemoryTab.jsx) shows the layers (edit, pin as a fact), the open threads (settle / reopen:
+story.settings_json.memory_closed_threads, also hidden from the narrator), the character notes, "Summarise now" and
+"Close the chapter here" (also /chapter, alias /chapitre: catch-up with force=True, then every active scene merged into
+one chapter, data_json.title). A long story opened after more than 4 hours offers the recap above the message box.
+
 Short lore cards (setting lore_short_cards): a character's lore entries are sent when they come into focus; while
 they stay (named in the messages before the last exchange) and have a cast line, the entries are listed as "short
 card (already in the scene)" and left out. Pinned lore is always sent.

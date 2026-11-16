@@ -158,15 +158,22 @@ def parse_answer(text: str) -> dict[str, Any]:
 
 
 # ------------------------------------------------------------------------------------------- notes and threads
-def open_threads(rows: list[MemorySummary]) -> list[dict[str, Any]]:
-    """Threads still open after these scenes (oldest first): [{"key", "text", "seq"}]."""
+def closed_by_player(story: Story) -> set[str]:
+    """Threads the player marked as settled in the memory panel (phase 7.4)."""
+    return set((story.settings_json or {}).get("memory_closed_threads") or [])
+
+
+def open_threads(rows: list[MemorySummary], closed: set[str] | None = None) -> list[dict[str, Any]]:
+    """Threads still open after these scenes (oldest first): [{"key", "text", "seq"}]; ``closed``: settled by hand."""
+    closed = closed or set()
     open_: dict[str, dict[str, Any]] = {}
     for r in sorted(rows, key=lambda r: (r.start_seq, r.end_seq)):
         d = r.data_json or {}
         for k in d.get("threads_resolved") or []:
             open_.pop(k, None)
         for i, text in enumerate(d.get("threads_opened") or []):
-            open_[f"{r.id}:{i}"] = {"key": f"{r.id}:{i}", "text": text, "seq": r.end_seq}
+            if f"{r.id}:{i}" not in closed:
+                open_[f"{r.id}:{i}"] = {"key": f"{r.id}:{i}", "text": text, "seq": r.end_seq}
     return list(open_.values())
 
 
@@ -264,14 +271,17 @@ def _runs(path: list[Message], todo: set[str]) -> list[list[Message]]:
     return runs
 
 
-def next_chunk(db: Session, story: Story, branch: MessageBranch, max_chars: int = CHUNK_CHARS) -> list[Message]:
+def next_chunk(db: Session, story: Story, branch: MessageBranch, max_chars: int = CHUNK_CHARS,
+               force: bool = False) -> list[Message]:
     """The next messages the catch-up should summarise, or [] (nothing to do, or the newest messages are left to
-    memory capture, which summarises them in its own request)."""
+    memory capture, which summarises them in its own request). ``force``: everything not summarised, now."""
     path = path_messages(db, branch)
     path_ids = {m.id for m in path}
     todo = path_ids - covered_ids(scenes(db, story.id, path_ids))
     mode = settings_service.get(db, "event_capture_mode")
-    if mode in ("batch", "after_each_turn") and settings_service.get(db, "extraction_model_source") != "none":
+    if force:
+        wait_for_more = False
+    elif mode in ("batch", "after_each_turn") and settings_service.get(db, "extraction_model_source") != "none":
         cur = db.get(ExtractionCursor, branch.id)
         done = cur.last_seq if cur else -1
         todo = {m.id for m in path if m.id in todo and m.seq <= done}  # capture has passed them without a summary
@@ -350,7 +360,8 @@ def save_merge(db: Session, story: Story, branch: MessageBranch, level: str, par
 
 
 async def catch_up(ctx: AppContext, story_id: str, branch_id: str | None = None, *,
-                   max_chunks: int = AUTO_MAX_CHUNKS, automatic: bool = True, max_merges: int = 1) -> dict[str, Any]:
+                   max_chunks: int = AUTO_MAX_CHUNKS, automatic: bool = True, max_merges: int = 1,
+                   force: bool = False, chapter_title: str | None = None) -> dict[str, Any]:
     """Summarise what memory capture left without a summary (at most ``max_chunks`` short requests, oldest first), then
     merge layers that piled up (at most ``max_merges`` requests), with the story's own model. Never raises for model
     problems (the next reply tries again, after a pause if it failed)."""
@@ -380,17 +391,17 @@ async def catch_up(ctx: AppContext, story_id: str, branch_id: str | None = None,
                     return {"status": "no_model", "written": written, "merged": merged, "error": str(e)}
                 name = protagonist(db, story)
                 system = RULES.format(name=name)
-                part = next_chunk(db, story, branch)
+                part = next_chunk(db, story, branch, force=force)
                 if not part:
                     break
                 path_ids = {m.id for m in path_messages(db, branch)}
                 before = [r for r in scenes(db, story.id, path_ids) if r.end_seq < part[0].seq]
-                threads_text, labels = thread_labels(open_threads(before))
+                threads_text, labels = thread_labels(open_threads(before, closed_by_player(story)))
                 context = "\n\n".join(x for x in [
                     f"Earlier (context only, do not summarise again): {before[-1].content}" if before else "",
                     f"Open threads (use these ids under RESOLVED):\n{threads_text}" if threads_text else ""] if x)
                 context = context + "\n\n" if context else ""
-                part = next_chunk(db, story, branch, _chunk_chars(resolved, system + context))
+                part = next_chunk(db, story, branch, _chunk_chars(resolved, system + context), force=force)
                 ids = [m.id for m in part]
                 prompt = context + "NEW messages:\n" + transcript(part)
             try:
@@ -417,6 +428,10 @@ async def catch_up(ctx: AppContext, story_id: str, branch_id: str | None = None,
                 story = story_tree.get_story(db, story_id)
                 branch = story_tree.get_branch(db, story, branch_id)
                 due = merge_candidate(db, story, branch)
+                if chapter_title is not None:  # /chapter: every active scene becomes a chapter now
+                    path_ids = {m.id for m in path_messages(db, branch)}
+                    active_scenes = visible(db, story.id, path_ids, "scene")
+                    due = ("chapter", active_scenes) if active_scenes else None
                 if due is None:
                     break
                 try:
@@ -438,7 +453,120 @@ async def catch_up(ctx: AppContext, story_id: str, branch_id: str | None = None,
                 story = story_tree.get_story(db, story_id)
                 branch = story_tree.get_branch(db, story, branch_id)
                 row = save_merge(db, story, branch, level, parts, text, resolved.profile.model_id)
+                if row is not None and chapter_title is not None:
+                    row.data_json = {**(row.data_json or {}), "title": chapter_title.strip()[:120], "closed_by": "player"}
             if row is None:
                 break
             merged += 1
+            chapter_title = None  # one chapter; then the usual merges
     return {"status": "succeeded", "written": written, "merged": merged}
+
+
+# ------------------------------------------------------------------------------------------- player-facing (7.4)
+PLAYER_RULES = """PLAYER RECAP. You help a player resume their interactive story after a break. Using ONLY the memory
+notes and the latest messages below, write in {language} for the player, who plays {name} (address them as "you"{address}).
+- 2 or 3 short paragraphs that begin like "Previously…" (in {language}): what happened, who matters, where things stand
+  now. Clear and pleasant to read; names exactly as written; no invention, no headings.
+- Then one line "{pending}:" followed by up to 5 short bullet points from the open threads (skip it if there are none).
+Answer with the recap only."""
+PENDING = {"en": "Still pending", "fr": "Encore en suspens"}
+RECAP_MAX_TOKENS = 900
+RECAP_MEMORY_CHARS = 9000
+RECAP_RECENT_CHARS = 3000
+
+
+def memory_layers(db: Session, story: Story, branch: MessageBranch) -> list[MemorySummary]:
+    """What the narrator remembers on this path, oldest first: the story so far, chapters, scenes."""
+    path_ids = {m.id for m in path_messages(db, branch)}
+    return visible(db, story.id, path_ids, ("story", "chapter", "scene"))
+
+
+async def player_recap(ctx: AppContext, story_id: str, refresh: bool = False) -> dict[str, Any]:
+    """A recap for the player in the story's language, written from the memory (one short request). Kept with the
+    story: shown again at once while the story has not moved on."""
+    from .narration_language import LANGUAGES, of as language_of
+
+    with ctx.db.session() as db:
+        story = story_tree.get_story(db, story_id)
+        branch = story_tree.get_branch(db, story)
+        cfg = settings_service.get_all(db)
+        code = language_of(cfg, story.settings_json or {})
+        cached = (story.settings_json or {}).get("player_recap") or {}
+        if not refresh and cached.get("head_id") == branch.head_message_id and cached.get("lang") == code and cached.get("text"):
+            return {**cached, "cached": True}
+        path = path_messages(db, branch)
+        if len(path) < 2:
+            raise ValueError("Nothing to recap yet: play a few turns first.")
+        layers = memory_layers(db, story, branch)
+        lines, used = [], 0
+        for r in reversed(layers):  # the newest memory first when it has to be cut; shown oldest first
+            label = {"story": "Story so far", "chapter": "Chapter", "scene": "Scene"}[r.level]
+            title = (r.data_json or {}).get("title")
+            line = f"- {label}{f' “{title}”' if title else ''} (#{r.start_seq}–#{r.end_seq}): {r.content}"
+            if lines and used + len(line) > RECAP_MEMORY_CHARS:
+                break
+            lines.append(line)
+            used += len(line)
+        lines.reverse()
+        threads = open_threads(scenes(db, story.id, {m.id for m in path}), closed_by_player(story))[-MAX_THREADS:]
+        covered = covered_ids(layers)
+        recent, used = [], 0
+        for m in reversed(path):
+            if m.id in covered and recent:
+                break
+            line = f"#{m.seq} {m.role}: {m.content}"
+            if recent and used + len(line) > RECAP_RECENT_CHARS:
+                break
+            recent.append(line[:RECAP_RECENT_CHARS])
+            used += len(line)
+        recent.reverse()
+        name = protagonist(db, story)
+        resolved = ctx.resolve(db, ctx.story_profile_id(db, story))
+        system = PLAYER_RULES.format(language=LANGUAGES[code], name=name, pending=PENDING.get(code, PENDING["en"]),
+                                     address=', with "vous"' if code == "fr" else "")
+        prompt = "\n\n".join(x for x in [
+            "Memory notes (oldest first):\n" + "\n".join(lines) if lines else "",
+            "Open threads:\n" + "\n".join(f"- {t['text']}" for t in threads) if threads else "",
+            "Latest messages:\n" + "\n\n".join(recent)] if x)
+        head_id = branch.head_message_id
+    text = await resolved.adapter.complete(resolved.profile.model_id, system, [ChatMessage("user", prompt)],
+                                           {**resolved.params, "temperature": 0.5, "max_tokens": RECAP_MAX_TOKENS})
+    text = re.sub(r"^```[a-zA-Z]*\s*|\s*```$", "", (text or "").strip()).strip()
+    if not text:
+        raise ValueError("The model returned an empty recap. Try again.")
+    out = {"text": text, "head_id": head_id, "lang": code, "at": now_iso(), "memory_parts": len(lines),
+           "model_id": resolved.profile.model_id}
+    with ctx.db.session() as db:
+        story = story_tree.get_story(db, story_id)
+        story.settings_json = {**(story.settings_json or {}), "player_recap": out}
+    return {**out, "cached": False}
+
+
+def memory_view(db: Session, story: Story, branch: MessageBranch) -> dict[str, Any]:
+    """Everything the memory panel shows (phase 7.4)."""
+    path = path_messages(db, branch)
+    path_ids = {m.id for m in path}
+    layers = visible(db, story.id, path_ids, ("story", "chapter", "scene"))
+    all_scenes = scenes(db, story.id, path_ids)
+    closed = closed_by_player(story)
+    keys: list[str] = []
+    for r in sorted(all_scenes, key=lambda r: r.end_seq, reverse=True):
+        for n in (r.data_json or {}).get("notes") or []:
+            if n.get("key") and n["key"] not in keys:
+                keys.append(n["key"])
+    chars = character_memory(all_scenes, keys, per_char=5, max_chars=40)
+    every_thread = {f"{r.id}:{i}": {"key": f"{r.id}:{i}", "text": t, "seq": r.end_seq}
+                    for r in all_scenes for i, t in enumerate((r.data_json or {}).get("threads_opened") or [])}
+    covered = covered_ids(all_scenes)
+    return {
+        "enabled": enabled(db),
+        "layers": [{"id": r.id, "level": r.level, "start_seq": r.start_seq, "end_seq": r.end_seq, "content": r.content,
+                    "source": r.source, "title": (r.data_json or {}).get("title"),
+                    "parts": sum(1 for x in all_scenes if x.parent_id == r.id) if r.level != "scene" else None}
+                   for r in layers],
+        "threads": open_threads(all_scenes, closed),
+        "closed_threads": [every_thread[k] for k in closed if k in every_thread],
+        "characters": [{"name": n, "lines": lines} for n, lines in chars],
+        "messages": len(path), "summarised_messages": len(covered & path_ids),
+        "pending_messages": len(path_ids - covered),
+    }

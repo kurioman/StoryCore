@@ -24,6 +24,7 @@ import { MONTHS, WEEKDAYS } from "@/features/story/chrono";
 import { StoryMarkdown } from "@/features/story/prose";
 import { loreSearchSchema, useStateEditor } from "@/features/lore/schemas";
 import { timeAgo } from "@/lib/util";
+import { useCloseChapter } from "@/features/story/MemoryTab";
 
 export function RecapDialog({ storyId, action, onClose, onOpenJournal, onFocusStatus, onJump }) {
   if (!action) return null;
@@ -35,6 +36,10 @@ export function RecapDialog({ storyId, action, onClose, onOpenJournal, onFocusSt
   switch (action.name) {
     case `recap`:
       return <RecapRunner {...o} />;
+    case `player_recap`:
+      return <PlayerRecapDialog {...o} onOpenJournal={onOpenJournal} />;
+    case `chapter`:
+      return <ChapterDialog {...o} onOpenJournal={onOpenJournal} />;
     case `recon`:
     case `continuity`:
       return <ContinuityDialog {...o} focus={action.name} onJump={onJump} onFocusStatus={onFocusStatus} />;
@@ -55,6 +60,123 @@ export function RecapDialog({ storyId, action, onClose, onOpenJournal, onFocusSt
     default:
       return null;
   }
+}
+
+// v1.8 phase 7.4: the golden Recap button. A recap for the player, in the story's language, written from the AI's
+// memory (one short request; shown again at once while the story has not moved on).
+function PlayerRecapDialog({ storyId, onClose, onOpenJournal }) {
+  let mutation = useMutation({ mutationFn: (refresh) => apiPost(`/stories/${storyId}/player-recap`, { refresh }) });
+  React.useEffect(() => {
+    mutation.mutate(false);
+  }, []);
+  return (
+    <Modal
+      open
+      onOpenChange={(e) => !e && onClose()}
+      size="lg"
+      title={msg("Recap")}
+      description={msg("Written from the AI's memory of your story. The transcript is never changed.")}
+      footer={
+        <>
+          <Button variant="ghost" onClick={() => (onClose(), onOpenJournal?.(`ai_memory`))}>
+            <Icon.Brain className="size-4" /> {msg("AI memory")}
+          </Button>
+          <Button onClick={() => mutation.mutate(true)} loading={mutation.isPending} disabled={!mutation.data && !mutation.isError}>
+            <Icon.RefreshCw className="size-4" /> {msg("Write it again")}
+          </Button>
+          <Button variant="primary" onClick={onClose}>
+            {msg("Back to the story")}
+          </Button>
+        </>
+      }
+    >
+      {mutation.isPending && (
+        <div className="flex items-center gap-2 text-sm text-muted">
+          <Spinner /> {msg("Writing the recap…")}
+        </div>
+      )}
+      {mutation.isError && <ErrorCallout error={mutation.error} onRetry={() => mutation.mutate(false)} />}
+      {mutation.data && !mutation.isPending && (
+        <div>
+          <StoryMarkdown text={mutation.data.text} className="prose-story" />
+          {mutation.data.cached && (
+            <p className="mt-3 text-xs text-faint">{msg("Nothing new since this recap was written.")}</p>
+          )}
+        </div>
+      )}
+    </Modal>
+  );
+}
+
+// v1.8 phase 7.4: /chapter (/chapitre) closes the current chapter of the AI's memory, with an optional title
+function ChapterDialog({ storyId, input, onClose, onOpenJournal }) {
+  let close = useCloseChapter(storyId),
+    [title, setTitle] = React.useState(input ?? ``);
+  return (
+    <Modal
+      open
+      onOpenChange={(e) => !e && onClose()}
+      title={msg("Close the chapter")}
+      description={msg(
+        "The latest messages are summarised now and the scenes since the last chapter become one chapter of the AI's memory.",
+      )}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose}>
+            {msg("Cancel")}
+          </Button>
+          <Button
+            variant="primary"
+            loading={close.isPending}
+            onClick={() => close.mutate(title, { onSuccess: () => (onClose(), onOpenJournal?.(`ai_memory`)) })}
+          >
+            <Icon.BookMarked className="size-4" /> {msg("Close the chapter")}
+          </Button>
+        </>
+      }
+    >
+      <Field label={msg("Chapter title (optional)")}>
+        <Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} autoFocus />
+      </Field>
+    </Modal>
+  );
+}
+
+/** A small offer above the message box when a long story is opened again after a break (v1.8 phase 7.4). */
+export function ResumeOffer({ storyId, messages, onRecap }) {
+  let key = `resume-offer-dismissed:${storyId}`,
+    [hidden, setHidden] = React.useState(() => {
+      try {
+        return sessionStorage.getItem(key) === `1`;
+      } catch {
+        return false;
+      }
+    }),
+    story = (messages ?? []).filter((m) => m.kind === `story`),
+    last = story[story.length - 1],
+    [show] = React.useState(() => {
+      let t = last?.created_at ? Date.parse(last.created_at) : NaN;
+      return story.length >= 10 && Number.isFinite(t) && Date.now() - t > 4 * 3600 * 1000;
+    });
+  if (!show || hidden) return null;
+  let dismiss = () => {
+    setHidden(true);
+    try {
+      sessionStorage.setItem(key, `1`);
+    } catch {}
+  };
+  return (
+    <div className="mx-auto mb-2 flex w-full max-w-3xl items-center gap-3 rounded-lg border border-accent/40 bg-accent-soft px-3 py-2 text-sm">
+      <Icon.ScrollText className="size-4 shrink-0 text-accent" />
+      <span className="flex-1">{msg("Welcome back! A short recap of the story so far?")}</span>
+      <Button size="sm" variant="primary" onClick={() => (dismiss(), onRecap())}>
+        {msg("Read the recap")}
+      </Button>
+      <button type="button" className="text-faint hover:text-fg" aria-label={msg("Close")} onClick={dismiss}>
+        <Icon.X className="size-4" />
+      </button>
+    </div>
+  );
 }
 
 function RecapRunner({ storyId, input, onClose }) {

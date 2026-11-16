@@ -669,7 +669,7 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
                                                     "first)",
                                 "\n".join(f"- {name}: " + " | ".join(lines) for name, lines in char_mem),
                                 [{"type": "memory", "label": name} for name, _ in char_mem]))
-    threads = summaries_svc.open_threads(all_scenes)[-summaries_svc.MAX_THREADS:]
+    threads = summaries_svc.open_threads(all_scenes, summaries_svc.closed_by_player(story))[-summaries_svc.MAX_THREADS:]
     if threads:
         sections.append(Section("threads", "Open threads (promises, debts, quests and mysteries still pending: keep them "
                                            "in mind, never force them)",
