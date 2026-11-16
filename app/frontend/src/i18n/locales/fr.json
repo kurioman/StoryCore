@@ -1733,5 +1733,7 @@
  "The bug report could not be made (error {{v0}}).": "Le rapport de bug n'a pas pu être créé (erreur {{v0}}).",
  "What happened?": "Que s'est-il passé ?",
  "What you did, what you expected, and what happened instead.": "Ce que vous avez fait, ce que vous attendiez, et ce qui s'est passé à la place.",
- "Your imagination, brought to life by AI": "Votre imagination prend vie grâce à l'IA"
+ "Your imagination, brought to life by AI": "Votre imagination prend vie grâce à l'IA",
+ "Language": "Langue",
+ "All settings": "Tous les paramètres"
 }

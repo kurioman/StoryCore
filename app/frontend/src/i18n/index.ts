@@ -61,4 +61,28 @@ export function setLanguage(code: Language) {
   if (code !== currentLanguage) window.location.reload();
 }
 
+let reloadOnLeave = false;
+
+/** Switch the language without leaving the page (welcome page). Only that page re-renders now; the next navigation
+ *  reloads the app so labels computed once by other modules follow too (see navigate() in lib/router). */
+export function setLanguageLive(code: Language) {
+  try {
+    localStorage.setItem(STORAGE_KEY, code);
+  } catch {
+    /* private mode: the choice lasts for this page only */
+  }
+  void i18next.changeLanguage(code);
+  document.documentElement.lang = code;
+  reloadOnLeave = code !== currentLanguage;
+}
+
+/** The language shown right now (can differ from currentLanguage after setLanguageLive). */
+export function shownLanguage(): Language {
+  return (LANGUAGES.some((l) => l.code === i18next.language) ? i18next.language : "en") as Language;
+}
+
+export function needsReloadOnLeave(): boolean {
+  return reloadOnLeave;
+}
+
 export { i18next };
