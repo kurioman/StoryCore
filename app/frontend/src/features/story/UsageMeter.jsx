@@ -5,12 +5,12 @@ import * as React from "react";
 import * as Icon from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiGet } from "@/api/legacy";
-import { msg } from "@/i18n";
+import { msg, shownLanguage } from "@/i18n";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui";
 import { fmtK } from "@/lib/util";
 
 function num(n) {
-  return typeof n === `number` ? n.toLocaleString() : `—`;
+  return typeof n === `number` ? n.toLocaleString(shownLanguage()) : `—`;
 }
 
 function money(c) {
