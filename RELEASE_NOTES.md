@@ -38,6 +38,9 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
   (1 March 1301), then arriving either in the summoning hall of Avalon (the royal palace of Grandel) or before the
   Demon King Beelzebub. Lumencia Academy: one opening, the new student arriving on 1 March. The other openings of the
   packs are removed. Both packs now have their cover image.
+- **No more generic openings** (Free Mode, Character Preview and the Settings editor for them): a story's openings
+  come only from its lore pack. The pack's first opening is selected by default. Opening names and descriptions can be
+  written per language (Hero's Chronicle: "Début alternatif : le Roi Démon").
 - Hero's Chronicle lore: Avalon added; Beelzebub is a woman who bears the title Demon King (narrator notes fixed).
 - **Night-blue dark theme** for the whole app, matching the welcome page (the light theme is unchanged).
 - **Cinzel** for the StoryCore name (welcome title, sidebar, headers), bundled with the app (SIL Open Font License).

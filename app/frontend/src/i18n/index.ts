@@ -85,4 +85,11 @@ export function needsReloadOnLeave(): boolean {
   return reloadOnLeave;
 }
 
+/** A text written by a lore pack author, given once ({"default": ...}) or per language ({"en": ..., "fr": ...}):
+ *  the interface language first, then English, then whatever there is. */
+export function packText(texts: Record<string, string> | undefined | null, fallback = ""): string {
+  if (!texts) return fallback;
+  return texts[shownLanguage()] || texts.en || texts.default || Object.values(texts)[0] || fallback;
+}
+
 export { i18next };

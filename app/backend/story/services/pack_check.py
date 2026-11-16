@@ -171,7 +171,7 @@ def _check_starters(world: World, index: EntityIndex, rep: Report) -> None:
     rep.stats["openings"] = len(starters)
     rep.stats["characters"] = len((world.data_json or {}).get("characters") or [])
     if not starters:
-        rep.info.append("No opening scenario: players can only start in Free Mode or Character Preview.")
+        rep.warnings.append("No opening (pack.json \"starters\"): the narrator has to improvise the first scene.")
     for st in starters:
         text = " ".join(str(st.get(k) or "") for k in ("blueprint", "purpose"))
         for name, _slot in TAG.findall(text):

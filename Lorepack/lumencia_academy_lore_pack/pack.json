@@ -17,8 +17,8 @@
   "starters": [
     {
       "id": "enrollment",
-      "name": "Enrollment",
-      "purpose": "You arrive at Lumencia Academy as a new student, on the first day of the academy year.",
+      "name": {"en": "Enrollment", "fr": "Inscription"},
+      "purpose": {"en": "You arrive at Lumencia Academy as a new student, on the first day of the academy year.", "fr": "Vous arrivez à l'Académie Lumencia comme nouvel élève, le premier jour de l'année académique."},
       "blueprint": "Begin on the first day of the academy year (1 March), the week of the entrance evaluation that sets each new student's starting rank. Place the protagonist, a newly arrived student, at the academy's entrance, admissions hall or first orientation point in Asterion. Establish the scale and atmosphere of the institution, hint at the tension between noble and commoner students, and introduce one immediate decision (where to go, whom to approach, what to disclose, or how to respond). Do not decide the protagonist's dialogue, feelings or actions. End on a clear opening for player input.",
       "scene": {
         "location": "Lumencia Academy",

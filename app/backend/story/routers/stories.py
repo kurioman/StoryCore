@@ -88,7 +88,6 @@ def create_story(body: StoryCreate, db: Session = Depends(get_db)) -> dict[str, 
     if body.starter_id:
         world = db.get(World, body.world_id) if body.world_id else None
         starters = (world.data_json or {}).get("starters", []) if world else []
-        starters = starters + settings_service.get(db, "starter_presets")
         starter = next((s for s in starters if s.get("id") == body.starter_id), None) or {}
     blueprint = body.starter_blueprint or starter.get("blueprint")
     s = Story(title=body.title.strip() or "Untitled story", world_id=body.world_id, active_avatar_id=av.id if av else None,

@@ -121,6 +121,9 @@ class OpeningsTest(AppTestCase):
         self.assertEqual(set(hc), {"the_hero_summoned", "the_hero_and_the_demon_king"})
         self.assertIn("Avalon", hc["the_hero_summoned"]["blueprint"])
         self.assertIn("Beelzebub", hc["the_hero_and_the_demon_king"]["blueprint"])
+        self.assertEqual(hc["the_hero_and_the_demon_king"]["i18n"]["name"]["fr"], "Début alternatif : le Roi Démon")
+        self.assertEqual(hc["the_hero_summoned"]["name"], "The Summoned Hero")  # the engine keeps the English text
+        self.assertEqual(self.get("/settings").get("starter_presets"), [])  # no generic openings any more
         for s in hc.values():
             self.assertEqual((s["scene"]["day"], s["scene"]["month"], s["scene"]["year"]), (1, 3, 1301))
         la = {s["id"]: s for s in self.world("lumencia_academy")["data_json"]["starters"]}

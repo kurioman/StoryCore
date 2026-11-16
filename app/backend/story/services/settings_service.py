@@ -23,12 +23,9 @@ NARRATION_PRESETS = [
     {"id": "dark_fantasy", "name": "Dark Fantasy", "instructions": "Lean into tension, dread, moral ambiguity and real danger while staying grounded in established lore."},
 ]
 
-# Generic openings offered for every world; a world's own openings come from its pack (pack.json → starters or its
-# scenarios files).
-STARTER_PRESETS = [
-    {"id": "free_mode", "name": "Free Mode", "blueprint": "Begin at the location and social role selected by the player. If none is specified, choose a plausible public location and present a concrete situation with at least two possible approaches. Hint at the wider world without forcing a path. End before the protagonist commits to an action."},
-    {"id": "character_preview", "name": "Character Preview", "blueprint": "Introduce one or more selected characters through a scene in which the protagonist can observe them. Show their defining behaviour through action and dialogue rather than biography. Keep private motives hidden. Do not assume familiarity or relationship history not supplied by the campaign."},
-]
+# v1.8: no generic openings any more. A story's openings come only from its lore pack (pack.json starters or its
+# scenarios files), chosen by the pack's author. The setting stays (empty) so older stored values are harmless.
+STARTER_PRESETS: list[dict] = []
 
 # v1.6.4: scene analysis, suggestions, portraits and relationship tracking are all on by default and each can be changed
 # afterwards. A stored value is the player's choice and is always honoured; only a missing setting takes these defaults.

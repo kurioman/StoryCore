@@ -310,6 +310,19 @@ def _stats(v: Any, rep: _Report) -> list[dict[str, Any]] | None:
     return out
 
 
+def _texts(v: Any) -> dict[str, str]:
+    """{"default": text} for a plain text, {lang: text} for texts per language."""
+    if isinstance(v, str) and v.strip():
+        return {"default": v.strip()}
+    if isinstance(v, dict):
+        return {k.strip().lower(): x.strip() for k, x in v.items() if isinstance(k, str) and isinstance(x, str) and x.strip()}
+    return {}
+
+
+def _pick(texts: dict[str, str]) -> str:
+    return texts.get("en") or texts.get("default") or next(iter(texts.values()), "")
+
+
 def _starters(v: Any, rep: _Report) -> list[dict[str, Any]] | None:
     items = _list_of_objects("starters", v, rep)
     if items is None:
@@ -319,8 +332,13 @@ def _starters(v: Any, rep: _Report) -> list[dict[str, Any]] | None:
         if not _str(s.get("blueprint")):
             rep.warnings.append(f"starters[{s['id']}]: \"blueprint\" (the opening instructions) is required; skipped.")
             continue
-        item = {"id": s["id"], "name": _str(s.get("name")) or s["id"], "blueprint": _str(s["blueprint"]),
-                "purpose": _str(s.get("purpose"))}
+        # name and purpose may be per interface language ({"en": "...", "fr": "..."}, format 2): "name"/"purpose" keep
+        # the English (or first) text for the engine, "i18n" holds every language for the interface
+        names, purposes = _texts(s.get("name")), _texts(s.get("purpose"))
+        item = {"id": s["id"], "name": _pick(names) or s["id"], "blueprint": _str(s["blueprint"]),
+                "purpose": _pick(purposes)}
+        if len(names) > 1 or len(purposes) > 1:
+            item["i18n"] = {"name": names, "purpose": purposes}
         if "scene" in s:  # optional starting scene (place, time, date, who is present); checked when a story starts
             if isinstance(s["scene"], dict):
                 item["scene"] = s["scene"]

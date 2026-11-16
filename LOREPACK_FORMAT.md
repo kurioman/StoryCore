@@ -156,6 +156,11 @@ wizard win). Keys: `location`, `time` (e.g. `"09:00"`), `weather`, `weekday`, `d
   "scene": { "location": "Pure White Space", "time": "09:00", "day": 1, "month": 3, "year": 1301, "present": ["lily"] } }
 ```
 
+Format 2: `name` and `purpose` may be given per interface language, like the library card:
+`"name": {"en": "Alternative start: The Demon King", "fr": "Début alternatif : le Roi Démon"}`. The blueprint stays one
+text (it is written for the narrator). Since v1.8 the app has no generic openings: a pack without `starters` (or lore
+scenarios) leaves the narrator to improvise the first scene, and the checker warns about it.
+
 ### `posts`
 Unique positions held by exactly one character. The narrator always uses that character for the post and never invents
 a second holder. Fields: `id`, `title`, `character`, optional `aliases` (other words for the post), `note`,

@@ -255,93 +255,6 @@ export function NarrationSettings() {
             ))}
           </div>
         </section>
-        <section>
-          <SectionTitle
-            action={
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() =>
-                  r({
-                    ...n,
-                    starter_presets: [
-                      ...n.starter_presets,
-                      {
-                        id: `starter_${Date.now()}`,
-                        name: msg("Custom start", {}),
-                        blueprint: ``,
-                      },
-                    ],
-                  })
-                }
-              >
-                <Icon.Plus className="size-3.5" /> {msg("Add starter")}
-              </Button>
-            }
-          >
-            {msg("Generic starter blueprints")}
-          </SectionTitle>
-          <p className="mb-2 text-xs text-faint">
-            {msg(
-              "Used by the new-story wizard in addition to starters from an imported world. These are original scaffolds.",
-            )}
-          </p>
-          <div className="space-y-2">
-            {n.starter_presets.map((e, t) => (
-              <div className="flex gap-2 rounded-md border border-line p-2" key={e.id}>
-                <Input
-                  value={e.name}
-                  onChange={(e) =>
-                    r({
-                      ...n,
-                      starter_presets: n.starter_presets.map((n, r) =>
-                        r === t
-                          ? {
-                              ...n,
-                              name: e.target.value,
-                            }
-                          : n,
-                      ),
-                    })
-                  }
-                  className="w-40"
-                  aria-label={msg("Starter name")}
-                />
-
-                <Textarea
-                  value={e.blueprint}
-                  onChange={(e) =>
-                    r({
-                      ...n,
-                      starter_presets: n.starter_presets.map((n, r) =>
-                        r === t
-                          ? {
-                              ...n,
-                              blueprint: e.target.value,
-                            }
-                          : n,
-                      ),
-                    })
-                  }
-                  className="min-h-12 flex-1"
-                  aria-label={msg("Blueprint")}
-                />
-
-                <IconButton
-                  label={msg("Remove starter")}
-                  onClick={() =>
-                    r({
-                      ...n,
-                      starter_presets: n.starter_presets.filter((e, n) => n !== t),
-                    })
-                  }
-                >
-                  <Icon.Trash className="size-3.5" />
-                </IconButton>
-              </div>
-            ))}
-          </div>
-        </section>
         <Button
           variant="primary"
           loading={saveSettings.isPending}
@@ -354,7 +267,6 @@ export function NarrationSettings() {
               enter_to_send: n.enter_to_send,
               default_system_prompt: n.default_system_prompt,
               narration_presets: n.narration_presets,
-              starter_presets: n.starter_presets,
               narrator_prompt_profile: n.narrator_prompt_profile ?? null,
               narration_language: n.narration_language ?? `en`,
             })

@@ -4,7 +4,7 @@ import { useQueryClient, useMutation } from "@tanstack/react-query";
 import * as React from "react";
 import { apiPost, apiGet, errorMessage } from "@/api/legacy";
 import * as Icon from "lucide-react";
-import { msg, msgKey } from "@/i18n";
+import { msg, msgKey, packText } from "@/i18n";
 import {
   Badge,
   Button,
@@ -62,22 +62,12 @@ export function NewStoryWizard() {
       story_note: ``,
     }),
     v = worlds.data?.find((e) => e.id === p.world_id),
+    // v1.8: only the world's own openings (chosen by the pack's author)
     y = React.useMemo(() => {
-      let e = v?.data_json.starters ?? [],
-        t = (settings.data?.starter_presets ?? []).filter((t) => !e.some((e) => e.name === t.name));
-      return [
-        ...e.map((e) => ({
-          ...e,
-          fromWorld: true,
-        })),
-        ...t.map((e) => ({
-          ...e,
-          fromWorld: false,
-          confidence: undefined,
-          canon_status: undefined,
-          purpose: undefined,
-        })),
-      ];
+      return (v?.data_json.starters ?? []).map((e) => ({
+        ...e,
+        fromWorld: true,
+      }));
     }, [v, settings.data]),
     b = y.find((e) => e.id === p.starter_id),
     mutation = useMutation({
@@ -195,7 +185,8 @@ export function NewStoryWizard() {
                       g({
                         ...p,
                         world_id: e.target.value,
-                        starter_id: ``,
+                        // the pack's first opening is chosen by default
+                        starter_id: worlds.data?.find((w) => w.id === e.target.value)?.data_json.starters?.[0]?.id ?? ``,
                         starting_location: ``,
                         featured_characters: [],
                       })
@@ -229,8 +220,10 @@ export function NewStoryWizard() {
                         )}
                         key={e.id}
                       >
-                        <p className="font-medium">{e.name}</p>
-                        <p className="mt-1 line-clamp-3 text-xs text-muted">{e.purpose ?? e.blueprint}</p>
+                        <p className="font-medium">{packText(e.i18n?.name, e.name)}</p>
+                        <p className="mt-1 line-clamp-3 text-xs text-muted">
+                          {packText(e.i18n?.purpose, e.purpose) || e.blueprint}
+                        </p>
                         {e.canon_status && (
                           <Badge
                             tone="warn"
@@ -291,40 +284,6 @@ export function NewStoryWizard() {
                     />
                   </Field>
                 </div>
-                {p.starter_id === `character_preview` && v && (
-                  <Field label={msg("Featured characters")}>
-                    <div className="grid max-h-56 grid-cols-3 gap-1.5 overflow-y-auto sm:grid-cols-4">
-                      {v.data_json.characters?.map((e) => {
-                        let t = p.featured_characters.includes(e.id);
-                        return (
-                          <button
-                            onClick={() =>
-                              g({
-                                ...p,
-                                featured_characters: t
-                                  ? p.featured_characters.filter((t) => t !== e.id)
-                                  : [...p.featured_characters, e.id],
-                              })
-                            }
-                            className={cn(
-                              `flex items-center gap-1.5 rounded-md border p-1 text-left text-xs`,
-                              t ? `border-accent` : `border-line`,
-                            )}
-                            key={e.id}
-                          >
-                            <Portrait
-                              assetId={portraitSlot(portraitMap.data?.[e.id])}
-                              name={e.name}
-                              className="size-7 shrink-0"
-                            />
-
-                            <span className="truncate">{e.name}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </Field>
-                )}
               </>
             )}
             {s === 2 && (
