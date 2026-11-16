@@ -64,6 +64,18 @@ One object shared by the whole app (request.app.state.ctx):
   - POST/PUT/PATCH/DELETE under /api need the header  X-Story-Client: 1  (old name X-Lumencia-Client also accepted)
     and, if an Origin header is present, a loopback origin. This blocks other websites from driving the app.
   - API keys: stored server-side only, never returned to the browser, masked in logs, never exported.
+  - Phone access (v1.8, services/remote.py + routers/remote.py), off by default and never remembered:
+      * POST /api/remote/enable opens a SECOND uvicorn server on 0.0.0.0:<main port + 1 or next free>, in the same
+        event loop as the main one (lifespan off, its own signal handling disabled). /disable and the app shutdown close
+        it and forget every badge. The main server stays on 127.0.0.1.
+      * A request is a "network request" when it arrived on that second port (scope["server"]). Those requests:
+        Host must be an IPv4 address (DNS rebinding); every path except /pair needs the HttpOnly cookie sc_device
+        (else /api -> 401 code not_paired, pages -> 303 /pair); origin must be http://<that host>; X-Story-Client
+        still required; PC-only routes -> 403 code pc_only (remote.blocked(): /api/remote/*, /api/system/*, backups,
+        imports, asset roots, Ollama/LM Studio, provider and model-profile changes except cloud consent).
+      * Pairing: /pair?code=NNNNNN (from the QR code) or the /pair form. 6-digit code, 10 minutes, single use, thrown
+        away after 5 wrong tries; GET /api/remote/status (PC) always hands out a fresh one. A badge is a random token
+        (only its SHA-256 is kept in memory), valid 12 hours at most.
   - Errors: TurnError -> 4xx with a plain message; NotFound -> 404; ValueError -> 400; ProviderError -> 502 with a
     friendly message + technical details; anything else -> 500 "details are in the app log" (logged with traceback).
 

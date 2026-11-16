@@ -208,6 +208,11 @@ SYSTEM  (routers/system.py)
   GET    /api/narration-languages                                 story languages (v1.8): en, fr
   PUT    /api/settings                                            put settings
   GET    /api/onboarding                                          onboarding
+  GET    /api/remote/whoami                                       (v1.8) {remote, device}: is this a paired phone?
+  GET    /api/remote/status                                       (v1.8, PC only) phone access: enabled, port, urls, code, devices
+  POST   /api/remote/enable | /disable | /new-code | /forget-all  (v1.8, PC only) open/close the network listener...
+  DELETE /api/remote/devices/{id}                                 (v1.8, PC only) disconnect one phone
+  GET    /pair?code=  ·  POST /pair (form)                        (v1.8, network listener only) pairing page, sets the badge
   GET    /api/system/paths                                        paths
   POST   /api/system/open-data-folder                             open data folder
   POST   /api/system/clear-logs                                   clear logs

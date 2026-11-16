@@ -69,6 +69,13 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
   much slower) or online through OpenRouter (Claude for the best writing but the highest price, DeepSeek, Gemini,
   Mistral for French). Ends with a short tour of the library, Codex, Music, Recap and Report. "Skip" at every step.
 - The new-story wizard no longer shows the opening blueprint (it stays hidden from the player).
+- **Play on a phone** (gear menu, sidebar, or Settings > Play on a phone): switch on "Allow a phone to connect", then
+  scan the QR code with the phone (same Wi-Fi), or type the address shown and the 6-digit code. The story still runs
+  on the computer; the phone shows it and plays. The code works once and for 10 minutes (a new one is ready at once);
+  the list of connected phones has Disconnect buttons. The option switches itself off when StoryCore closes, and
+  every phone is then disconnected. A phone cannot open the computer-only areas (models and keys, backups, imports,
+  logs, folders). The first time, Windows may ask to let StoryCore use the network: tick "Private networks". The link
+  is not encrypted: use it on your home Wi-Fi only. The welcome page and the library fit phone screens.
 
 ## New in v1.7.0
 

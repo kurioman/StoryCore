@@ -17,7 +17,8 @@ scripts/serve.py adds app/backend to sys.path and calls story.__main__.main(), w
   - reads the settings (story/config.py),
   - finds a free port starting at 8765 (tries 50 ports),
   - creates the FastAPI app (story/main.py -> create_app),
-  - starts uvicorn on 127.0.0.1 ONLY (never 0.0.0.0: the app is not reachable from the network),
+  - starts uvicorn on 127.0.0.1 ONLY (the app is not reachable from the network; "Play on a phone" opens a second,
+    protected listener only when the player switches it on, see 02_BACKEND.txt "Security"),
   - opens the browser as soon as /api/health answers (up to 2 minutes on a slow first start).
 
 At startup (main.py -> lifespan), before serving pages:

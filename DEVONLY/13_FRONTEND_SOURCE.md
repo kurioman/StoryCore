@@ -15,13 +15,17 @@ app/frontend/
     api/                  client.ts (fetch + SSE), legacy.ts (apiGet/apiPost/... used by the screens),
                           queries.ts (react-query keys, response schemas, data hooks), schema.d.ts (OpenAPI types)
     components/           ui.jsx (Button, Field, Modal, Tabs, Popover, toasts, confirm...), ErrorBoundary.tsx
-    lib/                  util (cn, timeAgo...), router (hash routes), hooks, portraits
+    lib/                  util (cn, timeAgo...), router (hash routes), hooks, portraits, remote (IS_REMOTE: true
+                          on a paired phone; the computer-only menus, settings tabs, imports and bug report are
+                          hidden there)
     app/App.jsx           shell: sidebar + routes
     features/
       welcome/            full-screen welcome page at #/ (WelcomePage.tsx) and its animated canvas (Starfield.tsx)
       setup/              first-run assistant at #/setup (SetupPage.jsx) and its model advice (recommendations.js)
       music/              Music page (#/music: the app's music library), in-game MusicPlayer, tag labels
       library/            the story library at #/library (LibraryPage.jsx: resume, story cards, story sheet)
+      mobile/             "Play on a phone" panel (PhonePanel.jsx: switch, QR code via the qrcode package, devices),
+                          shown at #/mobile and in Settings > Play on a phone
       home/               SetupNotices.jsx: set-up notices shown at the top of the library
       codex/              the Codex screen of the play screen (CodexDialog.jsx; data from services/codex.py)
       report/             "Report a problem" dialog, bug report download, the Recap / Report buttons of the play screen
