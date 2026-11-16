@@ -19,6 +19,10 @@ import {
 } from "@/components/ui";
 import { cn, timeAgo } from "@/lib/util";
 import { navigate } from "@/lib/router";
+import { IS_REMOTE } from "@/lib/remote";
+
+// v1.8: a paired phone is a player; computer-only pages are not offered there
+var PHONE_PAGES = [`/avatars`, `/lore`, `/music`, `/commands`, `/settings`];
 
 export function Logo({ small }) {
   return (
@@ -81,11 +85,16 @@ export function Sidebar({ activeStoryId, path, collapsed, onToggle, onHelp }) {
         icon: Icon.SquareSlash,
       },
       {
+        to: `/mobile`,
+        label: msg("Play on a phone"),
+        icon: Icon.Smartphone,
+      },
+      {
         to: `/settings`,
         label: msg("Settings"),
         icon: Icon.Settings,
       },
-    ];
+    ].filter((e) => !IS_REMOTE || PHONE_PAGES.includes(e.to));
 
   return collapsed ? (
     <aside className="flex h-full w-12 shrink-0 flex-col items-center gap-1 border-r border-line bg-panel py-2">

@@ -61,6 +61,8 @@ function App() {
     <SettingsPage tab={u.tab} />
   ) : matchRoute(hashPath, `/settings`) ? (
     <SettingsPage tab="providers" />
+  ) : matchRoute(hashPath, `/mobile`) ? (
+    <SettingsPage tab="phone" />
   ) : matchRoute(hashPath, `/music`) ? (
     <MusicPage />
   ) : matchRoute(hashPath, `/library`) ? (

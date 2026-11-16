@@ -13,8 +13,12 @@ import { OllamaModelsPage } from "@/features/settings/OllamaModels";
 import { cn } from "@/lib/util";
 import { navigate } from "@/lib/router";
 import { useUi } from "@/components/ui";
+import { PhonePanel } from "@/features/mobile/PhonePanel";
+import { IS_REMOTE } from "@/lib/remote";
 
-var SETTINGS_TABS = [
+// built when shown (msg() needs the chosen language); a paired phone only gets its own preferences (v1.8)
+function settingsTabs() {
+  let tabs = [
   {
     id: `providers`,
     label: msg("Providers & models"),
@@ -40,12 +44,22 @@ var SETTINGS_TABS = [
     label: msg("Appearance"),
   },
   {
+    id: `phone`,
+    label: msg("Play on a phone"),
+  },
+  {
     id: `data`,
     label: msg("Data & backups"),
   },
 ];
+  return IS_REMOTE ? tabs.filter((t) => PHONE_TABS.includes(t.id)) : tabs;
+}
+
+var PHONE_TABS = [`generation`, `memory`, `notes`, `appearance`];
 
 export function SettingsPage({ tab }) {
+  let SETTINGS_TABS = settingsTabs();
+  if (!SETTINGS_TABS.some((t) => t.id === tab)) tab = SETTINGS_TABS[0].id;
   return (
     <div className="flex h-full min-h-0 flex-col md:flex-row">
       <nav
@@ -76,6 +90,7 @@ export function SettingsPage({ tab }) {
         {tab === `memory` && <MemorySettings />}
         {tab === `notes` && <GlobalNoteSettings />}
         {tab === `appearance` && <AppearanceSettings />}
+        {tab === `phone` && <PhonePanel />}
         {tab === `data` && <DataSettings />}
       </div>
     </div>

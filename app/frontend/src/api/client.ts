@@ -1,6 +1,8 @@
 // Thin fetch wrapper for the StoryCore backend. Every request goes to /api/... with the X-Story-Client header the
 // backend requires for state-changing calls. Errors arrive as {"detail": "...", "code": "..."}.
 
+import { msg } from "@/i18n";
+
 export class ApiError extends Error {
   status: number;
   code?: string;
@@ -25,6 +27,8 @@ async function readResponse<T>(res: Response): Promise<T> {
   }
   if (!res.ok) {
     const data = (body ?? {}) as Record<string, unknown>;
+    // v1.8 phone access: the computer disconnected this phone (or restarted): back to the pairing page
+    if (res.status === 401 && data.code === "not_paired") window.location.assign("/pair");
     let message = typeof data.detail === "string" ? data.detail : `Request failed (${res.status})`;
     if (Array.isArray(data.detail)) message = data.detail.map((d: { msg?: string }) => d.msg).join("; ");
     throw new ApiError(res.status, message, data);
@@ -99,6 +103,7 @@ export function assetUrl(assetId: string, variant: "thumb" | "card" | "full" = "
 }
 
 export function errorMessage(e: unknown): string {
+  if (e instanceof ApiError && e.code === "pc_only") return msg("This is only available on the computer.");
   if (e instanceof ApiError) return e.message;
   if (e instanceof Error) return e.message;
   return String(e);

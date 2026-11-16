@@ -1,6 +1,7 @@
 // "Report a problem" (v1.8): the player describes what happened, and the bug report zip is downloaded with that
 // text inside (description.txt) and where they were (context.json: page, story id). Never any story text.
 import * as React from "react";
+import { IS_REMOTE } from "@/lib/remote";
 import * as Icon from "lucide-react";
 import { msg } from "@/i18n";
 import { Button, Modal, Textarea, useUi } from "@/components/ui";
@@ -98,7 +99,7 @@ export function ReportProblemDialog({ open, onClose, storyId }) {
 export function StoryPanelActions({ storyId, onRecap, className }) {
   let [open, setOpen] = React.useState(false);
   return (
-    <div className={cn(`grid grid-cols-2 gap-2 p-3`, className)}>
+    <div className={cn(`grid gap-2 p-3`, IS_REMOTE ? `grid-cols-1` : `grid-cols-2`, className)}>
       <button
         type="button"
         onClick={onRecap}
@@ -107,14 +108,15 @@ export function StoryPanelActions({ storyId, onRecap, className }) {
       >
         <Icon.ScrollText className="size-4" /> {msg("Recap")}
       </button>
-      <button
+      {/* the bug report reads the computer's logs: offered on the computer only (v1.8) */}
+      {!IS_REMOTE && <button
         type="button"
         onClick={() => setOpen(true)}
         title={msg("Export a bug report with a description of the problem")}
         className="sc-action sc-action-red inline-flex h-10 items-center justify-center gap-2 rounded-lg text-sm font-medium"
       >
         <Icon.Bug className="size-4" /> {msg("Report a problem")}
-      </button>
+      </button>}
       <ReportProblemDialog open={open} onClose={() => setOpen(false)} storyId={storyId} />
     </div>
   );

@@ -5,7 +5,8 @@
 import * as React from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { useQuery } from "@tanstack/react-query";
-import { Check, History, Languages, Settings, SlidersHorizontal, Wand2 } from "lucide-react";
+import { Check, History, Languages, Settings, SlidersHorizontal, Smartphone, Wand2 } from "lucide-react";
+import { IS_REMOTE } from "@/lib/remote";
 import discordLogo from "@/assets/discord.png"; // official Discord symbol: keep its colours as they are
 import { apiGet } from "@/api/legacy";
 import { useSettings, useStories } from "@/api/queries";
@@ -84,10 +85,18 @@ export function WelcomePage() {
               </button>
             ))}
             <div className="my-1.5 h-px bg-[#e2bd7226]" />
-            <button type="button" onClick={() => navigate(`/setup`)} className="sc-menu-item">
-              <Wand2 className="size-4" />
-              <span className="flex-1 text-left">{msg("First-run assistant")}</span>
-            </button>
+            {!IS_REMOTE && (
+              <>
+                <button type="button" onClick={() => navigate(`/setup`)} className="sc-menu-item">
+                  <Wand2 className="size-4" />
+                  <span className="flex-1 text-left">{msg("First-run assistant")}</span>
+                </button>
+                <button type="button" onClick={() => navigate(`/mobile`)} className="sc-menu-item">
+                  <Smartphone className="size-4" />
+                  <span className="flex-1 text-left">{msg("Play on a phone")}</span>
+                </button>
+              </>
+            )}
             <button type="button" onClick={() => navigate(`/settings`)} className="sc-menu-item">
               <SlidersHorizontal className="size-4" />
               <span className="flex-1 text-left">{msg("All settings")}</span>
