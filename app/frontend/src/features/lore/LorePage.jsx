@@ -52,7 +52,7 @@ export function LorePage() {
     [o, s] = React.useState(``),
     [c, l] = React.useState(``),
     [u, d] = React.useState(null),
-    portraitMap = usePortraitMap(),
+    portraitMap = usePortraitMap(r?.id),
     queryClient = useQueryClient(),
     { toast } = useUi(),
     v = React.useRef(null),

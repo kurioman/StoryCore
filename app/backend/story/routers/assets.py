@@ -33,9 +33,12 @@ def expressions() -> dict[str, Any]:
 
 
 @router.get("/assets/roots")
-def roots(db: Session = Depends(get_db)) -> dict[str, Any]:
+def roots(world_id: str = "", db: Session = Depends(get_db)) -> dict[str, Any]:
+    """The portrait folders; with ``world_id``: that world's folders and the shared ones (v0.5)."""
     out = []
     for r in db.scalars(select(AssetRoot)):
+        if world_id and r.world_id not in (world_id, None):
+            continue
         d = r.to_dict()
         d["exists"] = Path(r.path).is_dir()
         d["file_count"] = db.query(AssetManifestEntry).filter(AssetManifestEntry.root_id == r.id).count()
@@ -47,6 +50,26 @@ class RootIn(BaseModel):
     path: str
     label: Optional[str] = None
     scan: bool = True
+    world_id: Optional[str] = None  # v0.5: the story world the folder belongs to (None: shared)
+
+
+class RootPatch(BaseModel):
+    world_id: Optional[str] = None
+
+
+@router.patch("/assets/roots/{rid}")
+def patch_root(rid: str, body: RootPatch, db: Session = Depends(get_db)) -> dict[str, Any]:
+    """v0.5: tie a portrait folder to one story world (or make it shared), then match it again against those characters."""
+    from ..models import World
+    r = db.get(AssetRoot, rid)
+    if r is None:
+        raise HTTPException(404, "Root not found")
+    if body.world_id and db.get(World, body.world_id) is None:
+        raise ValueError("Unknown world")
+    r.world_id = body.world_id or None
+    db.flush()
+    report = assets_svc.scan_root(db, r, assets_svc.index_for_root(db, r)) if Path(r.path).is_dir() else None
+    return {"root": r.to_dict(), "report": report}
 
 
 @router.post("/assets/roots")
@@ -59,6 +82,7 @@ def add_root(body: RootIn, db: Session = Depends(get_db)) -> dict[str, Any]:
     existing = db.scalar(select(AssetRoot).where(AssetRoot.path == str(p)))
     r = existing or AssetRoot(path=str(p), kind="folder", label=body.label or p.name)
     if existing is None:
+        r.world_id = body.world_id or None
         db.add(r)
         db.flush()
     report = assets_svc.scan_root(db, r, assets_svc.index_for_root(db, r)) if body.scan else None
@@ -89,8 +113,11 @@ def rescan_all(db: Session = Depends(get_db)) -> dict[str, Any]:
 
 
 @router.get("/assets/manifest")
-def manifest(status: str = "", character_id: str = "", db: Session = Depends(get_db)) -> dict[str, Any]:
+def manifest(status: str = "", character_id: str = "", world_id: str = "", db: Session = Depends(get_db)) -> dict[str, Any]:
     q = select(AssetManifestEntry)
+    if world_id:  # v0.5: that world's folders and the shared ones
+        q = q.where(AssetManifestEntry.root_id.in_(select(AssetRoot.id).where(
+            (AssetRoot.world_id == world_id) | AssetRoot.world_id.is_(None))))
     if status:
         q = q.where(AssetManifestEntry.status.in_(status.split(",")))
     if character_id:
@@ -103,17 +130,22 @@ def characters(world_id: str = "", db: Session = Depends(get_db)) -> dict[str, A
     q = select(LoreEntity).where(LoreEntity.category == "character")
     if world_id:
         q = q.where(LoreEntity.world_id == world_id)
-    pmap = assets_svc.portrait_map(db, world_id or None)
+    # v0.5: portraits are per world (the same character can look different from one story to the next); without a
+    # world_id every world is listed with its own portraits (an entry per world: "world_id" tells them apart)
+    pmaps = {w: assets_svc.portrait_map(db, w) for w in ([world_id] if world_id else
+                                                         [x for (x,) in db.execute(select(LoreEntity.world_id).distinct())])}
     out = []
     for le in db.scalars(q.order_by(LoreEntity.name)):
-        slots = pmap.get(le.entity_id, {})
-        out.append({"id": le.entity_id, "name": le.name, "type": le.entity_type, "aliases": le.aliases_json,
-                    "slots": {str(k): v for k, v in slots.items()}, "missing": [s for s in range(1, 7) if s not in slots]})
-    known = {c["id"] for c in out}
-    for cid, slots in pmap.items():  # portraits mapped to ids not (yet) in lore, e.g. local NPCs
-        if cid not in known:
-            out.append({"id": cid, "name": cid, "type": "unknown", "aliases": [], "slots": {str(k): v for k, v in slots.items()},
-                        "missing": [s for s in range(1, 7) if s not in slots]})
+        slots = pmaps.get(le.world_id, {}).get(le.entity_id, {})
+        out.append({"id": le.entity_id, "world_id": le.world_id, "name": le.name, "type": le.entity_type,
+                    "aliases": le.aliases_json, "slots": {str(k): v for k, v in slots.items()},
+                    "missing": [s for s in range(1, 7) if s not in slots]})
+    if world_id:
+        known = {c["id"] for c in out}
+        for cid, slots in pmaps[world_id].items():  # portraits mapped to ids not (yet) in lore, e.g. local NPCs
+            if cid not in known:
+                out.append({"id": cid, "world_id": world_id, "name": cid, "type": "unknown", "aliases": [],
+                            "slots": {str(k): v for k, v in slots.items()}, "missing": [s for s in range(1, 7) if s not in slots]})
     return {"characters": out}
 
 
@@ -193,8 +225,8 @@ def image(asset_id: str, variant: str = "card", ctx: AppContext = Depends(get_ct
 
 
 @router.post("/assets/upload")
-async def upload(files: list[UploadFile] = File(...), relative_paths: str = Form(""), ctx: AppContext = Depends(get_ctx),
-                 db: Session = Depends(get_db)) -> dict[str, Any]:
+async def upload(files: list[UploadFile] = File(...), relative_paths: str = Form(""), world_id: str = Form(""),
+                 ctx: AppContext = Depends(get_ctx), db: Session = Depends(get_db)) -> dict[str, Any]:
     """Folder upload from the browser (webkitdirectory). Files are copied into the app data folder."""
     rels = [r for r in relative_paths.split("\n")] if relative_paths else []
     batch = ctx.settings.uploads_dir / "assets" / f"upload_{uuid.uuid4().hex[:8]}"
@@ -212,7 +244,8 @@ async def upload(files: list[UploadFile] = File(...), relative_paths: str = Form
         saved += 1
     if not saved:
         raise ValueError("No image files found in the selection.")
-    r = AssetRoot(path=str(batch.resolve()), kind="uploaded", label=f"Uploaded images ({saved})")
+    r = AssetRoot(path=str(batch.resolve()), kind="uploaded", label=f"Uploaded images ({saved})",
+                  world_id=world_id or None)  # v0.5: the story shown on the Portraits page
     db.add(r)
     db.flush()
     return {"root": r.to_dict(), "report": assets_svc.scan_root(db, r, assets_svc.index_for_root(db, r))}

@@ -421,7 +421,6 @@
  "First text after (s)": "Premier texte après (s)",
  "Fix things and stay safe": "Régler les problèmes et rester en sécurité",
  "Fixed for built-in commands": "Fixe pour les commandes intégrées",
- "Folder path on this computer, e.g. C:\\\\\\\\Users\\\\\\\\me\\\\\\\\Pictures\\\\\\\\portraits": "Chemin du dossier sur cet ordinateur, ex. C:\\\\\\\\Users\\\\\\\\moi\\\\\\\\Images\\\\\\\\portraits",
  "Folders": "Dossiers",
  "Found {{v0}} ({{v1}} images)": "Trouvé : {{v0}} ({{v1}} images)",
  "French": "Français",
@@ -1969,5 +1968,11 @@
  "Possible continuity problem — the reply was not changed:": "Problème de continuité possible — la réponse n'a pas été modifiée :",
  "StoryCore spots the phrases the narrator keeps reusing and asks it to vary them (a few words per request, found without any extra request).": "StoryCore repère les tournures que le narrateur réutilise sans cesse et lui demande de les varier (quelques mots par requête, trouvés sans aucune requête en plus).",
  "The time goes back from “{{v0}}” to “{{v1}}” on the same day.": "L'heure recule de « {{v0}} » à « {{v1}} » le même jour.",
- "{{v0}} speaks, but the journal records their death.": "{{v0}} parle, alors que le journal indique sa mort."
+ "{{v0}} speaks, but the journal records their death.": "{{v0}} parle, alors que le journal indique sa mort.",
+ "No story yet": "Aucune histoire pour l'instant",
+ "Portraits are separate for each story: the same character can look different in another one.": "Les portraits sont séparés par histoire : un même personnage peut avoir une autre apparence dans une autre histoire.",
+ "Portraits belong to a story: add a lore pack first.": "Les portraits appartiennent à une histoire : ajoutez d'abord un Lore pack.",
+ "Shared (stories without their own portrait)": "Partagé (histoires sans portrait propre)",
+ "Story of this folder": "Histoire de ce dossier",
+ "Folder path on this computer, e.g. C:\\Users\\me\\Pictures\\portraits": "Chemin du dossier sur cet ordinateur, ex. C:\\Users\\moi\\Images\\portraits"
 }

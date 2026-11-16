@@ -171,18 +171,47 @@ def index_for_root(db: Session, root: AssetRoot) -> EntityIndex:
 def portrait_map(db: Session, world_id: str | None = None) -> dict[str, dict[int, str]]:
     """character_id -> {slot: asset_id} for usable assets.
 
-    With a world: that world's own portrait folders first, then the shared folders (added by hand) for slots still
-    empty; another world's folders are never used. Without a world (Portraits page overview): every folder."""
+    With a world: that world's own portrait folders; a shared folder (no world) only for a character who has no portrait
+    at all in the world's own folders — never mixed into a character's own set (the same character can look different
+    from one world to the next: a teenager in one story, an adult in the next). Another world's folders are never used.
+    Without a world: every folder (only for internal checks; the screens always ask for one world)."""
     roots = {r.id: r.world_id for r in db.scalars(select(AssetRoot))}
     entries = [e for e in db.scalars(select(AssetManifestEntry).where(AssetManifestEntry.status.in_(("matched", "override"))))
                if e.character_id and e.slot]
-    if world_id:
-        entries = [e for e in entries if roots.get(e.root_id) in (world_id, None)]
-        entries.sort(key=lambda e: roots.get(e.root_id) is None)  # the world's own folders win
     out: dict[str, dict[int, str]] = {}
-    for e in entries:
+    if not world_id:
+        for e in entries:
+            out.setdefault(e.character_id, {}).setdefault(e.slot, e.id)
+        return out
+    own = [e for e in entries if roots.get(e.root_id) == world_id]
+    for e in sorted(own, key=lambda e: e.rel_path):
         out.setdefault(e.character_id, {}).setdefault(e.slot, e.id)
-    return out
+    shared: dict[str, dict[int, str]] = {}
+    for e in sorted((e for e in entries if roots.get(e.root_id) is None), key=lambda e: (e.root_id, e.rel_path)):
+        if e.character_id not in out:
+            shared.setdefault(e.character_id, {}).setdefault(e.slot, e.id)
+    return {**out, **shared}
+
+
+def adopt_pack_duplicates(db: Session) -> list[str]:
+    """Shared folders (no world) named like a lore pack's own image folder (e.g. an older install's copy of
+    "hero_chronicle_images") belong to that pack's world: they are tied to it and rescanned against its characters, so
+    they can never lend their portraits to another world. Returns the folders tied."""
+    roots = list(db.scalars(select(AssetRoot)))
+
+    def folder_name(path: str) -> str:  # the last folder, whatever the separators (Windows paths read anywhere)
+        return re.split(r"[\\/]", (path or "").rstrip("\\/"))[-1].lower()
+
+    pack_names = {folder_name(r.path): r.world_id for r in roots if r.world_id}
+    tied = []
+    for r in roots:
+        if r.world_id is None and folder_name(r.path) in pack_names:
+            r.world_id = pack_names[folder_name(r.path)]
+            db.flush()
+            if Path(r.path).is_dir():
+                scan_root(db, r, index_for_root(db, r))
+            tied.append(r.path)
+    return tied
 
 
 def resolve_expression(slots: dict[int, str], wanted: int) -> tuple[str | None, int | None, bool]:

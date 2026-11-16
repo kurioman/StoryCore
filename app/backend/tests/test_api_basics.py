@@ -89,6 +89,42 @@ class PortraitsPerWorldTest(AppTestCase):
                     self.assertIn(folder, folder_of[asset_id], f"{slug}: {cid} uses a picture from another pack")
 
 
+    def test_every_screen_gets_one_world_and_shared_folders_never_mix(self):
+        """v0.5 (bug report): the interface used one portrait map for every world, so Hero's Chronicle showed the
+        Lumencia Academy Lily and Beelzebub; an older copy of a pack's image folder, shared by every world, did too."""
+        import shutil
+        from story.models import AssetManifestEntry, AssetRoot
+        from story.services import assets
+        hero, academy = self.world("hero_chronicle"), self.world("lumencia_academy")
+        # without a world: one entry per world, each with that world's own pictures
+        both = [c for c in self.get("/assets/characters")["characters"] if c["id"] == "lily"]
+        self.assertEqual({c["world_id"] for c in both}, {hero["id"], academy["id"]})
+        self.assertNotEqual(*[sorted(c["slots"].values()) for c in both])
+
+        with self.ctx.db.session() as s:
+            pack_root = s.query(AssetRoot).filter_by(world_id=academy["id"]).one()
+            src = __import__("pathlib").Path(pack_root.path)
+        # an older install's copy of the Lumencia folder, registered as a shared folder (no world)
+        copy = self.tmp / "old_install" / src.name
+        shutil.copytree(src, copy)
+        r = self.post("/assets/roots", {"path": str(copy)})
+        self.assertIsNone(r["root"]["world_id"])
+        chars = {c["id"]: c for c in self.get(f"/assets/characters?world_id={hero['id']}")["characters"]}
+        with self.ctx.db.session() as s:
+            roots = {x.id: x for x in s.query(AssetRoot)}
+            for asset_id in chars["lily"]["slots"].values():  # never completed from the shared copy
+                self.assertIn("hero_chronicle_images", roots[s.get(AssetManifestEntry, asset_id).root_id].path)
+            tied = assets.adopt_pack_duplicates(s)  # what each start does: the copy belongs to Lumencia Academy
+        self.assertEqual(tied, [str(copy.resolve())])
+        with self.ctx.db.session() as s:
+            self.assertEqual(s.query(AssetRoot).filter_by(path=str(copy.resolve())).one().world_id, academy["id"])
+        # a folder can also be tied by hand (Portraits > Folders)
+        out = self.client.patch(f"/api/assets/roots/{r['root']['id']}", json={"world_id": None})
+        self.assertIsNone(out.json()["root"]["world_id"])
+        self.assertEqual(len(self.get(f"/assets/roots?world_id={hero['id']}")["roots"]), 2)  # its own + the shared one
+        self.client.delete(f"/api/assets/roots/{r['root']['id']}")
+
+
 class LibraryCardTest(AppTestCase):
     """pack.json format 2 (v0.5): summary and tags per language reach the world; no cover gives a clean 404."""
 

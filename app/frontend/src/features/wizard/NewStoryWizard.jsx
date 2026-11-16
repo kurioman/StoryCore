@@ -37,7 +37,6 @@ export function NewStoryWizard() {
     avatars = useAvatars(),
     providers = useProviders(),
     settings = useSettings(),
-    portraitMap = usePortraitMap(),
     queryClient = useQueryClient(),
     { toast } = useUi(),
     [s, c] = React.useState(0),
@@ -62,6 +61,7 @@ export function NewStoryWizard() {
       featured_characters: [],
       story_note: ``,
     })),
+    portraitMap = usePortraitMap(p.world_id || null), // v0.5: the chosen world's portraits
     v = worlds.data?.find((e) => e.id === p.world_id),
     // v0.5: only the world's own openings (chosen by the pack's author)
     y = React.useMemo(() => {

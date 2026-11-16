@@ -74,7 +74,7 @@ export function ListEditor({ items, placeholder, onAdd, onRemove, onToggle }) {
 
 export function RelationsPanel({ storyId, worldId, onOpenCharacter }) {
   let stateEditor = useStateEditor(storyId),
-    portraitMap = usePortraitMap(),
+    portraitMap = usePortraitMap(worldId),
     [a, o] = React.useState(null),
     [s, c] = React.useState(false);
   if (!stateEditor.state) return <Spinner />;

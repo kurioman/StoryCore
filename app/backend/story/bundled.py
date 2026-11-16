@@ -124,6 +124,19 @@ def _sync_pack(ctx: AppContext, folder: Path, seen: dict[str, Path]) -> str:
 
 def sync_lore_packs(ctx: AppContext) -> None:
     """Never stops the app: if this fails, Home still offers the manual "Import lore" and "Scan portraits" buttons."""
+    try:
+        _sync_lore_packs(ctx)
+    finally:
+        try:  # v0.5: an older copy of a pack's image folder belongs to that pack's world, never to every world
+            with ctx.db.session() as db:
+                tied = assets_svc.adopt_pack_duplicates(db)
+            if tied:
+                log.info("portrait folders tied to their world: %s", ", ".join(tied))
+        except Exception:
+            log.exception("portrait folders could not be tied to their world")
+
+
+def _sync_lore_packs(ctx: AppContext) -> None:
     packs = ctx.settings.project_root.resolve() / PACKS_DIR
     try:
         moved = _repoint(ctx, packs)

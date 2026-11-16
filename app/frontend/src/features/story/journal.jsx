@@ -1530,7 +1530,7 @@ function CurrentStateTab({ storyId }) {
 
 function CharactersTab({ storyId, worldId, initial, onJump }) {
   let worlds = useWorlds(),
-    portraitMap = usePortraitMap(),
+    portraitMap = usePortraitMap(worldId),
     storyState = useStoryState(storyId),
     [s, c] = React.useState(initial);
   React.useEffect(() => c(initial), [initial]);

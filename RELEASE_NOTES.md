@@ -95,6 +95,11 @@ and the numbering now says so.
   message box. The Journal has a new "AI memory" tab: the story so far, chapters and scenes (correct one, or pin it as a
   permanent memory), the open threads (mark one settled), what each character remembers, "Summarise now" and "Close the
   chapter here". The /chapter command (/chapitre) closes a chapter with an optional title.
+- **Fixed: portraits of characters who appear in several stories.** Lily and Beelzebub showed their Lumencia Academy
+  pictures in Hero's Chronicle: every screen now asks for the portraits of the story's own world, and a shared folder
+  never completes a character who has portraits in their story. An older copy of a pack's image folder (from a
+  previous install) is tied to that pack's world at start. The Portraits page shows one story at a time, and each
+  folder says which story it belongs to (Folders tab: change it there, or make it shared).
 - **Continuity checks at no cost.** StoryCore spots the phrases the narrator keeps reusing and asks it to vary them
   (Settings > Narration & context > Fight repetitions). A notice appears under a reply when a character the journal
   records as dead speaks, when the time of day goes back on the same day, or when the scene analysis finds that the

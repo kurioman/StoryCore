@@ -12,7 +12,7 @@ import { useStateEditor } from "@/features/lore/schemas";
 
 export function PickCharacterDialog({ worldId, title, onClose, onPick }) {
   let worlds = useWorlds(),
-    portraitMap = usePortraitMap(),
+    portraitMap = usePortraitMap(worldId),
     [o, s] = React.useState(``),
     [c, l] = React.useState(``),
     u = (worlds.data?.find((t) => t.id === worldId)?.data_json.characters ?? []).filter((e) =>

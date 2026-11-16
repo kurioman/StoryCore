@@ -1,7 +1,9 @@
-// Reconstructed from the StoryCore v1.7.0 compiled bundle (see DEVONLY/13_FRONTEND_SOURCE.md).
+// Portraits page (#/portraits). Reconstructed from the v1.7.0 bundle (DEVONLY/13_FRONTEND_SOURCE.md); v0.5: per world.
 import * as React from "react";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
-import { apiGet, apiPost, errorMessage, apiDelete, apiUpload } from "@/api/legacy";
+import { apiGet, apiPost, apiPatch, errorMessage, apiDelete, apiUpload } from "@/api/legacy";
+import { useWorlds } from "@/api/queries";
+import { useLocalState } from "@/lib/hooks";
 import { EXPRESSIONS } from "@/api/queries";
 import * as Icon from "lucide-react";
 import { msg, msgKey } from "@/i18n";
@@ -22,95 +24,114 @@ import {
 } from "@/components/ui";
 import { cn, fmtBytes } from "@/lib/util";
 
+// v0.5: portraits are separate for each story world. The same character can look different from one story to the
+// next (a teenager in one, an adult in another), so the page shows one world at a time and each folder belongs to one
+// world (or is shared by every story).
 export function PortraitsPage() {
-  let [e, t] = React.useState(`characters`),
+  let worlds = useWorlds(),
+    [tab, setTab] = React.useState(`characters`),
+    [chosenWorldId, setChosenWorldId] = useLocalState(`portraits-world`, ``),
+    world = worlds.data?.find((w) => w.id === chosenWorldId) ?? worlds.data?.[0],
+    worldId = world?.id ?? null,
     queryClient = useQueryClient(),
-    query = useQuery({
-      queryKey: [`portrait-chars`],
-      queryFn: () => apiGet(`/assets/characters`).then((e) => e.characters),
+    characters = useQuery({
+      queryKey: [`portrait-chars`, worldId],
+      enabled: !!worldId,
+      queryFn: () => apiGet(`/assets/characters?world_id=${encodeURIComponent(worldId)}`).then((d) => d.characters),
     }),
-    i = useQuery({
-      queryKey: [`assets`, `problems`],
+    problems = useQuery({
+      queryKey: [`assets`, `problems`, worldId],
+      enabled: !!worldId,
       queryFn: () =>
-        apiGet(`/assets/manifest?status=unmatched,ambiguous,duplicate,invalid,ignored`).then((e) => e.assets),
+        apiGet(
+          `/assets/manifest?status=unmatched,ambiguous,duplicate,invalid,ignored&world_id=${encodeURIComponent(worldId)}`,
+        ).then((d) => d.assets),
     }),
-    a = () => {
-      (queryClient.invalidateQueries({
-        queryKey: [`portrait-chars`],
-      }),
-        queryClient.invalidateQueries({
-          queryKey: [`assets`],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: [`portrait-map`],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: [`roots`],
-        }));
+    refresh = () => {
+      for (let key of [`portrait-chars`, `assets`, `portrait-map`, `roots`]) queryClient.invalidateQueries({ queryKey: [key] });
     },
-    o = query.data?.filter((e) => Object.keys(e.slots).length > 0) ?? [],
-    s = query.data?.filter((e) => Object.keys(e.slots).length === 0) ?? [];
+    withPortraits = characters.data?.filter((c) => Object.keys(c.slots).length > 0) ?? [],
+    withoutPortraits = characters.data?.filter((c) => Object.keys(c.slots).length === 0) ?? [];
+  if (worlds.isLoading) return <Spinner />;
+  if (!worlds.data?.length)
+    return (
+      <div className="p-8">
+        <EmptyState title={msg("No story yet")}>{msg("Portraits belong to a story: add a lore pack first.")}</EmptyState>
+      </div>
+    );
   return (
-    <Tabs
-      value={e}
-      onValueChange={t}
-      className="h-full"
-      listClassName="px-4"
-      tabs={[
-        {
-          value: `characters`,
-          label: msg("Characters ({{v0}})", {
-            v0: o.length,
-          }),
-        },
-        {
-          value: `mapping`,
-          label: msg("Needs mapping"),
-          badge: i.data?.length ? <Badge tone="warn">{i.data.length}</Badge> : undefined,
-        },
-        {
-          value: `folders`,
-          label: msg("Folders"),
-        },
-      ]}
-    >
-      <TabPanel value="characters" className="p-5">
-        <h1 className="sr-only">{msg("Portraits")}</h1>
-        <p className="mb-4 max-w-3xl text-xs text-muted">
-          {msg("Six expressions per character:")} {EXPRESSIONS.map((e) => `${e.slot} ${e.short}`).join(` · `)}
-          {msg(
-            ". Image 1 is the fallback when an expression is missing. Original files are never modified; thumbnails are cached in the app data folder.",
-          )}
-        </p>
-        {query.isLoading && <Spinner />}
-        {query.data && o.length === 0 && (
-          <EmptyState title={msg("No portraits mapped yet")}>
-            {msg("Add an image folder in the Folders tab.")}
-          </EmptyState>
-        )}
-        <div className="space-y-4">
-          {o.map((e) => (
-            <PortraitCharacterCard c={e} onChanged={a} key={e.id} />
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex flex-wrap items-center gap-2 border-b border-line px-4 py-2">
+        <Icon.BookOpen className="size-4 text-accent" />
+        <Select
+          value={worldId ?? ``}
+          onChange={(e) => setChosenWorldId(e.target.value)}
+          className="w-auto min-w-48"
+          aria-label={msg("Story")}
+        >
+          {worlds.data.map((w) => (
+            <option value={w.id} key={w.id}>
+              {w.name}
+            </option>
           ))}
-        </div>
-        {s.length > 0 && (
-          <p className="mt-6 text-xs text-faint">
-            {msg("Characters without portraits:")} {s.map((e) => e.name).join(`, `)}
-            {msg(". They show an initials placeholder.")}
-          </p>
-        )}
-      </TabPanel>
-      <TabPanel value="mapping" className="p-5">
-        <NeedsMappingList assets={i.data ?? []} chars={query.data ?? []} onChanged={a} />
-      </TabPanel>
-      <TabPanel value="folders" className="p-5">
-        <PortraitFolders onChanged={a} />
-      </TabPanel>
-    </Tabs>
+        </Select>
+        <span className="text-xs text-faint">
+          {msg("Portraits are separate for each story: the same character can look different in another one.")}
+        </span>
+      </div>
+      <div className="min-h-0 flex-1">
+        <Tabs
+          value={tab}
+          onValueChange={setTab}
+          className="h-full"
+          listClassName="px-4"
+          tabs={[
+            { value: `characters`, label: msg("Characters ({{v0}})", { v0: withPortraits.length }) },
+            {
+              value: `mapping`,
+              label: msg("Needs mapping"),
+              badge: problems.data?.length ? <Badge tone="warn">{problems.data.length}</Badge> : undefined,
+            },
+            { value: `folders`, label: msg("Folders") },
+          ]}
+        >
+          <TabPanel value="characters" className="p-5">
+            <h1 className="sr-only">{msg("Portraits")}</h1>
+            <p className="mb-4 max-w-3xl text-xs text-muted">
+              {msg("Six expressions per character:")} {EXPRESSIONS.map((e) => `${e.slot} ${e.short}`).join(` · `)}
+              {msg(
+                ". Image 1 is the fallback when an expression is missing. Original files are never modified; thumbnails are cached in the app data folder.",
+              )}
+            </p>
+            {characters.isLoading && <Spinner />}
+            {characters.data && withPortraits.length === 0 && (
+              <EmptyState title={msg("No portraits mapped yet")}>{msg("Add an image folder in the Folders tab.")}</EmptyState>
+            )}
+            <div className="space-y-4">
+              {withPortraits.map((c) => (
+                <PortraitCharacterCard c={c} worldId={worldId} onChanged={refresh} key={c.id} />
+              ))}
+            </div>
+            {withoutPortraits.length > 0 && (
+              <p className="mt-6 text-xs text-faint">
+                {msg("Characters without portraits:")} {withoutPortraits.map((c) => c.name).join(`, `)}
+                {msg(". They show an initials placeholder.")}
+              </p>
+            )}
+          </TabPanel>
+          <TabPanel value="mapping" className="p-5">
+            <NeedsMappingList assets={problems.data ?? []} chars={characters.data ?? []} onChanged={refresh} />
+          </TabPanel>
+          <TabPanel value="folders" className="p-5">
+            <PortraitFolders worldId={worldId} worlds={worlds.data} onChanged={refresh} />
+          </TabPanel>
+        </Tabs>
+      </div>
+    </div>
   );
 }
 
-function PortraitCharacterCard({ c, onChanged }) {
+function PortraitCharacterCard({ c, worldId, onChanged }) {
   let [n, r] = React.useState(null);
   return (
     <div className="rounded-lg border border-line p-3">
@@ -144,19 +165,19 @@ function PortraitCharacterCard({ c, onChanged }) {
           );
         })}
       </div>
-      {n && <PortraitAssetDialog assetId={n} onClose={() => r(null)} onChanged={onChanged} />}
+      {n && <PortraitAssetDialog assetId={n} worldId={worldId} onClose={() => r(null)} onChanged={onChanged} />}
     </div>
   );
 }
 
-function PortraitAssetDialog({ assetId, onClose, onChanged }) {
+function PortraitAssetDialog({ assetId, worldId, onClose, onChanged }) {
   let query = useQuery({
       queryKey: [`assets`, `one`, assetId],
       queryFn: () => apiGet(`/assets/manifest`).then((t) => t.assets.find((t) => t.id === assetId)),
     }),
     i = useQuery({
-      queryKey: [`portrait-chars`],
-      queryFn: () => apiGet(`/assets/characters`).then((e) => e.characters),
+      queryKey: [`portrait-chars`, worldId],
+      queryFn: () => apiGet(`/assets/characters?world_id=${encodeURIComponent(worldId)}`).then((e) => e.characters),
     });
   return query.data ? (
     <Modal open onOpenChange={(e) => !e && onClose()} title={query.data.rel_path} size="lg">
@@ -317,7 +338,7 @@ function NeedsMappingList({ assets, chars, onChanged }) {
   );
 }
 
-function PortraitFolders({ onChanged }) {
+function PortraitFolders({ worldId, worlds, onChanged }) {
   let query = useQuery({
       queryKey: [`roots`],
       queryFn: () => apiGet(`/assets/roots`).then((e) => e.roots),
@@ -334,6 +355,7 @@ function PortraitFolders({ onChanged }) {
       mutationFn: (e) =>
         apiPost(`/assets/roots`, {
           path: e,
+          world_id: worldId,
         }),
       onSuccess: (r) => {
         (l(r.report), o(``), query.refetch(), n.refetch(), onChanged());
@@ -361,6 +383,28 @@ function PortraitFolders({ onChanged }) {
               <span className="min-w-0 flex-1 truncate font-mono" title={n.path}>
                 {n.path}
               </span>
+              <Select
+                value={n.world_id ?? ``}
+                className="h-7 w-auto text-xs"
+                aria-label={msg("Story of this folder")}
+                title={msg("Story of this folder")}
+                onChange={async (e) => {
+                  try {
+                    (l((await apiPatch(`/assets/roots/${n.id}`, { world_id: e.target.value || null })).report),
+                      query.refetch(),
+                      onChanged());
+                  } catch (err) {
+                    toast(errorMessage(err), `danger`);
+                  }
+                }}
+              >
+                {worlds.map((w) => (
+                  <option value={w.id} key={w.id}>
+                    {w.name}
+                  </option>
+                ))}
+                <option value="">{msg("Shared (stories without their own portrait)")}</option>
+              </Select>
               <Badge>{msgKey(n.kind)}</Badge>
               <span className="text-faint">
                 {n.file_count} {msg("files")}
@@ -439,7 +483,7 @@ function PortraitFolders({ onChanged }) {
             value={a}
             onChange={(e) => o(e.target.value)}
             placeholder={msg(
-              "Folder path on this computer, e.g. C:\\\\\\\\Users\\\\\\\\me\\\\\\\\Pictures\\\\\\\\portraits",
+              "Folder path on this computer, e.g. C:\\Users\\me\\Pictures\\portraits",
             )}
           />
 
@@ -461,6 +505,7 @@ function PortraitFolders({ onChanged }) {
             if (!i.length) return;
             let a = new FormData();
             (i.forEach((e) => a.append(`files`, e)),
+              worldId && a.append(`world_id`, worldId),
               a.append(
                 `relative_paths`,
                 i.map((e) => e.webkitRelativePath || e.name).join(`
