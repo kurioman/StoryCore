@@ -9,6 +9,7 @@ import sys
 from typing import Any
 
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -141,6 +142,22 @@ def bug_report(ctx: AppContext = Depends(get_ctx), db: Session = Depends(get_db)
     from fastapi.responses import Response
     from ..services import bug_report
     name, data = bug_report.build(ctx, db)
+    return Response(data, media_type="application/zip", headers={"Content-Disposition": f'attachment; filename="{name}"'})
+
+
+class BugReportIn(BaseModel):
+    description: str | None = Field(default=None, max_length=20_000)
+    story_id: str | None = None
+    page: str | None = Field(default=None, max_length=200)
+
+
+@router.post("/system/bug-report")
+def bug_report_with_description(body: BugReportIn, ctx: AppContext = Depends(get_ctx), db: Session = Depends(get_db)):
+    """Same zip, plus what the player wrote and where they were (the red "Report a problem" button)."""
+    from fastapi.responses import Response
+    from ..services import bug_report
+    name, data = bug_report.build(ctx, db, description=body.description,
+                                  context={"page": body.page, "story_id": body.story_id})
     return Response(data, media_type="application/zip", headers={"Content-Disposition": f'attachment; filename="{name}"'})
 
 

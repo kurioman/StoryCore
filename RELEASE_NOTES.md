@@ -22,6 +22,13 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
 - **Report a problem**: Settings > Data & backups > Export a bug report makes a zip to send to the developer (versions,
   settings, recent errors, last logs). It never contains your API keys or your stories.
 - Engine tests (`app/backend/tests`, `DEVONLY/run_tests.bat`).
+- **New welcome page**: full screen, big logo and title, the motto, a "Start your next adventure" button and a settings
+  gear, over an animated starry sky that follows the mouse; on hover the button lights up and draws the nearby stars.
+  The button opens the story list (`#/library`; it becomes the story library later). With "reduce motion" switched on
+  in Windows, the stars stay still.
+- **Recap and Report a problem buttons** always visible at the bottom of the right panel while playing. "Report a
+  problem" asks what happened and puts that text in the bug report zip (`description.txt`), with the page and story
+  it was made from (`context.json`: ids and counts only, never story text). A crashed screen also offers it.
 
 ## New in v1.7.0
 

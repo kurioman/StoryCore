@@ -228,7 +228,7 @@ function StoryRow({ s: e, active }) {
           a === `duplicate` && toast(msg("Story duplicated")),
           a === `delete` &&
             (toast(msg("Story deleted. A recovery package was saved in data/backups/deleted_stories.")),
-            active && navigate(`/`)),
+            active && navigate(`/library`)),
           a === `archive` && toast(e.status === `archived` ? msg("Story restored", {}) : msg("Story archived", {})));
       },
       onError: (e) => toast(errorMessage(e), `danger`),

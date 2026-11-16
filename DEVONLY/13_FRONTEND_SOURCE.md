@@ -18,7 +18,10 @@ app/frontend/
     lib/                  util (cn, timeAgo...), router (hash routes), hooks, portraits
     app/App.jsx           shell: sidebar + routes
     features/
-      home/  sidebar/  help/  wizard/  avatars/  commands/  lore/  portraits/
+      welcome/            full-screen welcome page at #/ (WelcomePage.tsx) and its animated canvas (Starfield.tsx)
+      home/               the story list at #/library (will become the story library)
+      report/             "Report a problem" dialog, bug report download, the Recap / Report buttons of the play screen
+      sidebar/  help/  wizard/  avatars/  commands/  lore/  portraits/
       settings/           SettingsPage + one file per tab (Providers, OllamaModels, Narration, Memory, Note, Appearance, Data)
       story/              StoryPage (the play screen), transcript, composer, header, dialogs, journal, prose, chrono,
                           panels/ (Status, Known, Relations, Cast, Items & Quests), api.js (scene/known-characters hooks)
@@ -91,3 +94,9 @@ npm run typecheck
 
 `app/backend/story/main.py` serves `dist/` at `/` and, when it exists, `dist-next/` at `/next/`. When the new
 interface is validated it replaces `dist/` (build with base `/`), and `/next/` is removed.
+
+## Building from a Windows-mounted folder
+
+`npm install` straight into `app/frontend/node_modules` is very slow on some setups. Copying `app/frontend` (without
+`node_modules`, `dist`, `dist-next`) to a local folder, building there and copying `dist-next/` back works the same.
+Welcome page styles are in `styles.css` under "v1.8 welcome page"; the background colour is `--sc-night`.

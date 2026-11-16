@@ -1,6 +1,7 @@
 import * as React from "react";
-import { RotateCcw, TriangleAlert } from "lucide-react";
+import { Bug, RotateCcw, TriangleAlert } from "lucide-react";
 import { msg } from "@/i18n";
+import { ReportProblemDialog } from "@/features/report/ReportProblem";
 
 type Props = { area: string; resetKey?: unknown; compact?: boolean; children: React.ReactNode };
 
@@ -38,8 +39,26 @@ export class ErrorBoundary extends React.Component<Props, { error: Error | null 
           >
             <RotateCcw className="size-3.5" /> {msg("Try again")}
           </button>
+          <ReportButton />
         </div>
       </div>
     );
   }
+}
+
+/** Offered on every crashed area: the player can send the problem right away. */
+function ReportButton() {
+  const [open, setOpen] = React.useState(false);
+  const storyId = /^#\/story\/([^/?]+)/.exec(window.location.hash)?.[1];
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className="ml-2 mt-3 inline-flex items-center gap-1.5 rounded-md border border-danger/40 bg-danger-soft px-2.5 py-1 text-xs text-danger hover:border-danger"
+      >
+        <Bug className="size-3.5" /> {msg("Report a problem")}
+      </button>
+      <ReportProblemDialog open={open} onClose={() => setOpen(false)} storyId={storyId} />
+    </>
+  );
 }

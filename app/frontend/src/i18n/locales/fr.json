@@ -1722,5 +1722,16 @@
  "{{v0}} is ready: context {{v1}} tokens, replies up to {{v2}} tokens.": "{{v0}} est prêt : contexte de {{v1}} tokens, réponses jusqu'à {{v2}} tokens.",
  "LM Studio (local and offline)": "LM Studio (local et hors ligne)",
  "Runs on your own computer, with a window to download and load models. Set up in one click.": "Tourne sur votre ordinateur, avec une fenêtre pour télécharger et charger les modèles. Se configure en un clic.",
- "This only changes which guide you see here. Anthropic, OpenAI and other servers are under All providers below.": "Cela change seulement le guide affiché ici. Anthropic, OpenAI et les autres serveurs sont dans Tous les fournisseurs, plus bas."
+ "This only changes which guide you see here. Anthropic, OpenAI and other servers are under All providers below.": "Cela change seulement le guide affiché ici. Anthropic, OpenAI et les autres serveurs sont dans Tous les fournisseurs, plus bas.",
+ "A zip file will be downloaded. Send it to the StoryCore team with your message.": "Un fichier .zip va être téléchargé. Envoyez-le à l'équipe StoryCore avec votre message.",
+ "Bug report saved: {{v0}}. Send this file to the StoryCore team.": "Rapport de bug enregistré : {{v0}}. Envoyez ce fichier à l'équipe StoryCore.",
+ "Export a bug report with a description of the problem": "Exporter un rapport de bug avec une description du problème",
+ "Export the bug report": "Exporter le rapport de bug",
+ "Inside: your message, versions, the app log, settings and AI models. Never inside: API keys, story text or titles, notes or lore.": "Contenu : votre message, les versions, le journal de l'application, les réglages et les modèles d'IA. Jamais dedans : clés API, texte ou titres des histoires, notes ou lore.",
+ "Recap": "Récap",
+ "Start your next adventure": "Commencez votre prochaine aventure",
+ "The bug report could not be made (error {{v0}}).": "Le rapport de bug n'a pas pu être créé (erreur {{v0}}).",
+ "What happened?": "Que s'est-il passé ?",
+ "What you did, what you expected, and what happened instead.": "Ce que vous avez fait, ce que vous attendiez, et ce qui s'est passé à la place.",
+ "Your imagination, brought to life by AI": "Votre imagination prend vie grâce à l'IA"
 }

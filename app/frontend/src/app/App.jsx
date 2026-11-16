@@ -10,6 +10,7 @@ import { AvatarsPage } from "@/features/avatars/AvatarsPage";
 import { CommandsPage } from "@/features/commands/CommandsPage";
 import { HelpDialog } from "@/features/help/HelpDialog";
 import { HomePage } from "@/features/home/HomePage";
+import { WelcomePage } from "@/features/welcome/WelcomePage";
 import { IconButton, UiProvider } from "@/components/ui";
 import { LorePage } from "@/features/lore/LorePage";
 import { NewStoryWizard } from "@/features/wizard/NewStoryWizard";
@@ -58,9 +59,9 @@ function App() {
     <SettingsPage tab={u.tab} />
   ) : matchRoute(hashPath, `/settings`) ? (
     <SettingsPage tab="providers" />
-  ) : (
+  ) : matchRoute(hashPath, `/library`) ? (
     <HomePage />
-  );
+  ) : null;
 
   let d = matchRoute(hashPath, `/story/:id`)?.id,
     f = (
@@ -71,6 +72,17 @@ function App() {
         onToggle={() => (mediaQuery ? i(!r) : o(false))}
         onHelp={() => c(true)}
       />
+    );
+
+  // v1.8: the welcome page is full screen, without the sidebar (every unknown address lands there too)
+  if (!l)
+    return (
+      <div className="h-full">
+        <ErrorBoundary area={msg("This page")} resetKey={hashPath}>
+          <WelcomePage />
+        </ErrorBoundary>
+        <HelpDialog open={s} onClose={() => c(false)} />
+      </div>
     );
 
   return (

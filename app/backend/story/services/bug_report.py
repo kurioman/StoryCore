@@ -30,13 +30,16 @@ from .runtime import AppContext
 
 LOG_TAIL_BYTES = 3_000_000  # the log rotates at 2 MB, so this keeps the whole current log and part of the previous one
 RECENT_GENERATIONS = 30
+MAX_DESCRIPTION = 20_000
 README = """StoryCore bug report
 ====================
 
-Made by Settings > Data & backups > Export a bug report. Send it to the person who helps you with StoryCore,
-together with what you did, what you expected and what happened.
+Made by the red "Report a problem" button (play screen) or Settings > Data & backups > Export a bug report.
+Send it to the person who helps you with StoryCore, together with what you did, what you expected and what happened.
 
 What is inside
+  description.txt    what the player wrote when reporting (only when made from the "Report a problem" button)
+  context.json       where the player was: page, current story id, its world, message count (no story text)
   system.json        app version, Python, operating system, data folder sizes
   settings.json      every app setting (no secret is a setting)
   providers.json     AI providers and model profiles: type, address, parameters, whether a key is stored (never the key)
@@ -51,8 +54,9 @@ Never inside
 """
 
 
-def build(ctx: AppContext, db: Session) -> tuple[str, bytes]:
-    """(file name, zip bytes)."""
+def build(ctx: AppContext, db: Session, description: str | None = None,
+          context: dict[str, Any] | None = None) -> tuple[str, bytes]:
+    """(file name, zip bytes). description: the player's own words; context: page and story they were on."""
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
@@ -61,6 +65,10 @@ def build(ctx: AppContext, db: Session) -> tuple[str, bytes]:
             zf.writestr(name, _redact(ctx, text))
 
         put("README.txt", README)
+        if description and description.strip():
+            put("description.txt", description.strip()[:MAX_DESCRIPTION] + "\n")
+        if context:
+            put("context.json", _safe(lambda: _context(db, context)))
         put("system.json", _system(ctx))
         put("settings.json", settings_service.get_all(db))
         put("providers.json", _providers(ctx, db))
@@ -158,6 +166,19 @@ def _stories(db: Session) -> list[dict[str, Any]]:
         n = db.scalar(select(func.count()).select_from(Message).where(Message.story_id == s.id)) or 0
         out.append({"id": s.id, "world": worlds.get(s.world_id), "status": s.status, "messages": n,
                     "created_at": s.created_at, "narration_language": (s.settings_json or {}).get("narration_language")})
+    return out
+
+
+def _context(db: Session, context: dict[str, Any]) -> dict[str, Any]:
+    """Where the player was when reporting. Only ids and counts: never a title or story text."""
+    out: dict[str, Any] = {"page": str(context.get("page") or "")[:200]}
+    story_id = context.get("story_id")
+    story = db.get(Story, story_id) if story_id else None
+    if story is not None:
+        world = db.get(World, story.world_id) if story.world_id else None
+        n = db.scalar(select(func.count()).select_from(Message).where(Message.story_id == story.id)) or 0
+        out["story"] = {"id": story.id, "world": world.name if world else None, "status": story.status,
+                        "messages": n, "narration_language": (story.settings_json or {}).get("narration_language")}
     return out
 
 

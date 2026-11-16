@@ -51,3 +51,24 @@ class BugReportTest(AppTestCase):
         self.assertTrue(gens and all("status" in g for g in gens))
         stories = json.loads(z.read("stories.json"))
         self.assertTrue(any(s["id"] == story["id"] and s["messages"] == 4 for s in stories))
+
+    def test_report_with_description_and_context(self):
+        story = self.new_story("Secret title")
+        start = self.post(f"/stories/{story['id']}/start")
+        self.wait_reply(story["id"], start["assistant_message_id"])
+        r = self.client.post("/api/system/bug-report", json={
+            "description": "Les images de Hero's Chronicle apparaissent dans l'autre pack.",
+            "story_id": story["id"], "page": "/story/x"})
+        self.assertEqual(r.status_code, 200, r.text[:300])
+        z = zipfile.ZipFile(io.BytesIO(r.content))
+        self.assertIn("description.txt", z.namelist())
+        self.assertIn("images de Hero's Chronicle", z.read("description.txt").decode("utf-8"))
+        context = json.loads(z.read("context.json"))
+        self.assertEqual(context["page"], "/story/x")
+        self.assertEqual(context["story"]["id"], story["id"])
+        self.assertNotIn("Secret title", z.read("context.json").decode("utf-8"))
+        # no description and no story: the zip is still made, without those two files
+        r = self.client.post("/api/system/bug-report", json={})
+        self.assertEqual(r.status_code, 200, r.text[:300])
+        names = zipfile.ZipFile(io.BytesIO(r.content)).namelist()
+        self.assertNotIn("description.txt", names)

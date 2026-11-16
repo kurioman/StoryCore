@@ -22,6 +22,7 @@ import { JournalView } from "@/features/story/journal";
 import { MessageItem, SpeakersPanel, TurnAnalysisBar } from "@/features/story/transcript";
 import { RecapDialog } from "@/features/story/dialogs";
 import { StatusSection } from "@/features/story/panels/StatusPanel";
+import { StoryPanelActions } from "@/features/report/ReportProblem";
 import { StoryHeader } from "@/features/story/header";
 import { cn, isCloudModelId } from "@/lib/util";
 import { useLocalState, useMediaQuery } from "@/lib/hooks";
@@ -382,6 +383,8 @@ export function StoryPage({ storyId }) {
       (d(e), T(`known`), C(true));
     },
     Oe = (
+      <div className="flex h-full flex-col">
+      <div className="min-h-0 flex-1">
       <StatusSection
         storyId={storyId}
         worldId={k.world_id}
@@ -396,6 +399,9 @@ export function StoryPage({ storyId }) {
         knownFocus={u}
         setKnownFocus={d}
       />
+      </div>
+      <StoryPanelActions storyId={storyId} onRecap={() => ne({ name: `recap`, input: `` })} />
+      </div>
     );
 
   return (
