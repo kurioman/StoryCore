@@ -25,6 +25,7 @@ from sqlalchemy.orm import Session
 from ..models import Message, Story, TurnAnalysis, now_iso
 from . import settings_service, state_service, story_tree
 from .entities import build_index
+from .music import MUSIC_TAG
 
 TAG = re.compile(r"\[\s*([^\[\]\n:|+#]{1,40}?)\s*[:|+#]\s*([1-6])\s*\]")
 MAX_TAG_LEN = 48
@@ -51,6 +52,7 @@ class TagFilter:
         self.buf = ""
         self.clean = ""
         self.tags: list[dict[str, Any]] = []
+        self.music: list[dict[str, Any]] = []  # v1.8 music tags: [Music:combat] (services/music.py)
         self._eat = False  # drop the spaces (and one line break) right after a tag
         self._at_line_start = True
 
@@ -84,6 +86,13 @@ class TagFilter:
                     continue
                 self.buf = rest  # maybe a tag still arriving
                 break
+            mm = MUSIC_TAG.fullmatch(rest[:j + 1])
+            if mm:
+                self._at_line_start = not self.clean or self.clean.endswith("\n")
+                self.music.append({"tag": mm.group(1).strip(), "offset": len(self.clean)})
+                self._eat = True
+                self.buf = rest[j + 1:]
+                continue
             m = TAG.fullmatch(rest[:j + 1])
             if m:
                 self._at_line_start = not self.clean or self.clean.endswith("\n")
@@ -206,12 +215,20 @@ def apply(db: Session, message_id: str) -> bool:
 
 def retag(m: Message, content: str) -> str:
     """The reply as the narrator wrote it (tags put back), for the context sent to the model. Unchanged after an edit."""
-    tags = (m.generation_metadata_json or {}).get("portrait_tags") or []
-    if not tags or m.edited_at or content != m.content:
+    meta = m.generation_metadata_json or {}
+    tags = meta.get("portrait_tags") or []
+    music = meta.get("music_tags") or []
+    if (not tags and not music) or m.edited_at or content != m.content:
         return content
     out = content
+    for t in sorted(music, key=lambda t: t.get("offset") or 0, reverse=True):  # v1.8: the narrator's music tags too
+        p = t.get("offset")
+        if isinstance(p, int) and 0 <= p <= len(out) and not tags:
+            out = f"{out[:p]}[Music:{t['tag']}]\n{out[p:]}"
     for t in sorted(tags, key=lambda t: t.get("pos") or 0, reverse=True):
         p = t.get("pos")
         if isinstance(p, int) and 0 <= p <= len(out):
             out = f"{out[:p]}[{t['name']}:{t['slot']}] {out[p:]}"
+    if music and tags:  # both kinds of offsets refer to the streamed text: keep it simple, the first music tag on top
+        out = f"[Music:{music[0]['tag']}]\n{out}"
     return out

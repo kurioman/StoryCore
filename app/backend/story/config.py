@@ -8,6 +8,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Optional
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 FRONTEND_DIST = PROJECT_ROOT / "app" / "frontend" / "dist"
@@ -24,6 +25,12 @@ class Settings:
     dev_origins: list[str] = field(default_factory=lambda: ["http://localhost:5173", "http://127.0.0.1:5173"])
     project_root: Path = PROJECT_ROOT
     secrets_backend: str = "auto"  # auto | keyring | file | memory
+    music_dir_override: Optional[Path] = None  # tests use a throw-away folder
+
+    @property
+    def music_dir(self) -> Path:
+        """The app's music library (v1.8): <project>/Music with library.json, shared by every story."""
+        return self.music_dir_override or (self.project_root / "Music")
 
     @property
     def db_path(self) -> Path:

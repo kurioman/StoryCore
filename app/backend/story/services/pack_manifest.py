@@ -33,7 +33,7 @@ FACT_KINDS = {"aunt_of", "sibling_of", "parent_of", "spouse_of", "family_branch"
 DEFAULT_FILES = {"system_prompt": "ai/narrative_system_prompt.md", "premise": "lore/premise.md", "images": None}
 SECTIONS = ("stats", "starters", "posts", "closed_groups", "facts", "gatherings", "places", "calendar", "never_random")
 LIBRARY_KEYS = ("summary", "tags", "cover")
-TOP_KEYS = {"format_version", "id", "name", "description", "canon_note", "modules", "files", "codex", *LIBRARY_KEYS,
+TOP_KEYS = {"format_version", "id", "name", "description", "canon_note", "modules", "files", "codex", "music", *LIBRARY_KEYS,
             *SECTIONS}
 MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November",
           "December"]
@@ -100,6 +100,13 @@ def load(pack_dir: Path) -> tuple[dict[str, Any] | None, dict[str, list[str]]]:
         rep.warnings.append("codex: must be true or false; the codex stays on.")
         cx = True
     out["codex"] = cx
+    # music (v1.8): packs never ship music; they may switch it off or pick tracks of the app's library per tag
+    mu = raw.get("music")
+    if mu is False or isinstance(mu, dict):
+        out["music"] = mu
+    elif mu is not None:
+        rep.warnings.append("music: must be false, or an object {\"default\": \"calm\", \"choices\": {\"combat\": "
+                            "[\"track_id\"]}}; ignored.")
     for sec in SECTIONS:
         if sec not in raw:
             continue

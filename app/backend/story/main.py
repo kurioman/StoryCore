@@ -77,6 +77,8 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
     db = Database(settings.db_path)
     secrets = make_secret_store(settings.secrets_backend, settings.data_dir)
     ctx = AppContext(settings=settings, db=db, secrets=secrets, transport=transport)
+    from .services import music as music_svc
+    music_svc.set_folder(settings.music_dir)
     ctx.generations = GenerationManager(ctx)
     ctx.pulls = PullManager(ctx)
     ctx.extraction = ExtractionService(ctx)
@@ -186,10 +188,10 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
         log.error("Unhandled error on %s %s", request.method, request.url.path, exc_info=e)
         return JSONResponse({"detail": "Unexpected server error; details are in the app log.", "code": "internal"}, 500)
 
-    from .routers import assets, avatars, backup, commands, journal, lore, narrative, providers, state, stories, system
+    from .routers import assets, avatars, backup, commands, journal, lore, music, narrative, providers, state, stories, system
 
     for r in (system.router, providers.router, stories.router, state.router, journal.router, avatars.router,
-              lore.router, assets.router, commands.router, backup.router, narrative.router):
+              lore.router, assets.router, commands.router, backup.router, narrative.router, music.router):
         app.include_router(r, prefix="/api")
 
     if (FRONTEND_DIST / "assets").is_dir():

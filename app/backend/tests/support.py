@@ -32,7 +32,8 @@ class AppTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.tmp = Path(tempfile.mkdtemp(prefix="storycore_test_"))
-        settings = Settings(data_dir=cls.tmp / "data", secrets_backend="memory")
+        # tests never touch the project's Music folder
+        settings = Settings(data_dir=cls.tmp / "data", secrets_backend="memory", music_dir_override=cls.tmp / "music")
         cls.app = create_app(settings, testing=True)
         cls.client = TestClient(cls.app, headers=HEADERS)
         cls.client.__enter__()

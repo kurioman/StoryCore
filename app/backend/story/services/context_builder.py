@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 from ..models import (Avatar, EntityFact, LocalCanon, LoreChunk, LoreEntity, Message, MessageBranch, Recap, Story,
                       StoryEvent, UserNote, World)
 from ..providers.base import ChatMessage
+from . import music as music_svc
 from . import narration_language, portrait_tags, settings_service, state_service, story_tree
 from .entities import EntityIndex, build_index
 
@@ -678,6 +679,12 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
     if tags_text:
         sections.append(Section("portrait_tags", "Portrait tags (removed before the player reads)", tags_text,
                                 [{"type": "prompt", "label": "Portrait tags"}]))
+    # v1.8 background music: the narrator marks mood / place changes with [Music:tag] (services/music.py)
+    music_text = (music_svc.instruction(music_svc.folder())
+                  if world is not None and music_svc.pack_settings(world)["enabled"] else "")
+    if music_text:
+        sections.append(Section("music_tags", "Music tags (removed before the player reads)", music_text,
+                                [{"type": "prompt", "label": "Music tags"}]))
     if lang_text:
         sections.append(Section("narration_language", f"Story language: {narration_language.LANGUAGES[lang_code]}", lang_text,
                                 [{"type": "prompt", "label": f"Narration in {narration_language.LANGUAGES[lang_code]}"}]))
