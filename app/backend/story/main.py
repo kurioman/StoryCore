@@ -127,6 +127,7 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
         log.info("StoryCore %s started; data dir %s; secrets backend %s", APP_VERSION, settings.data_dir,
                  secrets.backend_name)
         yield
+        await app.state.remote.disable()  # phone access never survives a restart
         for t in [*ctx.background, *ctx.background_futures]:
             t.cancel()
         if ctx.background:  # let cancelled jobs persist their final text/status before the DB closes
@@ -138,15 +139,37 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
     app.state.testing = testing
     app.state.cloud_notice = CLOUD_NOTICE
 
+    from .services.remote import COOKIE as DEVICE_COOKIE, IP_HOST, RemoteAccess, blocked as pc_only
+
+    remote = RemoteAccess(main_port=settings.port)
+    app.state.remote = remote
+
     @app.middleware("http")
     async def security(request: Request, call_next):
         host = (request.headers.get("host") or "").lower()
         hostname = re.sub(r":\d+$", "", host)
-        if hostname not in LOOPBACK_HOSTS and not (testing and hostname == "testserver"):
-            return JSONResponse({"detail": "Host not allowed. StoryCore only serves 127.0.0.1/localhost."}, 403)
-        if request.method in UNSAFE and request.url.path.startswith("/api/"):
+        path = request.url.path
+        if remote.is_network_request(request.scope):
+            # v1.8 phone access: the network listener answers only by IP address (no DNS rebinding) and only to
+            # paired devices; PC-only areas stay closed (services/remote.py).
+            if not IP_HOST.match(hostname):
+                return JSONResponse({"detail": "Host not allowed."}, 403)
+            if path != "/pair":
+                if remote.device_for(request.cookies.get(DEVICE_COOKIE)) is None:
+                    if path.startswith("/api/"):
+                        return JSONResponse({"detail": "This device is not connected. Scan the QR code shown on the "
+                                                       "computer again.", "code": "not_paired"}, 401)
+                    return RedirectResponse("/pair", status_code=303)
+                if path.startswith("/api/") and pc_only(request.method, path):
+                    return JSONResponse({"detail": "This is only available on the computer.", "code": "pc_only"}, 403)
+            allowed_origin = re.compile(rf"^http://{re.escape(host)}$")
+        else:
+            if hostname not in LOOPBACK_HOSTS and not (testing and hostname == "testserver"):
+                return JSONResponse({"detail": "Host not allowed. StoryCore only serves 127.0.0.1/localhost."}, 403)
+            allowed_origin = re.compile(r"^https?://(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$")
+        if request.method in UNSAFE and path.startswith("/api/"):
             origin = request.headers.get("origin")
-            if origin and not (re.match(r"^https?://(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$", origin) or origin in settings.dev_origins):
+            if origin and not (allowed_origin.match(origin) or origin in settings.dev_origins):
                 return JSONResponse({"detail": "Cross-origin request blocked."}, 403)
             # X-Lumencia-Client: the header name used by Lumencia Story Desk's frontend (still accepted).
             if "1" not in (request.headers.get("x-story-client"), request.headers.get("x-lumencia-client")):
@@ -188,11 +211,14 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
         log.error("Unhandled error on %s %s", request.method, request.url.path, exc_info=e)
         return JSONResponse({"detail": "Unexpected server error; details are in the app log.", "code": "internal"}, 500)
 
-    from .routers import assets, avatars, backup, commands, journal, lore, music, narrative, providers, state, stories, system
+    from .routers import (assets, avatars, backup, commands, journal, lore, music, narrative, providers, remote as remote_r,
+                          state, stories, system)
 
     for r in (system.router, providers.router, stories.router, state.router, journal.router, avatars.router,
-              lore.router, assets.router, commands.router, backup.router, narrative.router, music.router):
+              lore.router, assets.router, commands.router, backup.router, narrative.router, music.router, remote_r.router):
         app.include_router(r, prefix="/api")
+
+    app.include_router(remote_r.pair_router)
 
     if (FRONTEND_DIST / "assets").is_dir():
         app.mount("/assets", StaticFiles(directory=FRONTEND_DIST / "assets"), name="assets")

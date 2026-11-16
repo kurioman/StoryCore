@@ -53,7 +53,7 @@ def main() -> None:
         print(f"\n  Still starting. If nothing opens, try {url} in your browser.\n")
 
     threading.Thread(target=open_when_ready, daemon=True).start()
-    # bound to loopback only — never 0.0.0.0
+    # bound to loopback only; phone access (services/remote.py) opens its own listener only when asked
     uvicorn.run(app, host="127.0.0.1", port=port, log_level="warning")
 
 
