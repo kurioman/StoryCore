@@ -792,10 +792,12 @@ function LMStudioQuickSetup({ onChanged }) {
   );
 }
 
-function ProvidersQuickSetup() {
+// v1.8: also used by the first-run assistant (features/setup) with a fixed path and without the chooser
+export function ProvidersQuickSetup({ path, hideChooser = false } = {}) {
   let providers = useProviders(),
     queryClient = useQueryClient(),
-    [n, r] = useLocalState(`ai-path`, `openrouter`),
+    [saved, r] = useLocalState(`ai-path`, `openrouter`),
+    n = path ?? saved,
     i = providers.data;
   if (!i) return null;
   let a = () => {
@@ -813,6 +815,7 @@ function ProvidersQuickSetup() {
     l = c.find((e) => e.id === i.default_model_profile_id) ?? c[0];
   return (
     <div className="space-y-4">
+      {!hideChooser && (
       <section aria-labelledby="run-ai">
         <SectionTitle>
           <span id="run-ai">{msg("Choose how to run the AI")}</span>
@@ -862,6 +865,7 @@ function ProvidersQuickSetup() {
           )}
         </p>
       </section>
+      )}
       {n === `openrouter` ? (
         <>
           <ModelCatalog provider={o} profiles={i.profiles} defaultId={i.default_model_profile_id} />

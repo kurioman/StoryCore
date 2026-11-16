@@ -161,6 +161,13 @@ def bug_report_with_description(body: BugReportIn, ctx: AppContext = Depends(get
     return Response(data, media_type="application/zip", headers={"Content-Disposition": f'attachment; filename="{name}"'})
 
 
+@router.get("/system/gpu")
+def gpu() -> dict[str, Any]:
+    """Graphics cards and their video memory, for the first-run assistant's model advice (NVIDIA only)."""
+    from ..services import hardware
+    return hardware.gpus()
+
+
 @router.get("/system/integrity")
 def integrity(db: Session = Depends(get_db)) -> dict[str, Any]:
     return backup_svc.integrity_check(db)

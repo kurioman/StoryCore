@@ -118,7 +118,7 @@ export function SetupNotices() {
                     )}
                   </p>
                 </div>
-                <Button onClick={() => navigate(`/settings/providers`)}>{msg("Add provider")}</Button>
+                <Button onClick={() => navigate(`/setup`)}>{msg("Open the first-run assistant")}</Button>
               </div>
             )}
           </section>

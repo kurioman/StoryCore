@@ -237,11 +237,6 @@ export function NewStoryWizard() {
                       </button>
                     ))}
                   </div>
-                  {b && (
-                    <p className="mt-2 text-xs text-faint">
-                      {msg("Opening blueprint (original scaffold, not quoted text):")} {b.blueprint}
-                    </p>
-                  )}
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Field label={msg("Starting location")}>

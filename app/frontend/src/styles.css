@@ -265,3 +265,18 @@ button.sc-cx-card:hover{transform:translateY(-2px);border-color:#e2bd7270;box-sh
 .sc-mp-vol{width:5.5rem;height:.3rem;appearance:none;-webkit-appearance:none;border-radius:999px;cursor:pointer;background:linear-gradient(90deg,#e2bd72 var(--v),#e2bd7230 var(--v))}
 .sc-mp-vol::-webkit-slider-thumb{-webkit-appearance:none;width:.8rem;height:.8rem;border-radius:999px;background:#fbe4a3;box-shadow:0 0 6px #e2bd72aa}
 .sc-mp-vol::-moz-range-thumb{width:.8rem;height:.8rem;border:none;border-radius:999px;background:#fbe4a3}
+
+/* v1.8 first-run assistant (features/setup) */
+.sc-su-dot{width:2.2rem;height:.3rem;border-radius:999px;background:#e2bd7230;transition:background .3s ease}
+.sc-su-dot-done{background:#e2bd7299}
+.sc-su-dot-on{background:linear-gradient(90deg,#f3d48c,#d4a650);box-shadow:0 0 10px #e2bd7288}
+.sc-su-choice{border-radius:999px;border:1px solid #e2bd7244;padding:.65rem 1.4rem;font-weight:600;color:#f3dca0;background:#0e1438cc;transition:all .2s ease}
+.sc-su-choice:hover{border-color:#e2bd72a0}
+.sc-su-choice-on{border-color:#f3d48c;background:#e2bd7222;box-shadow:0 0 24px -8px #e2bd72aa}
+.sc-su-card{display:flex;flex-direction:column;align-items:flex-start;border-radius:1.1rem;border:1px solid #e2bd7238;background:#0e1438d9;padding:1.5rem;text-align:left;transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease}
+.sc-su-card:hover{transform:translateY(-3px);border-color:#e2bd72a0;box-shadow:0 20px 50px -24px #000,0 0 40px -16px #e2bd7266}
+.sc-su-panel{border-radius:1rem;border:1px solid #e2bd7230;background:#0e1438e6;padding:1.1rem 1.25rem;backdrop-filter:blur(4px)}
+.sc-su-embed{color-scheme:dark}
+.sc-su-num{display:inline-flex;width:1.6rem;height:1.6rem;flex-shrink:0;align-items:center;justify-content:center;border-radius:999px;font-size:.8rem;font-weight:700;color:#0b1030;background:linear-gradient(180deg,#f3d48c,#d4a650)}
+.sc-su-ghost{display:inline-flex;align-items:center;gap:.4rem;border-radius:999px;padding:.5rem 1rem;font-size:.9rem;color:#e2bd72;transition:background .2s ease}
+.sc-su-ghost:hover{background:#e2bd7214;color:#fff0c4}

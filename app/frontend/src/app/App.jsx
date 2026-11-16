@@ -12,6 +12,7 @@ import { HelpDialog } from "@/features/help/HelpDialog";
 import { LibraryPage } from "@/features/library/LibraryPage";
 import { MusicPage } from "@/features/music/MusicPage";
 import { WelcomePage } from "@/features/welcome/WelcomePage";
+import { SetupPage } from "@/features/setup/SetupPage";
 import { IconButton, UiProvider } from "@/components/ui";
 import { LorePage } from "@/features/lore/LorePage";
 import { NewStoryWizard } from "@/features/wizard/NewStoryWizard";
@@ -82,7 +83,7 @@ function App() {
     return (
       <div className="h-full">
         <ErrorBoundary area={msg("This page")} resetKey={hashPath}>
-          <WelcomePage />
+          {matchRoute(hashPath, `/setup`) ? <SetupPage /> : <WelcomePage />}
         </ErrorBoundary>
         <HelpDialog open={s} onClose={() => c(false)} />
       </div>

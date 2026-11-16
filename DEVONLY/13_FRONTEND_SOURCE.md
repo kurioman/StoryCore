@@ -19,6 +19,7 @@ app/frontend/
     app/App.jsx           shell: sidebar + routes
     features/
       welcome/            full-screen welcome page at #/ (WelcomePage.tsx) and its animated canvas (Starfield.tsx)
+      setup/              first-run assistant at #/setup (SetupPage.jsx) and its model advice (recommendations.js)
       music/              Music page (#/music: the app's music library), in-game MusicPlayer, tag labels
       library/            the story library at #/library (LibraryPage.jsx: resume, story cards, story sheet)
       home/               SetupNotices.jsx: set-up notices shown at the top of the library

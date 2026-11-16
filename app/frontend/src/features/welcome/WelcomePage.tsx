@@ -5,10 +5,10 @@
 import * as React from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { useQuery } from "@tanstack/react-query";
-import { Check, History, Languages, Settings, SlidersHorizontal } from "lucide-react";
+import { Check, History, Languages, Settings, SlidersHorizontal, Wand2 } from "lucide-react";
 import discordLogo from "@/assets/discord.png"; // official Discord symbol: keep its colours as they are
 import { apiGet } from "@/api/legacy";
-import { useStories } from "@/api/queries";
+import { useSettings, useStories } from "@/api/queries";
 import { lastStory } from "@/features/library/LibraryPage";
 import { LANGUAGES, msg, setLanguageLive, shownLanguage, type Language } from "@/i18n";
 import { CREDITS, DISCORD_URL } from "@/lib/links";
@@ -23,6 +23,9 @@ export function WelcomePage() {
   const [language, setLanguage] = React.useState<Language>(shownLanguage());
   const [leaving, setLeaving] = React.useState(false);
   const last = lastStory(useStories().data);
+  const settings = useSettings();
+  // first visit: the first-run assistant comes before the library
+  const firstRun = settings.data ? !(settings.data as { onboarding_done?: boolean }).onboarding_done : false;
   const health = useQuery({ queryKey: [`health`], queryFn: () => apiGet<{ version: string }>(`/health`) });
 
   /** Stars fly to the mouse while it is over the button (to the button centre with the keyboard). */
@@ -81,6 +84,10 @@ export function WelcomePage() {
               </button>
             ))}
             <div className="my-1.5 h-px bg-[#e2bd7226]" />
+            <button type="button" onClick={() => navigate(`/setup`)} className="sc-menu-item">
+              <Wand2 className="size-4" />
+              <span className="flex-1 text-left">{msg("First-run assistant")}</span>
+            </button>
             <button type="button" onClick={() => navigate(`/settings`)} className="sc-menu-item">
               <SlidersHorizontal className="size-4" />
               <span className="flex-1 text-left">{msg("All settings")}</span>
@@ -109,7 +116,7 @@ export function WelcomePage() {
           <button
             ref={button}
             type="button"
-            onClick={() => start()}
+            onClick={() => start(firstRun ? `/setup` : `/library`)}
             onPointerEnter={(e) => attract(true, e)}
             onPointerMove={(e) => attract(true, e)}
             onPointerLeave={() => attract(false)}

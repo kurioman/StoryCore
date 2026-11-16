@@ -33,6 +33,7 @@ ANALYSIS_MODES = ("always", "local_only", "off")  # always is shown as "Automati
 RELATIONSHIP_MODES = ("auto_conservative", "review", "off")
 
 DEFAULTS: dict[str, Any] = {
+    "onboarding_done": False,  # v1.8: the first-run assistant (#/setup) was completed or skipped
     "default_model_profile_id": None,
     "extraction_model_source": "narration",  # narration | separate | none
     "extraction_model_profile_id": None,

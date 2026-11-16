@@ -129,3 +129,15 @@ class OpeningsTest(AppTestCase):
         la = {s["id"]: s for s in self.world("lumencia_academy")["data_json"]["starters"]}
         self.assertEqual(set(la), {"enrollment"})
         self.assertEqual((la["enrollment"]["scene"]["day"], la["enrollment"]["scene"]["month"]), (1, 3))
+
+
+class FirstRunTest(AppTestCase):
+    """v1.8 first-run assistant: the setting that remembers it, and the graphics card endpoint (never fails)."""
+
+    def test_onboarding_setting_and_gpu(self):
+        self.assertFalse(self.get("/settings")["onboarding_done"])
+        r = self.client.put("/api/settings", json={"onboarding_done": True})
+        self.assertEqual(r.status_code, 200, r.text[:200])
+        self.assertTrue(self.get("/settings")["onboarding_done"])
+        g = self.get("/system/gpu")
+        self.assertIsInstance(g["gpus"], list)

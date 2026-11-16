@@ -62,6 +62,13 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
 - **Recap and Report a problem buttons** always visible at the bottom of the right panel while playing. "Report a
   problem" asks what happened and puts that text in the bug report zip (`description.txt`), with the page and story
   it was made from (`context.json`: ids and counts only, never story text). A crashed screen also offers it.
+- **First-run assistant** (`#/setup`): the first click on the welcome page opens it (afterwards it goes straight to
+  the library; it can be reopened from the gear menu). Language, then where the AI runs: on your computer (graphics card
+  detected for NVIDIA cards, otherwise you pick its video memory; recommends TheDrummer's Rocinante 12B v1.1 with the
+  right file and context length for your card, and explains that a model bigger than your video memory works but is
+  much slower) or online through OpenRouter (Claude for the best writing but the highest price, DeepSeek, Gemini,
+  Mistral for French). Ends with a short tour of the library, Codex, Music, Recap and Report. "Skip" at every step.
+- The new-story wizard no longer shows the opening blueprint (it stays hidden from the player).
 
 ## New in v1.7.0
 
