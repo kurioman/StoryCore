@@ -165,11 +165,13 @@ body{background:var(--c-bg);color:var(--c-fg);font-family:var(--font-sans);-webk
 .sc-resume{margin-top:clamp(1.6rem,4vh,2.6rem);display:inline-flex;align-items:center;gap:.45rem;font-size:1rem;color:#e2bd7266;cursor:default;transition:color .2s ease}
 .sc-resume:hover{color:#e2bd7299}
 /* leaving: the content fades and grows, then a soft flash as the stars jump to light speed */
-.sc-welcome-layout{transition:opacity .55s ease,transform .7s cubic-bezier(.5,0,.75,0),filter .55s ease}
+.sc-welcome-layout{transition:opacity .9s ease,transform 1.15s cubic-bezier(.5,0,.75,0),filter .9s ease}
 .sc-leaving .sc-welcome-layout{opacity:0;transform:scale(1.12);filter:blur(3px)}
-.sc-leaving .sc-glow-btn{opacity:0;transition:opacity .3s ease}
+.sc-leaving .sc-glow-btn{opacity:0;transition:opacity .5s ease}
+.sc-leaving .sc-start,.sc-leaving .sc-start:hover{animation:none;transform:none;filter:none;box-shadow:0 1px 0 #ffffff60 inset,0 -2px 0 #00000018 inset;transition:none}
+.sc-leaving .sc-start-shine{animation:none;opacity:0}
 .sc-warp-flash{opacity:0;background:radial-gradient(circle at 50% 50%,#fffaf0 0%,#f4d27f99 30%,#0b103000 70%)}
-.sc-leaving .sc-warp-flash{animation:sc-flash .75s ease-in forwards}
+.sc-leaving .sc-warp-flash{animation:sc-flash 1.25s ease-in forwards}
 @keyframes sc-flash{0%,45%{opacity:0}75%{opacity:.9}100%{opacity:0}}
 .sc-discord-logo{width:1.75rem;height:auto;transition:transform .3s ease}
 .sc-glow-btn:hover .sc-discord-logo,.sc-glow-btn:focus-visible .sc-discord-logo{transform:translateY(-1px)}

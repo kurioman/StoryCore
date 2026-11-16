@@ -15,7 +15,7 @@ export type StarfieldHandle = {
   warp: () => Promise<void>;
 };
 
-const WARP_MS = 750;
+const WARP_MS = 1250;
 
 type Star = {
   x: number; // position in px (without the mouse parallax)
@@ -27,6 +27,7 @@ type Star = {
   phase: number;
   speed: number;
   age: number;
+  lastPull: number; // last time (s) the button pulled this star
   color: string;
   sparkle: boolean;
 };
@@ -58,6 +59,7 @@ export const Starfield = React.forwardRef<StarfieldHandle, { className?: string 
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return Promise.resolve();
       warpStart.current = performance.now();
       targetStrength.current = 0;
+      attractor.current = null; // no more pull, absorption or flashes once the jump has started
       return new Promise((resolve) => setTimeout(resolve, WARP_MS));
     },
   }));
@@ -73,6 +75,7 @@ export const Starfield = React.forwardRef<StarfieldHandle, { className?: string 
       stars: Star[] = [],
       frame = 0,
       strength = 0,
+      warpCleared = false,
       last = performance.now(),
       nextComet = last + 4000 + Math.random() * 5000;
     const comets: Comet[] = [];
@@ -92,6 +95,7 @@ export const Starfield = React.forwardRef<StarfieldHandle, { className?: string 
         phase: Math.random() * Math.PI * 2,
         speed: 0.6 + Math.random() * 1.8,
         age: anywhere ? 10 : 0,
+        lastPull: -1e9,
         color: COLORS[(Math.random() * COLORS.length) | 0],
         sparkle: Math.random() < 0.09,
       };
@@ -187,6 +191,15 @@ export const Starfield = React.forwardRef<StarfieldHandle, { className?: string 
 
       const goal = targetStrength.current;
       strength += (goal - strength) * Math.min(1, dt * (goal > strength ? 8 : 4));
+      if (warp > 0) {
+        strength = 0;
+        flashes.length = 0;
+        if (!warpCleared) {
+          // stars gathered by the button when it was clicked would leave as one odd bundle: they vanish instead
+          warpCleared = true;
+          for (const s of stars) if (t - s.lastPull < 0.8) s.age = -999;
+        }
+      }
 
       // the button box, in canvas coordinates
       const box = canvas!.getBoundingClientRect();
@@ -197,6 +210,7 @@ export const Starfield = React.forwardRef<StarfieldHandle, { className?: string 
         ty = a ? (a.py ?? a.y + a.height / 2) - box.top : 0;
 
       for (const s of stars) {
+        if (s.age < -100) continue; // gone in the warp
         s.age += dt;
         const ox = -mouse.sx * PARALLAX * s.z,
           oy = -mouse.sy * PARALLAX * s.z;
@@ -221,6 +235,7 @@ export const Starfield = React.forwardRef<StarfieldHandle, { className?: string 
               s.vy *= damp;
               glow = f;
               pulled = f > 0.02;
+              if (pulled) s.lastPull = t;
             }
           }
           if (!pulled) {
@@ -233,7 +248,7 @@ export const Starfield = React.forwardRef<StarfieldHandle, { className?: string 
             s.vx += ((dx / dist) * v - s.vx) * k;
             s.vy += ((dy / dist) * v - s.vy) * k;
           }
-          const boost = 1 + warp * warp * 40;
+          const boost = 1 + warp * warp * 32;
           const px = x;
           const py = y;
           s.x += s.vx * dt * boost;
