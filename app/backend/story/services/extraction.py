@@ -552,6 +552,8 @@ class ExtractionService:
                     db.flush()
                     run_id = last_run_id = run.id
                 data, diagnostics, part, err = await self._request(resolved, head, part, extra, requests_left)
+                from . import usage as usage_svc
+                usage_svc.record(self.ctx, story_id, "capture", resolved.adapter)
                 requests_left -= len(diagnostics)
                 chunks_left -= 1
                 with self.ctx.db.session() as db:  # one transaction: records + cursor + run status

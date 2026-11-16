@@ -18,6 +18,7 @@ import {
   useUi,
 } from "@/components/ui";
 import { ContextWarnings } from "@/features/story/composer";
+import { UsageMeter } from "@/features/story/UsageMeter";
 import { CodexButton } from "@/features/codex/CodexDialog";
 import { cn, isCloudModelId } from "@/lib/util";
 import { navigate } from "@/lib/router";
@@ -102,6 +103,7 @@ export function StoryHeader({
       )}
       <div className="ml-auto flex shrink-0 items-center gap-1">
         <ContextWarnings manifest={manifest} onClick={() => onOpen(`context`)} />
+        <UsageMeter storyId={story.id} refreshKey={`${generating ? 1 : 0}:${story.updated_at ?? ``}`} />
         <SaveStatus />
         <MoreToolsMenu story={story} onOpen={onOpen} compact={y} />
         <CodexButton storyId={story.id} compact={y} />

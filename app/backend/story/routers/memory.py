@@ -76,6 +76,14 @@ async def summarise_now(sid: str, body: SummariseIn | None = None, ctx: AppConte
         return {**out, "memory": summaries.memory_view(db, s, story_tree.get_branch(db, s))}
 
 
+@router.get("/stories/{sid}/usage")
+def usage_of(sid: str, db: Session = Depends(get_db)) -> dict[str, Any]:
+    """v1.8 phase 7.5: token use of the story (narrator replies on this path, side requests, the latest turn)."""
+    from ..services import usage
+    s = story_tree.get_story(db, sid)
+    return usage.summary(db, s, story_tree.path_ids(db, story_tree.get_branch(db, s)))
+
+
 class RecapIn(BaseModel):
     refresh: bool = False
 

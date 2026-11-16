@@ -91,6 +91,11 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
   message box. The Journal has a new "AI memory" tab: the story so far, chapters and scenes (correct one, or pin it as a
   permanent memory), the open threads (mark one settled), what each character remembers, "Summarise now" and "Close the
   chapter here". The /chapter command (/chapitre) closes a chapter with an optional title.
+- **Token counter.** Next to the context meter, a gauge shows what the latest turn sent to the AI (and how much came
+  from the provider's cache); click it for the whole story: narrator, scene analysis, memory, summaries, recaps, and
+  the cost when the provider reports it. The provider's real figures also correct StoryCore's own estimate for each
+  story, so a story in French no longer overflows a small model window. A short reply with nobody in the scene no
+  longer triggers a scene analysis request.
 - **Faster and cheaper requests.** What changes every turn (scene, lore found, memories, narration rules) now travels
   with your message, and older messages leave the request in steps rather than one by one: the beginning of the
   request stays the same for several turns. LM Studio reuses what it already read (replies start sooner); DeepSeek and

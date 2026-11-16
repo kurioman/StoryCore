@@ -101,6 +101,12 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
             mode = settings_service.get(s, "event_capture_mode")
         if method_branch:
             await ctx.extraction.run(story_id, method_branch, "after_each_turn" if mode == "after_each_turn" else "automatic_batch")
+        try:  # v1.8 phase 7.5: the real prompt size corrects the token estimate of this story
+            from .services import usage
+            with ctx.db.session() as s:
+                usage.calibrate(s, message_id)
+        except Exception:
+            log.exception("token calibration failed for %s", message_id)
         try:  # v1.8 phase 7.1: summaries that memory capture did not write (older games, capture off, an empty field)
             from .services import summaries
             await summaries.catch_up(ctx, story_id, branch_id)

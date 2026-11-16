@@ -235,6 +235,7 @@ class OllamaAdapter(ProviderAdapter):
                         if obj.get("done"):
                             finished = True
                             self.last_finish = {"reason": obj.get("done_reason")}
+                            self.last_usage = _usage(obj)
                             if not wrote and thought and obj.get("done_reason") == "length":
                                 # thinking models spend num_predict on reasoning first (seen with qwen3:14b)
                                 raise ProviderError(
@@ -273,6 +274,7 @@ class OllamaAdapter(ProviderAdapter):
         if r.status_code >= 400:
             raise error_from_status(r.status_code, r.text, self.label)
         data = r.json()
+        self.last_usage = _usage(data)
         text = ((data.get("message") or {}).get("content")) or ""
         if json_mode and data.get("done_reason") == "length":
             raise structured_error("truncated", self.label, f"done_reason=length, {len(text)} chars")
@@ -330,10 +332,15 @@ class AnthropicAdapter(ProviderAdapter):
                         if not isinstance(obj, dict):
                             continue
                         t = obj.get("type")
+                        if t == "message_start":
+                            self.last_usage = _usage(obj.get("message") or {})
                         if t == "content_block_delta" and (obj.get("delta") or {}).get("type") == "text_delta":
                             yield obj["delta"].get("text", "")
                         elif t == "message_delta":
                             self.last_finish = {"reason": (obj.get("delta") or {}).get("stop_reason")}
+                            out_tokens = (obj.get("usage") or {}).get("output_tokens")
+                            if out_tokens is not None:
+                                self.last_usage = {**(self.last_usage or {}), "completion_tokens": out_tokens}
                         elif t == "error":
                             err = obj.get("error") or {}
                             cat = "rate_limit" if err.get("type") == "rate_limit_error" else (
@@ -367,6 +374,7 @@ class AnthropicAdapter(ProviderAdapter):
         if r.status_code >= 400:
             raise error_from_status(r.status_code, r.text, self.label)
         data = r.json()
+        self.last_usage = _usage(data)
         text = "".join(b.get("text", "") for b in data.get("content", []) if b.get("type") == "text")
         if json_mode:
             if data.get("stop_reason") == "refusal":
@@ -466,6 +474,7 @@ class OpenAIAdapter(ProviderAdapter):
         if r.status_code >= 400:
             raise error_from_status(r.status_code, r.text, self.label)
         data = r.json()
+        self.last_usage = _usage(data)
         parts, refused = [], None
         for item in data.get("output", []):
             for c in item.get("content", []) or []:
@@ -592,6 +601,7 @@ class OpenAICompatAdapter(ProviderAdapter):
         # all 1,024 tokens on it, leaving "The". Off for narration unless the model's Thinking setting turns it on.
         if self.is_openrouter and OllamaAdapter._think(params) is not True:
             body["reasoning"] = {"enabled": False}
+        body["stream_options"] = {"include_usage": True}  # v1.8: token counts (LM Studio, llama.cpp, vLLM...)
         self.last_finish = {"reasoning": "off" if "reasoning" in body else "model default"}
         try:
             async with self.client() as c:
@@ -602,6 +612,9 @@ class OpenAICompatAdapter(ProviderAdapter):
                             if r.status_code == 400 and not rejected_once and "reasoning" in body and "reasoning" in text.lower():
                                 body.pop("reasoning")  # a model that cannot switch it off: refused, so nothing was generated
                                 self.last_finish["reasoning"] = "model default"
+                                continue
+                            if r.status_code == 400 and not rejected_once and "stream_options" in text:
+                                body.pop("stream_options")  # a server that does not know the option
                                 continue
                             raise error_from_status(r.status_code, text, self.label)
                         finished = False
@@ -673,6 +686,7 @@ class OpenAICompatAdapter(ProviderAdapter):
         data = r.json()
         if isinstance(data.get("error"), dict):  # some gateways report upstream failures inside a 200 body
             raise ProviderError("invalid_response", f"{self.label}: {FRIENDLY['invalid_response']}", json.dumps(data["error"])[:1000])
+        self.last_usage = _usage(data)
         ch = (data.get("choices") or [{}])[0]
         msg = ch.get("message") or {}
         text = msg.get("content") or ""
@@ -720,11 +734,29 @@ def _listed_price(m: dict[str, Any]) -> dict[str, Any]:
 
 
 def _usage(data: dict[str, Any]) -> dict[str, Any] | None:
-    """Token counts and cost exactly as the provider reported them (never estimated here)."""
+    """Token counts and cost exactly as the provider reported them (never estimated here). v1.8 phase 7.5: the same
+    keys for every provider (OpenAI-compatible, Ollama, Anthropic, OpenAI Responses), plus ``cached_tokens``: the part
+    of the prompt the provider read from its cache."""
     u = data.get("usage")
     if not isinstance(u, dict):
-        return None
-    out = {k: u.get(k) for k in ("prompt_tokens", "completion_tokens", "cost") if u.get(k) is not None}
+        if data.get("prompt_eval_count") is None and data.get("eval_count") is None:
+            return None
+        u = {"prompt_tokens": data.get("prompt_eval_count"), "completion_tokens": data.get("eval_count")}  # Ollama
+    u = dict(u)
+    if u.get("prompt_tokens") is None and u.get("input_tokens") is not None:
+        if "cache_read_input_tokens" in u or "cache_creation_input_tokens" in u:  # Anthropic: cache counted apart
+            u["prompt_tokens"] = sum(int(u.get(k) or 0) for k in ("input_tokens", "cache_read_input_tokens",
+                                                                   "cache_creation_input_tokens"))
+        else:  # OpenAI Responses: input_tokens already includes the cached part
+            u["prompt_tokens"] = u["input_tokens"]
+    if u.get("completion_tokens") is None and u.get("output_tokens") is not None:
+        u["completion_tokens"] = u["output_tokens"]
+    cached = ((u.get("prompt_tokens_details") or {}).get("cached_tokens")
+              or (u.get("input_tokens_details") or {}).get("cached_tokens")
+              or u.get("prompt_cache_hit_tokens") or u.get("cache_read_input_tokens"))
+    if cached is not None:
+        u["cached_tokens"] = cached
+    out = {k: u.get(k) for k in ("prompt_tokens", "completion_tokens", "cached_tokens", "cost") if u.get(k) is not None}
     thought = (u.get("completion_tokens_details") or {}).get("reasoning_tokens")
     if thought is not None:
         out["reasoning_tokens"] = thought

@@ -16,6 +16,7 @@ from sqlalchemy import select
 from ..models import Avatar, Message, Story, TurnAnalysis, now_iso
 from ..providers import ChatMessage, ProviderError
 from . import discovery, settings_service, state_service, story_tree, suggestions as suggestions_svc, world_state
+from . import usage as usage_svc
 from .assets import EXPRESSIONS
 from .entities import EntityIndex, build_index
 from .runtime import AppContext, ConsentRequired, NoModelConfigured
@@ -28,6 +29,8 @@ EXPRESSION_GUIDE = ", ".join(f"{e['slot']} {e['name'].lower()}" for e in EXPRESS
 WEAK_EVIDENCE = 0.4  # below this confidence an expression falls back to neutral (01)
 # The analysis has its own output budget (the story's reply limit can be too small for the JSON; observed: mistral-nemo
 # repeating speaker entries until cut off at 700 tokens) and bounded arrays in the schema.
+LIGHT_SKIP_CHARS = 700
+LIGHT_SKIP_REASON = "Nothing to analyse in this short reply (no character in the scene)."
 ANALYSIS_MAX_TOKENS = 1800  # v1.6: three written drafts instead of three 14-word labels
 RETRY_MAX_TOKENS = 3000  # the one automatic repair attempt gets more room (a cut-off answer is the commonest failure)
 MAX_ITEMS = 8
@@ -652,6 +655,12 @@ async def _analyse(ctx: AppContext, message_id: str, *, force: bool = False) -> 
             if r.character_id not in mentioned:
                 mentioned.append(r.character_id)
         named = identity.resolver(index, registry, canon, set(mentioned) | set(state["scene"].get("present", [])))
+        # v1.8 phase 7.5: a short reply with no character, in a scene whose place and time are known, gives the analysis
+        # nothing to do (no speaker, reaction, relationship or discovery): no request is spent on it
+        if (not tagged and not force and not cfg.get("action_suggestions_enabled", True) and not mentioned
+                and not state["scene"].get("present") and len(reply) < LIGHT_SKIP_CHARS
+                and state["scene"].get("location") and state["scene"].get("time")):
+            return _skip(row, LIGHT_SKIP_REASON)
         candidates = list(dict.fromkeys([*mentioned, *state["scene"].get("present", []),
                                          *discovery.roster(db, story, branch).keys()]))
         allowed = {c for c in candidates if c in index.entities and index.entities[c].category == "character"}
@@ -709,6 +718,7 @@ async def _analyse(ctx: AppContext, message_id: str, *, force: bool = False) -> 
                 resolved.profile.model_id, system, messages,
                 {**resolved.params, "temperature": 0.3, "max_tokens": ANALYSIS_MAX_TOKENS if attempt == 1 else RETRY_MAX_TOKENS},
                 json_mode=True, **extra)
+            usage_svc.record(ctx, m.story_id, "analysis", resolved.adapter)
             obj = parse_json_object(raw)
             missing = [k for k in ("speakers", "suggestions" if want else "speakers") if not isinstance(obj.get(k), list)]
             if missing:

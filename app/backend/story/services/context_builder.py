@@ -329,6 +329,12 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
     budget = min(budget_cfg, window or budget_cfg) - reserve
     if hard_input is not None:
         budget = min(budget, hard_input)
+    # v1.8 phase 7.5: sizes are estimated (characters / 4); the provider's real counts correct them per story
+    from .usage import ratio_of
+    token_ratio = ratio_of(ssettings)
+    if token_ratio != 1.0:
+        budget = int(budget / token_ratio)
+        hard_input = int(hard_input / token_ratio) if hard_input is not None else None
     warnings: list[str] = []
 
     world = db.get(World, story.world_id) if story.world_id else None
@@ -838,6 +844,7 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
                      f"out in that order if needed; then recent messages newest first, at least {min_recent} unless the "
                      "model window forbids it."),
         "layout": layout,
+        "token_ratio": token_ratio,
         "sections": [{"key": s.key, "title": s.title, "tokens": s.tokens, "items": s.items, "placement": placement[s.key]}
                      for s in sections]
                     + [{"key": "messages", "title": "Recent messages", "tokens": used,

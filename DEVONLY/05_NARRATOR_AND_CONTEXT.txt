@@ -35,6 +35,16 @@ story.settings_json.memory_closed_threads, also hidden from the narrator), the c
 "Close the chapter here" (also /chapter, alias /chapitre: catch-up with force=True, then every active scene merged into
 one chapter, data_json.title). A long story opened after more than 4 hours offers the recap above the message box.
 
+Token use (phase 7.5, services/usage.py): every adapter reports usage in one shape (prompt_tokens, completion_tokens,
+cached_tokens, cost) — OpenAI-compatible servers are asked for it in streams too (stream_options.include_usage, dropped
+if refused), Ollama (prompt_eval_count), Anthropic (cache read/creation counted in), OpenAI Responses. Narrator replies
+keep it in their metadata; side requests (analysis, capture, summaries, recap) are added up in
+story.settings_json.usage_side. After each reply usage.calibrate() folds real/estimated prompt size into
+settings_json.token_ratio (moving average, 0.6–2.0); the builder divides the budget and the hard limit by it.
+GET /stories/{sid}/usage feeds the gauge next to the context meter (UsageMeter.jsx). The scene analysis is skipped
+(status "skipped") for a reply under 700 characters with no character named or present, when place and time are
+already known and suggested replies are off.
+
 Short lore cards (setting lore_short_cards): a character's lore entries are sent when they come into focus; while
 they stay (named in the messages before the last exchange) and have a cast line, the entries are listed as "short
 card (already in the scene)" and left out. Pinned lore is always sent.

@@ -27,7 +27,7 @@ from sqlalchemy.orm import Session
 
 from ..models import Avatar, ExtractionCursor, MemorySummary, Message, MessageBranch, Story, now_iso
 from ..providers import ChatMessage, ProviderError
-from . import settings_service, story_tree
+from . import settings_service, story_tree, usage
 from .runtime import AppContext, ConsentRequired, NoModelConfigured
 
 log = logging.getLogger(__name__)
@@ -408,6 +408,7 @@ async def catch_up(ctx: AppContext, story_id: str, branch_id: str | None = None,
                 text = await resolved.adapter.complete(resolved.profile.model_id, system, [ChatMessage("user", prompt)],
                                                        {**resolved.params, "temperature": 0.3,
                                                         "max_tokens": SUMMARY_MAX_TOKENS})
+                usage.record(ctx, story_id, "summary", resolved.adapter)
             except ProviderError as e:
                 return failed(e)
             ans = parse_answer(text)
@@ -447,6 +448,7 @@ async def catch_up(ctx: AppContext, story_id: str, branch_id: str | None = None,
                 text = await resolved.adapter.complete(resolved.profile.model_id, system, [ChatMessage("user", prompt)],
                                                        {**resolved.params, "temperature": 0.3,
                                                         "max_tokens": MERGE_MAX_TOKENS})
+                usage.record(ctx, story_id, "summary", resolved.adapter)
             except ProviderError as e:
                 return failed(e)
             with ctx.db.session() as db:
@@ -531,6 +533,7 @@ async def player_recap(ctx: AppContext, story_id: str, refresh: bool = False) ->
         head_id = branch.head_message_id
     text = await resolved.adapter.complete(resolved.profile.model_id, system, [ChatMessage("user", prompt)],
                                            {**resolved.params, "temperature": 0.5, "max_tokens": RECAP_MAX_TOKENS})
+    usage.record(ctx, story_id, "recap", resolved.adapter)
     text = re.sub(r"^```[a-zA-Z]*\s*|\s*```$", "", (text or "").strip()).strip()
     if not text:
         raise ValueError("The model returned an empty recap. Try again.")

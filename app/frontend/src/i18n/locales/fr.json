@@ -1947,5 +1947,20 @@
  "messages #{{v0}}–#{{v1}}": "messages n°{{v0}} à {{v1}}",
  "{{v0}} of {{v1}} messages summarised": "{{v0}} messages résumés sur {{v1}}",
  "{{v0}} part(s)": "{{v0}} partie(s)",
- "{{v0}} summary(ies) written.": "{{v0}} résumé(s) écrit(s)."
+ "{{v0}} summary(ies) written.": "{{v0}} résumé(s) écrit(s).",
+ "Cost reported by the provider": "Coût indiqué par le fournisseur",
+ "Latest turn": "Dernier tour",
+ "Narrator ({{v0}} replies)": "Narrateur ({{v0}} réponses)",
+ "Scene analysis": "Analyse de scène",
+ "Sent to the AI": "Envoyés à l'IA",
+ "Summaries": "Résumés",
+ "Tokens used by the latest turn — click for the details": "Tokens utilisés par le dernier tour — cliquez pour le détail",
+ "Total tokens": "Total des tokens",
+ "Whole story": "Toute l'histoire",
+ "Written by the AI": "Écrits par l'IA",
+ "estimate": "estimation",
+ "{{v0}} request(s) without figures from the provider are not counted in the totals.": "{{v0}} requête(s) sans chiffres du fournisseur ne sont pas comptées dans les totaux.",
+ "{{v0}}% cached": "{{v0}} % en cache",
+ "…of which from the cache": "… dont depuis le cache",
+ "…of which read from the cache": "… dont lus depuis le cache"
 }
