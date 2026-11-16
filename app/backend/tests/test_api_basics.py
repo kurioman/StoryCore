@@ -67,3 +67,23 @@ class InterfaceSwitchTest(AppTestCase):
             old = self.client.get("/old")
             self.assertEqual(old.status_code, 200)
             self.assertIn("/assets/", old.text)
+
+
+class PortraitsPerWorldTest(AppTestCase):
+    """v1.8: both shipped packs have a character with the id "lily" (and "beelzebub"). Each world must show its own
+    pictures, never the other pack's."""
+
+    def test_same_character_id_in_two_packs_keeps_its_own_portraits(self):
+        from story.models import AssetManifestEntry, AssetRoot
+        with self.ctx.db.session() as s:
+            roots = {r.id: r for r in s.query(AssetRoot)}
+            folder_of = {e.id: roots[e.root_id].path for e in s.query(AssetManifestEntry)}
+            self.assertTrue(all(r.world_id for r in roots.values()), "pack image folders must belong to their world")
+        for slug, folder in (("hero_chronicle", "hero_chronicle_images"), ("lumencia_academy", "lumencia_images")):
+            world = self.world(slug)
+            chars = {c["id"]: c for c in self.get(f"/assets/characters?world_id={world['id']}")["characters"]}
+            for cid in ("lily", "beelzebub"):
+                slots = chars[cid]["slots"]
+                self.assertTrue(slots, f"{slug}: {cid} has no portrait")
+                for asset_id in slots.values():
+                    self.assertIn(folder, folder_of[asset_id], f"{slug}: {cid} uses a picture from another pack")

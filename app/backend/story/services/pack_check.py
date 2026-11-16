@@ -76,6 +76,7 @@ def check_pack(pack_dir: Path) -> dict[str, Any]:
                 _from_import_report(result["report"], rep)
                 world = s.scalar(select(World).where(World.slug == (manifest or {}).get("id", "")))
                 index = _character_index(s)
+                rep.stats["character_ids"] = {cid: index.name(cid) for cid in sorted(index.entities)}
                 if world is not None:
                     _check_starters(world, index, rep)
                 if manifest and manifest["files"].get("images"):
@@ -92,7 +93,25 @@ def check_all(packs_dir: Path) -> list[dict[str, Any]]:
     """Every folder with a pack.json inside ``packs_dir`` (the app's Lorepack folder)."""
     if not packs_dir.is_dir():
         return []
-    return [check_pack(p) for p in sorted(packs_dir.iterdir()) if p.is_dir() and pack_manifest.has_manifest(p)]
+    return cross_pack_notes([check_pack(p) for p in sorted(packs_dir.iterdir())
+                             if p.is_dir() and pack_manifest.has_manifest(p)])
+
+
+def cross_pack_notes(reports: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Characters with the same id in several packs. Fine since v1.8 (portraits and lore are kept per world), but
+    worth knowing: a player who sees "Lily" in two stories meets two different characters."""
+    owners: dict[str, list[tuple[str, str]]] = {}
+    for r in reports:
+        for cid, name in ((r.get("stats") or {}).get("character_ids") or {}).items():
+            owners.setdefault(cid, []).append((r["name"], name))
+    for r in reports:
+        mine = (r.get("stats") or {}).get("character_ids") or {}
+        for cid in sorted(mine):
+            others = [f"{name} in {pack}" for pack, name in owners[cid] if pack != r["name"]]
+            if others:
+                r["info"].append(f"Character id \"{cid}\" ({mine[cid]}) also exists in another pack ({', '.join(others)}). "
+                                 "Each world keeps its own portraits and lore, so this is fine; they are two characters.")
+    return reports
 
 
 # --------------------------------------------------------------------------- parts

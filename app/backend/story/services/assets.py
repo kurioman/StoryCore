@@ -152,12 +152,36 @@ def scan_root(db: Session, root: AssetRoot, index: EntityIndex) -> dict[str, Any
             "missing_slots": missing, "links_file": root.links_file_info_json}
 
 
-def portrait_map(db: Session) -> dict[str, dict[int, str]]:
-    """character_id -> {slot: asset_id} for usable assets."""
+def character_index(db: Session, world_id: str | None = None) -> EntityIndex:
+    """Characters that portraits can be matched to: one world's, or every world's when world_id is None."""
+    from ..models import LoreEntity
+    from .entities import Entity
+    q = select(LoreEntity).where(LoreEntity.category == "character")
+    if world_id:
+        q = q.where(LoreEntity.world_id == world_id)
+    return EntityIndex([Entity(le.entity_id, le.name, "character", le.entity_type, list(le.aliases_json or []))
+                        for le in db.scalars(q)])
+
+
+def index_for_root(db: Session, root: AssetRoot) -> EntityIndex:
+    """A pack's image folder is matched against its own world only; a shared folder against every world."""
+    return character_index(db, root.world_id)
+
+
+def portrait_map(db: Session, world_id: str | None = None) -> dict[str, dict[int, str]]:
+    """character_id -> {slot: asset_id} for usable assets.
+
+    With a world: that world's own portrait folders first, then the shared folders (added by hand) for slots still
+    empty; another world's folders are never used. Without a world (Portraits page overview): every folder."""
+    roots = {r.id: r.world_id for r in db.scalars(select(AssetRoot))}
+    entries = [e for e in db.scalars(select(AssetManifestEntry).where(AssetManifestEntry.status.in_(("matched", "override"))))
+               if e.character_id and e.slot]
+    if world_id:
+        entries = [e for e in entries if roots.get(e.root_id) in (world_id, None)]
+        entries.sort(key=lambda e: roots.get(e.root_id) is None)  # the world's own folders win
     out: dict[str, dict[int, str]] = {}
-    for e in db.scalars(select(AssetManifestEntry).where(AssetManifestEntry.status.in_(("matched", "override")))):
-        if e.character_id and e.slot:
-            out.setdefault(e.character_id, {}).setdefault(e.slot, e.id)
+    for e in entries:
+        out.setdefault(e.character_id, {}).setdefault(e.slot, e.id)
     return out
 
 

@@ -162,6 +162,10 @@ to the model WITH their tags so it keeps the habit. Code: services/portrait_tags
 In an opening blueprint you can write the tags yourself (see the_hero_summoned).
 Matching uses ids, names and unique aliases. Unmatched files are listed in the Portraits page, where the player can
 assign them by hand (stored as overrides; the image files are never modified).
+Portraits belong to their world (v1.8): a pack's image folder is tied to the pack's world (asset_roots.world_id), its
+files are matched against that world's characters only, and a story only looks at its own world's folders (plus
+folders the player added by hand, which are shared). So two packs may both have a character with the same id
+("lily"): each keeps its own pictures. The pack checker lists such shared ids as a note.
 
 
 7. IMPORT AND RE-IMPORT

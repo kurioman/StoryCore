@@ -80,7 +80,6 @@ def _repoint(ctx: AppContext, packs: Path) -> int:
 
 def _sync_pack(ctx: AppContext, folder: Path, seen: dict[str, Path]) -> str:
     """Import / re-import one pack and its portraits as needed; returns what was done (for the log)."""
-    from .routers.assets import global_index
 
     manifest, report = pack_manifest.load(folder)
     if manifest is None:
@@ -109,12 +108,15 @@ def _sync_pack(ctx: AppContext, folder: Path, seen: dict[str, Path]) -> str:
             world = db.scalar(select(World).where(World.slug == pid))
             root = db.scalar(select(AssetRoot).where(AssetRoot.path == str(images)))
             # rescan when the images changed, or the lore did (new characters can claim existing portraits)
-            if root is None or reimported or (world.data_json or {}).get("images_fingerprint") != img_fp:
+            # (v1.8) and when the folder is not yet tied to its world: portraits are matched within one world only
+            if (root is None or reimported or root.world_id != world.id
+                    or (world.data_json or {}).get("images_fingerprint") != img_fp):
                 if root is None:
                     root = AssetRoot(path=str(images), kind="folder", label=images.name)
                     db.add(root)
-                    db.flush()
-                scan = assets_svc.scan_root(db, root, global_index(db))
+                root.world_id = world.id
+                db.flush()
+                scan = assets_svc.scan_root(db, root, assets_svc.index_for_root(db, root))
                 world.data_json = {**(world.data_json or {}), "images_fingerprint": img_fp}
                 done.append(f"portraits scanned ({scan.get('by_status', {})})")
     return ", ".join(done) or "up to date"

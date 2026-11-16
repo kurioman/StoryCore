@@ -385,7 +385,7 @@ def _attach_presentation(db: Session, s, b, path: list[Message], out: list[dict[
 
     st_row = state_service.current(db, b.id)
     index = build_index(db, s.world_id, state_service.normalize(st_row.state_json if st_row else {}))
-    pmap = assets_svc.portrait_map(db)
+    pmap = assets_svc.portrait_map(db, s.world_id)
     edited = {m.id: m.edited_at for m in path}
     registry = roles.build_registry(db, s.world_id, index)
     canon = canon_svc.facts(db, s.world_id, index)
@@ -617,7 +617,7 @@ def cast(sid: str, db: Session = Depends(get_db)) -> dict[str, Any]:
             if c not in mentioned:
                 mentioned.append(c)
     exprs = ((s.settings_json or {}).get("expressions") or {}).get(b.id, {})
-    pmap = assets_svc.portrait_map(db)
+    pmap = assets_svc.portrait_map(db, s.world_id)
     rels = {r.get("target_id"): r for r in state["relationships"] if r.get("target_id") and not r.get("source_id")}
     out = []
     for cid in list(dict.fromkeys(present + mentioned)):

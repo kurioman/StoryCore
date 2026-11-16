@@ -50,7 +50,7 @@ def scene(sid: str, ctx: AppContext = Depends(get_ctx), db: Session = Depends(ge
     path = story_tree.path_messages(db, b.head_message_id)
     last = next((m for m in reversed(path) if m.role == "assistant" and m.kind == "story"), None)
     out = turn_analysis.scene_for(db, s, last)
-    pmap = assets_svc.portrait_map(db)
+    pmap = assets_svc.portrait_map(db, s.world_id)
     speakers = []
     for sp in out["speakers"]:
         cid = sp["character_id"]
@@ -118,7 +118,7 @@ def known_characters(sid: str, db: Session = Depends(get_db)) -> dict[str, Any]:
     speaking = {head_reply.speaker_character_id} if head_reply and head_reply.speaker_character_id else set()
     seq_by_id = {m.id: m.seq for m in path}
     rels = _relationships(state)
-    pmap = assets_svc.portrait_map(db)
+    pmap = assets_svc.portrait_map(db, s.world_id)
     exprs = ((s.settings_json or {}).get("expressions") or {}).get(b.id, {})
     out = []
     for cid in dict.fromkeys([*present, *roster.keys()]):

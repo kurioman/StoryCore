@@ -29,6 +29,9 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
   list (`#/library`; it becomes the story library later) after a jump to light speed. Stars are born from a light in
   the middle of the screen. Footer: credits, Discord (link set in `app/frontend/src/lib/links.ts`) and the version.
   With "reduce motion" switched on in Windows, the stars stay still.
+- **Fixed: portraits mixed up between worlds.** Hero's Chronicle and Lumencia Academy both have a Lily and a
+  Beelzebub; a story could show the other world's picture. Each pack's portraits now belong to its world (the next start
+  sorts existing data out by itself). The pack checker notes characters whose id exists in several packs.
 - **Night-blue dark theme** for the whole app, matching the welcome page (the light theme is unchanged).
 - **Cinzel** for the StoryCore name (welcome title, sidebar, headers), bundled with the app (SIL Open Font License).
   New welcome logo (a star born from an open book); the rest of the app keeps the four-point star.

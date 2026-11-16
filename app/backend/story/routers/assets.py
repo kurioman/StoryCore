@@ -16,16 +16,15 @@ from sqlalchemy.orm import Session
 from ..deps import get_ctx, get_db
 from ..models import AssetManifestEntry, AssetOverride, AssetRoot, LoreEntity, SlugOverride
 from ..services import assets as assets_svc
-from ..services.entities import Entity, EntityIndex, norm
+from ..services.entities import EntityIndex, norm
 from ..services.runtime import AppContext
 
 router = APIRouter(tags=["assets"])
 
 
 def global_index(db: Session) -> EntityIndex:
-    ents = [Entity(le.entity_id, le.name, "character", le.entity_type, list(le.aliases_json or []))
-            for le in db.scalars(select(LoreEntity).where(LoreEntity.category == "character"))]
-    return EntityIndex(ents)
+    """Every world's characters (kept for callers that need it; scans use assets_svc.index_for_root)."""
+    return assets_svc.character_index(db)
 
 
 @router.get("/assets/expressions")
@@ -62,7 +61,7 @@ def add_root(body: RootIn, db: Session = Depends(get_db)) -> dict[str, Any]:
     if existing is None:
         db.add(r)
         db.flush()
-    report = assets_svc.scan_root(db, r, global_index(db)) if body.scan else None
+    report = assets_svc.scan_root(db, r, assets_svc.index_for_root(db, r)) if body.scan else None
     return {"root": r.to_dict(), "report": report}
 
 
@@ -80,13 +79,13 @@ def scan(rid: str, db: Session = Depends(get_db)) -> dict[str, Any]:
     r = db.get(AssetRoot, rid)
     if r is None:
         raise HTTPException(404, "Root not found")
-    return assets_svc.scan_root(db, r, global_index(db))
+    return assets_svc.scan_root(db, r, assets_svc.index_for_root(db, r))
 
 
 @router.post("/assets/rescan-all")
 def rescan_all(db: Session = Depends(get_db)) -> dict[str, Any]:
-    idx = global_index(db)
-    return {"reports": [assets_svc.scan_root(db, r, idx) for r in db.scalars(select(AssetRoot)) if Path(r.path).is_dir()]}
+    return {"reports": [assets_svc.scan_root(db, r, assets_svc.index_for_root(db, r))
+                        for r in db.scalars(select(AssetRoot)) if Path(r.path).is_dir()]}
 
 
 @router.get("/assets/manifest")
@@ -104,7 +103,7 @@ def characters(world_id: str = "", db: Session = Depends(get_db)) -> dict[str, A
     q = select(LoreEntity).where(LoreEntity.category == "character")
     if world_id:
         q = q.where(LoreEntity.world_id == world_id)
-    pmap = assets_svc.portrait_map(db)
+    pmap = assets_svc.portrait_map(db, world_id or None)
     out = []
     for le in db.scalars(q.order_by(LoreEntity.name)):
         slots = pmap.get(le.entity_id, {})
@@ -139,7 +138,7 @@ def set_override(body: OverrideIn, db: Session = Depends(get_db)) -> dict[str, A
     o.character_id, o.slot, o.ignored = body.character_id, body.slot, body.ignored
     db.flush()
     r = db.get(AssetRoot, e.root_id)
-    return assets_svc.scan_root(db, r, global_index(db))
+    return assets_svc.scan_root(db, r, assets_svc.index_for_root(db, r))
 
 
 @router.delete("/assets/overrides/{asset_id}")
@@ -151,7 +150,7 @@ def clear_override(asset_id: str, db: Session = Depends(get_db)) -> dict[str, An
     if o:
         db.delete(o)
         db.flush()
-    return assets_svc.scan_root(db, db.get(AssetRoot, e.root_id), global_index(db))
+    return assets_svc.scan_root(db, (root := db.get(AssetRoot, e.root_id)), assets_svc.index_for_root(db, root))
 
 
 class SlugIn(BaseModel):
@@ -171,8 +170,8 @@ def slug_override(body: SlugIn, db: Session = Depends(get_db)) -> dict[str, Any]
     elif row is not None:
         db.delete(row)
     db.flush()
-    idx = global_index(db)
-    return {"reports": [assets_svc.scan_root(db, r, idx) for r in db.scalars(select(AssetRoot)) if Path(r.path).is_dir()]}
+    return {"reports": [assets_svc.scan_root(db, r, assets_svc.index_for_root(db, r))
+                        for r in db.scalars(select(AssetRoot)) if Path(r.path).is_dir()]}
 
 
 @router.get("/assets/{asset_id}/image")
@@ -216,7 +215,7 @@ async def upload(files: list[UploadFile] = File(...), relative_paths: str = Form
     r = AssetRoot(path=str(batch.resolve()), kind="uploaded", label=f"Uploaded images ({saved})")
     db.add(r)
     db.flush()
-    return {"root": r.to_dict(), "report": assets_svc.scan_root(db, r, global_index(db))}
+    return {"root": r.to_dict(), "report": assets_svc.scan_root(db, r, assets_svc.index_for_root(db, r))}
 
 
 @router.post("/assets/roots/{rid}/copy-to-app-data")
@@ -234,11 +233,11 @@ def copy_to_app_data(rid: str, ctx: AppContext = Depends(get_ctx), db: Session =
             shutil.copy2(f, t)
             n += 1
     # carry manual mappings over to the copy
-    nr = AssetRoot(path=str(dst.resolve()), kind="uploaded", label=f"{r.label} (app copy)")
+    nr = AssetRoot(path=str(dst.resolve()), kind="uploaded", label=f"{r.label} (app copy)", world_id=r.world_id)
     db.add(nr)
     db.flush()
     for o in db.scalars(select(AssetOverride).where(AssetOverride.root_id == r.id)):
         db.add(AssetOverride(root_id=nr.id, rel_path=o.rel_path, character_id=o.character_id, slot=o.slot, ignored=o.ignored))
     db.flush()
-    return {"root": nr.to_dict(), "copied": n, "report": assets_svc.scan_root(db, nr, global_index(db)),
+    return {"root": nr.to_dict(), "copied": n, "report": assets_svc.scan_root(db, nr, assets_svc.index_for_root(db, nr)),
             "note": "The original folder is still registered; remove it if you only want to use the copy."}

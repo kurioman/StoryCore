@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 from .config import PROJECT_ROOT
-from .services.pack_check import ascii_safe, check_all, check_pack, format_report
+from .services.pack_check import ascii_safe, check_all, check_pack, cross_pack_notes, format_report
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -25,7 +25,8 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
     logging.basicConfig(level=logging.WARNING)
     logging.getLogger("alembic").setLevel(logging.WARNING)
-    reports = [check_pack(Path(f)) for f in args.folders] if args.folders else check_all(PROJECT_ROOT / "Lorepack")
+    reports = (cross_pack_notes([check_pack(Path(f)) for f in args.folders]) if args.folders
+               else check_all(PROJECT_ROOT / "Lorepack"))
     if args.json:
         print(json.dumps(reports, indent=2, ensure_ascii=False))
     else:
