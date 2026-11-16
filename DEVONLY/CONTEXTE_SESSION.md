@@ -94,8 +94,10 @@ Vision : après la Phase 8 (version **0.6.0**), le reste du travail jusqu'à la 
    « réponses courtes » (préréglage Fast) ; chapitre fermé automatiquement après un changement de lieu ou un saut dans
    le temps ; le narrateur de démonstration recopie le texte des consignes.
 4. Nouveaux Lore packs (moi), avec le créateur de la Phase 8. Moi aussi : les images manquantes de Lumencia Academy.
-5. Prévus plus tôt, à confirmer selon la vision ci-dessus : mécaniques de jeu optionnelles, installateur Windows,
-   arbre de choix, application Android (APK) avec une IA en ligne.
+5. **Installateur Windows** (gardé). Priorité générale : pouvoir jouer dans de bonnes conditions (génération rapide,
+   fonctionnalités efficaces) avant tout le reste.
+   **Application Android (APK) avec une IA en ligne : pour la V1**, une fois l'application terminée (pas avant).
+   Abandonnés pour le moment (trop mineurs) : mécaniques de jeu optionnelles, arbre de choix.
 6. En tout dernier : lien d'invitation Discord (`DISCORD_URL` vide dans `lib/links.ts`).
 
 ## Ce que je te demande maintenant
