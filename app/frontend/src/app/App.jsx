@@ -6,25 +6,47 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as ReactDOMClient from "react-dom/client";
 import { msg } from "@/i18n";
-import { AvatarsPage } from "@/features/avatars/AvatarsPage";
-import { CommandsPage } from "@/features/commands/CommandsPage";
 import { HelpDialog } from "@/features/help/HelpDialog";
-import { LibraryPage } from "@/features/library/LibraryPage";
-import { MusicPage } from "@/features/music/MusicPage";
 import { WelcomePage } from "@/features/welcome/WelcomePage";
-import { SetupPage } from "@/features/setup/SetupPage";
 import { IconButton, UiProvider } from "@/components/ui";
-import { LorePage } from "@/features/lore/LorePage";
-import { NewStoryWizard } from "@/features/wizard/NewStoryWizard";
-import { PortraitsPage } from "@/features/portraits/PortraitsPage";
-import { SettingsPage } from "@/features/settings/SettingsPage";
 import { Sidebar } from "@/features/sidebar/Sidebar";
-import { StoryPage } from "@/features/story/StoryPage";
 import { cn } from "@/lib/util";
 import { matchRoute, useHashPath } from "@/lib/router";
 import { useLocalState, useMediaQuery } from "@/lib/hooks";
+import { Spinner } from "@/components/ui";
+
+// v0.5: every page is its own file, downloaded the first time it is opened (the welcome page and the sidebar are in the
+// main file). Faster first display, above all on a phone. The play screen and the library are fetched in the
+// background shortly after start, so opening them stays instant.
+const AvatarsPage = React.lazy(() => import("@/features/avatars/AvatarsPage").then((m) => ({ default: m.AvatarsPage })));
+const CommandsPage = React.lazy(() => import("@/features/commands/CommandsPage").then((m) => ({ default: m.CommandsPage })));
+const LibraryPage = React.lazy(() => import("@/features/library/LibraryPage").then((m) => ({ default: m.LibraryPage })));
+const MusicPage = React.lazy(() => import("@/features/music/MusicPage").then((m) => ({ default: m.MusicPage })));
+const SetupPage = React.lazy(() => import("@/features/setup/SetupPage").then((m) => ({ default: m.SetupPage })));
+const LorePage = React.lazy(() => import("@/features/lore/LorePage").then((m) => ({ default: m.LorePage })));
+const NewStoryWizard = React.lazy(() => import("@/features/wizard/NewStoryWizard").then((m) => ({ default: m.NewStoryWizard })));
+const PortraitsPage = React.lazy(() => import("@/features/portraits/PortraitsPage").then((m) => ({ default: m.PortraitsPage })));
+const SettingsPage = React.lazy(() => import("@/features/settings/SettingsPage").then((m) => ({ default: m.SettingsPage })));
+const StoryPage = React.lazy(() => import("@/features/story/StoryPage").then((m) => ({ default: m.StoryPage })));
+
+function preloadCommonPages() {
+  import("@/features/library/LibraryPage");
+  import("@/features/story/StoryPage");
+}
+
+function PageLoading() {
+  return (
+    <div className="flex h-full items-center justify-center">
+      <Spinner />
+    </div>
+  );
+}
 
 function App() {
+  React.useEffect(() => {
+    let t = window.setTimeout(preloadCommonPages, 1500);
+    return () => window.clearTimeout(t);
+  }, []);
   let hashPath = useHashPath(),
     settings = useSettings(),
     mediaQuery = useMediaQuery(`(min-width: 1024px)`),
@@ -85,7 +107,9 @@ function App() {
     return (
       <div className="h-full">
         <ErrorBoundary area={msg("This page")} resetKey={hashPath}>
-          {matchRoute(hashPath, `/setup`) ? <SetupPage /> : <WelcomePage />}
+          <React.Suspense fallback={<PageLoading />}>
+            {matchRoute(hashPath, `/setup`) ? <SetupPage /> : <WelcomePage />}
+          </React.Suspense>
         </ErrorBoundary>
         <HelpDialog open={s} onClose={() => c(false)} />
       </div>
@@ -129,7 +153,7 @@ function App() {
         )}
         <div className="min-h-0 flex-1">
           <ErrorBoundary area={msg("This page")} resetKey={hashPath.split(`?`)[0]}>
-            {l}
+            <React.Suspense fallback={<PageLoading />}>{l}</React.Suspense>
           </ErrorBoundary>
         </div>
       </main>

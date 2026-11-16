@@ -95,6 +95,8 @@ and the numbering now says so.
   message box. The Journal has a new "AI memory" tab: the story so far, chapters and scenes (correct one, or pin it as a
   permanent memory), the open threads (mark one settled), what each character remembers, "Summarise now" and "Close the
   chapter here". The /chapter command (/chapitre) closes a chapter with an optional title.
+- **Faster start.** Each page of the interface is loaded the first time it is opened: the welcome page appears with
+  about half the download (above all noticeable on a phone). Labels now follow a language change made without reloading.
 - **Fixed: portraits of characters who appear in several stories.** Lily and Beelzebub showed their Lumencia Academy
   pictures in Hero's Chronicle: every screen now asks for the portraits of the story's own world, and a shared folder
   never completes a character who has portraits in their story. An older copy of a pack's image folder (from a

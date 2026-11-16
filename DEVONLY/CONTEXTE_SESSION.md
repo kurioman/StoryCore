@@ -64,7 +64,8 @@ local de jeu de rôle textuel par IA, basé sur des « Lore packs » (des mondes
 - Version 0.5.0, zip `_release\StoryCore_v0.5.0.zip`.
 - Correctif portraits : chaque écran utilise les portraits du monde de l'histoire ; dossiers rattachés à un monde ; page
   Portraits séparée par histoire ; les anciens dossiers `Documents\LumenciaStoryDesk\...` sont rattachés à leur monde au démarrage.
-- (voir les derniers commits pour la suite : libellés traduits à chaud, interface découpée par page)
+- Libellés traduits au moment de l'affichage (plus de tableaux de `msg()` au chargement d'un fichier).
+- Interface découpée par page (`React.lazy` dans `app/App.jsx`) : le fichier principal passe de 1,3 Mo à ~380 Ko.
 
 ## Pas encore vérifié avec du vrai matériel
 - Phase 6 sur mon vrai téléphone (pare-feu Windows : cocher « Réseaux privés »).

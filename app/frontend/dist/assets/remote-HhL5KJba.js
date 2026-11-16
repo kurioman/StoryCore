@@ -1,0 +1,1 @@
+var e=typeof window<`u`&&!new Set([`127.0.0.1`,`localhost`,`[::1]`,`::1`]).has(window.location.hostname);export{e as t};

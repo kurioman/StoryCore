@@ -97,6 +97,15 @@ npm run build:debug  # same, not minified, with readable React errors
 npm run typecheck
 ```
 
+## Pages loaded on demand (v0.5)
+
+`app/App.jsx` loads every page with `React.lazy` (one file per page in `dist/assets`); the welcome page and the sidebar
+are in the main file, and the library and play screen are fetched in the background 1.5 s after start. A new page:
+add it the same way (`const MyPage = React.lazy(() => import("@/features/x/MyPage").then((m) => ({ default: m.MyPage })))`).
+
+Translations: never call `msg()` when a file loads (a table of labels at the top of a file). The language can change
+without reloading, and such labels would stay in the old one: write `const LABELS = () => ({ ... })` and call `LABELS()`.
+
 ## Serving
 
 `app/backend/story/main.py` serves `dist/` at `/`. The v1.7 compiled interface is gone (v0.5); the addresses used
