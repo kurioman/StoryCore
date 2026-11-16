@@ -28,6 +28,7 @@ from ..models import (EntityFact, ExtractionCursor, MemoryExtractionRun, Message
                       Story, StoryEvent, now_iso)
 from ..providers import ChatMessage, ProviderError
 from . import settings_service, state_service, story_tree
+from . import summaries as summaries_svc
 from .context_builder import render_state
 from .entities import build_index, norm
 from .runtime import AppContext, ConsentRequired, NoModelConfigured
@@ -157,6 +158,12 @@ class Extraction(BaseModel):
     state_changes: list[XChange] = Field(default_factory=list)
     contradictions: list[XContradiction] = Field(default_factory=list)
     character_moods: list[XMood] = Field(default_factory=list)
+    scene_summary: str = ""  # v1.8 phase 7.1: asked only when automatic summaries are on (services/summaries.py)
+
+    @field_validator("scene_summary", mode="before")
+    @classmethod
+    def _summary(cls, v: Any) -> str:
+        return v.strip() if isinstance(v, str) else ""
 
 
 SCHEMA_TEXT = """Return ONLY a JSON object with this shape (omit nothing; use empty arrays when there is nothing):
@@ -181,10 +188,17 @@ quest {"title": str, "status": "active|completed|failed", "objective": str}; sce
 Mood slots: 1 neutral, 2 happy/smiling, 3 sad/sobbing, 4 angry/aggressive, 5 disdain/disgust, 6 love/shy.""" % (
     EVENT_TYPES, EVIDENCE, FACT_KINDS, CHANGE_KINDS)
 
-def schema_text(state: dict[str, Any] | None) -> str:
-    """SCHEMA_TEXT with this story's own relationship axes (users can add axes; a fixed list hid them from the extractor)."""
+def schema_text(state: dict[str, Any] | None, summary: bool = False) -> str:
+    """SCHEMA_TEXT with this story's own relationship axes (users can add axes; a fixed list hid them from the extractor).
+    ``summary``: also ask for the scene summary of the NEW messages (v1.8 phase 7.1, the same request)."""
+    from .summaries import CAPTURE_FIELD
+
     axes = state_service.normalize(state or {}).get("relationship_axes") or ["trust", "affection", "respect", "fear"]
-    return SCHEMA_TEXT.replace("@AXES@", "|".join(str(a) for a in axes))
+    text = SCHEMA_TEXT.replace("@AXES@", "|".join(str(a) for a in axes))
+    if summary:
+        text = text.replace('  "character_moods": [{"character": name|id, "slot": 1-6, "confidence": 0-1}]\n}',
+                            '  "character_moods": [{"character": name|id, "slot": 1-6, "confidence": 0-1}],\n' + CAPTURE_FIELD + "\n}")
+    return text
 
 
 EXTRACTION_RULES = """You are a careful continuity clerk for an interactive story. Analyse ONLY the messages marked NEW.
@@ -202,7 +216,7 @@ Rules:
 """ % (6, 8, 4, 2)
 
 
-def extraction_schema(axes: list[str] | None = None) -> dict[str, Any]:
+def extraction_schema(axes: list[str] | None = None, summary: bool = False) -> dict[str, Any]:
     """JSON schema for providers with structured outputs (adapters reduce it to their strict subset or downgrade).
     The application still validates everything itself (``Extraction`` + ``_ingest``)."""
     s = {"type": "string"}
@@ -226,6 +240,7 @@ def extraction_schema(axes: list[str] | None = None) -> dict[str, Any]:
             "confidence": num, "source_message_ids": ids})},
         "contradictions": {"type": "array", "items": obj({"description": s, "conflicting_record": s, "source_message_ids": ids})},
         "character_moods": {"type": "array", "items": obj({"character": s, "slot": {"type": "integer"}, "confidence": num})},
+        **({"scene_summary": s} if summary else {}),
     })
 
 
@@ -450,7 +465,8 @@ class ExtractionService:
         requests_left = AUTO_MAX_REQUESTS if automatic else MANUAL_MAX_REQUESTS
         size = max(1, min(chunk_messages or CHUNK_MAX_MESSAGES, CHUNK_MAX_MESSAGES))
         totals: dict[str, Any] = {k: 0 for k in ("events", "facts", "proposals", "contradictions", "duplicates_skipped",
-                                                 "dropped_invalid_source_ids", "review_items", "relationship_changes_skipped")}
+                                                 "dropped_invalid_source_ids", "review_items", "relationship_changes_skipped",
+                                                 "summaries")}
         done: list[str] = []
         last_run_id, failure, processed = None, None, [None, None]
         async with self._lock(branch_id):
@@ -499,14 +515,15 @@ class ExtractionService:
                     index = build_index(db, story.world_id, state)
                     player_text, scene_text = render_state(state_service.normalize(state), index)
                     known = ", ".join(f"{e.name} [{e.id}]" for e in list(index.entities.values())[:80] if e.category == "character")
+                    want_summary = summaries_svc.enabled(db)
                     head = "\n\n".join(x for x in [
-                        schema_text(state), f"Known characters: {known}" if known else "",
+                        schema_text(state, want_summary), f"Known characters: {known}" if known else "",
                         f"Current state:\n{player_text}\n{scene_text}".strip(),
                         "PRIOR CONTEXT (do not extract from these):\n" + _transcript_block(prior_all[-3:], "prior") if prior_all else "",
                     ] if x)
                     if resolved.adapter.supports_json_schema:
                         axes = state_service.normalize(state).get("relationship_axes") or []
-                        extra = {"json_schema": extraction_schema(axes)}
+                        extra = {"json_schema": extraction_schema(axes, want_summary)}
                     part = chunk(pending, size, chunk_chars(resolved, head))
                     run = MemoryExtractionRun(story_id=story.id, branch_id=branch.id, start_message_id=part[0].id,
                                               end_message_id=part[-1].id, start_seq=part[0].seq, end_seq=part[-1].seq,
@@ -533,6 +550,11 @@ class ExtractionService:
                     ids = [m.id for m in part]
                     counts = self._ingest(db, story, branch, data, set(ids), ids, run_id, capture_method,
                                           resolved.provider.provider_type, resolved.profile.model_id)
+                    if want_summary and data.scene_summary:  # the memory summary of the same messages (no extra request)
+                        msgs = [db.get(Message, i) for i in ids]
+                        counts["summaries"] = int(summaries_svc.store(db, story, branch, [m for m in msgs if m],
+                                                                      data.scene_summary, source="capture",
+                                                                      model_id=resolved.profile.model_id) is not None)
                     cur = db.get(ExtractionCursor, branch.id)
                     pos = part[-1].seq
                     cur.last_seq, cur.last_message_id, cur.updated_at = max(cur.last_seq, pos), ids[-1], now_iso()

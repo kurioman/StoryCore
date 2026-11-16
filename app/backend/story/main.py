@@ -94,13 +94,18 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
             await turn_analysis.analyse(ctx, message_id, force=tagged)
         except Exception:  # never let optional metadata affect the finished reply or the extraction that follows
             log.exception("turn analysis crashed for %s", message_id)
+        with ctx.db.session() as s:
+            from .models import Message
+            m = s.get(Message, message_id)
+            story_id, branch_id = m.story_id, m.branch_id
+            mode = settings_service.get(s, "event_capture_mode")
         if method_branch:
-            with ctx.db.session() as s:
-                from .models import Message
-                m = s.get(Message, message_id)
-                story_id = m.story_id
-                mode = settings_service.get(s, "event_capture_mode")
             await ctx.extraction.run(story_id, method_branch, "after_each_turn" if mode == "after_each_turn" else "automatic_batch")
+        try:  # v1.8 phase 7.1: summaries that memory capture did not write (older games, capture off, an empty field)
+            from .services import summaries
+            await summaries.catch_up(ctx, story_id, branch_id)
+        except Exception:
+            log.exception("memory summary catch-up crashed for %s", message_id)
 
     def _apply_tags(message_id: str) -> bool:
         from .services import portrait_tags

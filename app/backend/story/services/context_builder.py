@@ -287,7 +287,8 @@ SAFETY_MARGIN = 0.9  # the chars/4 estimate can undercount real tokens; never pl
 # notes, protagonist, scene/world state, established posts, pinned memories and the narration rules are never dropped
 # v1.6: lore first. Encounters were first until the owner's story showed a ~100-token section dropped ahead of a
 # ~1,400-token one: 0 of 84 replies ever carried it.
-OPTIONAL_SECTIONS = ("lore", "encounters", "events", "facts", "recap")
+# trimmed in this order when space runs out; the automatic summaries go last (they replace whole scenes)
+OPTIONAL_SECTIONS = ("lore", "encounters", "events", "facts", "recap", "scene_summaries")
 MIN_MESSAGES_HARD = 2  # below the configured minimum only when the model window leaves no other choice
 
 
@@ -588,6 +589,35 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
     if recap:
         sections.append(Section("recap", f"Story so far (rolling recap v{recap.version}, covers messages up to #{recap.end_seq})",
                                 recap.content, [{"type": "recap", "id": recap.id, "label": f"Recap v{recap.version}"}]))
+    # 9b. v1.8 phase 7.1: automatic scene summaries of the messages no longer sent word for word (services/summaries.py).
+    # Prepared before the recent messages are picked (so their size counts), then narrowed to what was really left out.
+    from . import summaries as summaries_svc
+    summ_rows = [r for r in summaries_svc.visible(db, story.id, path_ids)
+                 if r.end_seq > (recap.end_seq if recap and recap.end_seq is not None else -1)]
+    summ_section = None
+    if summ_rows:
+        summ_section = Section("scene_summaries", "Earlier in the story (automatic summaries of the scenes no longer shown "
+                                                  "word for word; oldest first)", "", [])
+        sections.append(summ_section)
+
+    def fill_summaries(before_seq: int | None) -> None:
+        """Newest summaries first within their share of the budget, shown oldest first; only scenes that start
+        before the oldest message sent word for word."""
+        if summ_section is None:
+            return
+        cap, used_, keep = max(600, int(budget * 0.15)), 0, []
+        for r in reversed(summ_rows):
+            if before_seq is not None and r.start_seq >= before_seq:
+                continue
+            line = f"- (#{r.start_seq}–#{r.end_seq}) {r.content}"
+            if keep and used_ + est_tokens(line) > cap:
+                break
+            keep.append((r, line))
+            used_ += est_tokens(line)
+        keep.reverse()
+        summ_section.text = "\n".join(line for _, line in keep)
+        summ_section.items = [{"type": "summary", "id": r.id, "label": f"#{r.start_seq}–#{r.end_seq}: {r.content[:60]}"}
+                              for r, _ in keep]
 
     # 10. recent messages within budget (the final rules section is sent too, so it counts against the budget)
     pname = (av or {}).get("name") or "the protagonist"
@@ -625,6 +655,12 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
             used += t
         return out, used
 
+    # summaries only for scenes older than the minimum recent messages (always sent when the window allows)
+    surely_sent = candidates[min(min_recent, len(candidates)) - 1][0].seq if candidates else None
+    fill_summaries(surely_sent)
+    if summ_section is not None and not summ_section.text:
+        sections.remove(summ_section)
+        summ_section = None
     # priority trimming (v1.4): retrieved lore, then the event digest, facts and recap give way before recent messages
     trimmed: list[str] = []
     fixed = fixed_tokens()
@@ -643,8 +679,13 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
     if trimmed:
         warnings.append(f"To fit at least the {want} most recent messages, these optional sections were left out this "
                         f"time: {', '.join(trimmed)} ({len(picked)} recent messages sent).")
-    remaining = budget - fixed
     chosen = [m for m, *_ in reversed(picked)]
+    if summ_section is not None and summ_section in sections and chosen:
+        fill_summaries(chosen[0].seq)  # only what was really left out (frees the room of scenes still shown)
+        if not summ_section.text:
+            sections.remove(summ_section)
+        fixed = fixed_tokens()
+    remaining = budget - fixed
     bodies = {m.id: body for m, body, *_ in picked}
     menus_omitted = sum(cut for *_, cut in picked)
     if menus_omitted:
@@ -652,10 +693,15 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
                         f"{'y' if menus_omitted == 1 else 'ies'} sent to the model (the saved story is unchanged).")
     omitted = len(convo) - len(chosen)
     if omitted:
-        covered = recap and recap.end_seq is not None and chosen and recap.end_seq >= chosen[0].seq - 1
-        if not covered:
-            warnings.append(f"{omitted} older message(s) no longer fit the context budget and are not covered by an active "
-                            "recap. Consider creating a recap (/recap).")
+        sent_ids = {m.id for m in chosen}
+        recap_end = recap.end_seq if recap and recap.end_seq is not None else -1
+        summarised = summaries_svc.covered_ids([r for r in summ_rows if summ_section is not None and summ_section in sections
+                                                and any(i.get("id") == r.id for i in summ_section.items)])
+        gaps = [m for m in convo if m.id not in sent_ids and m.seq > recap_end and m.id not in summarised
+                and m.kind in ("story", "ooc")]
+        if gaps:
+            warnings.append(f"{len(gaps)} older message(s) no longer fit the context budget and have no summary yet "
+                            "(automatic summaries catch up after the next replies; /recap makes one now).")
     if used > remaining and (hard_input is None or fixed + used <= hard_input):
         warnings.append(f"The {len(chosen)} most recent messages go over the budget (≈{fixed + used} of {budget} tokens); "
                         "the model window still has room.")

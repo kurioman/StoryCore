@@ -405,6 +405,33 @@ class Recap(Base):
     updated_at: Mapped[str] = mapped_column(String(40), default=now_iso, onupdate=now_iso)
 
 
+class MemorySummary(Base):
+    """v1.8 (phase 7): the AI's own memory of the story, written automatically while playing.
+
+    A "scene" summary covers a short run of consecutive messages (the ones memory capture just read, or a catch-up
+    request). It is valid on any path that contains all of ``message_ids_json``, so regenerated replies and other
+    branches never see a summary of text they do not have. Editing a covered message marks it ``stale``; it is then
+    written again. Level "chapter" (phase 7.2) merges scene summaries. ``data_json`` holds extras (later steps)."""
+    __tablename__ = "memory_summaries"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    story_id: Mapped[str] = mapped_column(ForeignKey("stories.id", ondelete="CASCADE"), index=True)
+    branch_id: Mapped[str] = mapped_column(String(36), index=True)
+    level: Mapped[str] = mapped_column(String(20), default="scene")  # scene | chapter
+    content: Mapped[str] = mapped_column(Text, default="")
+    message_ids_json: Mapped[list[Any]] = mapped_column(JSON, default=list)
+    start_message_id: Mapped[Optional[str]] = mapped_column(String(36))
+    end_message_id: Mapped[Optional[str]] = mapped_column(String(36))
+    start_seq: Mapped[int] = mapped_column(Integer, default=0)
+    end_seq: Mapped[int] = mapped_column(Integer, default=0)
+    status: Mapped[str] = mapped_column(String(20), default="active")  # active | stale | superseded
+    source: Mapped[str] = mapped_column(String(30), default="capture")  # capture | summary | edited
+    parent_id: Mapped[Optional[str]] = mapped_column(String(36))  # the chapter that absorbed it (phase 7.2)
+    data_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    model_id: Mapped[Optional[str]] = mapped_column(String(200))
+    created_at: Mapped[str] = mapped_column(String(40), default=now_iso)
+    updated_at: Mapped[str] = mapped_column(String(40), default=now_iso, onupdate=now_iso)
+
+
 class Savepoint(Base):
     __tablename__ = "savepoints"
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)

@@ -288,6 +288,8 @@ def _flag_stale(db: Session, story: Story, message_ids: list[str], reason: str) 
         if ids & set(f.source_message_ids_json or []):
             f.stale = True
             n += 1
+    from . import summaries  # v1.8: the memory summary of that text is written again
+    n += summaries.mark_stale(db, story.id, list(ids))
     return n
 
 

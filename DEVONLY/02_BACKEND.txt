@@ -108,7 +108,9 @@ After each reply (see 05_NARRATOR_AND_CONTEXT.txt, section 4)
   suggestions.py      Validation of the three suggested replies (player's own voice, language, person).
   expressions.py      Cheap offline speaker / mood guesses (fallback when no analysis).
   extraction.py       Memory capture: journal events, facts, rolling recaps, continuity checks, state-change
-                      proposals. Runs in batches, in bounded chunks, never modifies the transcript.
+                      proposals. Runs in batches, in bounded chunks, never modifies the transcript. Also returns the
+                      scene summary of the chunk it reads (v1.8).
+  summaries.py        (v1.8) Automatic memory summaries: storage, visibility per path, staleness, catch-up requests.
   state_service.py    Versioned story state per branch (stats, inventory, quests, scene, relationships...). Every
                       change is a new version; undo creates a new version too.
 

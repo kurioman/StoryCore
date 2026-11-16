@@ -64,7 +64,12 @@ class MockAdapter(ProviderAdapter):
                     "source_message_ids": ids[-1:], "entities": [],
                 }] if ids else [],
                 "facts": [], "state_changes": [], "contradictions": [], "character_moods": [],
+                **({"scene_summary": f"[Mock summary] {len(ids)} message(s) captured; configure a real model for real "
+                                     "memory."} if "scene_summary" in (messages[-1].content if messages else "") else {}),
             })
+        if "SCENE SUMMARY" in (system or ""):  # the memory catch-up (services/summaries.py)
+            n = len(re.findall(r"\[NEW #\d+\]", messages[-1].content if messages else ""))
+            return f"[Mock summary] {n} message(s) summarised; configure a real model for real memory."
         return "[Mock recap] The mock provider cannot summarise real content. Configure a real model to generate recaps."
 
 

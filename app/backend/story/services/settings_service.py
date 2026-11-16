@@ -63,6 +63,9 @@ DEFAULTS: dict[str, Any] = {
     "recent_messages_min": 6,
     "context_warning_ratio": 0.85,
     "auto_recap_policy": "offer",  # off | offer
+    # v1.8 phase 7.1: short summaries of the story written while playing (services/summaries.py) and sent for the messages
+    # that no longer fit word for word
+    "scene_summaries_enabled": True,
     "recap_auto_replace": False,
     "enter_to_send": True,
     "theme": "dark",

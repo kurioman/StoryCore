@@ -233,6 +233,19 @@ export function MemorySettings() {
           description={msg("Off keeps the expressions you set yourself. Locked portraits never change either way.")}
         />
         <Toggle
+          checked={r.scene_summaries_enabled ?? true}
+          onChange={(e) =>
+            i({
+              ...r,
+              scene_summaries_enabled: e,
+            })
+          }
+          label={msg("Automatic summaries")}
+          description={msg(
+            "While you play, short summaries of the story are written (with automatic event capture, in the same request) and sent to the AI for the messages that no longer fit, so it keeps the thread of long games.",
+          )}
+        />
+        <Toggle
           checked={r.recap_auto_replace}
           onChange={(e) =>
             i({
@@ -261,6 +274,7 @@ export function MemorySettings() {
               candidate_confidence_threshold: r.candidate_confidence_threshold,
               auto_apply_expression_suggestions: r.auto_apply_expression_suggestions,
               recap_auto_replace: r.recap_auto_replace,
+              scene_summaries_enabled: r.scene_summaries_enabled ?? true,
               turn_analysis_mode: r.turn_analysis_mode,
               relationship_mode: r.relationship_mode,
               action_suggestions_enabled: r.action_suggestions_enabled,

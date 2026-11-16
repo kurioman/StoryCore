@@ -15,7 +15,7 @@ from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from ..config import APP_VERSION, EXPORT_FORMAT_VERSION
-from ..models import (Avatar, CharacterDiscovery, EntityFact, ExtractionCursor, LocalCanon, MemoryExtractionRun, Message,
+from ..models import (Avatar, CharacterDiscovery, EntityFact, ExtractionCursor, LocalCanon, MemoryExtractionRun, MemorySummary, Message,
                       MessageBranch, MessageVersion, Recap, Savepoint, SlashCommand, StateProposal, Story, StoryEvent,
                       StoryState, TurnAnalysis, UserNote, World, now_iso)
 from .idmap import remap, unresolved
@@ -28,6 +28,8 @@ STORY_TABLES: list[tuple[str, type]] = [
     ("local_canon", LocalCanon), ("commands", SlashCommand),
     # added in 1.1 (packages from 1.0 simply have none of these)
     ("turn_analyses", TurnAnalysis), ("discoveries", CharacterDiscovery),
+    # added in 1.8 (phase 7: automatic memory summaries)
+    ("summaries", MemorySummary),
 ]
 NEVER_EXPORTED = ["API keys and other secrets", "provider credentials", "app logs"]
 

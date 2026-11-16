@@ -1903,5 +1903,7 @@
  "Tested with StoryCore": "Testé avec StoryCore",
  "Used by this project's owner over hundreds of story turns": "Utilisé par l'auteur du projet sur des centaines de tours d'histoire",
  "Useful for cheap experiments": "Pratique pour des essais à petit prix",
- "Very low listed token price": "Prix par token affiché très bas"
+ "Very low listed token price": "Prix par token affiché très bas",
+ "Automatic summaries": "Résumés automatiques",
+ "While you play, short summaries of the story are written (with automatic event capture, in the same request) and sent to the AI for the messages that no longer fit, so it keeps the thread of long games.": "Pendant la partie, de courts résumés de l'histoire sont écrits (avec la capture automatique des événements, dans la même requête) et envoyés à l'IA à la place des messages qui ne tiennent plus, pour qu'elle garde le fil des longues parties."
 }
