@@ -91,6 +91,10 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
   message box. The Journal has a new "AI memory" tab: the story so far, chapters and scenes (correct one, or pin it as a
   permanent memory), the open threads (mark one settled), what each character remembers, "Summarise now" and "Close the
   chapter here". The /chapter command (/chapitre) closes a chapter with an optional title.
+- **Continuity checks at no cost.** StoryCore spots the phrases the narrator keeps reusing and asks it to vary them
+  (Settings > Narration & context > Fight repetitions). A notice appears under a reply when a character the journal
+  records as dead speaks, when the time of day goes back on the same day, or when the scene analysis finds that the
+  reply contradicts a pinned memory. The reply is never changed: regenerate or edit it if needed.
 - **Token counter.** Next to the context meter, a gauge shows what the latest turn sent to the AI (and how much came
   from the provider's cache); click it for the whole story: narrator, scene analysis, memory, summaries, recaps, and
   the cost when the provider reports it. The provider's real figures also correct StoryCore's own estimate for each

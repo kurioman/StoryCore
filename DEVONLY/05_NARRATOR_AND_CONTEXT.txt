@@ -45,6 +45,19 @@ GET /stories/{sid}/usage feeds the gauge next to the context meter (UsageMeter.j
 (status "skipped") for a reply under 700 characters with no character named or present, when place and time are
 already known and suggested replies are off.
 
+Continuity checks (phase 7.6, services/continuity.py), shown as notices under the reply
+(generation_metadata_json.continuity_alerts: {kind, ...}); the reply is never changed:
+  repetition     no model call: 5-word phrases found in 2+ of the last 6 narrator replies (merged into runs) and openings
+                 used twice; the per-turn section "repetition" asks to vary them (setting anti_repetition).
+  dead_speaks    no model call: a character of a witnessed "death" journal event (earlier on the path) speaks in a reply
+                 (analysis speakers, else portrait tags / heuristic speaker). Checked after the analysis.
+  time_back      no model call: the analysis moves the time of day back by more than 90 minutes on the same day.
+  contradiction  the scene analysis also receives up to 8 pinned memories and reports a clear contradiction in its
+                 "warnings" (no extra request).
+Stepped window, refined: the start of the previous request (story.settings_json.window_starts, written by turns.py) is
+kept while it still fits; a forced move goes to a memory boundary leaving the minimum of recent messages, else as far
+as the minimum allows (starting on a player message), then the window grows again.
+
 Short lore cards (setting lore_short_cards): a character's lore entries are sent when they come into focus; while
 they stay (named in the messages before the last exchange) and have a cast line, the entries are listed as "short
 card (already in the scene)" and left out. Pinned lore is always sent.

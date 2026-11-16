@@ -154,6 +154,21 @@ export function NarrationSettings() {
           </div>
           <div className="sm:col-span-2">
             <Toggle
+              checked={n.anti_repetition ?? true}
+              onChange={(e) =>
+                r({
+                  ...n,
+                  anti_repetition: e,
+                })
+              }
+              label={msg("Fight repetitions")}
+              description={msg(
+                "StoryCore spots the phrases the narrator keeps reusing and asks it to vary them (a few words per request, found without any extra request).",
+              )}
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <Toggle
               checked={n.lore_short_cards ?? true}
               onChange={(e) =>
                 r({
@@ -297,6 +312,7 @@ export function NarrationSettings() {
               enter_to_send: n.enter_to_send,
               context_layout: n.context_layout ?? `stable`,
               lore_short_cards: n.lore_short_cards ?? true,
+              anti_repetition: n.anti_repetition ?? true,
               default_system_prompt: n.default_system_prompt,
               narration_presets: n.narration_presets,
               narrator_prompt_profile: n.narrator_prompt_profile ?? null,

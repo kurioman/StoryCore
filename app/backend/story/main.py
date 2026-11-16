@@ -94,6 +94,12 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
             await turn_analysis.analyse(ctx, message_id, force=tagged)
         except Exception:  # never let optional metadata affect the finished reply or the extraction that follows
             log.exception("turn analysis crashed for %s", message_id)
+        try:  # v1.8 phase 7.6: a character recorded as dead who speaks (no model call)
+            from .services import continuity
+            with ctx.db.session() as s:
+                continuity.check_speakers(s, message_id)
+        except Exception:
+            log.exception("continuity check failed for %s", message_id)
         with ctx.db.session() as s:
             from .models import Message
             m = s.get(Message, message_id)

@@ -1962,5 +1962,12 @@
  "{{v0}} request(s) without figures from the provider are not counted in the totals.": "{{v0}} requête(s) sans chiffres du fournisseur ne sont pas comptées dans les totaux.",
  "{{v0}}% cached": "{{v0}} % en cache",
  "…of which from the cache": "… dont depuis le cache",
- "…of which read from the cache": "… dont lus depuis le cache"
+ "…of which read from the cache": "… dont lus depuis le cache",
+ "Fight repetitions": "Lutter contre les répétitions",
+ "May contradict a pinned memory: {{v0}}": "Contredit peut-être un souvenir épinglé : {{v0}}",
+ "Possible continuity problem": "Problème de continuité possible",
+ "Possible continuity problem — the reply was not changed:": "Problème de continuité possible — la réponse n'a pas été modifiée :",
+ "StoryCore spots the phrases the narrator keeps reusing and asks it to vary them (a few words per request, found without any extra request).": "StoryCore repère les tournures que le narrateur réutilise sans cesse et lui demande de les varier (quelques mots par requête, trouvés sans aucune requête en plus).",
+ "The time goes back from “{{v0}}” to “{{v1}}” on the same day.": "L'heure recule de « {{v0}} » à « {{v1}} » le même jour.",
+ "{{v0}} speaks, but the journal records their death.": "{{v0}} parle, alors que le journal indique sa mort."
 }

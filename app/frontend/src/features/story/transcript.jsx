@@ -362,6 +362,7 @@ export function MessageItem({
         ) : null}
       </div>
       {!se && !ue && ae !== `streaming` && <LoreConflicts items={de.lore_conflicts} />}
+      {!se && !ue && ae !== `streaming` && <ContinuityAlerts items={de.continuity_alerts} />}
       {!se && (ae !== `complete` || fe) && ae !== `streaming` && (
         <div
           className={cn(
@@ -617,6 +618,32 @@ function LoreConflicts({ items }) {
       <ul className="mt-0.5 list-disc pl-4">
         {t.map((e) => (
           <li key={e.text}>{e.message}</li>
+        ))}
+      </ul>
+      <p className="mt-0.5 text-faint">{msg("Regenerate or edit the reply if this was not intended.")}</p>
+    </div>
+  ) : null;
+}
+
+// v1.8 phase 7.6: continuity notices found after the reply (no model call, or inside the scene analysis)
+function ContinuityAlerts({ items }) {
+  let list = (Array.isArray(items) ? items : []).filter((e) => e && typeof e.kind == `string`),
+    text = (e) =>
+      e.kind === `dead_speaks`
+        ? msg("{{v0}} speaks, but the journal records their death.", { v0: e.name })
+        : e.kind === `time_back`
+          ? msg("The time goes back from “{{v0}}” to “{{v1}}” on the same day.", { v0: e.from, v1: e.to })
+          : e.kind === `contradiction`
+            ? msg("May contradict a pinned memory: {{v0}}", { v0: e.text })
+            : null;
+  list = list.filter((e) => text(e));
+  return list.length ? (
+    <div className="mt-2 rounded-md bg-warn-soft px-2.5 py-1.5 text-xs text-warn" role="note"
+      aria-label={msg("Possible continuity problem")}>
+      <p className="font-medium">{msg("Possible continuity problem — the reply was not changed:")}</p>
+      <ul className="mt-0.5 list-disc pl-4">
+        {list.map((e, i) => (
+          <li key={i}>{text(e)}</li>
         ))}
       </ul>
       <p className="mt-0.5 text-faint">{msg("Regenerate or edit the reply if this was not intended.")}</p>

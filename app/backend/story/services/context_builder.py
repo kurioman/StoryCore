@@ -301,7 +301,7 @@ STABLE_SECTIONS = {"core", "global_note", "story_note", "avatar", "roles", "know
                    "portrait_tags", "music_tags", "narration_language"}
 TURN_OPEN = "[Story context for this turn: written by the app for the narrator, not by the player]"
 TURN_CLOSE = "[The player's turn]"
-OPTIONAL_SECTIONS = ("lore", "encounters", "events", "facts", "recalled", "character_memory", "recap", "threads",
+OPTIONAL_SECTIONS = ("repetition", "lore", "encounters", "events", "facts", "recalled", "character_memory", "recap", "threads",
                      "scene_summaries")
 MIN_MESSAGES_HARD = 2  # below the configured minimum only when the model window leaves no other choice
 
@@ -681,6 +681,12 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
                                            "in mind, never force them)",
                                 "\n".join(f"- {t['text']} (since #{t['seq']})" for t in threads),
                                 [{"type": "thread", "label": t["text"][:80]} for t in threads]))
+    # 9e. v1.8 phase 7.6: phrasing the narrator keeps reusing (found without any model call)
+    if cfg.get("anti_repetition", True) is not False:
+        from . import continuity
+        rep = continuity.repetition_block(convo)
+        if rep:
+            sections.append(Section("repetition", "Vary your wording", rep, [{"type": "prompt", "label": "Repeated phrasing"}]))
 
     # 10. recent messages within budget (the final rules section is sent too, so it counts against the budget)
     pname = (av or {}).get("name") or "the protagonist"
@@ -751,7 +757,18 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
         ends = {r.end_seq for r in summ_rows} if summ_rows else set()
         steps = [i for i, m in enumerate(convo) if i > 0 and convo[i - 1].seq in ends] or \
                 [i for i in range(len(convo)) if i % 8 == 0]
-        step = next((i for i in steps if i >= oldest), None)
+        # where the previous request of this branch started (services/turns.py): kept while it still fits
+        prev_seq = ((ssettings.get("window_starts") or {}).get(branch.id))
+        prev_i = next((i for i, m in enumerate(convo) if m.seq == prev_seq), None)
+        if prev_i is not None and prev_i >= oldest and len(convo) - prev_i >= want:
+            step = prev_i
+        else:  # a forced move: to a boundary that leaves the minimum, else as far as the minimum allows (then it grows)
+            step = next((i for i in steps if i >= oldest and len(convo) - i >= want), None)
+            if step is None:
+                step = len(convo) - want
+                if convo[step].role != "user" and step - 1 >= oldest:
+                    step -= 1  # start on the player's turn
+                step = max(step, oldest)
         if step is not None and len(convo) - step >= want:
             picked = [x for x in picked if pos.get(x[0].id, 0) >= step]
             used = sum(t for _, _, t, _ in picked)
@@ -845,6 +862,7 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
                      "model window forbids it."),
         "layout": layout,
         "token_ratio": token_ratio,
+        "first_sent_seq": chosen[0].seq if chosen else None,
         "sections": [{"key": s.key, "title": s.title, "tokens": s.tokens, "items": s.items, "placement": placement[s.key]}
                      for s in sections]
                     + [{"key": "messages", "title": "Recent messages", "tokens": used,

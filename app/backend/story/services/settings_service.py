@@ -71,6 +71,8 @@ DEFAULTS: dict[str, Any] = {
     "context_layout": "stable",
     # v1.8 phase 7.3: a character's full lore entry is sent when they arrive; while they stay, their cast line only
     "lore_short_cards": True,
+    # v1.8 phase 7.6: tell the narrator which phrasing it keeps reusing (computed locally, a few words per request)
+    "anti_repetition": True,
     "recap_auto_replace": False,
     "enter_to_send": True,
     "theme": "dark",

@@ -61,6 +61,10 @@ def _start_generation(ctx: AppContext, db: Session, story: Story, branch: Messag
                               "reason": seg["reason"]}
         built = context_builder.build(db, story, branch, context_limit=resolved.profile.context_limit, params=resolved.params,
                                       exclude_message_ids={placeholder.id}, extra_instruction=extra_instruction)
+        if built.manifest.get("first_sent_seq") is not None:  # v1.8: the next request keeps this start while it fits
+            starts = dict((story.settings_json or {}).get("window_starts") or {})
+            starts[branch.id] = built.manifest["first_sent_seq"]
+            story.settings_json = {**(story.settings_json or {}), "window_starts": starts}
     except Exception as e:
         db.rollback()
         log.exception("could not start generation for message %s", placeholder.id)

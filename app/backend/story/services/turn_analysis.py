@@ -29,6 +29,7 @@ EXPRESSION_GUIDE = ", ".join(f"{e['slot']} {e['name'].lower()}" for e in EXPRESS
 WEAK_EVIDENCE = 0.4  # below this confidence an expression falls back to neutral (01)
 # The analysis has its own output budget (the story's reply limit can be too small for the JSON; observed: mistral-nemo
 # repeating speaker entries until cut off at 700 tokens) and bounded arrays in the schema.
+PINNED_CHECK = 8  # pinned memories sent to the analysis for the contradiction check (v1.8 phase 7.6)
 LIGHT_SKIP_CHARS = 700
 LIGHT_SKIP_REASON = "Nothing to analyse in this short reply (no character in the scene)."
 ANALYSIS_MAX_TOKENS = 1800  # v1.6: three written drafts instead of three 14-word labels
@@ -695,9 +696,16 @@ async def _analyse(ctx: AppContext, message_id: str, *, force: bool = False) -> 
             parts = [x for x in (posts.get(c), hints.get(c)) if x]
             return f" ({'; '.join(parts)})" if parts else ""
         chars = "\n".join(f"- {c}: {index.name(c)}{hint(c)}" for c in sorted(allowed, key=index.name)) or "(none)"
+        # v1.8 phase 7.6: the pinned memories, so that a clear contradiction is reported in "warnings" (same request)
+        from .context_builder import visible_facts
+        pinned = [f.content for f in visible_facts(db, story, branch, story_tree.path_ids(db, branch))
+                  if f.pinned and f.status in ("active", "disputed")][:PINNED_CHECK]
+        pinned_text = ("\n\nPINNED MEMORIES (established facts of this story):\n" + "\n".join(f"- {p[:200]}" for p in pinned)
+                       + "\nIf the REPLY clearly contradicts one of them, add a short description of it to \"warnings\" "
+                         "(\"contradicts: ...\"). Otherwise leave warnings empty.") if pinned else ""
         prompt = (f"Character list (id: name):\n{chars}\n\nProtagonist (never a speaker, discovery or relationship source): "
                   f"{protagonist}\n\n{world_state.prompt_state(state['scene'])}\n\n"
-                  f"PLAYER TURN:\n{user_text or '(none)'}\n\nREPLY:\n{reply}")
+                  f"PLAYER TURN:\n{user_text or '(none)'}\n\nREPLY:\n{reply}{pinned_text}")
         row_id, provider_label = row.id, f"{resolved.provider.provider_type}/{resolved.profile.model_id}"
     from .extraction import parse_json_object  # local import: extraction imports turns, which imports us lazily
     extra = {"json_schema": analysis_schema(sorted(allowed), want, axes, want_rel)} if resolved.adapter.supports_json_schema else {}
@@ -788,6 +796,9 @@ async def _analyse(ctx: AppContext, message_id: str, *, force: bool = False) -> 
         row.dialogue_json, row.schema_version = result["dialogue"], SCHEMA_VERSION
         row.diagnostics_json = diagnostics
         m.speaker_character_id = result["active_speaker_id"] or m.speaker_character_id
+        from . import continuity
+        continuity.set_alerts(m, "contradiction", [{"text": w[:200]} for w in result.get("warnings") or []
+                                                   if pinned_text and re.search(r"contradict", w, re.I)][:2])
         for d in result["discoveries"]:
             if d["character_id"] not in discoverable:
                 continue
@@ -817,6 +828,10 @@ async def _analyse(ctx: AppContext, message_id: str, *, force: bool = False) -> 
             scene_now = state_service.normalize(st_now.state_json if st_now else {})["scene"]
             year_start = world_state.calendar_of(db, story.world_id)["year_start"]
             update = world_state.validate(result.get("world_state_raw"), m.content, user_text, scene_now, year_start)
+            went_back = ("time" in update["changes"] and not update["days_passed"] and "story_day" not in update["changes"]
+                         and continuity.time_went_back(scene_now.get("time"), update["changes"]["time"]))
+            continuity.set_alerts(m, "time_back", [{"from": scene_now.get("time"), "to": update["changes"]["time"]}]
+                                  if went_back else [])
             if update["dropped"]:
                 log.info("world state for %s: dropped %s", message_id, update["dropped"])
             from . import chrono
