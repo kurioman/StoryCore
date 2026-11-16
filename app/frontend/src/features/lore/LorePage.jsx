@@ -3,6 +3,7 @@ import { useWorlds, queryKeys } from "@/api/queries";
 import * as React from "react";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
 import { apiGet, apiPost, errorMessage, apiUpload, apiPatch } from "@/api/legacy";
+import { IS_REMOTE } from "@/lib/remote";
 import * as Icon from "lucide-react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { msg, msgKey } from "@/i18n";
@@ -113,11 +114,13 @@ export function LorePage() {
         <EmptyState icon={<Icon.BookOpen className="size-8" />} title={msg("No lore imported yet")}>
           {msg("The home page detects lore packs in the app folder. You can also import a pack as a .zip.")}
         </EmptyState>
-        <div className="flex justify-center">
-          <Button onClick={() => v.current?.click()}>
-            <Icon.Upload className="size-4" /> {msg("Import lore .zip")}
-          </Button>
-        </div>
+        {!IS_REMOTE && (
+          <div className="flex justify-center">
+            <Button onClick={() => v.current?.click()}>
+              <Icon.Upload className="size-4" /> {msg("Import lore .zip")}
+            </Button>
+          </div>
+        )}
         <ImportReport r={v} />
       </div>
     );
@@ -151,6 +154,8 @@ export function LorePage() {
             ) : (
               <h1 className="flex-1 text-sm font-semibold">{r.name}</h1>
             )}
+            {/* importing reads the computer's folders: offered on the computer only (v1.8) */}
+            {!IS_REMOTE && (<>
             <Button
               size="sm"
               variant="ghost"
@@ -169,6 +174,7 @@ export function LorePage() {
             >
               <Icon.Upload className="size-3.5" />
             </Button>
+            </>)}
             <ImportReport r={v} />
           </div>
           <div className="relative">

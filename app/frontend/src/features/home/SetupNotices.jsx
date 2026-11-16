@@ -9,6 +9,7 @@ import * as Icon from "lucide-react";
 import { msg, msgKey } from "@/i18n";
 import { Badge, Button, Callout } from "@/components/ui";
 import { navigate } from "@/lib/router";
+import { IS_REMOTE } from "@/lib/remote";
 
 export function SetupNotices() {
   let query = useQuery({
@@ -55,6 +56,8 @@ export function SetupNotices() {
     p = (n.data?.providers ?? []).filter((e) => e.provider_type !== `mock`),
     g = query.data?.lore_candidates.filter((e) => !e.imported) ?? [],
     v = query.data?.image_folders.filter((e) => !e.registered) ?? [];
+  // setting up (lore, portraits, models) happens on the computer, not on a paired phone (v1.8)
+  if (IS_REMOTE) return null;
   return (
     <div>
         {c && (
@@ -66,9 +69,9 @@ export function SetupNotices() {
           <section className="mb-8 space-y-3">
             <h2 className="text-sm font-semibold text-muted">{msg("Get set up")}</h2>
             {g.map((e) => (
-              <div className="flex items-center gap-3 rounded-lg border border-line bg-panel p-4" key={e.path}>
+              <div className="flex flex-wrap items-center gap-3 rounded-lg border border-line bg-panel p-4" key={e.path}>
                 <Icon.BookOpen className="size-5 text-accent" />
-                <div className="min-w-0 flex-1">
+                <div className="min-w-[12rem] flex-1">
                   <p className="text-sm font-medium">
                     {msg("Lore pack found:")} {e.name}
                   </p>
@@ -80,9 +83,9 @@ export function SetupNotices() {
               </div>
             ))}
             {v.map((t) => (
-              <div className="flex items-center gap-3 rounded-lg border border-line bg-panel p-4" key={t.path}>
+              <div className="flex flex-wrap items-center gap-3 rounded-lg border border-line bg-panel p-4" key={t.path}>
                 <Icon.Images className="size-5 text-accent" />
-                <div className="min-w-0 flex-1">
+                <div className="min-w-[12rem] flex-1">
                   <p className="text-sm font-medium">
                     {msg("Portrait folder found:")} {t.name}
                     {" ("}
@@ -108,9 +111,9 @@ export function SetupNotices() {
               </div>
             ))}
             {p.length === 0 && (
-              <div className="flex items-center gap-3 rounded-lg border border-line bg-panel p-4">
+              <div className="flex flex-wrap items-center gap-3 rounded-lg border border-line bg-panel p-4">
                 <Icon.Cpu className="size-5 text-accent" />
-                <div className="min-w-0 flex-1">
+                <div className="min-w-[12rem] flex-1">
                   <p className="text-sm font-medium">{msg("Connect a model")}</p>
                   <p className="text-xs text-faint">
                     {msg(

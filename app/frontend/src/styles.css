@@ -280,3 +280,13 @@ button.sc-cx-card:hover{transform:translateY(-2px);border-color:#e2bd7270;box-sh
 .sc-su-num{display:inline-flex;width:1.6rem;height:1.6rem;flex-shrink:0;align-items:center;justify-content:center;border-radius:999px;font-size:.8rem;font-weight:700;color:#0b1030;background:linear-gradient(180deg,#f3d48c,#d4a650)}
 .sc-su-ghost{display:inline-flex;align-items:center;gap:.4rem;border-radius:999px;padding:.5rem 1rem;font-size:.9rem;color:#e2bd72;transition:background .2s ease}
 .sc-su-ghost:hover{background:#e2bd7214;color:#fff0c4}
+
+/* v1.8 phase 6: the welcome page on a phone (narrow screens) */
+.sc-welcome-layout{grid-template-columns:minmax(0,1fr)}
+@media (max-width:640px){
+.sc-welcome-title{font-size:clamp(2.2rem,12.5vw,4rem)}
+.sc-welcome-motto{font-size:1rem}
+.sc-start{min-width:0;width:100%;font-size:1.25rem;letter-spacing:.03em;padding:1rem 1.25rem}
+.sc-welcome-foot{grid-template-columns:1fr auto;gap:.75rem}
+.sc-welcome-foot>:last-child{display:none}
+}
