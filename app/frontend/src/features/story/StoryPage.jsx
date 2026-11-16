@@ -23,6 +23,7 @@ import { MessageItem, SpeakersPanel, TurnAnalysisBar } from "@/features/story/tr
 import { RecapDialog } from "@/features/story/dialogs";
 import { StatusSection } from "@/features/story/panels/StatusPanel";
 import { StoryPanelActions } from "@/features/report/ReportProblem";
+import { MusicPlayer } from "@/features/music/MusicPlayer";
 import { StoryHeader } from "@/features/story/header";
 import { cn, isCloudModelId } from "@/lib/util";
 import { useLocalState, useMediaQuery } from "@/lib/hooks";
@@ -399,6 +400,9 @@ export function StoryPage({ storyId }) {
         knownFocus={u}
         setKnownFocus={d}
       />
+      </div>
+      <div className="border-t border-line p-3 pb-0">
+        <MusicPlayer storyId={storyId} refreshKey={`${n.data?.messages?.length ?? 0}:${de.generating ? 1 : 0}`} />
       </div>
       <StoryPanelActions storyId={storyId} onRecap={() => ne({ name: `recap`, input: `` })} />
       </div>

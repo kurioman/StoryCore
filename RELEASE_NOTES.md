@@ -51,6 +51,11 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
   other games in progress, then one card per lore pack with its cover, tags and summary. A card opens the story sheet:
   choose an opening, "New game" (the wizard opens with the world and opening chosen) and your games in that world.
   "Resume my last adventure" on the welcome page now opens your latest game.
+- **Music**: one music library for the whole app (`Music` folder, new **Music** page): add .mp3 files, listen,
+  rename, tag them (about 60 tags in four families: mood, action, places, moments, plus your own). During a story the
+  narrator marks mood and place changes with a hidden music tag; otherwise the scene's place chooses. A player at the
+  bottom of the right panel: play / pause, clickable progress bar, another track, volume, mute, crossfade between
+  tracks; volume remembered. Packs can switch music off or pick tracks per tag (`pack.json` "music").
 - **Night-blue dark theme** for the whole app, matching the welcome page (the light theme is unchanged).
 - **Cinzel** for the StoryCore name (welcome title, sidebar, headers), bundled with the app (SIL Open Font License).
   New welcome logo (a star born from an open book); the rest of the app keeps the four-point star.

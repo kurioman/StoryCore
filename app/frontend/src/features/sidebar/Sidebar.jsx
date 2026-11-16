@@ -71,6 +71,11 @@ export function Sidebar({ activeStoryId, path, collapsed, onToggle, onHelp }) {
         icon: Icon.Images,
       },
       {
+        to: `/music`,
+        label: msg("Music"),
+        icon: Icon.Music,
+      },
+      {
         to: `/commands`,
         label: msg("Commands"),
         icon: Icon.SquareSlash,

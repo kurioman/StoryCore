@@ -98,7 +98,7 @@ export function ReportProblemDialog({ open, onClose, storyId }) {
 export function StoryPanelActions({ storyId, onRecap, className }) {
   let [open, setOpen] = React.useState(false);
   return (
-    <div className={cn(`grid grid-cols-2 gap-2 border-t border-line p-3`, className)}>
+    <div className={cn(`grid grid-cols-2 gap-2 p-3`, className)}>
       <button
         type="button"
         onClick={onRecap}

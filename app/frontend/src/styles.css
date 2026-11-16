@@ -229,3 +229,39 @@ button.sc-cx-card:hover{transform:translateY(-2px);border-color:#e2bd7270;box-sh
 .sc-lib-opening-on .sc-lib-radio{border-color:#f3d48c;background:radial-gradient(circle,#f3d48c 40%,transparent 45%)}
 .sc-lib-game{display:flex;width:100%;align-items:center;gap:.6rem;border-radius:.6rem;padding:.5rem .7rem;transition:background .2s ease}
 .sc-lib-game:hover{background:#e2bd7214}
+
+/* v1.8 music library page (features/music) */
+.sc-mu-drop{display:flex;align-items:center;justify-content:center;gap:.6rem;border-radius:1rem;border:1.5px dashed #e2bd7240;padding:1.1rem;font-size:.85rem;color:#e2bd72aa;transition:all .2s ease}
+.sc-mu-drop-on{border-color:#f3d48c;background:#e2bd7214;color:#fff0c4}
+.sc-mu-chip{border-radius:999px;border:1px solid #e2bd7238;padding:.2rem .7rem;font-size:.78rem;color:#e2bd72;background:#e2bd720d;transition:all .15s ease}
+.sc-mu-chip:hover:not(:disabled){border-color:#e2bd7290;color:#fff0c4}
+.sc-mu-chip-on{background:linear-gradient(180deg,#f3d48c,#d9ae5f);color:#0b1030;border-color:transparent}
+.sc-mu-row{display:flex;align-items:center;gap:.9rem;border-radius:.9rem;border:1px solid #e2bd7226;background:#101640;padding:.75rem .9rem;transition:border-color .2s ease}
+.sc-mu-row:hover{border-color:#e2bd7255}
+.sc-mu-play{display:inline-flex;width:2.5rem;height:2.5rem;flex-shrink:0;align-items:center;justify-content:center;border-radius:999px;color:#0b1030;background:linear-gradient(180deg,#f3d48c,#d4a650);box-shadow:0 4px 14px -6px #e2bd72aa;transition:filter .2s ease,transform .2s ease}
+.sc-mu-play:hover{filter:brightness(1.08);transform:scale(1.05)}
+.sc-mu-play-on{box-shadow:0 0 0 3px #e2bd7240,0 0 18px -2px #e2bd72aa}
+.sc-mu-title{width:100%;border-radius:.4rem;border:1px solid transparent;background:transparent;padding:.1rem .3rem;margin-left:-.3rem;font-weight:600;color:#f3dca0;outline:none}
+.sc-mu-title:hover{border-color:#e2bd7230}
+.sc-mu-title:focus{border-color:#e2bd7280;background:#0b1030}
+.sc-mu-tag{display:inline-flex;align-items:center;gap:.3rem;border-radius:999px;padding:.12rem .5rem .12rem .6rem;font-size:.75rem;color:#0b1030;background:#e9c477}
+.sc-mu-add{display:inline-flex;align-items:center;gap:.25rem;border-radius:999px;border:1px dashed #e2bd7266;padding:.1rem .55rem;font-size:.75rem;color:#e2bd72}
+.sc-mu-add:hover{border-color:#f3d48c;color:#fff0c4}
+.sc-mu-del{border-radius:.5rem;padding:.45rem;color:#e0715f99;transition:all .15s ease}
+.sc-mu-del:hover{color:#e0715f;background:#e0715f1a}
+
+/* v1.8 in-game music player (features/music/MusicPlayer.jsx) */
+.sc-mp{display:flex;width:100%;flex-direction:column;gap:.5rem;border-radius:.8rem;border:1px solid #e2bd7238;background:linear-gradient(180deg,#141c48,#0e1336);padding:.65rem .75rem;color:#e2bd72;box-shadow:0 8px 24px -16px #000}
+.sc-mp-off{flex-direction:row;align-items:center;justify-content:center;gap:.5rem;font-size:.85rem;font-weight:600;color:#f3dca0;transition:border-color .2s ease,box-shadow .2s ease}
+.sc-mp-off:hover{border-color:#e2bd72a0;box-shadow:0 0 22px -8px #e2bd72aa}
+.sc-mp-empty{flex-direction:row;align-items:center;gap:.5rem;font-size:.75rem;color:#e2bd72aa}
+.sc-mp-bar{position:relative;height:.4rem;cursor:pointer;border-radius:999px;background:#e2bd7224;overflow:hidden}
+.sc-mp-bar:hover{height:.5rem}
+.sc-mp-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#c9a25b,#fbe4a3)}
+.sc-mp-main{display:inline-flex;width:2rem;height:2rem;align-items:center;justify-content:center;border-radius:999px;color:#0b1030;background:linear-gradient(180deg,#f3d48c,#d4a650);transition:filter .2s ease}
+.sc-mp-main:hover{filter:brightness(1.1)}
+.sc-mp-btn{display:inline-flex;width:1.75rem;height:1.75rem;align-items:center;justify-content:center;border-radius:999px;color:#e2bd72;transition:background .15s ease,color .15s ease}
+.sc-mp-btn:hover{background:#e2bd721f;color:#fff0c4}
+.sc-mp-vol{width:5.5rem;height:.3rem;appearance:none;-webkit-appearance:none;border-radius:999px;cursor:pointer;background:linear-gradient(90deg,#e2bd72 var(--v),#e2bd7230 var(--v))}
+.sc-mp-vol::-webkit-slider-thumb{-webkit-appearance:none;width:.8rem;height:.8rem;border-radius:999px;background:#fbe4a3;box-shadow:0 0 6px #e2bd72aa}
+.sc-mp-vol::-moz-range-thumb{width:.8rem;height:.8rem;border:none;border-radius:999px;background:#fbe4a3}

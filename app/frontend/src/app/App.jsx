@@ -10,6 +10,7 @@ import { AvatarsPage } from "@/features/avatars/AvatarsPage";
 import { CommandsPage } from "@/features/commands/CommandsPage";
 import { HelpDialog } from "@/features/help/HelpDialog";
 import { LibraryPage } from "@/features/library/LibraryPage";
+import { MusicPage } from "@/features/music/MusicPage";
 import { WelcomePage } from "@/features/welcome/WelcomePage";
 import { IconButton, UiProvider } from "@/components/ui";
 import { LorePage } from "@/features/lore/LorePage";
@@ -59,6 +60,8 @@ function App() {
     <SettingsPage tab={u.tab} />
   ) : matchRoute(hashPath, `/settings`) ? (
     <SettingsPage tab="providers" />
+  ) : matchRoute(hashPath, `/music`) ? (
+    <MusicPage />
   ) : matchRoute(hashPath, `/library`) ? (
     <LibraryPage />
   ) : null;

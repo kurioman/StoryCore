@@ -265,10 +265,11 @@ def for_story(folder: Path, world: Any, replies: list[Any], scene: dict[str, Any
         tag, source, since = settings["default"], "pack_default", "default"
     story_seed = getattr(replies[0], "story_id", "") if replies else ""
     track = pick(tracks, tag, settings, f"{story_seed}|{tag}|{since}|{skip}")
+    fallback = track is None
     if track is None:  # nothing with that tag: any track, so there is always music when the library has some
         usable = [t for t in tracks if t["available"]]
         h = int(hashlib.sha1(f"{story_seed}|any|{since}|{skip}".encode()).hexdigest(), 16)
         track, source = usable[h % len(usable)], (source or "any")
-    return {"enabled": True, "tag": tag, "source": source,
+    return {"enabled": True, "tag": tag, "source": source, "fallback": fallback and bool(tag),
             "track": {k: track[k] for k in ("id", "title", "tags", "artist")}}
 

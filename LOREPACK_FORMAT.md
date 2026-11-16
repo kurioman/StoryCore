@@ -132,6 +132,22 @@ The codex is the in-story encyclopedia of characters and places the player has d
 What it shows comes only from public lore (never the narrator-only `hidden` notes): name and type once the player has
 heard of someone or something; summary, portrait and details once they have met the character or visited the place.
 
+### Music (optional)
+
+Packs never ship music: the app has one music library (`Music/`, page Music in the app) where every track has tags.
+During a story the narrator writes a hidden `[Music:tag]` when the mood or place changes; otherwise the scene's place
+chooses. A pack may only adjust this:
+
+```json
+"music": {"default": "calm", "choices": {"combat": ["steel_rain"], "tavern": ["warm_hearth", "jolly_mug"]}}
+```
+
+| Key | Meaning |
+|---|---|
+| `"music": false` | No music in this world. |
+| `default` | Tag used when nothing else suggests one (start of the story, unknown place). |
+| `choices` | For a tag, the library tracks (ids) this world plays; other tags: a random track with that tag. |
+
 ### `modules`
 List of genre names, e.g. `["school"]`. A module switches on genre-specific engine behaviour. Unknown names are kept
 (with a note in the report) so a pack can be tagged before the engine supports that genre.
