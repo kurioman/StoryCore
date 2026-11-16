@@ -214,3 +214,12 @@ def character_detail(sid: str, cid: str, db: Session = Depends(get_db)) -> dict[
             "lore_relationships": rel_svc.lore_relationships(db, s.world_id, {cid}), "character_relationships": evolved,
             # v1.5: canon facts about who this character is (kinship, family branch, classes taught/attended)
             "canon": canon_svc.for_character(canon_svc.facts(db, s.world_id, index), cid, index)}
+
+
+# --------------------------------------------------------------------------- codex (v1.8)
+@router.get("/stories/{sid}/codex")
+def codex(sid: str, db: Session = Depends(get_db)) -> dict[str, Any]:
+    """Characters and places discovered in this story (active branch); undiscovered ones are counted as locked."""
+    from ..services import codex as codex_svc
+    s, b, state, index = _ctx(db, sid)
+    return codex_svc.build(db, s, b, index)

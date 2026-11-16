@@ -18,6 +18,7 @@ import {
   useUi,
 } from "@/components/ui";
 import { ContextWarnings } from "@/features/story/composer";
+import { CodexButton } from "@/features/codex/CodexDialog";
 import { cn, isCloudModelId } from "@/lib/util";
 import { navigate } from "@/lib/router";
 
@@ -103,6 +104,7 @@ export function StoryHeader({
         <ContextWarnings manifest={manifest} onClick={() => onOpen(`context`)} />
         <SaveStatus />
         <MoreToolsMenu story={story} onOpen={onOpen} compact={y} />
+        <CodexButton storyId={story.id} compact={y} />
         <div className="flex rounded-md border border-line p-0.5" role="tablist" aria-label={msg("Workspace view")}>
           <button
             role="tab"

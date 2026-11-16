@@ -120,6 +120,18 @@ library uses the player's language, then English, then the first one given.
 "cover": "cover.webp"
 ```
 
+### Codex (optional)
+
+The codex is the in-story encyclopedia of characters and places the player has discovered. It is on by default.
+
+| Key | Meaning |
+|---|---|
+| `codex` | `false` switches the codex off for this pack. |
+| `"codex": false` on a lore record | Leaves that character or place out of the codex (a secret character, a hidden place). |
+
+What it shows comes only from public lore (never the narrator-only `hidden` notes): name and type once the player has
+heard of someone or something; summary, portrait and details once they have met the character or visited the place.
+
 ### `modules`
 List of genre names, e.g. `["school"]`. A module switches on genre-specific engine behaviour. Unknown names are kept
 (with a note in the report) so a pack can be tagged before the engine supports that genre.

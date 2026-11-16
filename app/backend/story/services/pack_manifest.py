@@ -33,7 +33,8 @@ FACT_KINDS = {"aunt_of", "sibling_of", "parent_of", "spouse_of", "family_branch"
 DEFAULT_FILES = {"system_prompt": "ai/narrative_system_prompt.md", "premise": "lore/premise.md", "images": None}
 SECTIONS = ("stats", "starters", "posts", "closed_groups", "facts", "gatherings", "places", "calendar", "never_random")
 LIBRARY_KEYS = ("summary", "tags", "cover")
-TOP_KEYS = {"format_version", "id", "name", "description", "canon_note", "modules", "files", *LIBRARY_KEYS, *SECTIONS}
+TOP_KEYS = {"format_version", "id", "name", "description", "canon_note", "modules", "files", "codex", *LIBRARY_KEYS,
+            *SECTIONS}
 MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November",
           "December"]
 
@@ -91,6 +92,14 @@ def load(pack_dir: Path) -> tuple[dict[str, Any] | None, dict[str, list[str]]]:
     if fv == 1 and any(k in raw for k in LIBRARY_KEYS):
         rep.warnings.append(f"{MANIFEST}: summary, tags and cover need format_version 2; they are read anyway.")
     out["library"] = _library(pack_dir, raw, rep)
+    # codex (v1.8): on unless the pack says "codex": false (or {"enabled": false})
+    cx = raw.get("codex", True)
+    if isinstance(cx, dict):
+        cx = cx.get("enabled", True)
+    if not isinstance(cx, bool):
+        rep.warnings.append("codex: must be true or false; the codex stays on.")
+        cx = True
+    out["codex"] = cx
     for sec in SECTIONS:
         if sec not in raw:
             continue

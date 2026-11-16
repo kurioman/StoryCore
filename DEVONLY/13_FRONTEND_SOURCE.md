@@ -20,6 +20,7 @@ app/frontend/
     features/
       welcome/            full-screen welcome page at #/ (WelcomePage.tsx) and its animated canvas (Starfield.tsx)
       home/               the story list at #/library (will become the story library)
+      codex/              the Codex screen of the play screen (CodexDialog.jsx; data from services/codex.py)
       report/             "Report a problem" dialog, bug report download, the Recap / Report buttons of the play screen
       sidebar/  help/  wizard/  avatars/  commands/  lore/  portraits/
       settings/           SettingsPage + one file per tab (Providers, OllamaModels, Narration, Memory, Note, Appearance, Data)
