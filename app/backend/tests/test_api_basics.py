@@ -111,3 +111,18 @@ class LibraryCardTest(AppTestCase):
             m, rep = pack_manifest.load(Path(d))
             self.assertIsNotNone(m, rep)
             self.assertEqual(m["library"], {})
+
+
+class OpeningsTest(AppTestCase):
+    """v1.8: Hero's Chronicle has two openings (Avalon, the Demon King), Lumencia Academy one (Enrollment, 1 March)."""
+
+    def test_pack_openings(self):
+        hc = {s["id"]: s for s in self.world("hero_chronicle")["data_json"]["starters"]}
+        self.assertEqual(set(hc), {"the_hero_summoned", "the_hero_and_the_demon_king"})
+        self.assertIn("Avalon", hc["the_hero_summoned"]["blueprint"])
+        self.assertIn("Beelzebub", hc["the_hero_and_the_demon_king"]["blueprint"])
+        for s in hc.values():
+            self.assertEqual((s["scene"]["day"], s["scene"]["month"], s["scene"]["year"]), (1, 3, 1301))
+        la = {s["id"]: s for s in self.world("lumencia_academy")["data_json"]["starters"]}
+        self.assertEqual(set(la), {"enrollment"})
+        self.assertEqual((la["enrollment"]["scene"]["day"], la["enrollment"]["scene"]["month"]), (1, 3))

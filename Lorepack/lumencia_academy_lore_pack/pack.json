@@ -5,7 +5,7 @@
   "description": "A prestigious imperial academy where martial cultivation, spellcraft and divine power meet, and noble privilege collides with commoner ambition.",
   "summary": {"en": "You arrive as a new student at Lumencia Academy, the most prestigious school of the empire, where sword arts, spellcraft and divine power are taught side by side. Classes, exams, rivalries and friendships between proud nobles and ambitious commoners... while a demonic cult stirs in the shadows.", "fr": "Vous arrivez comme nouvel élève à l'Académie Lumencia, l'école la plus prestigieuse de l'empire, où l'on enseigne côte à côte l'art de l'épée, la magie et le pouvoir divin. Cours, examens, rivalités et amitiés entre nobles fiers et roturiers ambitieux… pendant qu'un culte démoniaque s'agite dans l'ombre."},
   "tags": {"en": ["Academy", "Fantasy", "Lifestyle", "Action"], "fr": ["Académie", "Fantasy", "Lifestyle", "Action"]},
-  "_cover": "Story library cover: put an image in this folder (e.g. cover.webp) and add  \"cover\": \"cover.webp\"",
+  "cover": "cover.webp",
   "canon_note": "Imported from a research-based reference pack. Records carry confidence and canon_status; community reconstructions are not guaranteed official canon.",
   "modules": ["school"],
 
@@ -14,6 +14,19 @@
     "premise": "lore/premise.md",
     "images": "lumencia_images"
   },
+  "starters": [
+    {
+      "id": "enrollment",
+      "name": "Enrollment",
+      "purpose": "You arrive at Lumencia Academy as a new student, on the first day of the academy year.",
+      "blueprint": "Begin on the first day of the academy year (1 March), the week of the entrance evaluation that sets each new student's starting rank. Place the protagonist, a newly arrived student, at the academy's entrance, admissions hall or first orientation point in Asterion. Establish the scale and atmosphere of the institution, hint at the tension between noble and commoner students, and introduce one immediate decision (where to go, whom to approach, what to disclose, or how to respond). Do not decide the protagonist's dialogue, feelings or actions. End on a clear opening for player input.",
+      "scene": {
+        "location": "Lumencia Academy",
+        "day": 1,
+        "month": 3
+      }
+    }
+  ],
 
   "stats": [
     { "label": "HP", "type": "current_max", "value": 100, "max": 100 },

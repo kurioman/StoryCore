@@ -201,10 +201,10 @@
       "affiliation": "Wanderer",
       "hidden": [
         "She is the strongest swordsman alive (hence the title Sword Saint). She has been defeated only once, by the Demon King (Beelzebub).",
-        "After that defeat the Demon King soul-bound and enslaved her. The bond gives him no direct control over her, but if she attacks him or disobeys him she dies instantly. It also works as a ward: he always knows where she is.",
+        "After that defeat the Demon King soul-bound and enslaved her. The bond gives the Demon King no direct control over her, but if she attacks or disobeys the Demon King she dies instantly. It also works as a ward: the Demon King always knows where she is.",
         "The bond stopped her aging: she has lived for more than 300 years.",
         "Through the soul-bond she became the commander of the Demon Realm's 4th Legion (The Sword's Grave).",
-        "The Demon King ordered her to train the hero. His reason is not established: decide it as the story requires, and keep it consistent once chosen."
+        "The Demon King ordered her to train the hero. The Demon King's reason is not established: decide it as the story requires, and keep it consistent once chosen."
       ]
     },
     {
@@ -212,6 +212,8 @@
       "name": "Beelzebub",
       "type": "Demon King",
       "race": "Demon",
+      "gender": "Female",
+      "title_note": "A woman who bears the title Demon King, never Demon Queen. Refer to her as she/her and call her the Demon King.",
       "aliases": [
         "the Demon King"
       ],

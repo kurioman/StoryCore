@@ -19,33 +19,6 @@
       "ai_initialization": "Establish the protagonist as a new student, then present a concrete first choice or immediate situation without deciding the protagonist's actions.",
       "confidence": "medium",
       "canon_status": "community_reconstruction"
-    },
-    {
-      "id": "free_mode",
-      "name": "Free Mode",
-      "purpose": "Start in the wider Lumencia setting with greater freedom to define the protagonist's status and starting location.",
-      "reported_behaviour": [
-        "Less strongly tied to the student role.",
-        "Can support an outsider, noble, adventurer, adult, political agent or custom background.",
-        "The academy may still become relevant depending on the campaign."
-      ],
-      "recommended_for": "A custom protagonist or a campaign that may range beyond the academy.",
-      "ai_initialization": "Ask no unnecessary setup questions if the player has already provided a profile. Use their chosen role and location; otherwise open with an actionable scene that leaves role and intent under player control.",
-      "confidence": "medium",
-      "canon_status": "community_reconstruction"
-    },
-    {
-      "id": "character_preview",
-      "name": "Character Preview",
-      "purpose": "A start option reported to expose or foreground parts of the cast, including characters who may appear less often in ordinary academy play.",
-      "reported_behaviour": [
-        "May function as a character introduction mode.",
-        "Some players report continuing into an actual story from it; do not assume it is purely a gallery."
-      ],
-      "recommended_for": "Cast discovery, character-focused play or testing a chosen character setup.",
-      "ai_initialization": "Introduce the selected characters in an observable scene, but do not assume the protagonist already knows their private histories.",
-      "confidence": "low",
-      "canon_status": "community_reconstruction"
     }
   ]
 }

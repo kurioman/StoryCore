@@ -7,6 +7,12 @@
       "map_hint": "Approximate, from the author's map: centre"
     },
     {
+      "name": "Avalon",
+      "description": "The royal palace of Grandel, capital of the Central Empire (Aether). Heroes summoned by the Heavenly God Lily can arrive in its summoning hall.",
+      "type": "Landmark",
+      "location": "Grandel"
+    },
+    {
       "name": "Venezia",
       "description": "Located in the Valerius Marquisate. Overflowing with grand merchant alliances and hedonism.",
       "type": "City",
