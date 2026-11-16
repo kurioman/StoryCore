@@ -1766,5 +1766,15 @@
  "Way of speaking": "Façon de parler",
  "You have only heard of this character. Meet them to learn more.": "Vous n'avez fait qu'entendre parler de ce personnage. Rencontrez-le pour en savoir plus.",
  "You have only heard of this place. Go there to learn more.": "Vous n'avez fait qu'entendre parler de ce lieu. Rendez-vous-y pour en savoir plus.",
- "{{v0}} of {{v1}} discovered": "{{v0}} sur {{v1}} découverts"
+ "{{v0}} of {{v1}} discovered": "{{v0}} sur {{v1}} découverts",
+ "Choose your opening": "Choisissez votre début",
+ "Free-form story": "Histoire libre",
+ "Library": "Bibliothèque",
+ "New game": "Nouvelle partie",
+ "No adventure to resume yet": "Aucune aventure à reprendre pour l'instant",
+ "No lore pack yet. Put a pack folder in Lorepack and restart StoryCore.": "Aucun Lore pack pour l'instant. Placez un dossier de pack dans Lorepack et relancez StoryCore.",
+ "Resume": "Reprendre",
+ "Your games in this world": "Vos parties dans ce monde",
+ "Your last adventure": "Votre dernière aventure",
+ "{{v0}} game(s)": "{{v0}} partie(s)"
 }

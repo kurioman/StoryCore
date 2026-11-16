@@ -163,7 +163,9 @@ body{background:var(--c-bg);color:var(--c-fg);font-family:var(--font-sans);-webk
 
 /* quiet "Resume" link under the big button (not active yet) */
 .sc-resume{margin-top:clamp(1.6rem,4vh,2.6rem);display:inline-flex;align-items:center;gap:.45rem;font-size:1rem;color:#e2bd7266;cursor:default;transition:color .2s ease}
-.sc-resume:hover{color:#e2bd7299}
+.sc-resume:not(:disabled){cursor:pointer}
+.sc-resume:not(:disabled):hover{color:#e2bd72c0}
+.sc-resume:disabled{opacity:.6}
 /* leaving: the content fades and grows, then a soft flash as the stars jump to light speed */
 .sc-welcome-layout{transition:opacity .9s ease,transform 1.15s cubic-bezier(.5,0,.75,0),filter .9s ease}
 .sc-leaving .sc-welcome-layout{opacity:0;transform:scale(1.12);filter:blur(3px)}
@@ -200,3 +202,30 @@ button.sc-cx-card:hover{transform:translateY(-2px);border-color:#e2bd7270;box-sh
 .sc-cx-badge-met{background:#7fa7d626;color:#a9c6ec}
 .sc-cx-badge-known{background:#79b38a29;color:#9fd3ad}
 .sc-cx-lockslot{border:1px dashed #e2bd7244;color:#e2bd72;background:#0d1230}
+
+/* v1.8 story library (features/library) */
+.sc-lib{background:radial-gradient(ellipse 80% 40% at 50% 0%,#141b4580,transparent 70%),var(--c-bg)}
+.sc-lib-h2{margin-bottom:.9rem;font-family:var(--font-brand);font-weight:700;letter-spacing:.06em;font-size:1.05rem;color:#e2bd72}
+.sc-lib-h3{margin-bottom:.6rem;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#e2bd72b0}
+.sc-lib-resume{display:flex;width:100%;height:15rem;overflow:hidden;border-radius:1rem;border:1px solid #e2bd7240;background:linear-gradient(120deg,#151d4a,#0d1232);box-shadow:0 18px 50px -24px #000;transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+.sc-lib-resume>:first-child{width:10rem;flex-shrink:0}
+.sc-lib-resume:hover{transform:translateY(-2px);border-color:#e2bd72a0;box-shadow:0 22px 60px -24px #000,0 0 40px -14px #e2bd7266}
+.sc-lib-cta{display:inline-flex;align-items:center;gap:.5rem;border-radius:999px;padding:.5rem 1.1rem;font-weight:600;font-size:.9rem;color:#0b1030;background:linear-gradient(180deg,#f7d98e,#d4a650);box-shadow:0 1px 0 #ffffff60 inset,0 8px 20px -10px #e2bd72aa;transition:filter .2s ease,transform .2s ease}
+.sc-lib-cta:hover,.group:hover .sc-lib-cta{filter:brightness(1.08)}
+.sc-lib-mini{display:flex;height:4.5rem;overflow:hidden;border-radius:.75rem;border:1px solid #e2bd7226;background:#111840;transition:border-color .2s ease,transform .2s ease}
+.sc-lib-mini:hover{border-color:#e2bd7270;transform:translateY(-1px)}
+.sc-lib-card{display:flex;flex-direction:column;overflow:hidden;border-radius:1rem;border:1px solid #e2bd7230;background:#101640;transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+.sc-lib-card:hover{transform:translateY(-4px);border-color:#e2bd72a0;box-shadow:0 24px 50px -22px #000,0 0 40px -12px #e2bd7266}
+.sc-lib-cover{position:relative;aspect-ratio:2/3;width:100%;overflow:hidden}
+.sc-lib-cover img{transition:transform .5s ease}
+.sc-lib-card:hover .sc-lib-cover img{transform:scale(1.04)}
+.sc-lib-count{position:absolute;right:.5rem;top:.5rem;border-radius:999px;padding:.15rem .55rem;font-size:.7rem;font-weight:600;color:#0b1030;background:#f3d48ce6}
+.sc-lib-nocover{background:radial-gradient(circle at 50% 35%,#1c2556,#0d1230)}
+.sc-lib-tag{border-radius:999px;border:1px solid #e2bd7244;padding:.05rem .55rem;font-size:.7rem;color:#e2bd72;background:#e2bd7212}
+.sc-lib-opening{display:flex;width:100%;align-items:flex-start;gap:.75rem;border-radius:.75rem;border:1px solid #e2bd7226;padding:.7rem .85rem;background:#e2bd7208;transition:border-color .2s ease,background .2s ease}
+.sc-lib-opening:hover{border-color:#e2bd7266}
+.sc-lib-opening-on{border-color:#e2bd72;background:#e2bd7214}
+.sc-lib-radio{margin-top:.2rem;width:.9rem;height:.9rem;flex-shrink:0;border-radius:999px;border:2px solid #e2bd7299}
+.sc-lib-opening-on .sc-lib-radio{border-color:#f3d48c;background:radial-gradient(circle,#f3d48c 40%,transparent 45%)}
+.sc-lib-game{display:flex;width:100%;align-items:center;gap:.6rem;border-radius:.6rem;padding:.5rem .7rem;transition:background .2s ease}
+.sc-lib-game:hover{background:#e2bd7214}

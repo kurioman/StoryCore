@@ -8,6 +8,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Check, History, Languages, Settings, SlidersHorizontal } from "lucide-react";
 import discordLogo from "@/assets/discord.png"; // official Discord symbol: keep its colours as they are
 import { apiGet } from "@/api/legacy";
+import { useStories } from "@/api/queries";
+import { lastStory } from "@/features/library/LibraryPage";
 import { LANGUAGES, msg, setLanguageLive, shownLanguage, type Language } from "@/i18n";
 import { CREDITS, DISCORD_URL } from "@/lib/links";
 import { navigate } from "@/lib/router";
@@ -20,6 +22,7 @@ export function WelcomePage() {
   const button = React.useRef<HTMLButtonElement>(null);
   const [language, setLanguage] = React.useState<Language>(shownLanguage());
   const [leaving, setLeaving] = React.useState(false);
+  const last = lastStory(useStories().data);
   const health = useQuery({ queryKey: [`health`], queryFn: () => apiGet<{ version: string }>(`/health`) });
 
   /** Stars fly to the mouse while it is over the button (to the button centre with the keyboard). */
@@ -36,11 +39,11 @@ export function WelcomePage() {
     setLanguage(code);
   }
 
-  async function start() {
+  async function start(to = `/library`) {
     if (leaving) return;
     setLeaving(true);
     await stars.current?.warp();
-    navigate(`/library`);
+    navigate(to);
   }
 
   return (
@@ -106,7 +109,7 @@ export function WelcomePage() {
           <button
             ref={button}
             type="button"
-            onClick={start}
+            onClick={() => start()}
             onPointerEnter={(e) => attract(true, e)}
             onPointerMove={(e) => attract(true, e)}
             onPointerLeave={() => attract(false)}
@@ -119,9 +122,9 @@ export function WelcomePage() {
           </button>
           <button
             type="button"
-            aria-disabled
-            title={msg("Coming soon")}
-            onClick={(e) => e.preventDefault()}
+            disabled={!last}
+            title={last ? last.title : msg("No adventure to resume yet")}
+            onClick={() => last && start(`/story/${last.id}`)}
             className="sc-resume"
           >
             <History className="size-4" /> {msg("Resume my last adventure")}

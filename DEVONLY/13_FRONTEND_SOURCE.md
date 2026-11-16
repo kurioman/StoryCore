@@ -19,7 +19,8 @@ app/frontend/
     app/App.jsx           shell: sidebar + routes
     features/
       welcome/            full-screen welcome page at #/ (WelcomePage.tsx) and its animated canvas (Starfield.tsx)
-      home/               the story list at #/library (will become the story library)
+      library/            the story library at #/library (LibraryPage.jsx: resume, story cards, story sheet)
+      home/               SetupNotices.jsx: set-up notices shown at the top of the library
       codex/              the Codex screen of the play screen (CodexDialog.jsx; data from services/codex.py)
       report/             "Report a problem" dialog, bug report download, the Recap / Report buttons of the play screen
       sidebar/  help/  wizard/  avatars/  commands/  lore/  portraits/

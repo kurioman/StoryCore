@@ -47,6 +47,10 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
   and the first meeting. Places: heard of when the story names them, visited when a scene takes place there.
   Undiscovered entries are "???" cards with a progress counter, never their name. Packs can switch it off
   (`"codex": false`) or leave a record out.
+- **Story library** (where "Start your next adventure" leads): "Resume" with your last game in a big card and your
+  other games in progress, then one card per lore pack with its cover, tags and summary. A card opens the story sheet:
+  choose an opening, "New game" (the wizard opens with the world and opening chosen) and your games in that world.
+  "Resume my last adventure" on the welcome page now opens your latest game.
 - **Night-blue dark theme** for the whole app, matching the welcome page (the light theme is unchanged).
 - **Cinzel** for the StoryCore name (welcome title, sidebar, headers), bundled with the app (SIL Open Font License).
   New welcome logo (a star born from an open book); the rest of the app keeps the four-point star.

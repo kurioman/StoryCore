@@ -9,7 +9,7 @@ import { msg } from "@/i18n";
 import { AvatarsPage } from "@/features/avatars/AvatarsPage";
 import { CommandsPage } from "@/features/commands/CommandsPage";
 import { HelpDialog } from "@/features/help/HelpDialog";
-import { HomePage } from "@/features/home/HomePage";
+import { LibraryPage } from "@/features/library/LibraryPage";
 import { WelcomePage } from "@/features/welcome/WelcomePage";
 import { IconButton, UiProvider } from "@/components/ui";
 import { LorePage } from "@/features/lore/LorePage";
@@ -60,7 +60,7 @@ function App() {
   ) : matchRoute(hashPath, `/settings`) ? (
     <SettingsPage tab="providers" />
   ) : matchRoute(hashPath, `/library`) ? (
-    <HomePage />
+    <LibraryPage />
   ) : null;
 
   let d = matchRoute(hashPath, `/story/:id`)?.id,

@@ -43,10 +43,11 @@ export function NewStoryWizard() {
     [s, c] = React.useState(0),
     [l, u] = React.useState(null),
     [d, f] = React.useState(null),
-    [p, g] = React.useState({
+    [p, g] = React.useState(() => ({
       title: ``,
-      world_id: ``,
-      starter_id: ``,
+      // v1.8: the story library opens #/new?world=<id>&starter=<id>
+      world_id: new URLSearchParams(window.location.hash.split(`?`)[1] ?? ``).get(`world`) ?? ``,
+      starter_id: new URLSearchParams(window.location.hash.split(`?`)[1] ?? ``).get(`starter`) ?? ``,
       starting_location: ``,
       starting_time: ``,
       avatar_id: ``,
@@ -60,7 +61,7 @@ export function NewStoryWizard() {
       stat_template: `world`,
       featured_characters: [],
       story_note: ``,
-    }),
+    })),
     v = worlds.data?.find((e) => e.id === p.world_id),
     // v1.8: only the world's own openings (chosen by the pack's author)
     y = React.useMemo(() => {
