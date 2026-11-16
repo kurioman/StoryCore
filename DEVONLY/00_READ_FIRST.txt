@@ -35,8 +35,8 @@ It runs entirely on the player's PC:
 
   app/python/                Bundled "embeddable" Windows Python 3.12 + all libraries. Nothing to install.
   app/backend/story/         THE ENGINE (Python source). See 02_BACKEND.txt.
-  app/frontend/dist/         The compiled web interface (HTML/CSS/JS). See 07_FRONTEND.txt.
-  app/frontend/src/          Source of the new interface (v1.8, served at /next/). See 13_FRONTEND_SOURCE.md.
+  app/frontend/dist/         The built web interface (HTML/CSS/JS), served at /. See 07_FRONTEND.txt.
+  app/frontend/src/          Its source code (React). See 13_FRONTEND_SOURCE.md.
   app/backend/tests/         Engine tests (run DEVONLY\run_tests.bat).
   Check Lore Packs.bat       Lore pack checker for pack authors. See 04_LOREPACK.txt section 10.
   scripts/serve.py           Entry point used by the .bat.

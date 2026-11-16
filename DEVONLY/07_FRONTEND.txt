@@ -1,15 +1,11 @@
 FRONTEND (THE WEB INTERFACE)
 ============================
 
-Location: app/frontend/dist/
-    index.html                          loads the two files below
-    assets/index-storycore-p5.js        the whole app (React, compiled and minified, ~950 KB)
-    assets/index-DyVd5MRf.css           styles
+Source: app/frontend/src (React 19 + Vite + Tailwind 4). Built into app/frontend/dist (index.html + assets/), which
+is committed so players do not need Node. How to work on it, build it and translate it: 13_FRONTEND_SOURCE.md.
 
-IMPORTANT: the React/Vite SOURCE CODE IS NOT IN THIS PROJECT. Only the compiled result was delivered. During the
-multi-story refactor (November 2026) the compiled file was patched directly (renaming, the X-Story-Client header,
-the "World default" stat sheet, export file names); the patched file was given a new name ("-storycore-p5") so
-browsers reload it instead of using a cached copy.
+v1.8: the v1.7 interface (a compiled bundle without source, patched by hand) is gone. The rebuilt interface replaced
+it at / ; the addresses used during the switch (/next/..., /old) redirect to /.
 
 
 1. HOW IT IS SERVED
@@ -18,43 +14,32 @@ main.py mounts /assets as static files and answers every other non-/api path wit
 The app uses hash routing (http://127.0.0.1:8765/#/story/<id>), so any path works.
 
 Pages (hash routes):
-  #/                     Home: stories library, worlds, onboarding checklist, manual "Import lore" / "Scan portraits"
-  #/new                  New Story wizard (5 steps: Story, World & start, Protagonist, Tone & model, Review)
+  #/                     Welcome page (full screen)
+  #/setup                First-run assistant
+  #/library              Story library (resume, story cards, openings, games in progress)
+  #/new                  New Story wizard
   #/story/:id            The story: transcript, composer, scene portraits, suggestions, side panels (state, journal,
-                         characters, context inspector, savepoints...)
+                         characters, context inspector, savepoints...), Codex, music player
   #/lore                 Lore library: worlds, records, search, import reports, local canon, roles
   #/portraits            Portrait folders, matches, manual assignment
   #/avatars, #/avatars/:id   Player protagonists
+  #/music                Music library
   #/commands             Slash commands
+  #/mobile               Play on a phone (same as #/settings/phone)
   #/settings/:tab        providers, ollama, generation (Narration & context), memory (Memory capture),
-                         notes (Global note), appearance, data (Data & backups)
+                         notes (Global note), appearance, phone (Play on a phone), data (Data & backups)
 
-Browser storage: small UI preferences in localStorage with the prefix "lsd:" (panel sizes, last tab...).
+Browser storage: small UI preferences in localStorage with the prefix "lsd:" (language, panel sizes, last tab...).
 Everything that matters is on the server.
 
 
 2. HOW IT TALKS TO THE BACKEND
 ------------------------------
   - JSON over fetch to /api/... with the header X-Story-Client: 1 on every request (required for changes).
-  - Live text: EventSource on /api/generations/{message_id}/stream (and Ollama pull progress).
+  - Live text: server-sent events read with fetch on /api/generations/{message_id}/stream (and Ollama pull progress).
   - Images: /api/assets/{asset_id}/image?variant=card|full (and other thumbnail sizes, assets.VARIANTS), /api/uploads/...
   - Error JSON: {"detail": "...", "code": "..."}; the UI shows "detail". Special codes: cloud_consent_required
-    (shows the privacy notice), no_model (points to Settings), provider_error (friendly + technical details).
+    (shows the privacy notice), no_model (points to Settings), provider_error (friendly + technical details),
+    not_paired (a phone goes back to /pair), pc_only (a phone is told it is only available on the computer).
 Most world-specific text in the UI comes from the API (world names, descriptions, canon_note, starters, stats,
 characters), so new Lore Packs need no frontend change.
-
-
-3. CHANGING THE INTERFACE WITHOUT SOURCE
-----------------------------------------
-Small changes (a label, a default, a header) can be patched in the compiled file:
-  1. Copy assets/index-storycore-p5.js to a backup.
-  2. Find the exact text (strings are in backticks `...` in this build). Make sure it occurs once, or replace each
-     occurrence on purpose. Keep the JavaScript valid (do not break quotes/backticks).
-  3. Save under a NEW file name (e.g. index-storycore-p6.js) and update the <script src> in index.html, so browsers
-     do not keep the old cached copy.
-  4. Check in the browser: open the developer console (F12) for errors.
-CSS can be patched the same way (or add rules at the end of the .css file).
-
-Bigger changes: write a new frontend. The whole API is documented in 08_API_REFERENCE.txt and live at
-http://127.0.0.1:8765/docs. Build it to app/frontend/dist (index.html + assets/). A dev server on port 5173 is already
-allowed as an origin (Vite default); proxy /api to the backend.

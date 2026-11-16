@@ -115,7 +115,7 @@ def _try_pair(request: Request, code: str | None):
     token = remote.pair(code, request.headers.get("user-agent", ""))
     if token is None:
         return _page(t, t["bad"] if remote.enabled else t["off"])
-    resp = RedirectResponse("/next/#/library", status_code=303)
+    resp = RedirectResponse("/#/library", status_code=303)
     resp.set_cookie(COOKIE, token, max_age=BADGE_TTL, httponly=True, samesite="lax", path="/")
     return resp
 

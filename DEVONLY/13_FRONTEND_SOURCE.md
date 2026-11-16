@@ -1,7 +1,7 @@
 # StoryCore frontend: source code (roadmap step 2)
 
 Since November 2026 the interface has its source code, in `app/frontend/src`. Until then only the compiled file
-existed (`app/frontend/dist/assets/index-storycore-p6.js`), patched by hand.
+existed (`app/frontend/dist/assets/index-storycore-p6.js`, removed in v1.8), patched by hand.
 
 ## Where things are
 
@@ -33,8 +33,7 @@ app/frontend/
       settings/           SettingsPage + one file per tab (Providers, OllamaModels, Narration, Memory, Note, Appearance, Data)
       story/              StoryPage (the play screen), transcript, composer, header, dialogs, journal, prose, chrono,
                           panels/ (Status, Known, Relations, Cast, Items & Quests), api.js (scene/known-characters hooks)
-  dist/                   v1.7.0 compiled interface (still served at /)
-  dist-next/              build of src/ (served at /next/ while the two are compared)
+  dist/                   build of src/, served at / (committed: players do not need Node)
 ```
 
 ## How it was rebuilt
@@ -93,18 +92,18 @@ Node 20+ is needed only to work on the interface (players do not need it: the bu
 cd app/frontend
 npm install
 npm run dev          # http://localhost:5173, live reload, /api proxied to the running StoryCore (port 8765)
-npm run build        # production build to dist-next/ (served at http://127.0.0.1:8765/next/)
+npm run build        # production build to dist/ (served at http://127.0.0.1:8765/)
 npm run build:debug  # same, not minified, with readable React errors
 npm run typecheck
 ```
 
 ## Serving
 
-`app/backend/story/main.py` serves `dist/` at `/` and, when it exists, `dist-next/` at `/next/`. When the new
-interface is validated it replaces `dist/` (build with base `/`), and `/next/` is removed.
+`app/backend/story/main.py` serves `dist/` at `/`. The v1.7 compiled interface is gone (v1.8); the addresses used
+while both lived side by side (`/next/...`, `/old`) redirect to `/`.
 
 ## Building from a Windows-mounted folder
 
 `npm install` straight into `app/frontend/node_modules` is very slow on some setups. Copying `app/frontend` (without
-`node_modules`, `dist`, `dist-next`) to a local folder, building there and copying `dist-next/` back works the same.
+`node_modules` and `dist`) to a local folder, building there and copying `dist/` back works the same.
 Welcome page styles are in `styles.css` under "v1.8 welcome page"; the background colour is `--sc-night`.

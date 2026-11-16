@@ -220,42 +220,28 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
 
     app.include_router(remote_r.pair_router)
 
+    # v1.8: the interface (built from app/frontend/src into app/frontend/dist) is served at /. The addresses used
+    # while the old and the new interface lived side by side (/next/, /old) lead back to it (the #/... part is kept).
     if (FRONTEND_DIST / "assets").is_dir():
         app.mount("/assets", StaticFiles(directory=FRONTEND_DIST / "assets"), name="assets")
 
-    # Second frontend served side by side at /next/ while the rebuilt interface is being checked against the
-    # current one (app/frontend/dist-next, built with base "/next/"). Absent folder = nothing is served there.
-    next_dist = FRONTEND_DIST.parent / "dist-next"
-    if (next_dist / "assets").is_dir():
-        app.mount("/next/assets", StaticFiles(directory=next_dist / "assets"), name="next-assets")
-
+    @app.get("/old", include_in_schema=False)
     @app.get("/next", include_in_schema=False)
     @app.get("/next/{full_path:path}", include_in_schema=False)
-    async def spa_next(full_path: str = ""):
-        f = (next_dist / full_path).resolve() if full_path else None
-        if f and f.is_file() and next_dist.resolve() in f.parents:
-            return FileResponse(f)
-        index = next_dist / "index.html"
-        if index.is_file():
-            return FileResponse(index, headers={"Cache-Control": "no-cache"})
-        return HTMLResponse("<h1>StoryCore</h1><p>The new interface has not been built yet (app/frontend/dist-next).</p>")
+    async def former_addresses(full_path: str = ""):
+        return RedirectResponse("/", status_code=307)
 
     @app.get("/{full_path:path}", include_in_schema=False)
     async def spa(full_path: str):
         if full_path.startswith("api/"):
             return JSONResponse({"detail": "Not found"}, 404)
-        # v1.8: the new interface is the default; the previous one stays at /old while the switch settles
-        if full_path in ("", "index.html") and (next_dist / "index.html").is_file():
-            return RedirectResponse("/next/", status_code=307)
-        if full_path.strip("/") == "old":
-            full_path = ""
         f = (FRONTEND_DIST / full_path).resolve() if full_path else None
         if f and f.is_file() and FRONTEND_DIST.resolve() in f.parents:
             return FileResponse(f)
         index = FRONTEND_DIST / "index.html"
         if index.is_file():
             return FileResponse(index, headers={"Cache-Control": "no-cache"})
-        return HTMLResponse("<h1>StoryCore</h1><p>The frontend has not been built yet. Run the start script, "
-                            "which builds it automatically, or run <code>npm run build</code> in app/frontend.</p>")
+        return HTMLResponse("<h1>StoryCore</h1><p>The interface has not been built yet: run <code>npm run build</code> "
+                            "in app/frontend (see DEVONLY/13_FRONTEND_SOURCE.md).</p>")
 
     return app

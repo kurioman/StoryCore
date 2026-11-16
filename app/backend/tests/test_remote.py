@@ -30,14 +30,14 @@ class RemoteAccessTest(AppTestCase):
     def pair(self):
         r = self.phone.get(f"/pair?code={self.remote.code}", headers={"User-Agent": PHONE_UA})
         self.assertEqual(r.status_code, 303, r.text[:200])
-        self.assertEqual(r.headers["location"], "/next/#/library")
+        self.assertEqual(r.headers["location"], "/#/library")
         self.assertIn(remote_svc.COOKIE, r.cookies)
         self.assertIn("httponly", r.headers["set-cookie"].lower())
 
     def test_unpaired_phone_gets_nothing(self):
         self.assertEqual(self.phone.get("/api/stories").status_code, 401)
         self.assertEqual(self.phone.get("/api/stories").json()["code"], "not_paired")
-        r = self.phone.get("/next/")
+        r = self.phone.get("/")
         self.assertEqual((r.status_code, r.headers["location"]), (303, "/pair"))
         self.assertEqual(self.phone.get("/pair").status_code, 200)  # the code form
         # a forged badge is not a badge
@@ -49,7 +49,7 @@ class RemoteAccessTest(AppTestCase):
         who = self.phone.get("/api/remote/whoami").json()
         self.assertEqual(who, {"remote": True, "device": "Android · Chrome"})
         self.assertEqual(self.phone.get("/api/stories").status_code, 200)
-        self.assertEqual(self.phone.get("/next/").status_code, 200)
+        self.assertEqual(self.phone.get("/").status_code, 200)
         self.assertEqual(self.phone.put("/api/settings", json={"ui_language": "fr"}).status_code
                          if "ui_language" in self.get("/settings") else 200, 200)
         # PC-only areas

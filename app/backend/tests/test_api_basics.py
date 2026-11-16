@@ -55,18 +55,18 @@ class BasicsTest(AppTestCase):
 class InterfaceSwitchTest(AppTestCase):
     import_packs = False
 
-    def test_root_opens_the_new_interface_and_old_stays_reachable(self):
-        r = self.client.get("/", follow_redirects=False)
+    def test_root_opens_the_interface_and_former_addresses_lead_to_it(self):
         from story.config import FRONTEND_DIST
-        if not (FRONTEND_DIST.parent / "dist-next" / "index.html").is_file():
-            self.skipTest("new interface not built")
-        self.assertEqual(r.status_code, 307)
-        self.assertEqual(r.headers["location"], "/next/")
-        self.assertIn('id="root"', self.client.get("/next/").text)
-        if (FRONTEND_DIST / "index.html").is_file():
-            old = self.client.get("/old")
-            self.assertEqual(old.status_code, 200)
-            self.assertIn("/assets/", old.text)
+        if not (FRONTEND_DIST / "index.html").is_file():
+            self.skipTest("interface not built")
+        r = self.client.get("/")
+        self.assertEqual(r.status_code, 200)
+        self.assertIn('id="root"', r.text)
+        self.assertIn('src="/assets/', r.text)  # built with base "/"
+        self.assertEqual(self.client.get("/library").status_code, 200)  # unknown paths get the app too
+        for former in ("/old", "/next", "/next/", "/next/index.html"):
+            r = self.client.get(former, follow_redirects=False)
+            self.assertEqual((r.status_code, r.headers["location"]), (307, "/"), former)
 
 
 class PortraitsPerWorldTest(AppTestCase):

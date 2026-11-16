@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --base=/next/ --outDir dist-next --emptyOutDir",
-    "build:debug": "vite build --mode development --minify false --base=/next/ --outDir dist-next --emptyOutDir",
+    "build": "vite build --emptyOutDir",
+    "build:debug": "vite build --mode development --minify false --emptyOutDir",
     "typecheck": "tsc --noEmit",
     "gen:api": "openapi-typescript http://127.0.0.1:8765/openapi.json -o src/api/schema.d.ts"
   },

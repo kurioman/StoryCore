@@ -7,7 +7,7 @@ say. The engine contains no story-specific data; any number of worlds can live s
 
 ## Tech Stack
 - **Backend:** Python 3.12 (FastAPI / SQLAlchemy / Alembic), bundled Windows Python in `app/python`
-- **Frontend:** React/Vite, shipped compiled in `app/frontend/dist` (the source is not in this folder)
+- **Frontend:** React/Vite, source in `app/frontend/src`, shipped built in `app/frontend/dist`
 - **Database:** SQLite, `data/stories.db` (copied from the older `lumencia.db` on first start)
 - **AI Integration:** Multi-provider support (Ollama, OpenRouter / OpenAI-compatible, Anthropic, a mock narrator)
 
