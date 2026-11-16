@@ -30,6 +30,8 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
   the middle of the screen. Footer: credits, Discord (link set in `app/frontend/src/lib/links.ts`) and the version.
   With "reduce motion" switched on in Windows, the stars stay still.
 - **Night-blue dark theme** for the whole app, matching the welcome page (the light theme is unchanged).
+- **Cinzel** for the StoryCore name (welcome title, sidebar, headers), bundled with the app (SIL Open Font License).
+  New welcome logo (a star born from an open book); the rest of the app keeps the four-point star.
 - **Recap and Report a problem buttons** always visible at the bottom of the right panel while playing. "Report a
   problem" asks what happened and puts that text in the bug report zip (`description.txt`), with the page and story
   it was made from (`context.json`: ids and counts only, never story text). A crashed screen also offers it.

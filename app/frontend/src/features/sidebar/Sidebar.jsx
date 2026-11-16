@@ -108,7 +108,7 @@ export function Sidebar({ activeStoryId, path, collapsed, onToggle, onHelp }) {
       <div className="flex h-12 items-center gap-2 px-3">
         <button onClick={() => navigate(`/`)} className="flex items-center gap-2" aria-label={msg("Home")}>
           <Logo />
-          <span className="text-[15px] font-semibold tracking-tight">{msg("StoryCore")}</span>
+          <span className="sc-brand text-[16px] text-accent">{msg("StoryCore")}</span>
         </button>
         <IconButton label={msg("Collapse library")} className="ml-auto" onClick={onToggle}>
           <Icon.ChevronsLeft className="size-4" />

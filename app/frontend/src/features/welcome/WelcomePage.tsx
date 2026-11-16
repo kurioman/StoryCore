@@ -12,6 +12,7 @@ import { LANGUAGES, msg, setLanguageLive, shownLanguage, type Language } from "@
 import { CREDITS, DISCORD_URL } from "@/lib/links";
 import { navigate } from "@/lib/router";
 import { cn } from "@/lib/util";
+import { BrandLogo } from "@/components/BrandLogo";
 import { Starfield, type StarfieldHandle } from "./Starfield";
 
 export function WelcomePage() {
@@ -85,20 +86,7 @@ export function WelcomePage() {
       <main className="sc-welcome-layout relative z-[1] h-full px-6 text-center">
         <header className="sc-welcome-head flex flex-col items-center">
           <div className="sc-welcome-logo" aria-hidden>
-            <svg viewBox="0 0 32 32" className="size-full">
-              <defs>
-                <linearGradient id="sc-logo-gold" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stopColor="#fbe4a3" />
-                  <stop offset="0.5" stopColor="#e2bd72" />
-                  <stop offset="1" stopColor="#b48a43" />
-                </linearGradient>
-              </defs>
-              <path
-                d="M16 2.5 L19.2 12.8 L29.5 16 L19.2 19.2 L16 29.5 L12.8 19.2 L2.5 16 L12.8 12.8 Z"
-                fill="url(#sc-logo-gold)"
-              />
-              <circle cx="16" cy="16" r="2.4" fill="#0b1030" />
-            </svg>
+            <BrandLogo full className="size-full" />
           </div>
           <div className="sc-title-wrap">
             <div className="sc-title-halo" aria-hidden />

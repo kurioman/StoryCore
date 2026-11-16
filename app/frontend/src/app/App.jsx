@@ -115,7 +115,7 @@ function App() {
             <IconButton label={msg("Open library")} onClick={() => o(true)}>
               <Icon.Menu className="size-4" />
             </IconButton>
-            <span className="text-sm font-medium">{msg("StoryCore")}</span>
+            <span className="sc-brand text-sm text-accent">{msg("StoryCore")}</span>
             <IconButton label={msg("Help and tour")} className="ml-auto" onClick={() => c(true)}>
               <Icon.CircleQuestionMark className="size-4" />
             </IconButton>

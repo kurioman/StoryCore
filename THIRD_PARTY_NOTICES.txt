@@ -116,6 +116,7 @@ is-hexadecimal 2.0.1: MIT
 is-plain-obj 4.1.0: MIT
 longest-streak 3.1.0: MIT
 lucide-react 1.64.0: ISC
+@fontsource/cinzel 5.3.0 (Cinzel font by Natanael Gama): SIL Open Font License 1.1, see app/frontend/node_modules/@fontsource/cinzel/LICENSE or https://openfontlicense.org
 markdown-table 3.0.4: MIT
 mdast-util-find-and-replace 3.0.4: MIT
 mdast-util-from-markdown 2.1.0: MIT

@@ -63,7 +63,7 @@ export function HomePage() {
         <div className="mb-8 flex items-center gap-3">
           <Logo />
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">{msg("StoryCore")}</h1>
+            <h1 className="sc-brand text-2xl text-accent">{msg("StoryCore")}</h1>
             <p className="text-sm text-muted">
               {msg("Your local storytelling workspace. Everything is stored on this computer.")}
             </p>
