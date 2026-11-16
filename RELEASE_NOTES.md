@@ -85,6 +85,11 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
   stays the same size however long the game. Each summary also remembers what happened with each character (sent
   when that character is in the scene again) and the promises, quests and mysteries still open; the detail of an old
   scene comes back when its names or places are mentioned again.
+- **Faster and cheaper requests.** What changes every turn (scene, lore found, memories, narration rules) now travels
+  with your message, and older messages leave the request in steps rather than one by one: the beginning of the
+  request stays the same for several turns. LM Studio reuses what it already read (replies start sooner); DeepSeek and
+  Gemini bill repeated input less, and Claude gets cache markers. A character's full lore entry is sent when they
+  arrive, then only their short line while they stay. Both can be switched off in Settings > Narration & context.
 - The recommended-models cards (Settings > Providers & models) are translated too ("Tested with StoryCore", pros
   and cons...).
 

@@ -561,7 +561,11 @@ def context_preview(sid: str, full: bool = False, ctx: AppContext = Depends(get_
         for secret in built.secrets:  # narrator-only notes never reach the player's screen
             system = system.replace(secret, "[Narrator-only notes are hidden from the player.]")
         out["system"] = system
-        out["messages"] = [{"role": m.role, "content": m.content} for m in built.messages]
+        msgs = [{"role": m.role, "content": m.content} for m in built.messages]
+        for m in msgs:  # v1.8 "stable" layout: the per-turn sections (secrets included) ride with the last message
+            for secret in built.secrets:
+                m["content"] = m["content"].replace(secret, "[Narrator-only notes are hidden from the player.]")
+        out["messages"] = msgs
     return out
 
 

@@ -66,6 +66,11 @@ DEFAULTS: dict[str, Any] = {
     # v1.8 phase 7.1: short summaries of the story written while playing (services/summaries.py) and sent for the messages
     # that no longer fit word for word
     "scene_summaries_enabled": True,
+    # v1.8 phase 7.3: "stable" keeps the rarely changing sections in the system prompt and sends the per-turn ones with the
+    # player's message (the beginning of the request can be cached); "classic" sends everything in the system prompt
+    "context_layout": "stable",
+    # v1.8 phase 7.3: a character's full lore entry is sent when they arrive; while they stay, their cast line only
+    "lore_short_cards": True,
     "recap_auto_replace": False,
     "enter_to_send": True,
     "theme": "dark",

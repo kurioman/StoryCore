@@ -29,6 +29,7 @@ class MockAdapter(ProviderAdapter):
 
     def _reply(self, messages: list[ChatMessage]) -> str:
         last = next((m.content for m in reversed(messages) if m.role == "user"), "")
+        last = last.split("[The player's turn]")[-1]  # v1.8 "stable" layout: the app's context block is not the action
         snippet = re.sub(r"\s+", " ", last).strip()[:160]
         return (
             "*[Mock provider — offline demo text, not a real model]*\n\n"
@@ -305,8 +306,9 @@ class AnthropicAdapter(ProviderAdapter):
             "messages": [{"role": m.role, "content": m.content} for m in normalize_alternating(messages)],
             "stream": stream,
         }
-        if system:
-            body["system"] = system
+        if system:  # v1.8 phase 7.3: the system prompt and the history are cached (cheaper repeated input)
+            body["system"] = [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}]
+        cache_last_stable(body["messages"])
         body.update(p)
         return body
 
@@ -569,6 +571,11 @@ class OpenAICompatAdapter(ProviderAdapter):
             p["repetition_penalty"] = p.pop("repeat_penalty")
         msgs = ([{"role": "system", "content": system}] if system else []) + [
             {"role": m.role, "content": m.content} for m in messages if m.content.strip()]
+        if self.is_openrouter and str(model).startswith("anthropic/"):
+            # v1.8 phase 7.3: Claude caches only what is marked (other models cache an identical beginning by themselves)
+            if system:
+                msgs[0]["content"] = [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}]
+            cache_last_stable(msgs)
         body: dict[str, Any] = {"model": model, "messages": msgs, "stream": stream}
         body.update(p)
         if self.is_openrouter:
@@ -718,6 +725,14 @@ def _usage(data: dict[str, Any]) -> dict[str, Any] | None:
     if thought is not None:
         out["reasoning_tokens"] = thought
     return out or None
+
+
+def cache_last_stable(msgs: list[dict[str, Any]]) -> None:
+    """Mark the last message before the player's turn as a cache breakpoint (Claude): with the "stable" context layout
+    everything up to it is identical from one turn to the next."""
+    if len(msgs) >= 3 and msgs[-1].get("role") == "user" and isinstance(msgs[-2].get("content"), str):
+        msgs[-2] = {**msgs[-2], "content": [{"type": "text", "text": msgs[-2]["content"],
+                                              "cache_control": {"type": "ephemeral"}}]}
 
 
 def _is_local_url(url: str) -> bool:

@@ -53,6 +53,8 @@ def put_settings(values: dict[str, Any], db: Session = Depends(get_db)) -> dict[
     bad = [k for k in values if k not in settings_service.DEFAULTS]
     if bad:
         raise ValueError(f"Unknown setting(s): {', '.join(bad)}")
+    if "context_layout" in values and values["context_layout"] not in ("stable", "classic"):
+        raise ValueError("context_layout must be stable or classic")
     if "event_capture_mode" in values and values["event_capture_mode"] not in ("off", "manual", "batch", "after_each_turn"):
         raise ValueError("event_capture_mode must be off, manual, batch or after_each_turn")
     if values.get("narrator_prompt_profile") is not None:

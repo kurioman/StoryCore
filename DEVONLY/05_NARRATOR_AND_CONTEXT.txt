@@ -12,6 +12,24 @@ context_builder.build() returns:
   messages  the most recent player/narrator messages that fit
   manifest  token counts per section, what was left out and why, warnings (shown in the Context Inspector)
   secrets   the narrator-only text (so the preview can mask it)
+  turn_context  (v1.8, "stable" layout) the per-turn sections, sent at the top of the player's last message
+  instructions  system + turn_context (for side requests that send only a system prompt: continuity check)
+
+Layout (v1.8 phase 7.3, setting context_layout):
+  stable (default)  STABLE_SECTIONS stay in the system prompt: core, global_note, story_note, avatar (profile only),
+                    roles, known, recap, scene_summaries, portrait_tags, music_tags, narration_language. Every other
+                    section (player_state, scene, canon, events, facts, lore, secrets, memories, threads, narration
+                    rules last) goes at the top of the player's latest message, between TURN_OPEN and TURN_CLOSE. Old
+                    messages leave in steps: the oldest message sent is moved forward to the first message after the
+                    end of a memory summary (or every 8 messages), when more than the minimum fit. The beginning of the
+                    request is then identical for several turns: LM Studio / llama.cpp reuse their prompt cache,
+                    DeepSeek and Gemini bill cached input less, and Claude gets cache_control markers (system prompt +
+                    the message before the player's turn; AnthropicAdapter and OpenRouter "anthropic/" models). The
+                    opening request keeps everything in the system prompt.
+  classic           Everything in the system prompt (v1.7 behaviour).
+Short lore cards (setting lore_short_cards): a character's lore entries are sent when they come into focus; while
+they stay (named in the messages before the last exchange) and have a cast line, the entries are listed as "short
+card (already in the scene)" and left out. Pinned lore is always sent.
 
 Sections, in order (key in brackets; [optional] ones are dropped first when space runs out):
    1 core          The world's narrative prompt (pack ai/narrative_system_prompt.md) - or the default prompt for a
@@ -19,7 +37,8 @@ Sections, in order (key in brackets; [optional] ones are dropped first when spac
                    agency rules, and an extra instruction for special turns (opening scene, immersive mode).
    2 global_note   The player's global note (Settings).
    3 story_note    The story's own note (overrides the global note and base lore).
-   4 avatar        The protagonist (player's avatar profile) and player state (stats, inventory...).
+   4 avatar        The protagonist (player's avatar profile).
+   4b player_state The player state (stats, inventory...), separate since v1.8 (it changes every turn).
    5 scene         Current place/time/weather/day, characters present and mentioned (with short lore summaries
                    and looks), relationships between them (lore background + values evolved in the story).
    5b roles        Established posts and closed groups: never reassign, never invent a second holder.

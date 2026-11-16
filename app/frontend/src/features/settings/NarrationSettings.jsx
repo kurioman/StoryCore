@@ -137,6 +137,36 @@ export function NarrationSettings() {
               description={msg("Off: Ctrl+Enter sends and Enter adds a new line.")}
             />
           </div>
+          <div className="sm:col-span-2">
+            <Toggle
+              checked={(n.context_layout ?? `stable`) === `stable`}
+              onChange={(e) =>
+                r({
+                  ...n,
+                  context_layout: e ? `stable` : `classic`,
+                })
+              }
+              label={msg("Stable request (faster and cheaper)")}
+              description={msg(
+                "What changes every turn (scene, lore found, memories, rules) is sent with your message, and older messages leave in steps: the beginning of the request stays the same, so LM Studio answers sooner and some online models bill it less. Off: everything in the instructions, as before.",
+              )}
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <Toggle
+              checked={n.lore_short_cards ?? true}
+              onChange={(e) =>
+                r({
+                  ...n,
+                  lore_short_cards: e,
+                })
+              }
+              label={msg("Short lore for characters already in the scene")}
+              description={msg(
+                "A character's full lore entry is sent when they arrive; while they stay, only their short line (traits, looks). Saves many tokens in long scenes.",
+              )}
+            />
+          </div>
         </section>
         <NarrationLanguagePicker
           value={n.narration_language ?? `en`}
@@ -265,6 +295,8 @@ export function NarrationSettings() {
               recent_messages_min: n.recent_messages_min,
               context_warning_ratio: n.context_warning_ratio,
               enter_to_send: n.enter_to_send,
+              context_layout: n.context_layout ?? `stable`,
+              lore_short_cards: n.lore_short_cards ?? true,
               default_system_prompt: n.default_system_prompt,
               narration_presets: n.narration_presets,
               narrator_prompt_profile: n.narrator_prompt_profile ?? null,

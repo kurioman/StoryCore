@@ -55,6 +55,13 @@ class BuiltContext:
     messages: list[ChatMessage]
     manifest: dict[str, Any]
     secrets: list[str] = field(default_factory=list)  # narrator-only text inside `system`; redact before showing it
+    # v1.8 phase 7.3 ("stable" layout): the per-turn sections, sent at the top of the player's last message
+    turn_context: str = ""
+
+    @property
+    def instructions(self) -> str:
+        """Everything the narrator is told, wherever it is placed (for side requests that send only a system prompt)."""
+        return self.system + (f"\n\n{self.turn_context}" if self.turn_context else "")
 
 
 def fts_query(text_: str, limit_terms: int = 12) -> str:
@@ -288,6 +295,12 @@ SAFETY_MARGIN = 0.9  # the chars/4 estimate can undercount real tokens; never pl
 # v1.6: lore first. Encounters were first until the owner's story showed a ~100-token section dropped ahead of a
 # ~1,400-token one: 0 of 84 replies ever carried it.
 # trimmed in this order when space runs out; the automatic summaries go last (they replace whole scenes)
+# v1.8 phase 7.3 "stable" layout: these stay in the system prompt (they rarely change, so its beginning can be cached);
+# every other section goes with the player's latest message, under TURN_OPEN (narration rules last)
+STABLE_SECTIONS = {"core", "global_note", "story_note", "avatar", "roles", "known", "recap", "scene_summaries",
+                   "portrait_tags", "music_tags", "narration_language"}
+TURN_OPEN = "[Story context for this turn: written by the app for the narrator, not by the player]"
+TURN_CLOSE = "[The player's turn]"
 OPTIONAL_SECTIONS = ("lore", "encounters", "events", "facts", "recalled", "character_memory", "recap", "threads",
                      "scene_summaries")
 MIN_MESSAGES_HARD = 2  # below the configured minimum only when the model window leaves no other choice
@@ -383,12 +396,12 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
             av = {"name": a.name, "profile": a.profile_json}
     from .world_state import calendar_of
     player_text, scene_text = render_state(state, index, calendar_of(db, story.world_id)["year_label"])
-    if av:
+    if av:  # v1.8: the profile (stable) and the current state (changes every turn) are separate sections
         sections.append(Section("avatar", "Protagonist (controlled by the user — never act or speak for them)",
-                                render_avatar(av) + ("\n\nCurrent state:\n" + player_text if player_text else ""),
-                                [{"type": "avatar", "label": av.get("name") or "Avatar"}]))
-    elif player_text:
-        sections.append(Section("avatar", "Protagonist state", player_text, [{"type": "state", "label": "Player state"}]))
+                                render_avatar(av), [{"type": "avatar", "label": av.get("name") or "Avatar"}]))
+    if player_text:
+        sections.append(Section("player_state", "Protagonist's current state", player_text,
+                                [{"type": "state", "label": "Player state"}]))
 
     # 5. scene + cast lore summaries
     present = list((state.get("scene") or {}).get("present") or [])
@@ -539,10 +552,19 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
             except Exception:
                 pass
         seen = set()
+        # v1.8 phase 7.3: a character's full lore entry is sent when they come into the scene; while they stay (already
+        # named in the recent messages before this exchange) the cast notes above (traits, looks) are their short card
+        short_cards = cfg.get("lore_short_cards", True) is not False
+        staying = set(index.find_mentions(" ".join(m.content for m in convo[-12:-2]))) if short_cards else set()
+        carded = {cid for cid in focus_entities[:8] if any(line.startswith(f"- {index.name(cid)} (") for line in cast_lines)}
         for c in chunks:
             if c.id in seen or f"lore:{c.id}" in exclusions:
                 continue
             seen.add(c.id)
+            if c.entity_id in staying and c.entity_id in carded and c.id not in pins:
+                lore_items.append({"type": "lore", "id": c.id, "label": c.title, "included": False,
+                                   "reason": "short card (already in the scene)"})
+                continue
             body = c.content if len(c.content) < 2400 else c.content[:2400] + " …"
             t = est_tokens(body)
             if used + t > lore_budget and c.id not in pins:
@@ -714,6 +736,19 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
     if trimmed:
         warnings.append(f"To fit at least the {want} most recent messages, these optional sections were left out this "
                         f"time: {', '.join(trimmed)} ({len(picked)} recent messages sent).")
+    layout = cfg.get("context_layout") or "stable"
+    if layout == "stable" and len(picked) > want and len(picked) < len(candidates):
+        # v1.8 phase 7.3: old messages leave in steps, at the end of a memory summary (or every 8 messages), so the
+        # beginning of the request stays identical for several turns (prompt caches: LM Studio, DeepSeek, Claude...)
+        pos = {m.id: i for i, m in enumerate(convo)}
+        oldest = min(pos[m.id] for m, *_ in picked if m.id in pos) if picked else 0
+        ends = {r.end_seq for r in summ_rows} if summ_rows else set()
+        steps = [i for i, m in enumerate(convo) if i > 0 and convo[i - 1].seq in ends] or \
+                [i for i in range(len(convo)) if i % 8 == 0]
+        step = next((i for i in steps if i >= oldest), None)
+        if step is not None and len(convo) - step >= want:
+            picked = [x for x in picked if pos.get(x[0].id, 0) >= step]
+            used = sum(t for _, _, t, _ in picked)
     chosen = [m for m, *_ in reversed(picked)]
     if summ_section is not None and summ_section in sections and chosen:
         fill_summaries(chosen[0].seq)  # only what was really left out (frees the room of scenes still shown)
@@ -771,8 +806,21 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
     if rules:
         sections.append(rules)
 
-    system = "\n\n".join(f"# {s.title}\n{s.text}" for s in sections)
-    total = est_tokens(system) + used
+    turn_context = ""
+    if layout == "stable":
+        stable = [s for s in sections if s.key in STABLE_SECTIONS]
+        per_turn = [s for s in sections if s.key not in STABLE_SECTIONS]
+        if per_turn and msgs and msgs[-1].role == "user" and not opening:
+            turn_context = "\n\n".join(f"## {s.title}\n{s.text}" for s in per_turn)
+            msgs[-1] = ChatMessage("user", f"{TURN_OPEN}\n\n{turn_context}\n\n{TURN_CLOSE}\n{msgs[-1].content}")
+            sections = stable + per_turn  # the manifest lists them in sending order
+            system = "\n\n".join(f"# {s.title}\n{s.text}" for s in stable)
+        else:
+            system = "\n\n".join(f"# {s.title}\n{s.text}" for s in stable + per_turn)
+    else:
+        system = "\n\n".join(f"# {s.title}\n{s.text}" for s in sections)
+    placement = {s.key: ("turn" if turn_context and s.key not in STABLE_SECTIONS else "system") for s in sections}
+    total = est_tokens(system) + est_tokens(turn_context) + used
     ratio = total / budget if budget > 0 else 1
     # recent messages fill whatever the fixed sections leave, so a total near 100 % is normal and not a warning (the
     # owner saw "≈96 %" every turn); what deserves one is fixed content crowding out the conversation
@@ -789,7 +837,9 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
                      "pinned memories, narration rules — never dropped); retrieved lore, events, facts and recap are left "
                      f"out in that order if needed; then recent messages newest first, at least {min_recent} unless the "
                      "model window forbids it."),
-        "sections": [{"key": s.key, "title": s.title, "tokens": s.tokens, "items": s.items} for s in sections]
+        "layout": layout,
+        "sections": [{"key": s.key, "title": s.title, "tokens": s.tokens, "items": s.items, "placement": placement[s.key]}
+                     for s in sections]
                     + [{"key": "messages", "title": "Recent messages", "tokens": used,
                         "items": [{"type": "message", "id": m.id, "label": f"#{m.seq} {m.role}: {m.content[:60]}"} for m in chosen]}],
         "omitted_messages": omitted,
@@ -801,7 +851,7 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
         "model_context_limit": context_limit,
         "analysis_output_budget": _analysis_budget(),
     }
-    return BuiltContext(system=system, messages=msgs, manifest=manifest, secrets=secret_texts)
+    return BuiltContext(system=system, messages=msgs, manifest=manifest, secrets=secret_texts, turn_context=turn_context)
 
 
 def _analysis_budget() -> int:

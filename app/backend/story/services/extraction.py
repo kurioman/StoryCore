@@ -888,7 +888,7 @@ class ExtractionService:
         prompt = (f"{instr}\n\nReturn ONLY JSON: {{\"issues\": [{{\"description\": str, \"records\": [str], \"message_ids\": "
                   f"[ids from [msg:...] tags], \"suggested_fix\": str, \"fix_type\": \"edit_message|create_memory|update_state|none\", "
                   f"\"fix_text\": str}}], \"summary\": str}}\n\nRecent transcript:\n{transcript}")
-        raw = await resolved.adapter.complete(resolved.profile.model_id, built.system, [ChatMessage("user", prompt)],
+        raw = await resolved.adapter.complete(resolved.profile.model_id, built.instructions, [ChatMessage("user", prompt)],
                                               {**resolved.params, "temperature": 0.2}, json_mode=True)
         try:
             data = parse_json_object(raw)
