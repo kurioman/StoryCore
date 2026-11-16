@@ -23,6 +23,7 @@ import {
 import { cn, isCloudModelId, timeAgo } from "@/lib/util";
 import { navigate } from "@/lib/router";
 import { useLocalState } from "@/lib/hooks";
+import { catalogText } from "@/features/settings/catalogTexts";
 
 var MODEL_CATALOG_KEY = [`model-catalog`],
   OPENROUTER_URL = `https://openrouter.ai/`,
@@ -100,7 +101,7 @@ function CatalogModelRow({ m: e, provider, profile, isDefault, onAdded }) {
     >
       <div className="flex flex-wrap items-center gap-1.5">
         <span className="min-w-0 font-medium [overflow-wrap:anywhere]">{e.name}</span>
-        <Badge tone={e.tested ? `accent` : `neutral`}>{e.label}</Badge>
+        <Badge tone={e.tested ? `accent` : `neutral`}>{catalogText(e.label)}</Badge>
         {c && <Badge tone="warn">{msg("Unavailable")}</Badge>}
       </div>
       <p className="font-mono text-[11px] text-faint [overflow-wrap:anywhere]">{e.slug}</p>
@@ -125,7 +126,7 @@ function CatalogModelRow({ m: e, provider, profile, isDefault, onAdded }) {
       )}
       {c && (
         <p className="text-xs text-warn">
-          {e.unavailable_reason}
+          {catalogText(e.unavailable_reason)}
           {e.alternative
             ? msg(" Try {{v0}} instead.", {
                 v0: e.alternative,
@@ -140,7 +141,7 @@ function CatalogModelRow({ m: e, provider, profile, isDefault, onAdded }) {
               {"+ "}
             </span>
             <span className="sr-only">{msg("Pro:")} </span>
-            {e}
+            {catalogText(e)}
           </li>
         ))}
         {e.cons.map((e) => (
@@ -149,7 +150,7 @@ function CatalogModelRow({ m: e, provider, profile, isDefault, onAdded }) {
               {"− "}
             </span>
             <span className="sr-only">{msg("Con:")} </span>
-            {e}
+            {catalogText(e)}
           </li>
         ))}
       </ul>

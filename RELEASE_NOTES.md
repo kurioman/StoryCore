@@ -76,6 +76,8 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
   every phone is then disconnected. A phone cannot open the computer-only areas (models and keys, backups, imports,
   logs, folders). The first time, Windows may ask to let StoryCore use the network: tick "Private networks". The link
   is not encrypted: use it on your home Wi-Fi only. The welcome page and the library fit phone screens.
+- The recommended-models cards (Settings > Providers & models) are translated too ("Tested with StoryCore", pros
+  and cons...).
 
 ## New in v1.7.0
 
