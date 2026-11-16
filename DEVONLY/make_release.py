@@ -24,7 +24,7 @@ INCLUDE = ["Start StoryCore.bat", "Check Lore Packs.bat", "START_HERE.txt", "REA
 SKIP_DIRS = {"__pycache__", ".git", ".vscode", ".idea", "node_modules", ".venv"}
 SKIP_FILES = {"Thumbs.db", "desktop.ini", ".DS_Store"}
 # personal or obsolete developer material (the owner's GitHub push script, screenshots of the v1.7 interface)
-SKIP_PATHS = {("DEVONLY", "Push vers GitHub.bat"), ("DEVONLY", "frontend_inventory")}
+SKIP_PATHS = {("DEVONLY", "Push vers GitHub.bat"), ("DEVONLY", "frontend_inventory"), ("DEVONLY", "CONTEXTE_SESSION.md")}
 # the music library ships empty: the player's own tracks (Music/*.mp3) are never put in a release
 EMPTY_LIBRARY = '{\n  "format_version": 1,\n  "_comment": "StoryCore music library: edit in the app (Music page) or by hand.",\n  "tracks": []\n}\n'
 
