@@ -1,4 +1,5 @@
-// Reconstructed from the StoryCore v1.7.0 compiled bundle (see DEVONLY/13_FRONTEND_SOURCE.md).
+// Sidebar: the stories (search, groups, rename/archive/delete menu), the pages, and "Import a story package".
+// Reconstructed from the StoryCore v1.7.0 compiled bundle (see DEVONLY/13_FRONTEND_SOURCE.md); names made readable in v0.6.
 import { useStories, queryKeys } from "@/api/queries";
 import * as React from "react";
 import * as Icon from "lucide-react";
@@ -39,17 +40,17 @@ export function Logo({ small }) {
 
 export function Sidebar({ activeStoryId, path, collapsed, onToggle, onHelp }) {
   let stories = useStories(),
-    [o, s] = React.useState(``),
-    [c, l] = React.useState(`active`),
-    [u, d] = React.useState(false),
-    f = React.useMemo(() => {
-      let e = o.toLowerCase();
+    [query, setQuery] = React.useState(``),
+    [group, setGroup] = React.useState(`active`),
+    [importOpen, setImportOpen] = React.useState(false),
+    shownStories = React.useMemo(() => {
+      let e = query.toLowerCase();
       return (stories.data ?? []).filter(
         (t) =>
-          t.status === c && (!e || t.title.toLowerCase().includes(e) || (t.world_name ?? ``).toLowerCase().includes(e)),
+          t.status === group && (!e || t.title.toLowerCase().includes(e) || (t.world_name ?? ``).toLowerCase().includes(e)),
       );
-    }, [stories.data, o, c]),
-    p = React.useMemo(() => {
+    }, [stories.data, query, group]),
+    counts = React.useMemo(() => {
       let e = {
         active: 0,
         archived: 0,
@@ -58,7 +59,7 @@ export function Sidebar({ activeStoryId, path, collapsed, onToggle, onHelp }) {
       for (let t of stories.data ?? []) e[t.status] = (e[t.status] ?? 0) + 1;
       return e;
     }, [stories.data]),
-    g = [
+    pages = [
       {
         to: `/avatars`,
         label: msg("Avatars"),
@@ -113,7 +114,7 @@ export function Sidebar({ activeStoryId, path, collapsed, onToggle, onHelp }) {
         <Icon.Plus className="size-4" />
       </IconButton>
       <div className="my-1 h-px w-6 bg-line" />
-      {g.map((e) => (
+      {pages.map((e) => (
         <IconButton label={e.label} active={path.startsWith(e.to)} onClick={() => navigate(e.to)} key={e.to}>
           <e.icon className="size-4" />
         </IconButton>
@@ -137,7 +138,7 @@ export function Sidebar({ activeStoryId, path, collapsed, onToggle, onHelp }) {
         <Button variant="primary" className="flex-1" onClick={() => navigate(`/new`)}>
           <Icon.Plus className="size-4" /> {msg("New story")}
         </Button>
-        <IconButton label={msg("Import story package")} className="size-8.5 border border-line" onClick={() => d(true)}>
+        <IconButton label={msg("Import story package")} className="size-8.5 border border-line" onClick={() => setImportOpen(true)}>
           <Icon.Upload className="size-4" />
         </IconButton>
       </div>
@@ -145,8 +146,8 @@ export function Sidebar({ activeStoryId, path, collapsed, onToggle, onHelp }) {
         <div className="relative">
           <Icon.Search className="absolute left-2 top-2.5 size-3.5 text-faint" aria-hidden />
           <Input
-            value={o}
-            onChange={(e) => s(e.target.value)}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
             placeholder={msg("Search stories")}
             className="pl-7"
             aria-label={msg("Search stories")}
@@ -157,39 +158,39 @@ export function Sidebar({ activeStoryId, path, collapsed, onToggle, onHelp }) {
         {[`active`, `archived`, `template`].map((e) => (
           <button
             role="tab"
-            aria-selected={c === e}
-            onClick={() => l(e)}
+            aria-selected={group === e}
+            onClick={() => setGroup(e)}
             className={cn(
               `rounded px-2 py-0.5 text-xs capitalize`,
-              c === e ? `bg-panel-2 text-fg` : `text-faint hover:text-muted`,
+              group === e ? `bg-panel-2 text-fg` : `text-faint hover:text-muted`,
             )}
             key={e}
           >
             {e === `template` ? msg("Templates") : e === `active` ? msg("Active") : msg("Archived")}{" "}
-            {p[e] ? <span className="text-faint">{p[e]}</span> : null}
+            {counts[e] ? <span className="text-faint">{counts[e]}</span> : null}
           </button>
         ))}
       </div>
       <nav className="min-h-0 flex-1 overflow-y-auto px-2 py-1" aria-label={msg("Stories")}>
         {stories.isLoading && <p className="px-2 py-3 text-xs text-faint">{msg("Loading…")}</p>}
         {stories.isError && <p className="px-2 py-3 text-xs text-danger">{errorMessage(stories.error)}</p>}
-        {!stories.isLoading && f.length === 0 && (
+        {!stories.isLoading && shownStories.length === 0 && (
           <p className="px-2 py-3 text-xs text-faint">
-            {o
+            {query
               ? msg("No matching stories.")
-              : c === `active`
+              : group === `active`
                 ? msg("No stories yet — create one to begin.")
-                : msg("No {{v0}} stories.", {
-                    v0: c,
-                  })}
+                : group === `archived`
+                  ? msg("No archived stories.")
+                  : msg("No templates yet.")}
           </p>
         )}
-        {f.map((t) => (
+        {shownStories.map((t) => (
           <StoryRow s={t} active={t.id === activeStoryId} key={t.id} />
         ))}
       </nav>
       <div className="border-t border-line p-2">
-        {g.map((e) => (
+        {pages.map((e) => (
           <button
             onClick={() => navigate(e.to)}
             className={cn(
@@ -208,96 +209,96 @@ export function Sidebar({ activeStoryId, path, collapsed, onToggle, onHelp }) {
           <Icon.CircleQuestionMark className="size-4" /> {msg("Help")}
         </button>
       </div>
-      <ImportStoryDialog open={u} onOpenChange={d} />
+      <ImportStoryDialog open={importOpen} onOpenChange={setImportOpen} />
     </aside>
   );
 }
 
-function StoryRow({ s: e, active }) {
+function StoryRow({ s: story, active }) {
   let queryClient = useQueryClient(),
     { toast, confirm } = useUi(),
-    [a, o] = React.useState(false),
-    [s, c] = React.useState(e.title),
-    l = () =>
+    [renaming, setRenaming] = React.useState(false),
+    [title, setTitle] = React.useState(story.title),
+    refreshStories = () =>
       queryClient.invalidateQueries({
         queryKey: queryKeys.stories,
       }),
     mutation = useMutation({
       mutationFn: async (t) => {
         if (t === `rename`)
-          return apiPatch(`/stories/${e.id}`, {
-            title: s,
+          return apiPatch(`/stories/${story.id}`, {
+            title: title,
           });
         if (t === `archive`)
-          return apiPatch(`/stories/${e.id}`, {
-            status: e.status === `archived` ? `active` : `archived`,
+          return apiPatch(`/stories/${story.id}`, {
+            status: story.status === `archived` ? `active` : `archived`,
           });
         if (t === `template`)
-          return apiPatch(`/stories/${e.id}`, {
-            status: e.status === `template` ? `active` : `template`,
+          return apiPatch(`/stories/${story.id}`, {
+            status: story.status === `template` ? `active` : `template`,
           });
-        if (t === `duplicate`) return apiPost(`/stories/${e.id}/duplicate`);
-        if (t === `delete`) return apiDelete(`/stories/${e.id}?confirm=true`);
+        if (t === `duplicate`) return apiPost(`/stories/${story.id}/duplicate`);
+        if (t === `delete`) return apiDelete(`/stories/${story.id}?confirm=true`);
       },
       onSuccess: (i, a) => {
-        (l(),
+        (refreshStories(),
           queryClient.invalidateQueries({
-            queryKey: queryKeys.story(e.id),
+            queryKey: queryKeys.story(story.id),
           }),
           a === `duplicate` && toast(msg("Story duplicated")),
           a === `delete` &&
             (toast(msg("Story deleted. A recovery package was saved in data/backups/deleted_stories.")),
             active && navigate(`/library`)),
-          a === `archive` && toast(e.status === `archived` ? msg("Story restored", {}) : msg("Story archived", {})));
+          a === `archive` && toast(story.status === `archived` ? msg("Story restored", {}) : msg("Story archived", {})));
       },
       onError: (e) => toast(errorMessage(e), `danger`),
     });
   return (
     <div className={cn(`group relative mb-0.5 rounded-md`, active ? `bg-panel-2` : `hover:bg-panel-2/60`)}>
-      {a ? (
+      {renaming ? (
         <form
           className="p-1.5"
           onSubmit={(e) => {
-            (e.preventDefault(), mutation.mutate(`rename`), o(false));
+            (e.preventDefault(), mutation.mutate(`rename`), setRenaming(false));
           }}
         >
           <Input
             autoFocus
-            value={s}
-            onChange={(e) => c(e.target.value)}
-            onBlur={() => o(false)}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onBlur={() => setRenaming(false)}
             aria-label={msg("Story title")}
           />
         </form>
       ) : (
         <button
-          onClick={() => navigate(`/story/${e.id}`)}
+          onClick={() => navigate(`/story/${story.id}`)}
           className="block w-full px-2.5 py-2 pr-8 text-left"
           aria-current={active ? `page` : undefined}
         >
-          <div className="truncate text-[13px] font-medium">{e.title}</div>
+          <div className="truncate text-[13px] font-medium">{story.title}</div>
           <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-faint">
-            <span>{timeAgo(e.last_activity)}</span>
-            {e.world_name && (
+            <span>{timeAgo(story.last_activity)}</span>
+            {story.world_name && (
               <>
                 <span>·</span>
-                <span className="truncate">{e.world_name}</span>
+                <span className="truncate">{story.world_name}</span>
               </>
             )}
-            {e.message_count ? (
+            {story.message_count ? (
               <span className="ml-auto">
-                {e.message_count} {msg("msg")}
+                {story.message_count} {msg("msg")}
               </span>
             ) : null}
           </div>
         </button>
       )}
-      {!a && (
+      {!renaming && (
         <Popover>
           <PopoverTrigger asChild>
             <IconButton
               label={msg("Actions for {{v0}}", {
-                v0: e.title,
+                v0: story.title,
               })}
               className="absolute right-1 top-1.5 opacity-0 group-hover:opacity-100 focus:opacity-100 data-[state=open]:opacity-100"
             >
@@ -305,23 +306,23 @@ function StoryRow({ s: e, active }) {
             </IconButton>
           </PopoverTrigger>
           <PopoverContent align="end" className="w-44 p-1">
-            <MenuItem icon={Icon.Pencil} label={msg("Rename")} onClick={() => o(true)} />
+            <MenuItem icon={Icon.Pencil} label={msg("Rename")} onClick={() => setRenaming(true)} />
             <MenuItem icon={Icon.Copy} label={msg("Duplicate")} onClick={() => mutation.mutate(`duplicate`)} />
             <MenuItem
               icon={Icon.Download}
               label={msg("Export package")}
-              onClick={() => (window.location.href = `/api/stories/${e.id}/export`)}
+              onClick={() => (window.location.href = `/api/stories/${story.id}/export`)}
             />
 
             <MenuItem
-              icon={e.status === `archived` ? Icon.ArchiveArrowUp : Icon.Archive}
-              label={e.status === `archived` ? msg("Unarchive") : msg("Archive")}
+              icon={story.status === `archived` ? Icon.ArchiveArrowUp : Icon.Archive}
+              label={story.status === `archived` ? msg("Unarchive") : msg("Archive")}
               onClick={() => mutation.mutate(`archive`)}
             />
 
             <MenuItem
               icon={Icon.BookOpen}
-              label={e.status === `template` ? msg("Unmark template") : msg("Mark as template")}
+              label={story.status === `template` ? msg("Unmark template") : msg("Mark as template")}
               onClick={() => mutation.mutate(`template`)}
             />
 
@@ -333,7 +334,7 @@ function StoryRow({ s: e, active }) {
               onClick={async () => {
                 (await confirm({
                   title: msg("Delete “{{v0}}”?", {
-                    v0: e.title,
+                    v0: story.title,
                   }),
                   body: msg(
                     "The story, its branches, journal and savepoints are removed. Avatars, global notes, providers and lore are not affected. A recovery package is saved in the backups folder first.",
@@ -350,7 +351,7 @@ function StoryRow({ s: e, active }) {
   );
 }
 
-function MenuItem({ icon: CompE, label, onClick, danger, disabled }) {
+function MenuItem({ icon: ItemIcon, label, onClick, danger, disabled }) {
   return (
     <button
       disabled={disabled}
@@ -360,64 +361,64 @@ function MenuItem({ icon: CompE, label, onClick, danger, disabled }) {
         danger ? `text-danger` : `text-fg`,
       )}
     >
-      <CompE className="size-3.5" /> {label}
+      <ItemIcon className="size-3.5" /> {label}
     </button>
   );
 }
 
 function ImportStoryDialog({ open, onOpenChange }) {
-  let n = React.useRef(null),
+  let fileInput = React.useRef(null),
     queryClient = useQueryClient(),
     { toast } = useUi(),
-    [a, o] = React.useState(null),
-    [s, c] = React.useState(false),
-    [l, u] = React.useState(null),
-    d = async (e) => {
-      (c(true), u(null));
+    [preview, setPreview] = React.useState(null),
+    [busy, setBusy] = React.useState(false),
+    [error, setError] = React.useState(null),
+    readPackage = async (e) => {
+      (setBusy(true), setError(null));
       try {
         let t = new FormData();
-        (t.append(`file`, e), o(await apiUpload(`/import/story/preview`, t)));
+        (t.append(`file`, e), setPreview(await apiUpload(`/import/story/preview`, t)));
       } catch (e) {
-        u(errorMessage(e));
+        setError(errorMessage(e));
       } finally {
-        c(false);
+        setBusy(false);
       }
     };
   return (
     <Modal
       open={open}
       onOpenChange={(e) => {
-        (onOpenChange(e), e || o(null));
+        (onOpenChange(e), e || setPreview(null));
       }}
       title={msg("Import a story package")}
       description={msg("Packages (.zip) exported from StoryCore or Lumencia Story Desk. Imports always create a copy.")}
       footer={
-        a ? (
+        preview ? (
           <>
-            <Button variant="ghost" onClick={() => o(null)}>
+            <Button variant="ghost" onClick={() => setPreview(null)}>
               {msg("Choose another file")}
             </Button>
             <Button
               variant="primary"
-              loading={s}
+              loading={busy}
               onClick={async () => {
-                if (a) {
-                  c(true);
+                if (preview) {
+                  setBusy(true);
                   try {
                     let e = await apiPost(`/import/story/confirm`, {
-                      token: a.token,
+                      token: preview.token,
                     });
                     (queryClient.invalidateQueries({
                       queryKey: queryKeys.stories,
                     }),
                       toast(msg("Story imported as a new copy")),
                       onOpenChange(false),
-                      o(null),
+                      setPreview(null),
                       navigate(`/story/${e.story_id}`));
                   } catch (e) {
-                    u(errorMessage(e));
+                    setError(errorMessage(e));
                   } finally {
-                    c(false);
+                    setBusy(false);
                   }
                 }
               }}
@@ -429,28 +430,28 @@ function ImportStoryDialog({ open, onOpenChange }) {
       }
     >
       <input
-        ref={n}
+        ref={fileInput}
         type="file"
         accept=".zip"
         className="hidden"
-        onChange={(e) => e.target.files?.[0] && d(e.target.files[0])}
+        onChange={(e) => e.target.files?.[0] && readPackage(e.target.files[0])}
       />
 
-      {!a && (
-        <Button onClick={() => n.current?.click()} loading={s}>
+      {!preview && (
+        <Button onClick={() => fileInput.current?.click()} loading={busy}>
           <Icon.Upload className="size-4" /> {msg("Choose package…")}
         </Button>
       )}
-      {l && (
+      {error && (
         <Callout tone="danger" className="mt-3">
-          {l}
+          {error}
         </Callout>
       )}
-      {a && (
+      {preview && (
         <div className="space-y-3 text-sm">
-          <p className="font-medium">{a.report.title}</p>
+          <p className="font-medium">{preview.report.title}</p>
           <div className="flex flex-wrap gap-1.5">
-            {Object.entries(a.report.counts ?? {}).map(([e, t]) => (
+            {Object.entries(preview.report.counts ?? {}).map(([e, t]) => (
               <Badge key={e}>
                 {msgKey(e)}
                 {": "}
@@ -458,28 +459,28 @@ function ImportStoryDialog({ open, onOpenChange }) {
               </Badge>
             ))}
           </div>
-          {a.report.world && (
-            <Callout tone={a.report.world.found ? `ok` : `warn`}>
+          {preview.report.world && (
+            <Callout tone={preview.report.world.found ? `ok` : `warn`}>
               {msg("World “")}
-              {a.report.world.name}
+              {preview.report.world.name}
               {"” "}
-              {a.report.world.found
+              {preview.report.world.found
                 ? msg("is available locally.")
                 : msg("is not imported here; the story will open without lore until you import that world.")}
             </Callout>
           )}
-          {a.report.missing_assets.length > 0 && (
+          {preview.report.missing_assets.length > 0 && (
             <Callout tone="warn">
-              {msg("Missing assets in package:")} {a.report.missing_assets.join(`, `)}
+              {msg("Missing assets in package:")} {preview.report.missing_assets.join(`, `)}
             </Callout>
           )}
-          {a.report.unresolved_count > 0 && (
+          {preview.report.unresolved_count > 0 && (
             <Callout tone="warn">
-              {a.report.unresolved_count}{" "}
+              {preview.report.unresolved_count}{" "}
               {msg("record reference(s) point outside the package (they will be kept but cannot be followed).")}
             </Callout>
           )}
-          <p className="text-xs text-muted">{a.report.policy}</p>
+          <p className="text-xs text-muted">{preview.report.policy}</p>
         </div>
       )}
     </Modal>

@@ -1,7 +1,24 @@
-# Release notes: StoryCore v0.5 for Windows
+# Release notes: StoryCore v0.6 for Windows
 
 StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine: every world is a lore pack in the
 `Lorepack` folder, loaded automatically at start.
+
+## New in v0.6
+
+- **World creator** (sidebar, or **Create a world** in the library): make a world without any technical knowledge, in
+  ten guided tabs (identity and cover, presentation and narrator rules, characters with six portraits each, places,
+  groups, glossary, beginnings, player stats, optional fixed rules, check and play). Changes are saved automatically and
+  the world is reloaded at once, so **Play in this world** always uses the latest version. Any genre: nothing in the
+  creator assumes fantasy.
+- **Suggest with AI**: a character, a place, a group, a beginning, the presentation or the narrator rules drafted by
+  your current model from a few words, written in the interface language. Nothing is saved before you read it.
+- **Copy an existing world**: the bundled worlds stay as they are; **Make a copy** gives you your own version to change
+  (characters, places, groups, glossary, beginnings and secrets included; extra information is kept and shown).
+- **Share a world**: **Export (.zip)** in the creator, **Import a world (.zip)** in the library (a check report is shown;
+  a world whose id is already used is imported as a new world).
+- Pictures added in the creator are converted to WebP and resized automatically.
+- Fixed: a pack whose presentation was only a title could not be loaded.
+- The creator is not available from a paired phone.
 
 ## New in v0.5
 

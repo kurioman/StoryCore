@@ -228,3 +228,24 @@ services/pack_check.py. It never reads or writes the data folder.
   NOTES      worth knowing: records without an explicit id, characters without portraits, very large images.
 
 Exit code 1 when a pack has errors (usable in scripts). The test suite checks that the shipped packs have none.
+
+
+11. WORLD CREATOR (v0.6)
+------------------------
+#/creator (features/creator/*) edits a pack from the app; the backend is services/pack_editor.py (files),
+services/creator_assist.py ("Suggest with AI") and routers/creator.py (API, see 08_API_REFERENCE.txt).
+
+  - A world made in the app is a normal pack in Lorepack/<id>_lore_pack, marked "_creator" in pack.json, written in a
+    fixed layout (LOREPACK_FORMAT.md, "Making a pack in the app"). After each save the world is re-imported with
+    bundled._sync_pack, exactly as at start-up.
+  - Only "_creator" packs are edited. Any other pack is copied first (pack_editor.copy): the importer runs on a
+    throw-away database, its records are sorted into characters / locations / groups / glossary (CATEGORY_LIST), the
+    same id read twice is merged into one card, narrator-only "hidden" notes are put back, and what was gathered is
+    removed from the copied files (no record is read twice). The original folder is never written.
+  - Record ids are made from the first name (makeId in features/creator/api.js, slugify in pack_editor: same rule) and
+    never change afterwards: portraits and other cards refer to them.
+  - Fields the form does not know are shown under "Other information" and kept as they are.
+  - Images are converted to WebP (portraits 1024 px at most, cover 1280 px), 25 MB per upload at most.
+  - A paired phone cannot use /api/creator/ (services/remote.py).
+  - Tests: app/backend/tests/test_creator.py.
+

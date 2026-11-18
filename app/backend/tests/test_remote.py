@@ -97,6 +97,7 @@ class RemoteAccessTest(AppTestCase):
         self.assertFalse(remote_svc.blocked("POST", "/api/providers/abc/consent"))
         self.assertTrue(remote_svc.blocked("PATCH", "/api/providers/abc"))
         self.assertTrue(remote_svc.blocked("POST", "/api/worlds/w1/reimport"))
+        self.assertTrue(remote_svc.blocked("GET", "/api/creator/worlds"))
 
     def test_real_listener_opens_and_closes(self):
         self.remote.enabled, self.remote.port = False, None

@@ -256,6 +256,28 @@ Any record in the lore files (a character, a faction, a place, even an entry nes
 A note inside a nested entry is labelled with that entry's name (for example `[4th Legion (Unknown)] ...`). Hidden notes
 are only read from JSON files, not from Markdown. The import report gives their number, never their text.
 
+## Making a pack in the app (v0.6)
+
+The easiest way: **World creator** (sidebar, or **Create a world** in the library). It writes a real pack in
+`Lorepack/<id>_lore_pack` with the layout below, reloads the world after every change, and exports it as one `.zip`
+(**Import a world (.zip)** in the library loads a shared one; a world whose id is already used gets a new id).
+
+```
+pack.json                       identity, library card and every section above
+lore/premise.md                 presentation of the world
+ai/narrative_system_prompt.md   narrator rules
+characters/characters.json      {"characters": [...]}
+lore/locations.json             {"locations": [...]}
+factions/factions.json          {"factions": [...]}   (every kind of group)
+story/glossary.json             {"terms": [{"id", "term", "definition"}]}
+images/                         cover.webp is at the root; portraits <character id>_<1..6>.webp (converted to WebP)
+```
+
+The creator only edits packs whose `pack.json` has a `"_creator"` object (it adds it). Other packs (the bundled ones,
+packs written by hand) are copied first: their records are sorted into the files above with the importer's own rules,
+narrator-only notes included; files the creator does not manage are kept unchanged and still read. The original is never
+changed. In the creator, `summary`, `tags` and starter names are written in one language.
+
 ## Checking a pack
 
 Import or re-import the pack in the app. The import report has a **pack** part listing:

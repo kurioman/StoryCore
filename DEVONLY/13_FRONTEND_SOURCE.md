@@ -24,6 +24,10 @@ app/frontend/
       setup/              first-run assistant at #/setup (SetupPage.jsx) and its model advice (recommendations.js)
       music/              Music page (#/music: the app's music library), in-game MusicPlayer, tag labels
       library/            the story library at #/library (LibraryPage.jsx: resume, story cards, story sheet)
+      creator/            the world creator (v0.6) at #/creator and #/creator/<id>: CreatorPage.jsx (worlds, new,
+                          copy), WorldEditor.jsx (10 tabs, autosave), CardList.jsx (list + form used by every tab,
+                          "Suggest with AI", "Other information"), fields.js (what each card contains), api.js,
+                          ImportButton.jsx (also in the library)
       mobile/             "Play on a phone" panel (PhonePanel.jsx: switch, QR code via the qrcode package, devices),
                           shown at #/mobile and in Settings > Play on a phone
       home/               SetupNotices.jsx: set-up notices shown at the top of the library
@@ -116,3 +120,10 @@ while both lived side by side (`/next/...`, `/old`) redirect to `/`.
 `npm install` straight into `app/frontend/node_modules` is very slow on some setups. Copying `app/frontend` (without
 `node_modules` and `dist`) to a local folder, building there and copying `dist/` back works the same.
 Welcome page styles are in `styles.css` under "v0.5 welcome page"; the background colour is `--sc-night`.
+
+## Readable names (v0.6)
+
+The reconstruction kept the compiled one-letter names (`let [o, s] = React.useState()`). Files are renamed as they are
+touched: `node rename.mjs <file> <function> old=new ...` (DEVONLY/tools/frontend_reconstruction/rename.mjs, needs
+@babel/parser and @babel/traverse like keys.mjs) renames the local variables of one function at every place they are
+used, without touching the formatting. Done: features/sidebar/Sidebar.jsx.

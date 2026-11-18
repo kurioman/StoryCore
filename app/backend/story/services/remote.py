@@ -35,7 +35,8 @@ IP_HOST = re.compile(r"^(\d{1,3}\.){3}\d{1,3}$")
 BLOCKED_ALWAYS = ("/api/remote/", "/api/system/", "/api/backups", "/api/import/", "/api/notes/import",
                   "/api/local-canon/import", "/api/assets/roots", "/api/assets/rescan-all", "/api/assets/upload",
                   "/api/assets/overrides", "/api/assets/slug-overrides", "/api/lore/import", "/api/ollama/",
-                  "/api/lmstudio/", "/api/model-catalog/refresh")
+                  "/api/lmstudio/", "/api/model-catalog/refresh",
+                  "/api/creator/")  # v0.6: the world creator writes into the Lorepack folder: computer only
 # …and these only refuse changes (reading them is needed to show the current model, for example).
 BLOCKED_CHANGES = ("/api/providers", "/api/model-profiles")
 # Exceptions: what a phone may still do there.

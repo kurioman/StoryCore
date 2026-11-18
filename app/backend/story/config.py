@@ -12,7 +12,7 @@ from typing import Optional
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 FRONTEND_DIST = PROJECT_ROOT / "app" / "frontend" / "dist"
-APP_VERSION = "0.5.0"
+APP_VERSION = "0.6.0"
 EXPORT_FORMAT_VERSION = 1
 
 

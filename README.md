@@ -1,8 +1,8 @@
-# StoryCore v0.5 for Windows
+# StoryCore v0.6 for Windows
 
 ## What this is
 
-StoryCore is a local interactive-fiction engine. You play one character and an AI narrates the world around you. Each story world is a **lore pack**: a folder in `Lorepack` with a `pack.json` and its lore files (see `LOREPACK_FORMAT.md`). Every pack there is loaded automatically at start. It comes with two worlds: **Hero's Chronicle** (heroic fantasy: a summoned hero, the Central Empire, the holy nation of Lumina and the Demon Realm, 21 characters) and **Lumencia Academy** (a fantasy academy with about 30 characters). Both have six portrait expressions per character. Anyone can add a new world by adding a folder; developers should read the `DEVONLY` folder.
+StoryCore is a local interactive-fiction engine. You play one character and an AI narrates the world around you. Each story world is a **lore pack**: a folder in `Lorepack` with a `pack.json` and its lore files (see `LOREPACK_FORMAT.md`). Every pack there is loaded automatically at start. It comes with two worlds: **Hero's Chronicle** (heroic fantasy: a summoned hero, the Central Empire, the holy nation of Lumina and the Demon Realm, 21 characters) and **Lumencia Academy** (a fantasy academy with about 30 characters). Both have six portrait expressions per character. Anyone can make a new world without technical knowledge with the **World creator** (sidebar), or by adding a folder; developers should read the `DEVONLY` folder.
 
 The app runs on your own PC and opens in your web browser. It keeps track of your story, the characters you meet, relationships, a journal and memory.
 
@@ -53,6 +53,17 @@ The complete experience is on by default, so once a model is connected everythin
 5. Write what your character does in the message box at the bottom and press Enter.
 
 The **?** Help button in the sidebar gives a short tour of the rest.
+
+## Create your own world
+
+Open **World creator** in the sidebar (or **Create a world** in the library). A guided path in ten tabs: identity and
+cover, presentation of the world and narrator rules, characters (with up to six portraits each), places, groups,
+glossary, beginnings, the player's stats, optional fixed rules, then **Check and play**. Every change is saved
+automatically. **Suggest with AI** writes a draft from a short idea with your current model; you read and change it
+before it is saved. The bundled worlds are not edited directly: **Make a copy** and change your copy.
+
+To share a world, press **Export (.zip)**; the other player uses **Import a world (.zip)** in the library. Your worlds
+are folders in `Lorepack`: keep them when you update StoryCore.
 
 ## What happens after each reply
 

@@ -103,6 +103,22 @@ JOURNAL  (routers/journal.py)
   DELETE /api/stories/{sid}/savepoints/{spid}                     delete savepoint
   GET    /api/stories/{sid}/maintenance                           maintenance
 
+WORLD CREATOR  (routers/creator.py, v0.6; refused to a paired phone)
+  GET    /api/creator/worlds                                      every pack in Lorepack: id, name, editable ("_creator"), world_id, has_stories
+  POST   /api/creator/worlds                                      {name, copy_from?}: new world, or an editable copy of any pack
+  GET    /api/creator/worlds/{pid}                                the world as one document (identity, sections, premise, narrator, lists, portraits)
+  PUT    /api/creator/worlds/{pid}                                save the keys sent (any subset), then reload the world
+  DELETE /api/creator/worlds/{pid}                                delete the folder and the world (refused while stories use it)
+  GET    /api/creator/worlds/{pid}/check                          pack checker report for this world
+  POST   /api/creator/worlds/{pid}/assist                         {kind, idea, lang}: AI draft (character, location, group, starter, premise, narrator); never saved
+  POST   /api/creator/worlds/{pid}/cover                          upload the cover (multipart "file", converted to WebP)
+  DELETE /api/creator/worlds/{pid}/cover                          remove the cover
+  POST   /api/creator/worlds/{pid}/portraits/{char_id}/{n}        upload expression n (1-6) of a character
+  DELETE /api/creator/worlds/{pid}/portraits/{char_id}[?n=]       remove one expression, or all of them
+  GET    /api/creator/worlds/{pid}/image?path=                    a picture of the world (images folder or cover only)
+  GET    /api/creator/worlds/{pid}/export                         the pack folder as a .zip
+  POST   /api/creator/import                                      a shared world (.zip) into Lorepack, loaded and checked
+
 LORE  (routers/lore.py)
   GET    /api/worlds                                              worlds
   GET    /api/worlds/{wid}/roles                                  Established posts and closed groups (lore-derived + owner-confirmed), ambiguous titles and lore/owner conflicts.
