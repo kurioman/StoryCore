@@ -9,7 +9,7 @@ Bonjour Claude. On continue le développement de StoryCore. Voici tout le contex
 - Je pousse moi-même sur GitHub avec `DEVONLY\Push vers GitHub.bat` (dépôt privé, branche `main`). Rappelle-le-moi en fin de phase.
 
 ## Le projet en bref
-StoryCore (version **0.5.0** ; la numérotation est repartie de zéro après la 1.7.0 : on vise une vraie V1) est un moteur
+StoryCore (version **0.6.0** ; la numérotation est repartie de zéro après la 1.7.0 : on vise une vraie V1) est un moteur
 local de jeu de rôle textuel par IA, basé sur des « Lore packs » (des mondes).
 - Dossier : `C:\Users\Kurio\Desktop\StoryCore`
 - Backend : Python FastAPI (`app/backend/story`), SQLite, migrations Alembic (`migrations/versions`, la dernière est la **0010**).
@@ -31,13 +31,17 @@ local de jeu de rôle textuel par IA, basé sur des « Lore packs » (des mondes
   - Outil des clés de traduction : `mkdir -p $HOME/tools && cp DEVONLY/tools/frontend_reconstruction/keys.mjs $HOME/tools/ && cd $HOME/tools && npm init -y && npm i @babel/parser @babel/traverse`
 - Compilation : `rsync -a --delete app/frontend/src/ $HOME/fe/src/`, puis dans `$HOME/fe` : `npx tsc --noEmit && npm run build`,
   puis recopier `$HOME/fe/dist/` dans `app/frontend/dist/` (supprimer l'ancien `dist` d'abord). Ne pas faire `npm install` dans le dossier monté.
-- Tests (**58**, ~2 min 30 au total : la commande a une limite de 3 min, donc **les lancer en deux moitiés**) :
+- Tests (**63**, ~2 min 45 au total : la commande a une limite de 3 min, donc **les lancer en deux moitiés**) :
   `PYTHONPYCACHEPREFIX=$HOME/pyc $HOME/v312/bin/python DEVONLY/run_tests.py test_api_basics test_bug_report test_codex test_lmstudio test_music test_narration_language test_pack_check test_providers test_remote test_usage test_continuity`
-  puis `... DEVONLY/run_tests.py test_context_layout test_story_flow test_summaries`.
+  puis `... DEVONLY/run_tests.py test_context_layout test_story_flow test_summaries test_creator`.
 - Clés de traduction manquantes : `node $HOME/tools/keys.mjs app/frontend/src app/frontend/src/i18n/locales/en.json`
   (met à jour en.json), puis comparer avec fr.json (chaque clé de en.json doit exister dans fr.json). Ajouter les traductions
   avec un petit script node (Object.assign) pour garder le format du fichier.
 - Les fichiers `.txt` de DEVONLY sont en fins de ligne Windows (CRLF) : les modifier en les conservant.
+- Variables d'une lettre du code reconstruit : `node DEVONLY/tools/frontend_reconstruction/rename.mjs <fichier> <fonction> o=query ...`
+  (copier dans `$HOME/tools`, à côté de keys.mjs). `fr.json` est indenté avec **un espace** (`JSON.stringify(fr, null, 1)`).
+- Fichiers écrits depuis le conteneur cloud avec `device_commit_files` : utiliser `force: true` si le fichier existe déjà
+  (sinon il peut ne pas être remplacé sans erreur).
 - Vérification visuelle : mettre `app/backend` et `app/frontend/dist` dans `_work/upd.tgz`, le transférer dans le conteneur
   cloud et l'extraire dans `/home/claude/sc` (le conteneur a aussi besoin de `scripts`, `Lorepack`, `Music`), lancer
   `python3 scripts/serve.py --port 8765 --no-browser --data-dir /home/claude/scdata` (d'abord `pkill -f scripts/serve.py`),
@@ -67,17 +71,27 @@ local de jeu de rôle textuel par IA, basé sur des « Lore packs » (des mondes
 - Libellés traduits au moment de l'affichage (plus de tableaux de `msg()` au chargement d'un fichier).
 - Interface découpée par page (`React.lazy` dans `app/App.jsx`) : le fichier principal passe de 1,3 Mo à ~380 Ko.
 
+- **Phase 8 (v0.6.0)** : créateur de mondes (`#/creator`, `features/creator/*`, `services/pack_editor.py`,
+  `services/creator_assist.py`, `routers/creator.py`) : 10 onglets, enregistrement automatique, portraits et couverture
+  (convertis en WebP), « Proposer avec l'IA », copie des packs inclus (les originaux ne sont jamais modifiés), export et
+  import .zip (Bibliothèque), réservé à l'ordinateur. Barre latérale rendue lisible. Zip `_release\StoryCore_v0.6.0.zip`.
+- **Phase 9.1** : requêtes plus petites (fiches de lore compactes, consignes `ai/` et scénarios exclus du lore,
+  consignes fixes raccourcies ; importeur version 6). Mesures dans `DEVONLY/05_NARRATOR_AND_CONTEXT.txt`.
+
 ## Pas encore vérifié avec du vrai matériel
 - Phase 6 sur mon vrai téléphone (pare-feu Windows : cocher « Réseaux privés »).
 - Phase 7 avec mon modèle LM Studio (qualité des résumés et du récap, vitesse avec la requête stable).
+- Phase 8 : « Proposer avec l'IA » avec mon modèle LM Studio (qualité des brouillons JSON).
+- Phase 9.1 : qualité du narrateur avec les fiches de lore compactes.
 
 ## Feuille de route restante
 Vision : après la Phase 8 (version **0.6.0**), le reste du travail jusqu'à la **V1** sera surtout des optimisations
 (comme celles ci-dessous) et l'ajout de nouveaux Lore packs.
 
-1. **Phase 8** : créateur de Lore packs dans l'application. Y inclure : rendre lisible le code de l'interface reconstruit
-   (variables d'une lettre, très gros fichiers : `journal.jsx`, `Providers.jsx`, `dialogs.jsx`) au fur et à mesure des fichiers touchés.
-   Une fois la Phase 8 finie, la version passe en **0.6.0**.
+1. **Phase 9 (suite)** : consignes de l'analyse de scène (~1 300 tokens à chaque tour, `turn_analysis.RULES`) à
+   raccourcir, à tester avec mon vrai modèle ; « narration prioritaire » (point 2 ci-dessous). Continuer à rendre
+   lisible le code reconstruit (`journal.jsx`, `Providers.jsx`, `dialogs.jsx`) au fur et à mesure des fichiers touchés.
+   **Phase 10** : deux nouveaux Lore packs, créés par moi avec le créateur.
 2. **Optimisations images et vitesse** (après la Phase 8) :
    - **Vérification d'abord** : contrôler à quel moment le portrait s'affiche aujourd'hui. Il doit apparaître dès que
      l'IA écrit la balise `[Nom:N]` pendant la génération, et non après la fin de la réponse ou après l'analyse de scène.
