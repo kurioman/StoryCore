@@ -189,3 +189,29 @@ Measured with the mock narrator after 3 turns (estimated tokens, characters / 4)
     they were tuned on live failures of local models.
   Not changed yet, to test with a real model first: the scene analysis system prompt (turn_analysis.RULES, about 1300
   tokens on every turn; with a JSON schema the shape part repeats the schema).
+
+PHASE 9.2-9.4 (v0.6): PLAYABLE WITH A LOCAL MODEL
+-------------------------------------------------
+Diagnosed on the owner's game (rocinante-12b, LM Studio) and in live tests:
+  - "Replayed scene": /continue (CONTINUE_TEMPLATE, now v3) did not forbid repeating; replies could run to 8,000
+    tokens and looped; the repetition penalty was sent as "repetition_penalty", which LM Studio ignores.
+  - The GGUF had no chat template: LM Studio used "Instruct:/Human:" and the model answered a turn by copying the
+    previous reply, then wrote "Human:" and our per-turn context. ChatML set in LM Studio fixed it.
+  - 10.4 GB Q6_K_L + 32k f16 cache on a 12 GB card spilled into shared memory (20 s before the first word, 7 tok/s).
+    Q4_K_M + 24k context + Q8_0 K/V cache: about 8.6 GB.
+Engine changes:
+  - services/reply_cleanup.py (called from turns.post_process, setting reply_cleanup, never for the mock narrator):
+    paragraphs whose 4-word sequences are 60% already in the last 3 replies (or earlier in the same reply) removed; a
+    reply cut by max_tokens trimmed to its last sentence; a trailing options menu dropped; a leaked next turn
+    ("\nHuman:", "<|im_start|>", "[Story context for this turn") cut. Tag offsets move with the text; never empties.
+  - runtime.story_params: max_tokens capped by the target length (settings_service.REPLY_TOKEN_CAPS: short 380,
+    medium 650, long 1050); repeat_penalty 1.08 for local story replies only (never JSON requests).
+  - OpenAICompatAdapter: repeat_penalty keeps its name for local servers; local requests get stop sequences
+    (LOCAL_STOPS).
+  - context_builder: with a known window and no story budget, the budget follows the window up to AUTO_BUDGET_CAP
+    (24,000; setting context_budget_auto); lore budget capped at LORE_BUDGET_MAX (1,600). Two narration rules added
+    (never repeat earlier replies; never invent a shared past).
+  - Narration first (runtime.GenerationManager.side_tasks / stop_side_requests): the post-reply hooks of a story are
+    cancelled when its next narration starts; a running scene analysis is marked skipped ("the next reply had
+    priority"); capture and summaries catch up on a later turn.
+  Tests: app/backend/tests/test_phase9.py.

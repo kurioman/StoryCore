@@ -31,9 +31,9 @@ local de jeu de rôle textuel par IA, basé sur des « Lore packs » (des mondes
   - Outil des clés de traduction : `mkdir -p $HOME/tools && cp DEVONLY/tools/frontend_reconstruction/keys.mjs $HOME/tools/ && cd $HOME/tools && npm init -y && npm i @babel/parser @babel/traverse`
 - Compilation : `rsync -a --delete app/frontend/src/ $HOME/fe/src/`, puis dans `$HOME/fe` : `npx tsc --noEmit && npm run build`,
   puis recopier `$HOME/fe/dist/` dans `app/frontend/dist/` (supprimer l'ancien `dist` d'abord). Ne pas faire `npm install` dans le dossier monté.
-- Tests (**63**, ~2 min 45 au total : la commande a une limite de 3 min, donc **les lancer en deux moitiés**) :
+- Tests (**73**, ~3 min 15 au total : la commande a une limite de 3 min, donc **les lancer en deux moitiés**) :
   `PYTHONPYCACHEPREFIX=$HOME/pyc $HOME/v312/bin/python DEVONLY/run_tests.py test_api_basics test_bug_report test_codex test_lmstudio test_music test_narration_language test_pack_check test_providers test_remote test_usage test_continuity`
-  puis `... DEVONLY/run_tests.py test_context_layout test_story_flow test_summaries test_creator`.
+  puis `... DEVONLY/run_tests.py test_context_layout test_story_flow test_summaries test_creator test_phase9`.
 - Clés de traduction manquantes : `node $HOME/tools/keys.mjs app/frontend/src app/frontend/src/i18n/locales/en.json`
   (met à jour en.json), puis comparer avec fr.json (chaque clé de en.json doit exister dans fr.json). Ajouter les traductions
   avec un petit script node (Object.assign) pour garder le format du fichier.
@@ -78,6 +78,16 @@ local de jeu de rôle textuel par IA, basé sur des « Lore packs » (des mondes
 - **Phase 9.1** : requêtes plus petites (fiches de lore compactes, consignes `ai/` et scénarios exclus du lore,
   consignes fixes raccourcies ; importeur version 6). Mesures dans `DEVONLY/05_NARRATOR_AND_CONTEXT.txt`.
 
+- **Phase 9.2 à 9.4** (testé en direct avec mon LM Studio) : plus de scènes rejouées (« Continuer » v3, règle
+  anti-répétition, `services/reply_cleanup.py` qui retire les paragraphes recopiés, le menu final et un tour « Human: »
+  écrit par le modèle), longueur des réponses plafonnée, `repeat_penalty` envoyé à LM Studio sous le bon nom, marqueurs
+  d'arrêt, budget de contexte qui suit le modèle (jusqu'à 24 000), narration prioritaire (analyse/capture/résumés
+  arrêtés quand j'écris), règle contre les passés communs inventés, consignes d'analyse raccourcies.
+- **Mon LM Studio (réglé par Claude le 18/11)** : Rocinante 12B **Q4_K_M** (`rocinante-12b-v1.1@q4_k_m`), contexte 24 576,
+  cache K/V Q8_0, Flash Attention, format **ChatML** enregistré dans les réglages par défaut du modèle (le GGUF n'en a
+  pas : sans lui le modèle répète et écrit « Human: »), « Limit Model Offload to Dedicated GPU Memory » activé.
+  Vitesse mesurée : ~14-16 tokens/s (attendu 30-40 sur une 3060) : reste à comprendre (autres applis sur la carte ?).
+
 ## Pas encore vérifié avec du vrai matériel
 - Phase 6 sur mon vrai téléphone (pare-feu Windows : cocher « Réseaux privés »).
 - Phase 7 avec mon modèle LM Studio (qualité des résumés et du récap, vitesse avec la requête stable).
@@ -88,8 +98,9 @@ local de jeu de rôle textuel par IA, basé sur des « Lore packs » (des mondes
 Vision : après la Phase 8 (version **0.6.0**), le reste du travail jusqu'à la **V1** sera surtout des optimisations
 (comme celles ci-dessous) et l'ajout de nouveaux Lore packs.
 
-1. **Phase 9 (suite)** : consignes de l'analyse de scène (~1 300 tokens à chaque tour, `turn_analysis.RULES`) à
-   raccourcir, à tester avec mon vrai modèle ; « narration prioritaire » (point 2 ci-dessous). Continuer à rendre
+1. **Phase 9 (suite)** : style de narration à travailler ensemble (j'aime : réponses courtes, actions entre *astérisques*,
+   proche d'OOC.AI) ; début fixe de Lumencia (je le conçois moi-même) ; vitesse de génération (14 tok/s) ; les balises
+   de portrait que Rocinante n'écrit presque jamais. Continuer à rendre
    lisible le code reconstruit (`journal.jsx`, `Providers.jsx`, `dialogs.jsx`) au fur et à mesure des fichiers touchés.
    **Phase 10** : deux nouveaux Lore packs, créés par moi avec le créateur.
 2. **Optimisations images et vitesse** (après la Phase 8) :

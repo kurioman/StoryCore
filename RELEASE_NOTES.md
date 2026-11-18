@@ -23,6 +23,20 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
   bookkeeping lines and in a more compact form, the narrator's own instructions and the opening scenarios are no longer
   sent again as "lore", and the fixed instructions (posts, encounters, portrait tags, scene) say the same in fewer words.
   About 10% less on every request for Hero's Chronicle. The packs are re-imported once at the first start.
+- **No more replayed scenes.** "Continue" now asks for what happens next and forbids telling the scene again; a
+  narration rule forbids repeating earlier replies; a reply's paragraphs copied from the last replies (or said twice) are
+  removed automatically, as well as a trailing "What do you do?" menu. Local models (LM Studio, llama.cpp) now receive a
+  repetition penalty under the name they read (it was silently ignored before).
+- **Replies of a sane length**: a reply stops near its target length (short, medium, long) and is trimmed to its last
+  full sentence; long free runs were where small models looped.
+- **More memory with big models**: the context budget now follows the model's window (up to 24,000 tokens) instead of a
+  fixed 10,000; reference lore stays capped, so the extra room holds more of the story itself.
+- **Narration first**: when you send a message, the scene analysis, memory capture and summaries still running for the
+  previous reply are stopped, so the narrator starts at once (capture and summaries catch up later).
+- **Safer with local models**: end-of-turn markers are sent as stop sequences, and a reply in which the model starts
+  writing your next turn itself (a model loaded with the wrong chat template) is cut there.
+- The narrator no longer invents a shared past with characters you have never met.
+- Shorter scene-analysis instructions (same rules).
 
 ## New in v0.5
 
