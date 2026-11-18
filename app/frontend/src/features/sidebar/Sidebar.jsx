@@ -65,6 +65,11 @@ export function Sidebar({ activeStoryId, path, collapsed, onToggle, onHelp }) {
         icon: Icon.UserRound,
       },
       {
+        to: `/creator`,
+        label: msg("World creator"),
+        icon: Icon.PencilRuler,
+      },
+      {
         to: `/lore`,
         label: msg("Lore library"),
         icon: Icon.BookOpen,

@@ -69,8 +69,8 @@ def packs_dir(project_root: Path) -> Path:
 def slugify(text: str, fallback: str = "world") -> str:
     import unicodedata
 
-    t = unicodedata.normalize("NFKD", str(text)).encode("ascii", "ignore").decode()
-    s = re.sub(r"[^a-z0-9]+", "_", t.lower()).strip("_")[:60]
+    t = "".join(c for c in unicodedata.normalize("NFKD", str(text)) if not unicodedata.combining(c))
+    s = re.sub(r"[^a-z0-9]+", "_", t.lower()).strip("_")[:60]  # same rule as makeId() in the creator page
     return s or fallback
 
 
@@ -169,6 +169,7 @@ def read(project_root: Path, pid: str) -> dict[str, Any]:
     images = _images_dir(folder, raw)
     doc["cover"] = raw.get("cover") or ""
     doc["portraits"] = portraits(images)
+    doc["portrait_files"] = portrait_files(folder, images)
     managed = {pack_manifest.MANIFEST, PREMISE, NARRATOR, *(rel for rel, _ in LISTS.values())}
     doc["other_files"] = sorted(p.relative_to(folder).as_posix() for p in folder.rglob("*")
                                 if p.is_file() and p.suffix.lower() in (".json", ".md")
@@ -177,14 +178,37 @@ def read(project_root: Path, pid: str) -> dict[str, Any]:
     return doc
 
 
+IMAGE_EXTS = (".webp", ".png", ".jpg", ".jpeg", ".gif")
+
+
+def _portrait_slots(images: Path) -> list[tuple[str, int, Path]]:
+    """(character, expression, file) for every portrait, named as the importer reads them: ``lily_1.webp``,
+    ``lily_01.webp`` or ``lily/1.webp``."""
+    from .assets import parse_name
+
+    out = []
+    if images.is_dir():
+        for p in sorted(images.rglob("*")):
+            if p.is_file() and p.suffix.lower() in IMAGE_EXTS:
+                slug, num = parse_name(p.relative_to(images).as_posix())
+                if slug and num in EXPRESSIONS:
+                    out.append((slug, num, p))
+    return out
+
+
 def portraits(images: Path) -> dict[str, list[int]]:
     out: dict[str, list[int]] = {}
-    if images.is_dir():
-        for p in images.iterdir():
-            m = re.match(r"^(.+)_([1-6])$", p.stem)
-            if p.is_file() and m and p.suffix.lower() in (".webp", ".png", ".jpg", ".jpeg", ".gif"):
-                out.setdefault(m.group(1), []).append(int(m.group(2)))
+    for slug, num, _p in _portrait_slots(images):
+        out.setdefault(slug, []).append(num)
     return {k: sorted(set(v)) for k, v in out.items()}
+
+
+def portrait_files(folder: Path, images: Path) -> dict[str, dict[int, str]]:
+    """{character id: {expression: path inside the pack}} (for the creator's picture slots)."""
+    out: dict[str, dict[int, str]] = {}
+    for slug, num, p in _portrait_slots(images):
+        out.setdefault(slug, {})[num] = p.relative_to(folder).as_posix()
+    return out
 
 
 # --------------------------------------------------------------------------- writing
@@ -333,7 +357,20 @@ def _gather(folder: Path) -> tuple[dict[str, list[dict[str, Any]]], list[str]]:
                     lists[key].append(rec)
         finally:
             tdb.engine.dispose()  # Windows cannot delete the temporary database while it is open
-    return lists, sorted(files)
+    return {k: _merge_same_ids(v) for k, v in lists.items()}, sorted(files)
+
+
+def _merge_same_ids(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """One card per id: the importer can read the same id twice in different categories (a faction and a polity)."""
+    out: dict[str, dict[str, Any]] = {}
+    for r in records:
+        rid = str(r.get("id") or "")
+        if rid in out:
+            for k, v in r.items():
+                out[rid].setdefault(k, v)
+        else:
+            out[rid or f"_{len(out)}"] = dict(r)
+    return list(out.values())
 
 
 def _list_category(key: str, items: list[Any], stem: str) -> str | None:
@@ -463,8 +500,9 @@ def set_portrait(project_root: Path, pid: str, char_id: str, n: int, data: bytes
     images = _images_dir(folder, raw)
     images.mkdir(parents=True, exist_ok=True)
     webp = _to_webp(data, IMAGE_MAX_SIDE)
-    for old in images.glob(f"{char_id}_{n}.*"):
-        old.unlink()
+    for slug, num, old in _portrait_slots(images):
+        if slug == char_id and num == n:
+            old.unlink()
     (images / f"{char_id}_{n}.webp").write_bytes(webp)
 
 
@@ -473,9 +511,8 @@ def remove_portraits(project_root: Path, pid: str, char_id: str, n: int | None =
         raise EditorError("Unknown character.")
     folder, raw = _editable_folder(project_root, pid)
     images = _images_dir(folder, raw)
-    for p in images.glob(f"{char_id}_*.*") if images.is_dir() else []:
-        m = re.match(rf"^{re.escape(char_id)}_([1-6])$", p.stem)
-        if m and (n is None or int(m.group(1)) == n):
+    for slug, num, p in _portrait_slots(images):
+        if slug == char_id and (n is None or num == n):
             p.unlink()
 
 

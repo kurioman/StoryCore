@@ -7,7 +7,9 @@ import * as Dialog from "@radix-ui/react-dialog";
 import * as Icon from "lucide-react";
 import { useStories, useWorlds } from "@/api/queries";
 import { msg, packText, shownLanguage } from "@/i18n";
-import { Spinner } from "@/components/ui";
+import { Button, Spinner } from "@/components/ui";
+import { ImportButton } from "@/features/creator/ImportButton";
+import { IS_REMOTE } from "@/lib/remote";
 import { SetupNotices } from "@/features/home/SetupNotices";
 import { navigate } from "@/lib/router";
 import { cn, timeAgo } from "@/lib/util";
@@ -63,6 +65,14 @@ export function LibraryPage() {
         <header className="mb-6 flex items-center gap-3">
           <Icon.Library className="size-7 text-[#e2bd72]" />
           <h1 className="sc-brand text-3xl text-[#f3dca0]">{msg("Library")}</h1>
+          {!IS_REMOTE && (
+            <div className="ml-auto flex flex-wrap gap-2">
+              <ImportButton />
+              <Button onClick={() => navigate(`/creator`)}>
+                <Icon.PencilRuler className="size-4" /> {msg("Create a world")}
+              </Button>
+            </div>
+          )}
         </header>
         <SetupNotices />
 
@@ -111,7 +121,7 @@ export function LibraryPage() {
           <h2 className="sc-lib-h2">{msg("Stories")}</h2>
           {worlds.data && !worlds.data.length && (
             <p className="text-sm text-[#e2bd72aa]">
-              {msg("No lore pack yet. Put a pack folder in Lorepack and restart StoryCore.")}
+              {msg("No world yet. Create one with the world creator, or import a shared world (.zip).")}
             </p>
           )}
           <div className="grid grid-cols-[repeat(auto-fill,minmax(210px,1fr))] gap-5">

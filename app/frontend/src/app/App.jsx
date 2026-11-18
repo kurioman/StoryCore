@@ -19,6 +19,7 @@ import { Spinner } from "@/components/ui";
 // main file). Faster first display, above all on a phone. The play screen and the library are fetched in the
 // background shortly after start, so opening them stays instant.
 const AvatarsPage = React.lazy(() => import("@/features/avatars/AvatarsPage").then((m) => ({ default: m.AvatarsPage })));
+const CreatorPage = React.lazy(() => import("@/features/creator/CreatorPage").then((m) => ({ default: m.CreatorPage })));
 const CommandsPage = React.lazy(() => import("@/features/commands/CommandsPage").then((m) => ({ default: m.CommandsPage })));
 const LibraryPage = React.lazy(() => import("@/features/library/LibraryPage").then((m) => ({ default: m.LibraryPage })));
 const MusicPage = React.lazy(() => import("@/features/music/MusicPage").then((m) => ({ default: m.MusicPage })));
@@ -73,6 +74,10 @@ function App() {
     <AvatarsPage selectedId={u.id} />
   ) : matchRoute(hashPath, `/avatars`) ? (
     <AvatarsPage />
+  ) : (u = matchRoute(hashPath, `/creator/:id`)) ? (
+    <CreatorPage worldId={u.id} />
+  ) : matchRoute(hashPath, `/creator`) ? (
+    <CreatorPage />
   ) : matchRoute(hashPath, `/lore`) ? (
     <LorePage />
   ) : matchRoute(hashPath, `/portraits`) ? (
