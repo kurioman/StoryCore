@@ -177,5 +177,20 @@ class CreatorTest(unittest.TestCase):
         self.call("DELETE", f"/creator/worlds/{pid}")
 
 
+    def test_helpers(self):
+        from story.services import pack_editor as pe
+
+        self.assertEqual(pe.slugify("Le Royaume d’Écume"), "le_royaume_d_ecume")
+        merged = pe._merge_same_ids([{"id": "a", "name": "A"}, {"id": "a", "type": "Guild", "name": "B"}, {"id": "b"}])
+        self.assertEqual(merged, [{"id": "a", "name": "A", "type": "Guild"}, {"id": "b"}])
+        with tempfile.TemporaryDirectory() as tmp:  # portraits named lily_1, lily_01 or lily/1 are all found
+            images = Path(tmp) / "images"
+            (images / "kai").mkdir(parents=True)
+            for rel in ("lily_1.webp", "lily_02.webp", "kai/3.png", "notes.txt"):
+                (images / rel).write_bytes(b"x")
+            self.assertEqual(pe.portraits(images), {"lily": [1, 2], "kai": [3]})
+            self.assertEqual(pe.portrait_files(Path(tmp), images)["kai"], {3: "images/kai/3.png"})
+
+
 if __name__ == "__main__":
     unittest.main()
