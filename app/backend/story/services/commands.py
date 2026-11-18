@@ -24,7 +24,15 @@ CONTINUE_TEMPLATE = ("[Continue the scene] Let the world, NPCs and events alread
                      "new thought or feeling. If something happens to the protagonist (a touch, a fall, an attack), describe it "
                      "reaching them and stop there: how they react (moving, dodging, catching, answering) is the player's choice. "
                      "Stop when the protagonist needs to act or respond.\n{{input}}")
-PREVIOUS_DEFAULTS = {"continue": {CONTINUE_TEMPLATE_V1}}
+CONTINUE_TEMPLATE_V2 = CONTINUE_TEMPLATE
+# v0.6 (phase 9): with V2 a 12B model answered "Continue" by telling the previous scene again, copying its paragraphs
+CONTINUE_TEMPLATE = ("[Continue the scene] Pick up exactly where your last reply stopped and show what happens NEXT: an NPC "
+                     "acts or speaks, an event occurs, time moves on a little. Never repeat, rephrase or sum up anything "
+                     "already narrated. The protagonist takes no new deliberate action, says nothing new, makes no decision and "
+                     "is given no new thought or feeling. If something happens to the protagonist (a touch, a fall, an attack), "
+                     "describe it reaching them and stop there: how they react is the player's choice. Stop when the "
+                     "protagonist needs to act or respond.\n{{input}}")
+PREVIOUS_DEFAULTS = {"continue": {CONTINUE_TEMPLATE_V1, CONTINUE_TEMPLATE_V2}}
 
 SEEDS: list[dict[str, Any]] = [
     {"name": "recap", "aliases": [], "kind": "hybrid", "action": "recap", "output_target": "utility", "category": "Continuity",

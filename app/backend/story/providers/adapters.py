@@ -580,7 +580,9 @@ class OpenAICompatAdapter(ProviderAdapter):
     def _body(self, model, system, messages, params, stream):
         p = self.filter_params(params)
         p.pop("think", None)  # never a body field: stream_chat turns it into OpenRouter's reasoning option
-        if "repeat_penalty" in p:
+        if "repeat_penalty" in p and self.is_cloud:
+            # v0.6: LM Studio and llama.cpp read "repeat_penalty" (the other name was silently ignored by them);
+            # OpenRouter and vLLM-style services call it repetition_penalty
             p["repetition_penalty"] = p.pop("repeat_penalty")
         msgs = ([{"role": "system", "content": system}] if system else []) + [
             {"role": m.role, "content": m.content} for m in messages if m.content.strip()]

@@ -15,6 +15,12 @@ DEFAULT_MAX_OUTPUT_TOKENS = 3000
 LOCAL_MAX_OUTPUT_TOKENS = 1024
 # v1.6.4: from this window a local model can afford the full ceiling; below it (or unknown) 3,000 would come out of the story
 ROOMY_LOCAL_WINDOW = 16384
+# v0.6 (phase 9): reply ceilings per target length (generous: the target itself is in the prompt) and the repetition
+# penalty sent to local servers for story replies (LM Studio / llama.cpp default is 1.0 = off)
+REPLY_TOKEN_CAPS = {"short": 380, "medium": 650, "long": 1050}
+LOCAL_REPEAT_PENALTY = 1.08
+# v0.6: with a known model window the context budget follows it (up to this), instead of a fixed 10,000 tokens
+AUTO_BUDGET_CAP = 24000
 
 NARRATION_PRESETS = [
     {"id": "balanced", "name": "Balanced", "instructions": "Write vivid but economical prose (2–5 paragraphs). Balance dialogue, action and description."},
@@ -33,6 +39,8 @@ ANALYSIS_MODES = ("always", "local_only", "off")  # always is shown as "Automati
 RELATIONSHIP_MODES = ("auto_conservative", "review", "off")
 
 DEFAULTS: dict[str, Any] = {
+    "context_budget_auto": True,  # v0.6: the budget follows the model's window (context_budget_tokens when unknown)
+    "reply_cleanup": True,  # v0.6: paragraphs copied from earlier replies are removed from a new reply
     "onboarding_done": False,  # v0.5: the first-run assistant (#/setup) was completed or skipped
     "default_model_profile_id": None,
     "extraction_model_source": "narration",  # narration | separate | none

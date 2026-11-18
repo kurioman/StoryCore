@@ -47,7 +47,23 @@ def story_params(profile_params: dict[str, Any] | None, story: Story, hosted: bo
         params["max_tokens"] = limit
     if window and int(params.get("max_tokens") or 0) > window // 2:
         params["max_tokens"] = window // 2
+    # v0.6 (phase 9): a reply may not run far past its target length. Long free runs are where small models loop
+    # (one 740-token reply told the same scene twice). A reply cut by this ceiling is trimmed to its last sentence.
+    cap = length_cap((story.settings_json or {}).get("output_length"))
+    if cap and int(params.get("max_tokens") or cap + 1) > cap:
+        params["max_tokens"] = cap
+    if not hosted and "repeat_penalty" not in params:
+        params["repeat_penalty"] = settings_service.LOCAL_REPEAT_PENALTY  # story narration only, never JSON requests
     return params
+
+
+def length_cap(output_length: str | None) -> int | None:
+    """Ceiling on a reply's tokens for the story's target length ("short (1–2 paragraphs)", "medium ...", "long ...")."""
+    text = (output_length or "").lower()
+    for word, cap in settings_service.REPLY_TOKEN_CAPS.items():
+        if text.startswith(word):
+            return cap
+    return None
 
 
 @dataclass

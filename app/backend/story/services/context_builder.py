@@ -33,6 +33,9 @@ FACT_LABELS = {
 }
 
 
+LORE_BUDGET_MAX = 1600
+
+
 def est_tokens(s: str) -> int:
     return math.ceil(len(s or "") / 4)
 
@@ -239,6 +242,8 @@ NARRATION_RULES_V4 = (
     "surrendering belong to the player. Stop at the moment {name} must respond.\n"
     "- Keep NPCs active: they talk, decide and act on what they plausibly know, never on secrets they had no way to learn.\n"
     "- A length target is a maximum, not a quota: once the other characters have reacted, stop.\n"
+    "- Never repeat or paraphrase earlier replies (their descriptions, lines or events): continue from the exact point "
+    "where the last one ended.\n"
     "- End in plain prose at a natural moment for the player to respond. Never add a list of options, a numbered menu, "
     "a 'What do you do next?' question or any interface text: the application shows suggested actions separately. "
     "Earlier replies that did so were mistakes; do not repeat them.\n"
@@ -322,6 +327,10 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
     budget_cfg = int(ssettings.get("context_budget_tokens") or cfg["context_budget_tokens"])
     reply_tokens = int((params or {}).get("max_tokens") or 0)
     window = effective_window(context_limit, params)
+    if window and cfg.get("context_budget_auto", True) and not ssettings.get("context_budget_tokens"):
+        # v0.6 (phase 9): use the model's window (it was capped at 10,000 tokens even for a 32k model); the stable layout
+        # keeps the start of the request identical, so a local server reuses its cache and a long history stays cheap
+        budget_cfg = max(budget_cfg, min(window, settings_service.AUTO_BUDGET_CAP))
     # v1.6.2: with a known window the hard limit below already leaves room for the whole reply, so a high output ceiling does
     # not also come out of the story's context budget. With no known window the reply must fit inside the budget.
     reserve = int(cfg["reserve_output_tokens"]) if window else max(int(cfg["reserve_output_tokens"]), reply_tokens)
@@ -544,7 +553,8 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
     # 8. lore + local canon
     lore_lines, lore_items = [], []
     if story.world_id:
-        lore_budget = max(500, int(budget * 0.2))
+        # v0.6: capped, so a bigger window holds more of the story itself rather than more reference lore
+        lore_budget = max(500, min(int(budget * 0.2), LORE_BUDGET_MAX))
         used = 0
         pins = list(ssettings.get("pinned_lore_ids") or [])
         chunks: list[LoreChunk] = [c for c in (db.get(LoreChunk, i) for i in pins) if c]

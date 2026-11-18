@@ -315,6 +315,10 @@ def post_process(ctx: AppContext, message_id: str) -> str | None:
         state = st_row.state_json if st_row else {}
         index = build_index(db, story.world_id, state)
         md = dict(m.generation_metadata_json or {})
+        # (the demo narrator repeats one canned paragraph on purpose: nothing to clean there)
+        if m.kind == "story" and m.role == "assistant" and m.status == "complete" and not md.get("cleanup") \
+                and md.get("provider_type") != "mock" and settings_service.get(db, "reply_cleanup") is not False:
+            _clean_reply(db, m, md)
         if m.kind == "story":
             m.speaker_character_id = detect_speaker(m.content, index)
             mentioned = index.find_mentions(m.content, ("character",))
@@ -344,6 +348,32 @@ def post_process(ctx: AppContext, message_id: str) -> str | None:
         if mode == "after_each_turn" or (mode == "batch" and cur.assistant_turns_since >= every):
             return m.branch_id
     return None
+
+
+def _clean_reply(db, m: Message, md: dict[str, Any]) -> None:
+    """v0.6 (phase 9): paragraphs copied from the last replies, an unfinished last sentence, a trailing options menu
+    (services/reply_cleanup.py). The stored tag positions move with the text."""
+    from . import reply_cleanup
+
+    earlier = [p.content for p in story_tree.path_messages(db, m.parent_id)
+               if p.role == "assistant" and p.kind == "story" and p.content.strip()][-reply_cleanup.LOOKBACK:] \
+        if m.parent_id else []
+    cut = (md.get("diagnostics") or {}).get("finish_reason") == "length"
+    text, spans, report = reply_cleanup.clean(m.content, earlier, cut_by_length=cut)
+    md["cleanup"] = report or {"checked": True}
+    if not spans:
+        return
+    md["cleanup"]["removed_chars"] = len(m.content) - len(text)
+    for key, field in (("portrait_tags", "pos"), ("music_tags", "offset")):
+        moved = []
+        for t in md.get(key) or []:
+            p = t.get(field)
+            new = reply_cleanup.move_offset(p, spans) if isinstance(p, int) else p
+            if new is not None:
+                moved.append({**t, field: min(new, len(text))})
+        if key in md:
+            md[key] = moved
+    m.content = text
 
 
 def apply_expressions(story: Story, branch_id: str, suggestions: list[dict[str, Any]], *, source: str,
