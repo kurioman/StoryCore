@@ -176,12 +176,11 @@ def render_block(registry: dict[str, Any], index: EntityIndex, present: list[str
         return ""
     first = registry["roles"][0]["title"] if registry["roles"] else "a listed post"
     example = "the Headmaster" if registry.get("school") else f"the {re.sub(r'^the ', '', first, flags=re.I)}"
-    lines = ["Established posts (canonical lore). Whoever holds a post below is that person whenever the post appears — "
-             f"e.g. {example} is always the character listed. The protagonist may not have met everyone yet: name "
-             "a character naturally once they are introduced or already known (see the list of met characters):"]
+    # v0.6 (phase 9): same rules in fewer words (this block is sent with every request)
+    lines = [f"Established posts (always held by the character listed, e.g. {example}; the protagonist may not know them "
+             "yet: name them once introduced or already met):"]
     for r in registry["roles"]:
-        extra = "; ".join(x for x in ["mandatory" if r["mandatory"] else "locked", r["note"]] if x)
-        lines.append(f"- {r['title']}: {r['character_name']} [{r['character_id']}] — {extra}")
+        lines.append(f"- {r['title']}: {r['character_name']}" + (f" ({r['note']})" if r["note"] else ""))
     closed = [g for g in registry["groups"] if g["closed"]]
     if closed:
         lines.append("Closed groups (never add members): " + "; ".join(
@@ -189,14 +188,11 @@ def render_block(registry: dict[str, Any], index: EntityIndex, present: list[str
     posted = {r["character_id"] for r in registry["roles"]} | {m for g in closed for m in g["members"]}
     others = [e.name for e in index.entities.values() if e.category == "character" and not e.local and e.id not in posted]
     if others:
-        lines.append("Other established characters (prefer them over inventing new named ones): " + ", ".join(sorted(others)))
-    lines.append("Rules: a listed post is held only by its listed character — never introduce a replacement, a second "
-                 "holder or a new authority for it. If that character is absent, keep the post offscreen or say they are "
-                 "away; do not invent a substitute. Use canonical names (aliases are fine). Prefer existing characters for "
-                 "scenes and encounters; new minor characters "
-                 + ("(other students, staff, townsfolk)" if registry.get("school") else "(townsfolk, staff, passers-by)")
-                 + " are fine when they take no established post and contradict no lore. Do not invent new gods or "
-                 "celestial beings.")
+        lines.append("Other established characters (prefer them over new named ones): " + ", ".join(sorted(others)))
+    lines.append("Never give a post to anyone else, even when its holder is absent (keep them offscreen or away). Use "
+                 "canonical names (aliases are fine). New minor characters "
+                 + ("(students, staff, townsfolk)" if registry.get("school") else "(townsfolk, staff, passers-by)")
+                 + " are fine if they hold no post and contradict no lore. No new gods or celestial beings.")
     return "\n".join(lines)
 
 

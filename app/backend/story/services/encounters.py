@@ -169,14 +169,14 @@ def render(result: dict[str, Any], index: EntityIndex) -> str:
     lines = [f"- {h['name']}" + (f" ({h['looks']})" if h.get("looks") else "") + f" — {'; '.join(h['reasons']) or 'plausibly nearby'}"
              for h in result["hints"]]
     school = result.get("school", True)
-    opening = ("This is the start of the story: where the place is plausibly busy, let the protagonist notice or cross "
-               "paths with one of them in the first reply or two (someone seen across a room, a passing remark). When "
-               f"you single out {'a student' if school else 'someone'}, make it one of these, recognisable by look, rather "
-               "than an invented one. It is an opportunity, not a conversation; the player decides whether to engage.\n"
+    # v0.6 (phase 9): same rules in fewer words
+    opening = ("Story start: where the place is busy, let the protagonist notice or cross paths with one of them in the "
+               f"first reply or two (seen across a room, a passing remark), rather than an invented "
+               f"{'student' if school else 'person'}. An opportunity, not a conversation: the player decides.\n"
                if result.get("early") else "")
-    usual = ("In a lesson the teacher and usual students are normally present; prefer them over invented classmates."
-             if school else "At a recurring gathering its leader and usual members are normally present; prefer them over "
-             "invented ones.")
-    return (opening + "Possible encounters (optional; established characters who could plausibly be here). Use at most "
-            "one, and only if it fits the moment naturally — never force a meeting, never move the protagonist, never "
-            f"decide for them. {usual} A minor unnamed extra is fine when none fits.\n" + "\n".join(lines))
+    usual = ("In a lesson the teacher and usual students are present; prefer them over invented classmates."
+             if school else "At a recurring gathering its leader and usual members are present; prefer them over invented "
+             "ones.")
+    return (opening + "Possible encounters (established characters who could plausibly be here): use at most one, only "
+            f"if it fits naturally; never force a meeting or move the protagonist. {usual} Otherwise a minor unnamed extra "
+            "is fine.\n" + "\n".join(lines))

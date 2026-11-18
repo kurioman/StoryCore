@@ -171,3 +171,21 @@ secret only enters memory if the narrator actually wrote it into the story.
   - If replies are cut: raise the model profile's max_tokens, or lower it if the model's window is small.
   - If the narrator invents a second ruler / god: add a post or closed group in pack.json.
   - If a character is never met: add places (regulars / likely) or a gathering in pack.json.
+
+PHASE 9 (v0.6): SMALLER REQUESTS
+--------------------------------
+Measured with the mock narrator after 3 turns (estimated tokens, characters / 4):
+                      fixed sections before -> after
+  Hero's Chronicle    2430 -> 2147   roles 422 -> 271, portrait tags 142 -> 113, scene 235 -> 205, lore 419 -> 345
+  Lumencia Academy    3763 -> 3666   roles 565 -> 409, encounters 146 -> 130; lore now holds real records (see below)
+  - Lore records (lore_import.record_text): no id / name (the chunk title has it) / _index_type / source_ids lines; the
+    confidence line only when it is not "high"; small blocks of plain values on one line ("appearance: hair: blue;
+    eyes: gold"). Importer version 6: every pack is re-imported once at start.
+  - Not retrieved as lore any more: the pack's system prompt file and every Markdown file under ai/ or scenarios/ (and
+    README.md), and the records of the "scenario" and "source" categories. They were found by the lore search and sent
+    again in pieces (the narrator already has its rules whole; openings are used when a story starts).
+  - Shorter wording, same rules: established posts (roles.render_block, no [id] and "locked" labels), possible
+    encounters, portrait tags, scene consistency lines. The narration rules (final section) are unchanged on purpose:
+    they were tuned on live failures of local models.
+  Not changed yet, to test with a real model first: the scene analysis system prompt (turn_analysis.RULES, about 1300
+  tokens on every turn; with a JSON schema the shape part repeats the schema).

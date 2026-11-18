@@ -38,11 +38,10 @@ EXPRESSION_LINE = ("1 neutral (use it when unsure), 2 happy / smiling, 3 sad / s
 
 def instruction(protagonist: str) -> str:
     """Narrator rule (context_builder adds it near the end of the system prompt)."""
-    return (f"Before every line of dialogue spoken by a named character, write that character's portrait tag: [Name:N], "
-            f"where N is their expression: {EXPRESSION_LINE}. Example: [Selphina:3] \"I... I didn't mean it.\" "
-            "Use the character's name as the lore writes it, one tag per spoken line, and change N when their emotion "
-            f"changes. Never tag {protagonist} and never tag unnamed extras. The app removes the tags before the player "
-            "reads the text and shows the matching portrait.")
+    return (f"Before each line spoken by a named character, write their portrait tag [Name:N] (the name as the lore "
+            f"writes it), N = expression: {EXPRESSION_LINE}. Example: [Selphina:3] \"I... I didn't mean it.\" One tag per "
+            f"spoken line; change N with their emotion. Never tag {protagonist} or unnamed extras. The app removes the "
+            "tags and shows the portraits.")
 
 
 class TagFilter:

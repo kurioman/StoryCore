@@ -332,20 +332,18 @@ def render_for_narrator(sc: dict[str, Any], year_label: str = "Year") -> str:
     lines = [f"In-story day: D{sc.get('story_day') or 1} (story-world time, not the real date)",
              f"Calendar: {calendar_text(sc, year_label) or NOT_ESTABLISHED}",
              f"Time of day: {fmt(sc.get('time'))}", f"Location: {fmt(sc.get('location'))}", f"Weather: {fmt(sc.get('weather'))}",
-             "Keep time, place and weather consistent with these values; change them only when the story moves on, and "
-             "make that visible in the narration. When a lesson, a meeting or a clock makes it natural, state the hour "
-             "once in the narration."]
+             "Keep these consistent; change them only when the story moves on, visibly in the narration. When a lesson, "
+             "a meeting or a clock makes it natural, state the hour once."]
     missing = [label for label, v in (("time of day", sc.get("time")), ("weather", sc.get("weather"))) if not v]
     if missing:
         # v1.5: in the owner's 120-message story the weather was almost never stated, so the bar showed "not established"
         # for most of the session; the narrator is now asked to establish it — naturally, never as an invented clock
-        lines.append(f"Not yet established: {' and '.join(missing)}. When this reply begins or moves a scene, or time "
-                     "passes, establish them in one brief, natural detail (light, sky, bells, rain on the windows) — an "
-                     "approximate time of day is enough.")
+        lines.append(f"Not yet established: {' and '.join(missing)}. When a scene begins or moves, or time passes, "
+                     "establish them in one brief natural detail (light, sky, bells, rain); an approximate time is enough.")
     if not calendar_text(sc):
-        lines.append("Calendar date: not established; do not invent a precise date unless the story calls for one.")
+        lines.append("Calendar date: not established; invent a precise date only if the story calls for one.")
     # v1.5.1: the app shows a day/date/time/weather/place header above each reply from these values
-    lines.append("Do not write a date, time or location header line; the app shows one above each reply.")
+    lines.append("Never write a date/time/location header line (the app shows one).")
     return "\n".join(lines)
 
 

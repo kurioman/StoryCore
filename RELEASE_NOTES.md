@@ -19,6 +19,10 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
 - Pictures added in the creator are converted to WebP and resized automatically.
 - Fixed: a pack whose presentation was only a title could not be loaded.
 - The creator is not available from a paired phone.
+- **Smaller requests to the narrator** (fewer tokens, faster with local models): lore records are sent without their
+  bookkeeping lines and in a more compact form, the narrator's own instructions and the opening scenarios are no longer
+  sent again as "lore", and the fixed instructions (posts, encounters, portrait tags, scene) say the same in fewer words.
+  About 10% less on every request for Hero's Chronicle. The packs are re-imported once at the first start.
 
 ## New in v0.5
 

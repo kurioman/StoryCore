@@ -32,6 +32,8 @@ STEM_CATEGORY = {**KEY_CATEGORY, "glossary": "glossary", "starting_scenarios": "
                  "antagonists": "character", "npcs": "character"}
 
 
+NOT_LORE_DIRS = ("ai/", "scenarios/")  # Markdown there is written for the AI or the openings, not about the world
+NOT_LORE_CATEGORIES = {"scenario", "source"}
 HIDDEN_KEY = "hidden"  # narrator-only notes: never shown to the player (see LOREPACK_FORMAT.md)
 
 
@@ -123,6 +125,17 @@ def extract_zip(zip_path: Path, dest_root: Path) -> Path:
 
 
 # --------------------------------------------------------------------------- rendering
+INLINE_MAX = 160  # v0.6: a small block of plain values is written on one line ("appearance: hair: blue; eyes: gold")
+
+
+def _inline(d: dict[str, Any]) -> str | None:
+    items = [(k, x) for k, x in d.items() if x not in (None, "", [], {}) and k not in ("source_ids", "schema_version")]
+    if not items or any(isinstance(x, (dict, list)) for _k, x in items):
+        return None
+    text = "; ".join(f"{k}: {x}" for k, x in items)
+    return text if len(text) <= INLINE_MAX else None
+
+
 def render_value(v: Any, indent: int = 0) -> list[str]:
     pad = "  " * indent
     if isinstance(v, dict):
@@ -130,7 +143,9 @@ def render_value(v: Any, indent: int = 0) -> list[str]:
         for k, x in v.items():
             if k in ("source_ids", "schema_version"):
                 continue
-            if isinstance(x, (dict, list)) and x:
+            if isinstance(x, dict) and x and _inline(x):
+                lines.append(f"{pad}{k}: {_inline(x)}")
+            elif isinstance(x, (dict, list)) and x:
                 sub = render_value(x, indent + 1)
                 if isinstance(x, list) and all(not isinstance(i, (dict, list)) for i in x):
                     lines.append(f"{pad}{k}: " + "; ".join(str(i) for i in x))
@@ -143,7 +158,9 @@ def render_value(v: Any, indent: int = 0) -> list[str]:
     if isinstance(v, list):
         lines = []
         for i in v:
-            if isinstance(i, dict):
+            if isinstance(i, dict) and _inline(i):
+                lines.append(f"{pad}- {_inline(i)}")
+            elif isinstance(i, dict):
                 sub = render_value(i, indent)
                 if sub:
                     lines.append(f"{pad}- " + sub[0].strip())
@@ -154,11 +171,19 @@ def render_value(v: Any, indent: int = 0) -> list[str]:
     return [f"{pad}{v}"]
 
 
+# v0.6 (phase 9): top-level keys the narrator does not need in a lore record: the chunk title already gives the name,
+# the id and the import bookkeeping are noise (fewer tokens for the same information)
+RECORD_SKIP = {"id", "name", "confidence", "canon_status", "_index_type", "source_ids", "schema_version"}
+SURE = {None, "", "high", "canon", "confirmed"}
+
+
 def record_text(rec: dict[str, Any]) -> str:
+    """A lore record as the narrator reads it. Its reliability is only stated when it is not certain."""
     head = []
-    if rec.get("confidence") or rec.get("canon_status"):
-        head.append(f"[confidence: {rec.get('confidence', 'unknown')} | status: {rec.get('canon_status', 'unknown')}]")
-    return "\n".join(head + render_value(rec))
+    if rec.get("confidence") not in SURE:
+        status = f" | status: {rec['canon_status']}" if rec.get("canon_status") else ""
+        head.append(f"[confidence: {rec.get('confidence')}{status}]")
+    return "\n".join(head + render_value({k: v for k, v in rec.items() if k not in RECORD_SKIP}))
 
 
 def summary_of(rec: dict[str, Any]) -> str:
@@ -376,17 +401,23 @@ def import_pack(db: Session, pack_dir: Path, world_slug: str | None = None) -> d
                         source_ids_json=list(rec.get("source_ids") or []), file=rel)
         db.add(le)
         db.flush()
+        if cat in NOT_LORE_CATEGORIES:
+            continue  # kept as a record (the wizard's openings), never retrieved as lore in a story
         db.add(LoreChunk(world_id=world.id, entity_row_id=le.id, entity_id=eid, category=cat, title=name,
                          content=record_text(rec), confidence=rec.get("confidence"), canon_status=rec.get("canon_status")))
         report["entities_by_category"][cat] = report["entities_by_category"].get(cat, 0) + 1
 
+    pack_files = (manifest or {}).get("files") or pack_manifest.DEFAULT_FILES
     for rel, text in md_docs.items():
+        # v0.6 (phase 9): instructions for the AI and opening scenarios are not world lore: the narrator gets its rules
+        # whole in the system prompt and the openings when a story starts; retrieved again they only cost tokens
+        if rel == pack_files.get("system_prompt") or rel.startswith(NOT_LORE_DIRS) or rel.lower() == "readme.md":
+            continue
         for title, body in split_markdown(text):
             db.add(LoreChunk(world_id=world.id, category="document", title=f"{Path(rel).stem}: {title}" if title else Path(rel).stem,
                              content=body))
 
     # world-level data used by the new-story wizard and context builder
-    pack_files = (manifest or {}).get("files") or pack_manifest.DEFAULT_FILES
     sys_prompt = md_docs.get(pack_files.get("system_prompt") or "", "")
     world.system_prompt = sys_prompt
     starters = _starters(entities, md_docs.get("scenarios/intro_blueprints.md", ""))

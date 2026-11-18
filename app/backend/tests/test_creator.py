@@ -192,5 +192,24 @@ class CreatorTest(unittest.TestCase):
             self.assertEqual(pe.portrait_files(Path(tmp), images)["kai"], {3: "images/kai/3.png"})
 
 
+    def test_lore_sent_to_the_narrator_is_compact(self):
+        """Phase 9: no AI instructions retrieved as lore; records without id/name/bookkeeping lines."""
+        from sqlalchemy import select
+        from story.models import LoreChunk, World
+        from story.services.lore_import import record_text
+
+        with self.app.state.ctx.db.session() as db:
+            w = db.scalar(select(World).where(World.slug == "hero_chronicle"))
+            chunks = list(db.scalars(select(LoreChunk).where(LoreChunk.world_id == w.id)))
+            self.assertTrue(chunks)
+            self.assertFalse([c.title for c in chunks if c.title.startswith("narrative_system_prompt")])
+            lily = next(c for c in chunks if c.entity_id == "lily")
+            self.assertNotIn("\nid:", "\n" + lily.content)
+            self.assertNotIn("name: Lily", lily.content)
+        text = record_text({"id": "x", "name": "X", "confidence": "high", "appearance": {"hair": "red", "eyes": "green"}})
+        self.assertEqual(text, "appearance: hair: red; eyes: green")
+        self.assertTrue(record_text({"id": "y", "confidence": "low", "notes": "n"}).startswith("[confidence: low]"))
+
+
 if __name__ == "__main__":
     unittest.main()
