@@ -399,15 +399,13 @@ def date_suggestion(db: Session, story: Story, sc: dict[str, Any]) -> dict[str, 
 
 ANALYSIS_SHAPE = ('"world_state": {"changes": [{"field": "location|time|weather|weekday|day|month|year", "value": str, '
                   '"evidence": "exact short quote"}], "days_passed": 0, "days_evidence": ""},')
-ANALYSIS_RULE = ("- world_state: only what the REPLY or PLAYER TURN explicitly establishes or changes about in-story place, "
-                 "time of day, weather or the calendar, compared with CURRENT WORLD STATE. Each change needs an exact short "
-                 "quote. days_passed: in-story days that pass in this reply (sleeping until the next morning = 1), with a "
-                 "quote; 0 otherwise. Weather may come from a concrete description (\"rain drummed on the windows\" -> "
-                 "rain; \"under a cloudless sky\" -> clear), time of day from light or bells (\"the evening bells\" -> "
-                 "evening). An hour stated in the text (\"at eight thirty\", \"half past seven\", \"20h15\") is given as "
-                 "24-hour HH:MM with that exact quote; anything vaguer stays a plain time of day (\"late morning\"): never "
-                 "work out an hour from light or bells. Never put the day counter in the time. Never guess a date or "
-                 "weather; omit anything not stated or described. Nothing changes: [].\n")
+ANALYSIS_RULE = ("- world_state: only what the REPLY or PLAYER TURN explicitly establishes or changes (place, time of day, "
+                 "weather, calendar) compared with CURRENT WORLD STATE, each with an exact short quote. days_passed: "
+                 "in-story days passing in this reply (sleeping until morning = 1), with a quote; else 0. Weather from a "
+                 "concrete description (\"rain drummed on the windows\" -> rain), time of day from light or bells. An hour "
+                 "stated in the text (\"at eight thirty\", \"20h15\") as 24-hour HH:MM; anything vaguer stays a time of day "
+                 "(\"late morning\"): never work out an hour from light or bells. Never put the day counter in the time, "
+                 "never guess a date or weather. Nothing changes: [].\n")
 
 
 def analysis_schema() -> dict[str, Any]:

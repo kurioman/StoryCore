@@ -41,14 +41,15 @@ SUGGESTION_KINDS = ("action", "dialogue", "observation", "social", "strategy")
 # provider failures worth one automatic retry; auth/network/rate limits are not retried here (Retry stays manual)
 RETRYABLE = {"truncated", "empty_output", "invalid_response"}
 
-RULES = """You annotate one turn of an interactive story for the app's interface. You never write story text.
-Return ONLY a JSON object with exactly these keys:
+# v0.6 (phase 9): the same rules in about a third fewer words (this prompt is sent after every reply)
+RULES = """You annotate one turn of an interactive story for the app. You never write story text.
+Return ONLY one JSON object with exactly these keys:
 {"schema_version": 4,
- "speakers": [{"character": id, "expression": 1-6, "line": "their first spoken words, copied exactly from the REPLY", "evidence": "short quote", "confidence": 0-1}],
+ "speakers": [{"character": id, "expression": 1-6, "line": "their first spoken words, copied from the REPLY", "evidence": "short quote", "confidence": 0-1}],
  "active_speaker": id or null,
- "reactions": [{"character": id, "expression": 1-6, "anchor": "short exact quote from the REPLY showing the reaction", "confidence": 0-1}],
- "present": [{"character": id, "evidence": "short exact quote from the REPLY showing them in the scene"}],
- "left": [{"character": id, "evidence": "short exact quote"}],
+ "reactions": [{"character": id, "expression": 1-6, "anchor": "short quote showing the reaction", "confidence": 0-1}],
+ "present": [{"character": id, "evidence": "short quote showing them in the scene"}],
+ "left": [{"character": id, "evidence": "short quote"}],
  %s
  "discoveries": [{"character": id, "status": "rumored|encountered|known", "evidence": "short quote"}],
  %s
@@ -56,36 +57,29 @@ Return ONLY a JSON object with exactly these keys:
  "warnings": []}
 Expressions: %s.
 Rules:
-- speakers: only characters from the list who speak in the REPLY, in the order they first speak. Base the expression on
-  that character's own words and actions, not on the genre or overall mood. Use 1 when the evidence is weak.
-  5 is anger/outrage/disgust, 4 is stern focus or defiance; 3 is sadness/compassion, 6 is embarrassment or romantic
-  tenderness. Never infer romance or attraction without clear evidence.
-- active_speaker: the character whose dialogue the reply ends on or centres on; null if nobody speaks.
-- reactions: characters from the list who are present and visibly react WITHOUT speaking (a look, a gesture, a flush).
-  Not someone who merely stands nearby, and never a speaker. Omit anyone whose emotion is unclear.
-- present: every character from the list who is physically in the protagonist's scene in this REPLY — speakers, silent
-  onlookers, people who arrive — each with a short exact quote showing them there. A character may be described
-  without their name ("the Headmaster", "Lucia's sister", "a girl with silver hair" who is then named): use the list's
-  hints. NOT someone only mentioned, remembered, written to, or speaking from elsewhere. left: characters who clearly
-  leave the scene in this reply. Unsure: omit.
-%s- discoveries: "encountered" when the character is physically present/acts in the protagonist's scene; "known" only
-  when they are introduced to the protagonist (by name or role) or have a real exchange WITH the protagonist — the
-  narrator naming someone who merely watches or stands nearby is "encountered", not "known"; "rumored" when they are only
-  mentioned or heard about. Never list the protagonist. A name existing in lore is not a discovery.
+- speakers: listed characters who speak in the REPLY, in order. Expression from their own words and actions, not the
+  overall mood; 1 when unsure. 5 anger/outrage/disgust, 4 stern focus or defiance, 3 sadness/compassion, 6 embarrassment
+  or romantic tenderness (never romance without clear evidence).
+- active_speaker: whose dialogue the reply ends on or centres on; null if nobody speaks.
+- reactions: present listed characters who visibly react WITHOUT speaking (a look, a gesture, a flush); not mere
+  bystanders, never a speaker; omit unclear emotions.
+- present: every listed character physically in the protagonist's scene in this REPLY (speakers, silent onlookers,
+  arrivals), also when described without their name ("the Headmaster", "a girl with silver hair": use the list's hints);
+  NOT someone only mentioned, remembered, written to or speaking from elsewhere. left: those who clearly leave. Unsure: omit.
+%s- discoveries: "encountered" = physically present or acting in the scene; "known" = introduced to the protagonist (name
+  or role) or in a real exchange WITH them (being named while watching is still "encountered"); "rumored" = only mentioned.
+  Never the protagonist; a name existing in lore is not a discovery.
 %s%s- Quotes ("line", "anchor", "evidence") are copied exactly from the REPLY.
 - Use ONLY ids from the character list. Never invent characters."""
 
 RELATIONSHIP_SHAPE = '''"relationship_changes": [{"source": id, "target": id or "protagonist", "dimension": "%s", "delta": integer, "impact": "minor|major", "evidence": "short exact quote from the REPLY", "confidence": 0-1}],'''
-RELATIONSHIP_RULE = """- relationship_changes: only when something in THIS reply clearly changes how one character sees another. "source" is
-  the character whose view changes (never the protagonist: only the player decides what the protagonist feels). Changes
-  are directional: never add the mirror change. Use the dimension the evidence speaks to — do not default to trust:
-  trust = reliability, honesty, feeling safe; affection = warmth and attachment (not romance); respect = esteem for
-  competence or integrity; familiarity = knowing each other better through real shared time or personal exchange;
-  rivalry = competitive or antagonistic tension; fear = feeling threatened. Ordinary courtesy, routine answers, small
-  talk and following instructions change nothing; a misunderstanding is usually no change or -1. Ordinary moments:
-  delta between -3 and 3 with impact "minor"; up to 10 only for a major event (confession, betrayal, rescue, cruelty,
-  humiliation, reconciliation) with impact "major". Feelings can diverge: after a betrayal trust may fall sharply
-  while affection stays. A neutral exchange changes nothing: return [].
+RELATIONSHIP_RULE = """- relationship_changes: only when THIS reply clearly changes how one character sees another. "source" is
+  whose view changes (never the protagonist). Directional: no mirror change. Pick the dimension the evidence shows (not
+  trust by default): trust = reliability/safety; affection = warmth (not romance); respect = esteem for competence or
+  integrity; familiarity = knowing each other better through real time together; rivalry = competitive tension; fear =
+  feeling threatened. Courtesy, routine answers, small talk, following instructions: no change; a misunderstanding: none
+  or -1. Ordinary moments: delta -3..3, "minor"; up to 10 only for a major event (confession, betrayal, rescue, cruelty,
+  humiliation, reconciliation), "major". Feelings can diverge (betrayal: trust falls, affection may stay). Neutral: [].
 """
 
 SUGGESTION_SHAPE = ('"suggestions": [{"text": "the message itself, as the player would send it", "approach": "tone in one or two words", '
