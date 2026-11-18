@@ -84,6 +84,18 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
     ctx.extraction = ExtractionService(ctx)
 
     async def after_generation(message_id: str) -> None:
+        try:
+            await _after_generation(message_id)
+        except asyncio.CancelledError:
+            # v0.6 narration first: the player sent the next message (runtime.stop_side_requests)
+            from .models import TurnAnalysis
+            with ctx.db.session() as s:
+                row = s.scalar(select(TurnAnalysis).where(TurnAnalysis.message_id == message_id))
+                if row is not None and row.status == "running":
+                    row.status, row.error = "skipped", "Stopped: the next reply had priority."
+            raise
+
+    async def _after_generation(message_id: str) -> None:
         method_branch = await asyncio.to_thread(post_process, ctx, message_id)
         tagged = False
         try:  # v1.7: the narrator's portrait tags show the portraits at once, before the scene analysis

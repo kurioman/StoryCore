@@ -54,10 +54,17 @@ def _last_sentence_end(text: str) -> int | None:
     return ends[-1] if ends else None
 
 
+LEAK = re.compile(r"\n\s*(?:Human:|User:|<\|im_(?:start|end)\|>|\[Story context for this turn)")
+
+
 def clean(reply: str, earlier: list[str], *, cut_by_length: bool = False) -> tuple[str, list[tuple[int, int]], dict[str, Any]]:
     """(new text, removed spans of the original text, report)."""
     from .context_builder import strip_trailing_menu
 
+    leak = LEAK.search(reply)
+    if leak and leak.start() > 0:  # the model went on writing the next turn itself (wrong chat template): cut there
+        text, spans, report = clean(reply[:leak.start()], earlier, cut_by_length=False)
+        return text, spans + [(leak.start(), len(reply))], {**report, "leaked_turn_cut": True}
     # a removed paragraph takes the blank line after it along (positions stay exact: nothing else is reflowed)
     removed = [(a, len(reply) - len(reply[b:].lstrip())) for a, b in repeated_spans(reply, earlier)]
     report: dict[str, Any] = {}

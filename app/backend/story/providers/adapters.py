@@ -496,6 +496,9 @@ class OpenAIAdapter(ProviderAdapter):
 
 
 # =========================================================================== openai-compatible
+LOCAL_STOPS = ("<|im_end|>", "<|im_start|>", "<|eot_id|>", "\nHuman:", "\nUser:", "[Story context for this turn")
+
+
 class OpenAICompatAdapter(ProviderAdapter):
     """Chat Completions (/chat/completions): the de-facto API of OpenRouter, LM Studio, llama.cpp, vLLM, etc."""
 
@@ -580,6 +583,11 @@ class OpenAICompatAdapter(ProviderAdapter):
     def _body(self, model, system, messages, params, stream):
         p = self.filter_params(params)
         p.pop("think", None)  # never a body field: stream_chat turns it into OpenRouter's reasoning option
+        if not self.is_cloud and "stop" not in p:
+            # v0.6 (phase 9): a local model loaded with the wrong chat template (a GGUF without one: LM Studio falls back
+            # to "Human:/Assistant:") writes the next turn itself, our per-turn context included. Seen live with
+            # rocinante-12b. These end markers never belong in a story.
+            p["stop"] = list(LOCAL_STOPS)
         if "repeat_penalty" in p and self.is_cloud:
             # v0.6: LM Studio and llama.cpp read "repeat_penalty" (the other name was silently ignored by them);
             # OpenRouter and vLLM-style services call it repetition_penalty

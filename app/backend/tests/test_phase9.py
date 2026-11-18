@@ -39,6 +39,13 @@ class CleanupTest(unittest.TestCase):
         fresh = "A new scene: rain on the windows of the library, and a voice behind you."
         self.assertEqual(reply_cleanup.clean(fresh, [PREV]), (fresh, [], {}))
 
+    def test_a_reply_that_writes_the_next_turn_is_cut(self):
+        # seen live: a GGUF without chat template -> the model wrote "Human:" and copied the app's per-turn context
+        text, spans, report = reply_cleanup.clean("Artemis nods. \"Follow me.\"\nHuman: [Story context for this turn: "
+                                                  "written by the app]\n## Scene", [])
+        self.assertEqual(text, "Artemis nods. \"Follow me.\"")
+        self.assertTrue(report["leaked_turn_cut"])
+
     def test_reply_cut_by_the_ceiling_ends_on_a_full_sentence(self):
         text, _s, report = reply_cleanup.clean("She draws her sword. The duel begins at once, and the crowd falls "
                                                "silent. He lunges toward her with a", [], cut_by_length=True)
@@ -63,7 +70,9 @@ class ParamsTest(unittest.TestCase):
         local = OpenAICompatAdapter("http://localhost:1234/v1", None)
         body = local._body("m", "sys", [], {"repeat_penalty": 1.08, "max_tokens": 10}, False)
         self.assertEqual(body.get("repeat_penalty"), 1.08)
+        self.assertIn("<|im_end|>", body["stop"])  # local servers stop at the end markers of a turn
         cloud = OpenAICompatAdapter("https://openrouter.ai/api/v1", "k")
+        self.assertNotIn("stop", cloud._body("m", "sys", [], {}, False))
         self.assertEqual(cloud._body("m", "sys", [], {"repeat_penalty": 1.08}, False).get("repetition_penalty"), 1.08)
 
 
@@ -79,6 +88,27 @@ class BudgetTest(AppTestCase):
             small = context_builder.build(db, s, b, context_limit=None, params={"max_tokens": 650}).manifest
         self.assertGreater(big["budget_tokens"], 12000)
         self.assertLessEqual(small["budget_tokens"], 10000)
+
+    def test_narration_first_stops_side_requests(self):
+        st = self.new_story("Priority", world_slug="hero_chronicle")
+        sid = st["id"]
+        r = self.post(f"/stories/{sid}/start")
+        self.wait_reply(sid, r["assistant_message_id"])
+        gens, ctx = self.ctx.generations, self.ctx
+
+        async def slow_side_request():
+            await asyncio.sleep(60)
+
+        fut = ctx.spawn(slow_side_request())  # stands for a scene analysis still running on the local server
+        gens.side_tasks.setdefault(sid, set()).add(fut)
+        turn = self.post(f"/stories/{sid}/turns", {"content": "I look around."})
+        self.wait_reply(sid, turn["assistant_message_id"])
+        import time
+        for _ in range(50):
+            if fut.done():
+                break
+            time.sleep(0.05)
+        self.assertTrue(fut.cancelled(), "the side request was not stopped when the player sent a message")
 
     def test_continue_never_repeats(self):
         cmds = self.get("/commands")

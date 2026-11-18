@@ -244,6 +244,8 @@ NARRATION_RULES_V4 = (
     "- A length target is a maximum, not a quota: once the other characters have reacted, stop.\n"
     "- Never repeat or paraphrase earlier replies (their descriptions, lines or events): continue from the exact point "
     "where the last one ended.\n"
+    "- Never invent a shared past between {name} and anyone (old friends, former classmates, \"you recognise her\") "
+    "unless the story or {name}'s profile established it.\n"
     "- End in plain prose at a natural moment for the player to respond. Never add a list of options, a numbered menu, "
     "a 'What do you do next?' question or any interface text: the application shows suggested actions separately. "
     "Earlier replies that did so were mistakes; do not repeat them.\n"

@@ -183,6 +183,10 @@ class GenerationManager:
         self.ctx = ctx
         self.jobs: dict[str, GenerationJob] = {}
         self.on_complete: list[Callable[[str], Any]] = []
+        # v0.6 (phase 9) narration first: the side requests after a reply (scene analysis, memory capture, summaries),
+        # per story. A local server answers one request at a time (or shares the GPU between them), so when the player
+        # sends the next message they are stopped: the reply starts at once. Capture and summaries catch up later.
+        self.side_tasks: dict[str, set[Any]] = {}
 
     def active_for_branch(self, branch_id: str) -> GenerationJob | None:
         return next((j for j in self.jobs.values() if j.branch_id == branch_id and j.status == "streaming"), None)
@@ -193,8 +197,17 @@ class GenerationManager:
         job = GenerationJob(message.id, message.story_id, message.branch_id, marker_filter=marker_filter,
                             tag_filter=TagFilter())
         self.jobs[message.id] = job
+        self.stop_side_requests(message.story_id)
         job.task = self.ctx.spawn(self._run(job, resolved, system, messages))
         return job
+
+    def stop_side_requests(self, story_id: str) -> int:
+        tasks = [t for t in self.side_tasks.pop(story_id, set()) if not t.done()]
+        for t in tasks:
+            t.cancel()
+        if tasks:
+            log.info("narration first: %d side request(s) of story %s stopped", len(tasks), story_id)
+        return len(tasks)
 
     def cancel(self, message_id: str) -> bool:
         job = self.jobs.get(message_id)
@@ -292,7 +305,9 @@ class GenerationManager:
             try:
                 res = cb(job.message_id)
                 if asyncio.iscoroutine(res):
-                    self.ctx.spawn(res)
+                    t = self.ctx.spawn(res)
+                    self.side_tasks.setdefault(job.story_id, set()).add(t)
+                    t.add_done_callback(lambda done, s=job.story_id: self.side_tasks.get(s, set()).discard(done))
             except Exception:
                 log.exception("post-generation hook failed")
 
