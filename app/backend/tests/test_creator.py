@@ -142,15 +142,38 @@ class CreatorTest(unittest.TestCase):
 
         orig = self.worlds()["hero_chronicle"]
         copy = self.worlds()[pid]
-        count = lambda w: sum(self.call("GET", f"/worlds/{w['id']}")["counts"].values()) if "counts" in self.call(
-            "GET", f"/worlds/{w['id']}") else None
-        self.assertEqual(count(orig), count(copy))
+        def total(w):
+            return sum(self.call("GET", f"/worlds/{w['id']}")["categories"].values())
+        self.assertEqual(total(orig), total(copy))
         check = self.call("GET", f"/creator/worlds/{pid}/check")
         self.assertTrue(check["ok"], check)
         self.assertFalse([w for w in check["warnings"] if "duplicate" in w.lower()], check["warnings"])
 
         after = {p.relative_to(src).as_posix(): p.stat().st_mtime_ns for p in src.rglob("*") if p.is_file()}
         self.assertEqual(before, after, "the original pack is never changed")
+        self.call("DELETE", f"/creator/worlds/{pid}")
+
+
+    def test_ai_suggestion(self):
+        from story.services import creator_assist as ca
+
+        self.assertEqual(ca.parse_json_object('Sure!\n```json\n{"name": "Ana", "hidden": ["x",], "a": "}"}\n```'),
+                         {"name": "Ana", "hidden": ["x"], "a": "}"})
+        with self.assertRaises(ValueError):
+            ca.parse_json_object("no card here")
+        draft = ca.clean_draft("character", {"name": " Ana ", "race": "", "personality_traits": ["calme", ""]})
+        self.assertEqual(draft, {"name": "Ana", "personality_traits": ["calme"]})
+        doc = {"name": "Écume", "premise": "# Écume\nUne cité.", "characters": [{"name": "Mara"}]}
+        system, prompt = ca.build_prompt(doc, "character", "un vieux pêcheur", "fr")
+        self.assertIn("French", system)
+        self.assertIn("Mara", prompt)
+        self.assertIn("un vieux pêcheur", prompt)
+
+        pid = self.call("POST", "/creator/worlds", json={"name": "Monde IA"})["id"]
+        self.call("POST", f"/creator/worlds/{pid}/assist", expect=400, json={"kind": "spaceship", "idea": "x"})
+        # the demo narrator cannot write a card: the player gets a clear message, never a crash
+        r = self.client.post(f"/api/creator/worlds/{pid}/assist", json={"kind": "narrator", "idea": "sombre"})
+        self.assertIn(r.status_code, (200, 400, 409, 502), r.text)
         self.call("DELETE", f"/creator/worlds/{pid}")
 
 

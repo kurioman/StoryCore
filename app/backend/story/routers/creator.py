@@ -24,6 +24,12 @@ router = APIRouter(tags=["creator"])
 log = logging.getLogger("story")
 
 
+class AssistIn(BaseModel):
+    kind: str  # character, location, group, starter, premise, narrator
+    idea: str = ""
+    lang: str = "en"  # the player's interface language: the draft is written in it
+
+
 class NewWorldIn(BaseModel):
     name: str
     copy_from: str = ""  # id of a pack to copy (any pack: bundled, hand-made or made with the creator)
@@ -94,6 +100,17 @@ def delete_world(pid: str, ctx: AppContext = Depends(get_ctx), db: Session = Dep
     except (EditorError, LookupError) as e:
         raise _fail(e)
     return {"ok": True}
+
+
+@router.post("/creator/worlds/{pid}/assist")
+async def assist(pid: str, body: AssistIn, ctx: AppContext = Depends(get_ctx)) -> dict[str, Any]:
+    """A draft written by the player's model from a short idea (never saved here: the player edits it first)."""
+    from ..services import creator_assist
+
+    try:
+        return await creator_assist.suggest(ctx, pid, body.kind, body.idea, body.lang)
+    except LookupError as e:
+        raise _fail(e)
 
 
 @router.get("/creator/worlds/{pid}/check")
