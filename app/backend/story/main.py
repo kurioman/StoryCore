@@ -228,12 +228,12 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
         log.error("Unhandled error on %s %s", request.method, request.url.path, exc_info=e)
         return JSONResponse({"detail": "Unexpected server error; details are in the app log.", "code": "internal"}, 500)
 
-    from .routers import (assets, avatars, backup, commands, journal, lore, memory, music, narrative, providers,
-                          remote as remote_r, state, stories, system)
+    from .routers import (assets, avatars, backup, commands, creator, journal, lore, memory, music, narrative,
+                          providers, remote as remote_r, state, stories, system)
 
     for r in (system.router, providers.router, stories.router, state.router, journal.router, avatars.router,
               lore.router, assets.router, commands.router, backup.router, narrative.router, music.router, remote_r.router,
-              memory.router):
+              memory.router, creator.router):
         app.include_router(r, prefix="/api")
 
     app.include_router(remote_r.pair_router)

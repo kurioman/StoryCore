@@ -394,7 +394,8 @@ def import_pack(db: Session, pack_dir: Path, world_slug: str | None = None) -> d
         own = [{**s, "confidence": None, "canon_status": None} for s in manifest["starters"]]
         starters = own + [s for s in starters if s["id"] not in {o["id"] for o in own}]
     premise = md_docs.get(pack_files.get("premise") or "", "")
-    world.description = (manifest or {}).get("description") or (split_markdown(premise)[0][1][:1200] if premise else "")
+    first = split_markdown(premise) if premise else []  # a premise with only a title has no section
+    world.description = (manifest or {}).get("description") or (first[0][1][:1200] if first else "")
     world.data_json = {
         "starters": starters,
         "locations": [{"id": eid, "name": r.get("name", eid)} for (c, eid), r in entities.items() if c == "location"],
