@@ -56,6 +56,22 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
 - **A character's face follows the scene**: in one reply, Lily can first appear neutral and, a few lines later, sad
   (from the narrator's tag, or from the words around her line such as "les larmes aux yeux" / "she blushed").
 
+- **Fixes from a 30-turn test game** (Rocinante 12B in LM Studio):
+  - **Memory capture no longer gets stuck.** A capture stopped by your next message was left "running" forever and the
+    same messages were sent again and again. It is now recorded as stopped and resumes after the next reply, one
+    exchange at a time, so it catches up even when you answer quickly. Captures left running are cleaned at start.
+  - **The clock moves.** Sunset, nightfall or "the next morning" in the narration now move the time of day and the day,
+    even when the scene analysis did not run. A place someone only talks about no longer becomes the scene's place.
+  - **Right portraits.** A line whose speaker is not a known character (a maid, a captain, a refugee) shows no portrait
+    instead of the last character named; a maid called "Lily" is no longer the goddess Lily; narration written between
+    quotation marks is shown as narration; characters only mentioned are no longer marked present.
+  - **Invented titles are reported**: "Emperor Alaric" while the world's Empress is Diana shows a lore notice.
+  - **Repetitive replies**: when most of a reply repeated earlier ones and was removed, a notice says so, with
+    **Regenerate**. The notices under a reply (repetition, a dead character speaking, the time going back) now show.
+  - Interface: the "⋯" menu works in a narrow window (Story language can be reached), the view follows a new reply until
+    its portraits have loaded, the world chosen in the library is kept in the wizard, the last step's buttons no longer
+    move under the cursor, and work folders are no longer offered as lore packs.
+
 ## New in v0.5
 
 The version number starts again: v0.5 follows v1.7.0. StoryCore is about halfway to its first complete version (1.0),

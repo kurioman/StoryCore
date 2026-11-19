@@ -31,9 +31,9 @@ local de jeu de rôle textuel par IA, basé sur des « Lore packs » (des mondes
   - Outil des clés de traduction : `mkdir -p $HOME/tools && cp DEVONLY/tools/frontend_reconstruction/keys.mjs $HOME/tools/ && cd $HOME/tools && npm init -y && npm i @babel/parser @babel/traverse`
 - Compilation : `rsync -a --delete app/frontend/src/ $HOME/fe/src/`, puis dans `$HOME/fe` : `npx tsc --noEmit && npm run build`,
   puis recopier `$HOME/fe/dist/` dans `app/frontend/dist/` (supprimer l'ancien `dist` d'abord). Ne pas faire `npm install` dans le dossier monté.
-- Tests (**93**, ~3 min 20 au total : la commande a une limite de 3 min, donc **les lancer en deux moitiés**) :
+- Tests (**110**, plus les 4 de l'installateur en cours ; ~3 min 30 au total : la commande a une limite de 3 min, donc **les lancer en deux moitiés**) :
   `PYTHONPYCACHEPREFIX=$HOME/pyc $HOME/v312/bin/python DEVONLY/run_tests.py test_api_basics test_bug_report test_codex test_lmstudio test_music test_narration_language test_pack_check test_providers test_remote test_usage test_continuity test_cinematic`
-  puis `... DEVONLY/run_tests.py test_context_layout test_story_flow test_summaries test_creator test_phase9 test_portraits_live test_story_events`.
+  puis `... DEVONLY/run_tests.py test_context_layout test_story_flow test_summaries test_creator test_phase9 test_portraits_live test_story_events test_report_30_turns`.
 - Clés de traduction manquantes : `node $HOME/tools/keys.mjs app/frontend/src app/frontend/src/i18n/locales/en.json`
   (met à jour en.json), puis comparer avec fr.json (chaque clé de en.json doit exister dans fr.json). Ajouter les traductions
   avec un petit script node (Object.assign) pour garder le format du fichier.
@@ -100,6 +100,16 @@ local de jeu de rôle textuel par IA, basé sur des « Lore packs » (des mondes
   Ensuite (même jour) : un personnage peut avoir plusieurs portraits dans une réponse (neutre puis triste) : chaque
   réplique garde son expression (sa balise, sinon l'humeur lue dans son paragraphe, mots français et anglais,
   `expressions.mood_of`) ; l'écran remontre le portrait quand l'expression change ou après un autre personnage.
+
+- **Rapport de test 30 tours (19/11)** : les 15 bugs B1 à B15 corrigés (commits « Rapport de test 30 tours (1/6) » à
+  « (5/6) », tests `test_report_30_turns`). Mémoire : capture arrêtée = `cancelled`, reprise à la réponse suivante par
+  échanges de 2 messages (`extraction.RESUME_CHUNK_MESSAGES`). Horloge : repères de la narration
+  (`world_state.time_cues` / `with_cues`, aussi appliqués juste après la réponse dans `turns._clock_from_cues`).
+  Portraits et présence : `services/speaker_guard.py`. Narration entre guillemets : `reply_cleanup.quoted_narration_spans`.
+  Titres inventés : `roles.office_conflicts`. Les avertissements (`continuity_alerts`) sont maintenant envoyés à l'écran.
+  À faire ensuite (axes du rapport, pas des bugs) : langue de l'histoire demandée dans l'assistant, apparence et liens
+  de famille dans le pack Hero's Chronicle, portraits plus petits, traduction des derniers textes anglais. Refaire
+  30 tours en français dès le départ avec 60 s entre les tours.
 
 ## Pas encore vérifié avec du vrai matériel
 - Phase 6 sur mon vrai téléphone (pare-feu Windows : cocher « Réseaux privés »).
