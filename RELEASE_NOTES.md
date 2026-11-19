@@ -37,6 +37,12 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
   writing your next turn itself (a model loaded with the wrong chat template) is cut there.
 - The narrator no longer invents a shared past with characters you have never met.
 - Shorter scene-analysis instructions (same rules).
+- **Planned events**: a world can list scenes decided in advance (a ceremony, an exam, a tournament) that the
+  narrator plays its own way, one at a time, at the right moment (after a number of turns, after another event, from a
+  date, or once the player made a choice such as the academy wing). In the World creator, tab **8. Events**. Played
+  events and settled choices are shown in the Journal (Current state). **Lumencia Academy** now has its first days
+  planned: entrance ceremony, an orientation exam for undecided students, the exam of the chosen wing (a duel against
+  Artemis, Elena's mana crystal, or Aria's trial), a start-of-year event of the wing, and the end-of-year exam.
 - **New narration style "Cinematic"** (the default for new stories), close to OOC.AI: the hero is called by name
   (third person), short paragraphs and short lines, emotions shown through small gestures, a closing line that lands.
   Its matching display (Settings > Appearance > Dialogue, also the default) shows spoken lines bright and narration in a

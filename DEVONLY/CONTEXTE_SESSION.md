@@ -31,9 +31,9 @@ local de jeu de rôle textuel par IA, basé sur des « Lore packs » (des mondes
   - Outil des clés de traduction : `mkdir -p $HOME/tools && cp DEVONLY/tools/frontend_reconstruction/keys.mjs $HOME/tools/ && cd $HOME/tools && npm init -y && npm i @babel/parser @babel/traverse`
 - Compilation : `rsync -a --delete app/frontend/src/ $HOME/fe/src/`, puis dans `$HOME/fe` : `npx tsc --noEmit && npm run build`,
   puis recopier `$HOME/fe/dist/` dans `app/frontend/dist/` (supprimer l'ancien `dist` d'abord). Ne pas faire `npm install` dans le dossier monté.
-- Tests (**85**, ~3 min 20 au total : la commande a une limite de 3 min, donc **les lancer en deux moitiés**) :
+- Tests (**93**, ~3 min 20 au total : la commande a une limite de 3 min, donc **les lancer en deux moitiés**) :
   `PYTHONPYCACHEPREFIX=$HOME/pyc $HOME/v312/bin/python DEVONLY/run_tests.py test_api_basics test_bug_report test_codex test_lmstudio test_music test_narration_language test_pack_check test_providers test_remote test_usage test_continuity test_cinematic`
-  puis `... DEVONLY/run_tests.py test_context_layout test_story_flow test_summaries test_creator test_phase9 test_portraits_live`.
+  puis `... DEVONLY/run_tests.py test_context_layout test_story_flow test_summaries test_creator test_phase9 test_portraits_live test_story_events`.
 - Clés de traduction manquantes : `node $HOME/tools/keys.mjs app/frontend/src app/frontend/src/i18n/locales/en.json`
   (met à jour en.json), puis comparer avec fr.json (chaque clé de en.json doit exister dans fr.json). Ajouter les traductions
   avec un petit script node (Object.assign) pour garder le format du fichier.
@@ -113,10 +113,17 @@ Priorité générale : pouvoir jouer dans de bonnes conditions avant tout le res
 
 1. ~~Portraits~~ : **fait le 19/11** (voir « Ce qui est fait »), y compris plusieurs portraits d'un même personnage
    dans une réponse quand son expression change. À confirmer en jouant en français avec Rocinante.
-2. **Style de narration** à travailler ensemble (j'aime : réponses courtes, actions entre *astérisques*, proche
-   d'OOC.AI). Idée : un préréglage « Chat ».
-3. **Début fixe de Lumencia** : je le conçois moi-même. Côté moteur, prévoir un champ « introduction fixe » dans les
-   débuts (`starters[].intro`), affichée sans appel à l'IA, et modifiable dans le créateur.
+2. ~~Style de narration~~ : **fait le 19/11** : style « Cinématique » (proche d'OOC.AI : 3e personne avec le nom du
+   héros, paragraphes courts, émotions montrées par le corps, chute finale, actions en narration normale ; pour appuyer
+   un mot, l'italique de l'application), par défaut des nouvelles histoires, longueur en mots ; affichage
+   « Cinématique » (narration en gris plus sombre). **À tester avec Rocinante et à ajuster ensemble** (captures).
+3. ~~Début fixe de Lumencia~~ : **remplacé le 19/11 par les « événements prévus »** (pas de scène fixe : des scènes
+   décidées à l'avance que l'IA joue à sa façon, un à la fois ; obligatoires, surprise pour le joueur, visibles dans le
+   Journal une fois joués). Moteur `services/story_events.py`, onglet « 8. Événements » du créateur, choix du joueur
+   (l'aile). Lumencia : cérémonie d'entrée (Emily présente l'école, les règles et Artemis, Elena, Aria), examen d'entrée
+   facultatif (élèves sans aile), examen de l'aile (duel contre Artemis / cristal de détection d'Elena / épreuve d'Aria
+   inventée par l'IA), événement de début d'année (tournoi / sort ou mémoire à inventer / inventé par l'IA), examen de
+   fin d'année (à partir du 20 décembre, choisi par l'IA). **À tester avec Rocinante.**
 4. **Vitesse** : 14-16 tokens/s mesurés au lieu de 30-40 attendus sur ma 3060. Pistes : fermer les applications qui
    utilisent la carte (Opera GX…), vérifier la mémoire vidéo dans le Gestionnaire des tâches, essayer « Max Concurrent
    Predictions » à 1 dans LM Studio. Je peux supprimer l'ancien Rocinante Q6_K_L (10,4 Go) dans My Models.
@@ -132,4 +139,5 @@ Priorité générale : pouvoir jouer dans de bonnes conditions avant tout le res
 9. En tout dernier : lien d'invitation Discord (`DISCORD_URL` vide dans `lib/links.ts`).
 
 ## Ce que je te demande maintenant
-(à compléter)
+(à compléter) — reste du 19/11 : les petits restes du point 6 (option « réponses courtes » mise en avant, chapitre
+fermé après un changement de lieu ou un saut dans le temps, narrateur de démonstration, code lisible).

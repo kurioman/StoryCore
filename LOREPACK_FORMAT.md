@@ -228,6 +228,50 @@ The calendar **format** is fixed for every world: 12 months and 7-day weeks (the
 ### `never_random`
 Character types the engine never suggests as a chance encounter (gods, demon lords...).
 
+### `events` and `choices` (v0.6, optional)
+**Planned events**: scenes you decide in advance (a ceremony, an exam, a tournament), played by the narrator its own way.
+Before each reply the app picks at most **one** due event (no model call) and gives it to the narrator in the turn's
+context: what must happen, never how. The narrator writes a hidden `[Event:id]` in the reply where it happens (removed
+before the player reads, like the music tags). An event asked for `firm_after` times (default 2) is asked for firmly
+("start it now, adapted to where the protagonist is"); after `give_up_after` reminders (default 6) without its mark it
+counts as played, so no event is asked for forever. The player sees the played events in the Journal (Current state),
+never the ones to come.
+
+Each event: `id`, `title` (text or `{"en": ..., "fr": ...}`), `brief` (**required**: what must happen, for the
+narrator; English works best), and optionally:
+
+- `characters`: character ids involved;
+- `after`: ids of events that must be played (or skipped) first; `delay_turns`: player turns to wait after them;
+- `from_turn`: not before the player's turn number N (the opening scene is turn 0);
+- `from_story_day`: not before day N of the story (D1 = first day); `from_date`: `{"month": "December", "day": 20}`,
+  not before this date of the story's year (the year starts on `calendar.year_start`); an unknown date never triggers it;
+- `needs_choice`: waits until this player choice is known; `skip_if_choice`: skipped when it is already known;
+- `variants`: `{"option id": "what changes for this option"}`, added to the brief once the choice is known;
+- `firm_after`, `give_up_after`: numbers of reminders (see above).
+
+**Player choices** (`choices`) are what events can depend on, e.g. the academy wing: `id`, `name`, and at least two
+`options`, each with `id`, `name` and `keywords` (words that show the player chose it, in every language you expect).
+The narrator marks a choice with a hidden `[Choice:wing=knight]` when it becomes clear; otherwise the player's own words
+settle it when exactly one option's keywords appear in a message.
+
+```json
+"choices": [{"id": "wing", "name": {"en": "academy wing", "fr": "aile de l'Académie"}, "options": [
+  {"id": "knight", "name": "Knight wing", "keywords": ["knight wing", "aile des chevaliers"]},
+  {"id": "magic", "name": "Magic wing", "keywords": ["magic wing", "aile de magie"]}]}],
+"events": [
+  {"id": "entrance_ceremony", "title": {"en": "Entrance ceremony", "fr": "Cérémonie d'entrée"},
+   "brief": "The entrance ceremony on the first day: the headmaster presents the academy, its rules and the instructors.",
+   "characters": ["emily"], "from_turn": 1},
+  {"id": "wing_exam", "title": "Wing entrance exam", "brief": "The entrance evaluation of the chosen wing.",
+   "after": ["entrance_ceremony"], "delay_turns": 1, "needs_choice": "wing",
+   "variants": {"knight": "A duel against the instructor.", "magic": "A mana detection crystal."}}
+]
+```
+
+Progress is read from the replies of the story's current path, so another branch or a regenerated reply has its own.
+In the app: World creator, tab **8. Events**. Lumencia Academy uses this for its first days (ceremony, optional
+orientation exam, wing exam, start-of-year event) and its end-of-year exam.
+
 ## Hidden information (narrator-only secrets)
 
 Any record in the lore files (a character, a faction, a place, even an entry nested inside another record) can have a

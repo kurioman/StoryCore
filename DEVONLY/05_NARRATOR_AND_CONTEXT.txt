@@ -261,3 +261,25 @@ Narration style "Cinematic" (v0.6, 19/11 - the OOC.AI-like style Kurio asked for
   - Display: dialogue_style "cinematic" (default; Settings > Appearance > Dialogue) = the "emphasis" reading with a
     darker grey for narration (styles.css, html[data-dialogue=cinematic]); a stressed word takes the other colour.
   Tests: app/backend/tests/test_cinematic.py.
+
+Planned events (v0.6, 19/11 - scenes decided by the pack's author, played the narrator's way)
+  - services/story_events.py; pack.json "events" and "choices" (checked in pack_manifest._events/_choices/check_choices,
+    format in LOREPACK_FORMAT.md). Creator: tab "8. Events" (fields.js kinds events/choices, CardList types options,
+    events, choice, variants); creator_assist kind "event".
+  - progress(pack, path): read from the replies of the current path only (branches and regenerations stay separate):
+    generation_metadata_json.event_tags / choice_tags (the narrator's hidden marks, removed by portrait_tags.TagFilter
+    and saved by runtime) and context.planned_event (the event asked for in that request = one reminder). Player turns
+    = user story messages without a command (the opening is turn 0). A choice also comes from the player's words when
+    exactly one option's keywords match.
+  - due(): the first event in the pack's order whose conditions hold (after + delay_turns, from_turn, from_story_day,
+    from_date in the story's year, needs_choice); skip_if_choice resolves an event when the choice is known; firm after
+    firm_after reminders (2), counted as played ("given_up") after give_up_after (6).
+  - context_builder: section "planned_event" (per turn, never trimmed) = narrator_note() (brief, variant for the
+    known option, characters, "play it your way, never decide the protagonist's words", the [Event:id] mark);
+    section "choice_tags" (stable) = the rule for the choices not known yet. manifest["planned_event"] = {id, firm}.
+    retag() puts the marks back on top of earlier replies so the model keeps seeing the format.
+  - API: GET /api/stories/{sid}/planned-events (Journal > Current state: played events and settled choices).
+  - Lumencia: choice "wing" (knight / magic / divine) and 5 events: entrance_ceremony (turn 1), entrance_exam (only
+    without a wing, 2 turns after), wing_exam (Artemis duel / Elena's crystal / Aria's test invented by the narrator),
+    wing_event (6 turns later: tournament / spell or thesis / invented), final_exam (from 20 December).
+  Tests: app/backend/tests/test_story_events.py.

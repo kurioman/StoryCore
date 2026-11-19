@@ -212,6 +212,7 @@ STORIES  (routers/stories.py)
   POST   /api/generations/{mid}/cancel                            generation cancel
   GET    /api/generations/active                                  generations active
   GET    /api/stories/{sid}/context                               context preview
+  GET    /api/stories/{sid}/planned-events?lang=fr                planned events played + choices settled (v0.6)
   POST   /api/stories/{sid}/context/exclusions                    set exclusion
   POST   /api/stories/{sid}/context/pinned-lore                   pin lore
   GET    /api/stories/{sid}/cast                                  cast
