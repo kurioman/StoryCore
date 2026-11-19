@@ -8,8 +8,9 @@ import { cn } from "@/lib/util";
 import { creatorApi, makeId } from "./api";
 import { getPath, setPath } from "./fields";
 
-/** One field of a card. `characters` is the world's character list (for the character pickers). */
-export function FieldInput({ spec, item, onChange, characters = [], onNameBlur, id }) {
+/** One field of a card. `characters` is the world's character list (for the character pickers); `refs` holds the
+ * world's planned events and player choices (v0.6, for the event cards). */
+export function FieldInput({ spec, item, onChange, characters = [], refs = {}, onNameBlur, id }) {
   let value = getPath(item, spec.key),
     set = (v) => onChange(setPath(item, spec.key, v));
 
@@ -60,6 +61,33 @@ export function FieldInput({ spec, item, onChange, characters = [], onNameBlur, 
       );
     case `characters`:
       return <CharacterChips value={value ?? []} onChange={set} characters={characters} />;
+    case `options`:
+      return <OptionsInput value={value ?? []} onChange={set} />;
+    case `events`:
+      return (
+        <Chips
+          value={value ?? []}
+          onChange={set}
+          items={(refs.events ?? []).filter((e) => e.id && e.id !== item.id).map((e) => ({ id: e.id, name: e.title || e.id }))}
+          empty={msg("No other event yet.")}
+        />
+      );
+    case `choice`:
+      return (
+        <Select id={id} value={value ?? ``} onChange={(e) => set(e.target.value)}>
+          <option value="">{msg("(none)")}</option>
+          {(refs.choices ?? [])
+            .filter((c) => c.id)
+            .map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name || c.id}
+              </option>
+            ))}
+          {value && !(refs.choices ?? []).some((c) => c.id === value) && <option value={value}>{value}</option>}
+        </Select>
+      );
+    case `variants`:
+      return <VariantsInput value={value ?? {}} onChange={set} choices={refs.choices ?? []} wanted={item.needs_choice} />;
     default:
       return (
         <Input
@@ -96,10 +124,15 @@ function split(text) {
 }
 
 function CharacterChips({ value, onChange, characters }) {
-  if (!characters.length) return <p className="text-xs text-faint">{msg("Add characters first.")}</p>;
+  return <Chips value={value} onChange={onChange} items={characters} empty={msg("Add characters first.")} />;
+}
+
+/** Pick several items ({id, name}) by clicking them. */
+function Chips({ value, onChange, items, empty }) {
+  if (!items.length) return <p className="text-xs text-faint">{empty}</p>;
   return (
     <div className="flex flex-wrap gap-1.5">
-      {characters.map((c) => {
+      {items.map((c) => {
         let on = value.includes(c.id);
         return (
           <button
@@ -115,6 +148,77 @@ function CharacterChips({ value, onChange, characters }) {
           </button>
         );
       })}
+    </div>
+  );
+}
+
+/** v0.6: the options of a player choice: a name and the words that show the player picked it. */
+function OptionsInput({ value, onChange }) {
+  let options = Array.isArray(value) ? value : [],
+    update = (i, option) => onChange(options.map((o, j) => (j === i ? option : o))),
+    giveId = (i) => {
+      let option = options[i];
+      if (option.id || !option.name) return;
+      let taken = new Set(options.map((o) => o.id).filter(Boolean));
+      update(i, { id: makeId(option.name, taken), ...option });
+    };
+  return (
+    <div className="flex flex-col gap-2">
+      {options.map((option, i) => (
+        <div key={i} className="grid gap-2 rounded-md border border-line p-2 sm:grid-cols-[12rem_1fr_auto]">
+          <Input
+            value={option.name ?? ``}
+            placeholder={msg("Option")}
+            aria-label={msg("Option")}
+            onChange={(e) => update(i, { ...option, name: e.target.value })}
+            onBlur={() => giveId(i)}
+          />
+          <ListInput
+            value={option.keywords ?? []}
+            placeholder={msg("Words that show this choice")}
+            onChange={(keywords) => update(i, { ...option, keywords })}
+          />
+          <Button size="sm" variant="ghost" aria-label={msg("Remove")} onClick={() => onChange(options.filter((_, j) => j !== i))}>
+            <Icon.X className="size-3.5" />
+          </Button>
+        </div>
+      ))}
+      <div>
+        <Button size="sm" onClick={() => onChange([...options, {}])}>
+          <Icon.Plus className="size-3.5" /> {msg("Add an option")}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+/** v0.6: one text per option ("variants" of an event), for the choice the event waits for (or every choice). */
+function VariantsInput({ value, onChange, choices, wanted }) {
+  let shown = choices.filter((c) => c.id && (!wanted || c.id === wanted));
+  if (!shown.length) return <p className="text-xs text-faint">{msg("Add a player choice first (section below).")}</p>;
+  return (
+    <div className="flex flex-col gap-3">
+      {shown.map((c) => (
+        <div key={c.id} className="flex flex-col gap-2">
+          {!wanted && <p className="text-xs font-medium text-muted">{c.name || c.id}</p>}
+          {(c.options ?? [])
+            .filter((o) => o.id)
+            .map((o) => (
+              <Field key={o.id} label={o.name || o.id}>
+                <Textarea
+                  rows={3}
+                  value={value[o.id] ?? ``}
+                  onChange={(e) => {
+                    let next = { ...value };
+                    if (e.target.value) next[o.id] = e.target.value;
+                    else delete next[o.id];
+                    onChange(next);
+                  }}
+                />
+              </Field>
+            ))}
+        </div>
+      ))}
     </div>
   );
 }
@@ -218,7 +322,7 @@ function OtherFields({ item, known, onChange }) {
  * kind: an entry of cardKinds(); items: the cards; onChange(items); extra(item, update): more content under the form
  * (the portraits of a character); onRemove(item): called before a card is removed.
  */
-export function CardList({ kind, items, onChange, worldId, characters, extra, onRemove, intro }) {
+export function CardList({ kind, items, onChange, worldId, characters, refs, extra, onRemove, intro }) {
   let { confirm } = useUi(),
     [selected, setSelected] = React.useState(0),
     list = items ?? [],
@@ -302,13 +406,14 @@ export function CardList({ kind, items, onChange, worldId, characters, extra, on
                   key={f.key}
                   label={f.label}
                   hint={f.hint}
-                  className={[`textarea`, `lines`, `characters`].includes(f.type) ? `md:col-span-2` : ``}
+                  className={[`textarea`, `lines`, `characters`, `options`, `events`, `variants`].includes(f.type) ? `md:col-span-2` : ``}
                 >
                   <FieldInput
                     spec={f}
                     item={item}
                     onChange={update}
                     characters={characters}
+                    refs={refs}
                     onNameBlur={f.key === kind.nameKey ? giveId : undefined}
                   />
                 </Field>

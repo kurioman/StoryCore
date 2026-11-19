@@ -570,7 +570,7 @@ def context_preview(sid: str, full: bool = False, ctx: AppContext = Depends(get_
 
 
 # --------------------------------------------------------------------------- v0.6 planned events
-@router.get("/stories/{sid}/events")
+@router.get("/stories/{sid}/planned-events")
 def planned_events(sid: str, lang: str = "en", db: Session = Depends(get_db)) -> dict[str, Any]:
     """The planned events already played on the current path, and the choices already settled (the Journal shows them;
     events still to come stay a surprise)."""

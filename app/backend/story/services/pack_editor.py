@@ -49,7 +49,8 @@ LISTS = {  # document key -> (file, key inside the file)
 # importer categories gathered into each list when a pack is copied
 CATEGORY_LIST = {"character": "characters", "location": "locations", "region": "locations", "faction": "groups",
                  "polity": "groups", "organization": "groups", "department": "groups", "glossary": "glossary"}
-SECTIONS = ("stats", "starters", "posts", "closed_groups", "facts", "gatherings", "places", "never_random")
+SECTIONS = ("stats", "starters", "posts", "closed_groups", "facts", "gatherings", "places", "never_random", "choices",
+            "events")  # v0.6: planned events and the player choices they depend on
 EXPRESSIONS = range(1, 7)
 IMAGE_MAX_SIDE = 1024
 COVER_MAX_SIDE = 1280
@@ -289,7 +290,7 @@ def _images_rel(raw: dict[str, Any]) -> str:
 def _ordered(m: dict[str, Any]) -> dict[str, Any]:
     order = ["format_version", "id", "name", "description", "summary", "tags", "cover", "canon_note", "modules", "codex",
              "music", "files", "stats", "starters", "posts", "closed_groups", "facts", "gatherings", "places", "calendar",
-             "never_random"]
+             "never_random", "choices", "events"]
     return {**{k: m[k] for k in order if k in m}, **{k: v for k, v in m.items() if k not in order}}
 
 
@@ -452,6 +453,13 @@ def copy(project_root: Path, db: Session, pid: str, name: str, now: str) -> str:
             for k in ("name", "purpose"):
                 if k in st:
                     st[k] = _one_text(st[k])
+        for ev in new.get("events") or []:
+            if "title" in ev:
+                ev["title"] = _one_text(ev["title"])
+        for c in new.get("choices") or []:
+            c["name"] = _one_text(c.get("name"))
+            for o in c.get("options") or []:
+                o["name"] = _one_text(o.get("name"))
         new = {k: v for k, v in new.items() if v not in (None, "", [], {}) or k == "codex"}
         _write_json(dest / pack_manifest.MANIFEST, _ordered(new))
         _remove_empty_dirs(dest)

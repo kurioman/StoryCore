@@ -18,9 +18,10 @@ import { cardKinds, getPath, monthOptions } from "./fields";
 
 const SAVE_DELAY = 1200; // ms after the last change
 // lists whose cards get an id from their name (other cards and the portraits refer to it)
-const WITH_IDS = [`characters`, `locations`, `groups`, `glossary`, `starters`, `posts`, `closed_groups`, `gatherings`, `places`];
+const WITH_IDS = [`characters`, `locations`, `groups`, `glossary`, `starters`, `posts`, `closed_groups`, `gatherings`, `places`,
+  `choices`, `events`];
 // pack.json sections: a card without its name is not saved yet (it would only cause warnings)
-const SECTIONS = [`stats`, `starters`, `posts`, `closed_groups`, `facts`, `gatherings`, `places`];
+const SECTIONS = [`stats`, `starters`, `posts`, `closed_groups`, `facts`, `gatherings`, `places`, `choices`, `events`];
 
 /** The world being edited, saved automatically: { doc, change(key, value), status, error, flush, setDoc }. */
 function useAutosavedWorld(worldId) {
@@ -185,9 +186,10 @@ export function WorldEditor({ worldId }) {
     { value: `groups`, label: msg("5. Groups"), badge: <Count n={doc.groups?.length} /> },
     { value: `glossary`, label: msg("6. Glossary"), badge: <Count n={doc.glossary?.length} /> },
     { value: `starters`, label: msg("7. Beginnings"), badge: <Count n={doc.starters?.length} /> },
-    { value: `player`, label: msg("8. The player") },
-    { value: `rules`, label: msg("9. Fixed rules") },
-    { value: `check`, label: msg("10. Check and play") },
+    { value: `events`, label: msg("8. Events"), badge: <Count n={doc.events?.length} /> },
+    { value: `player`, label: msg("9. The player") },
+    { value: `rules`, label: msg("10. Fixed rules") },
+    { value: `check`, label: msg("11. Check and play") },
   ];
 
   return (
@@ -241,6 +243,9 @@ export function WorldEditor({ worldId }) {
             />
           </TabPanel>
         ))}
+        <TabPanel value="events" className="p-4">
+          <EventsTab doc={doc} change={change} common={common} kinds={kinds} />
+        </TabPanel>
         <TabPanel value="player" className="p-4">
           <CardList {...common} kind={kinds.stats} items={doc.stats} onChange={(v) => change(`stats`, v)} intro={intros().stats} />
         </TabPanel>
@@ -251,6 +256,28 @@ export function WorldEditor({ worldId }) {
           <CheckTab worldId={worldId} flush={flush} play={play} canPlay={!!world} />
         </TabPanel>
       </Tabs>
+    </div>
+  );
+}
+
+/** v0.6: planned events (scenes decided in advance, played by the narrator its own way) and the player choices they
+ * depend on (e.g. the academy wing). */
+function EventsTab({ doc, change, common, kinds }) {
+  let refs = { events: doc.events ?? [], choices: doc.choices ?? [] };
+  return (
+    <div className="flex flex-col">
+      <Section
+        title={msg("Planned events")}
+        help={msg("Scenes you decide in advance: a ceremony, an exam, a tournament… The app reminds the narrator at the right moment (one event at a time) and the narrator plays it its own way. The player only sees them in the Journal once they have happened.")}
+      >
+        <CardList {...common} refs={refs} kind={kinds.events} items={doc.events} onChange={(v) => change(`events`, v)} />
+      </Section>
+      <Section
+        title={msg("Player choices")}
+        help={msg("A choice the story keeps track of, such as the school wing or the faction the player joins. An event can wait for it, change with it, or be skipped when it is already made.")}
+      >
+        <CardList {...common} refs={refs} kind={kinds.choices} items={doc.choices} onChange={(v) => change(`choices`, v)} />
+      </Section>
     </div>
   );
 }

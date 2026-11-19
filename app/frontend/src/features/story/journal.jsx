@@ -4,7 +4,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiGet, apiPost, apiPatch, errorMessage } from "@/api/legacy";
 import { useWorlds, useStoryState, useInvalidateStory } from "@/api/queries";
 import * as Icon from "lucide-react";
-import { msg, msgKey } from "@/i18n";
+import { msg, msgKey, shownLanguage } from "@/i18n";
 import {
   Badge,
   Button,
@@ -1434,10 +1434,15 @@ function NewFactDialog({ storyId, onClose }) {
 }
 
 function CurrentStateTab({ storyId }) {
-  let storyState = useStoryState(storyId);
+  let storyState = useStoryState(storyId),
+    // v0.6 planned events: the ones already played and the choices settled (those still to come stay a surprise)
+    planned = useQuery({
+      queryKey: [`journal`, storyId, `planned-events`, shownLanguage()],
+      queryFn: () => apiGet(`/stories/${storyId}/planned-events?lang=${shownLanguage()}`),
+    });
   if (!storyState.data) return <Spinner />;
-  let n = storyState.data.state,
-    r = (e, t) => (
+  let state = storyState.data.state,
+    card = (e, t) => (
       <div className="rounded-md border border-line p-3">
         <SectionTitle>{e}</SectionTitle>
         {t.length ? (
@@ -1454,37 +1459,42 @@ function CurrentStateTab({ storyId }) {
 
   return (
     <div className="mx-auto grid max-w-5xl gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {r(
+      {card(
         msg("Scene", {}),
 
         [
-          n.scene.location && msg("Location: {{v0}}", { v0: n.scene.location }),
-          n.scene.date && msg("Date: {{v0}}", { v0: n.scene.date }),
-          n.scene.time && msg("Time: {{v0}}", { v0: n.scene.time }),
-          n.scene.weather && msg("Weather: {{v0}}", { v0: n.scene.weather }),
-          n.scene.status && msg("Status: {{v0}}", { v0: n.scene.status }),
+          state.scene.location && msg("Location: {{v0}}", { v0: state.scene.location }),
+          state.scene.date && msg("Date: {{v0}}", { v0: state.scene.date }),
+          state.scene.time && msg("Time: {{v0}}", { v0: state.scene.time }),
+          state.scene.weather && msg("Weather: {{v0}}", { v0: state.scene.weather }),
+          state.scene.status && msg("Status: {{v0}}", { v0: state.scene.status }),
         ].filter(Boolean),
       )}
-      {r(msg("Cast present", {}), n.scene.present)}
-      {r(
+      {(planned.data?.played?.length > 0 || planned.data?.choices?.length > 0) &&
+        card(msg("Events of the story", {}), [
+          ...(planned.data.choices ?? []).map((c) => msg("Choice — {{v0}}: {{v1}}", { v0: c.name, v1: c.label })),
+          ...(planned.data.played ?? []).map((e) => (e.how === `given_up` ? msg("{{v0}} (not confirmed by the narrator)", { v0: e.title }) : e.title)),
+        ])}
+      {card(msg("Cast present", {}), state.scene.present)}
+      {card(
         msg("Injuries & conditions", {}),
 
-        n.conditions.map((e) => `${e.label} (${e.severity})`),
+        state.conditions.map((e) => `${e.label} (${e.severity})`),
       )}
-      {r(
+      {card(
         msg("Inventory", {}),
 
-        n.inventory.map((e) => `${e.name} ×${e.qty}${e.equipped ? ` (equipped)` : ``}`),
+        state.inventory.map((e) => `${e.name} ×${e.qty}${e.equipped ? ` (equipped)` : ``}`),
       )}
-      {r(
+      {card(
         msg("Active quests", {}),
 
-        n.quests.filter((e) => e.status === `active`).map((e) => e.title),
+        state.quests.filter((e) => e.status === `active`).map((e) => e.title),
       )}
-      {r(
+      {card(
         msg("Relationships", {}),
 
-        n.relationships.map(
+        state.relationships.map(
           (e) =>
             `${e.target_name}: ${e.label} — ${Object.entries(e.axes)
               .filter(([, e]) => e)
@@ -1492,30 +1502,30 @@ function CurrentStateTab({ storyId }) {
               .join(`, `)}`,
         ),
       )}
-      {r(
+      {card(
         msg("Known clues", {}),
 
-        n.clues.filter((e) => !e.resolved).map((e) => e.text),
+        state.clues.filter((e) => !e.resolved).map((e) => e.text),
       )}
-      {r(
+      {card(
         msg("Pending promises", {}),
 
-        n.promises.filter((e) => !e.resolved).map((e) => e.text),
+        state.promises.filter((e) => !e.resolved).map((e) => e.text),
       )}
-      {r(
+      {card(
         msg("Unresolved mysteries", {}),
 
-        n.mysteries.filter((e) => !e.resolved).map((e) => e.text),
+        state.mysteries.filter((e) => !e.resolved).map((e) => e.text),
       )}
-      {r(
+      {card(
         msg("Immediate goals", {}),
 
-        n.goals.filter((e) => !e.resolved).map((e) => e.text),
+        state.goals.filter((e) => !e.resolved).map((e) => e.text),
       )}
-      {r(
+      {card(
         msg("Stats", {}),
 
-        n.stats
+        state.stats
           .filter((e) => !e.hidden)
           .map((e) => `${e.label}: ${e.value}${e.max != null && e.type === `current_max` ? `/${e.max}` : ``}`),
       )}

@@ -32,6 +32,9 @@ FIELDS = {
                 '"blueprint": "instructions to the narrator for the opening scene: where, when, who is there, what '
                 'happens, one immediate choice for the player; never decide the protagonist\'s actions", '
                 '"scene": {"location": "...", "time": "HH:MM"}}'),
+    # v0.6 planned events: the author decides what happens, the narrator how
+    "event": ('{"title": "short title", "brief": "for the narrator, 2-4 sentences: what must happen, where, who is '
+              'involved and what is at stake; never how the protagonist reacts or what they decide"}'),
 }
 TEXTS = {
     "premise": ("the world's presentation in Markdown: a title line '# Name', then short sections (## The world, "
@@ -48,6 +51,8 @@ def _world_brief(doc: dict[str, Any]) -> str:
         "Characters": [c.get("name") for c in doc.get("characters") or []],
         "Places": [x.get("name") for x in doc.get("locations") or []],
         "Groups": [g.get("name") for g in doc.get("groups") or []],
+        "Planned events": [e.get("title") if isinstance(e.get("title"), str) else e.get("id")
+                           for e in doc.get("events") or []],
     }
     lines = [f"World: {doc.get('name', '')}"]
     if doc.get("summary"):
@@ -116,7 +121,9 @@ def clean_draft(kind: str, obj: dict[str, Any]) -> dict[str, Any]:
             out[str(k)] = v
     if kind == "starter" and "blueprint" not in out:
         raise ValueError("no blueprint")
-    if kind != "starter" and not out.get("name"):
+    if kind == "event" and not (out.get("brief") and out.get("title")):
+        raise ValueError("no brief")
+    if kind not in ("starter", "event") and not out.get("name"):
         raise ValueError("no name")
     return out
 

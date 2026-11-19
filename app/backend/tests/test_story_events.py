@@ -141,8 +141,11 @@ class LumenciaFlowTest(AppTestCase):
         self.assertIn("one-on-one duel against her", sent)  # Artemis' exam, the Knight wing
         self.assertIn("[Event:wing_exam]", sent)
         self.assertNotIn("[Choice:wing=", full["system"])  # the wing is known: the choice rule is gone
-        played = self.get(f"/stories/{sid}/events?lang=fr")["played"]
+        self.assertIn("events", self.get(f"/stories/{sid}/events"))  # the Journal's timeline keeps its own address
+        played = self.get(f"/stories/{sid}/planned-events?lang=fr")["played"]
         self.assertEqual([(p["id"], p["title"]) for p in played], [("entrance_ceremony", "Cérémonie d'entrée")])
+        wing = self.get(f"/stories/{sid}/planned-events?lang=fr")["choices"]
+        self.assertEqual([(c["value"], c["label"]) for c in wing], [("knight", "aile des Chevaliers")])
 
 
 if __name__ == "__main__":
