@@ -711,9 +711,12 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
     # v0.5 story language: the narrator writes in it; tags, names and the analysis JSON stay as they are
     lang_code = narration_language.of(cfg, ssettings)
     lang_text = narration_language.instruction(lang_code)
+    # v0.6: earlier replies show the tags of the speakers the app found, even when the narrator wrote none
+    tags_on = bool(tags_text)
+    history_tags = portrait_tags.history_fallback(db, convo, index.name) if tags_on else {}
     candidates = []  # newest first: (message, body as sent, tokens, trailing menu left out)
     for m in reversed(convo):
-        body, cut = message_for_model(m), False
+        body, cut = message_for_model(m, history_tags.get(m.id), portraits=tags_on), False
         if profile.get("history_hygiene") and m.role == "assistant":
             body, cut = strip_trailing_menu(body)
         candidates.append((m, body, est_tokens(body) + 4, cut))
@@ -821,11 +824,14 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
         # long system prompts and older replies that broke the rule get ignored by smaller models; a short per-request
         # reminder next to the player's turn helps. Sent only, never stored in the transcript.
         reminder = profile["reminder"].format(name=pname)
-        if tags_text:  # small models follow a per-turn note far better than a system rule (v1.7 portrait tags)
-            reminder = reminder.rstrip(")") + " Put [Name:N] before each named character's spoken line.)"
         msgs[-1] = ChatMessage("user", msgs[-1].content + reminder)
+    if tags_text and msgs and msgs[-1].role == "user" and chosen[-1].kind == "story" and not opening:
+        # v0.6: the portrait-tag note sits right next to the player's message, with a character of this scene as the
+        # example (small models follow a per-turn note far better than a rule at the top of the system prompt)
+        msgs[-1] = ChatMessage("user", msgs[-1].content + portrait_tags.reminder(_tag_example(index, state, convo, pname),
+                                                                                 lang_code))
     if lang_text and msgs and msgs[-1].role == "user" and chosen[-1].kind == "story" and not opening:
-        msgs[-1] = ChatMessage("user", msgs[-1].content + narration_language.reminder(lang_code))
+        msgs[-1] = ChatMessage("user", msgs[-1].content + narration_language.reminder(lang_code))  # the language note stays last
     if tags_text:
         sections.append(Section("portrait_tags", "Portrait tags (removed before the player reads)", tags_text,
                                 [{"type": "prompt", "label": "Portrait tags"}]))
@@ -896,12 +902,23 @@ def _analysis_budget() -> int:
     return ANALYSIS_MAX_TOKENS
 
 
-def message_for_model(m: Message) -> str:
+def _tag_example(index, state: dict[str, Any], convo: list[Message], pname: str) -> str:
+    """A character of the current scene for the portrait-tag example: the last speaker, else someone present."""
+    def ok(cid: str | None) -> bool:
+        return bool(cid) and cid in index.entities and index.entities[cid].category == "character" \
+            and index.name(cid).casefold() != (pname or "").casefold()
+    last = next((m.speaker_character_id for m in reversed(convo) if m.role == "assistant" and ok(m.speaker_character_id)), None)
+    cid = last or next((c for c in (state.get("scene") or {}).get("present") or [] if ok(c)), None)
+    return index.name(cid).split(" ")[0] if cid else "Name"
+
+
+def message_for_model(m: Message, history_tags: list[dict[str, Any]] | None = None, *, portraits: bool = True) -> str:
     content = m.content
     if m.role == "user" and m.command_json and m.command_json.get("expansion"):
         content = m.command_json["expansion"]
     if m.kind == "ooc":
         content = f"(OOC) {content}"
     if m.role == "assistant" and m.kind == "story":
-        content = portrait_tags.retag(m, content)  # the narrator sees its own tags again (never stored in the reply)
+        # the narrator sees the tags again (never stored in the reply): its own, or where the app found the speaker
+        content = portrait_tags.retag(m, content, history_tags, portraits=portraits)
     return content

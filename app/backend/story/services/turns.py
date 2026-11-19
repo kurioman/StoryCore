@@ -86,7 +86,13 @@ def _start_generation(ctx: AppContext, db: Session, story: Story, branch: Messag
         from . import chrono
         chrono.record_current(db, placeholder, branch, "before_reply")
     db.commit()
-    ctx.generations.start(placeholder, resolved, built.system, built.messages, marker_filter=marker_filter)
+    live = None
+    try:  # v0.6 portraits while the reply is written (services/live_speakers.py); never blocks the reply
+        from . import live_speakers
+        live = live_speakers.for_story(db, story, branch.id) if placeholder.kind == "story" else None
+    except Exception:
+        log.exception("live speaker detection unavailable for message %s", placeholder.id)
+    ctx.generations.start(placeholder, resolved, built.system, built.messages, marker_filter=marker_filter, live=live)
     return built.manifest
 
 
@@ -364,7 +370,7 @@ def _clean_reply(db, m: Message, md: dict[str, Any]) -> None:
     if not spans:
         return
     md["cleanup"]["removed_chars"] = len(m.content) - len(text)
-    for key, field in (("portrait_tags", "pos"), ("music_tags", "offset")):
+    for key, field in (("portrait_tags", "pos"), ("music_tags", "offset"), ("live_speakers", "pos")):
         moved = []
         for t in md.get(key) or []:
             p = t.get(field)

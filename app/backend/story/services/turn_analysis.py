@@ -766,6 +766,17 @@ async def _analyse(ctx: AppContext, message_id: str, *, force: bool = False) -> 
             return {"status": "gone"}
         story = db.get(Story, m.story_id)
         branch = story_tree.get_branch(db, story, m.branch_id)
+        if tag_view is not None and result["speakers"] and \
+                all(b.get("source") == "detected" for b in tag_view["beats"]):
+            # v0.6: the speakers guessed while streaming give way to the analysis' own; a guessed line of someone the
+            # analysis confirms as a speaker keeps its portrait (the analysis lists one line per speaker)
+            said = {sp["character_id"]: sp["expression"] for sp in result["speakers"]}
+            taken = {b.get("paragraph") for b in result["beats"] if b.get("beat") == "speaking"}
+            extra = [{**b, "expression": said[b["character_id"]]} for b in tag_view["beats"]
+                     if b["character_id"] in said and b.get("paragraph") not in taken]
+            result["beats"] = sorted(result["beats"] + extra,
+                                     key=lambda b: (b["paragraph"] if b.get("paragraph") is not None else 10_000))
+            tag_view = None
         if tag_view is not None:  # the narrator's own tags win for the characters it tagged
             mine = {b["character_id"] for b in tag_view["beats"]}
             result["speakers"], result["active_speaker_id"] = tag_view["speakers"], tag_view["active"]
@@ -790,6 +801,13 @@ async def _analyse(ctx: AppContext, message_id: str, *, force: bool = False) -> 
         row.dialogue_json, row.schema_version = result["dialogue"], SCHEMA_VERSION
         row.diagnostics_json = diagnostics
         m.speaker_character_id = result["active_speaker_id"] or m.speaker_character_id
+        md_now = dict(m.generation_metadata_json or {})
+        if tag_view is None and result["speakers"] and not m.edited_at and \
+                not any(t.get("source", "tag") == "tag" for t in md_now.get("portrait_tags") or []):
+            # v0.6: where the analysis found the speakers, the history sent to the model shows their tags
+            from . import portrait_tags
+            md_now["portrait_tags"] = portrait_tags.from_beats(m.content, result["beats"], index.name)
+            m.generation_metadata_json = md_now
         from . import continuity
         continuity.set_alerts(m, "contradiction", [{"text": w[:200]} for w in result.get("warnings") or []
                                                    if pinned_text and re.search(r"contradict", w, re.I)][:2])

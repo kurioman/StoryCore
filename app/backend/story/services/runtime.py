@@ -158,6 +158,7 @@ class GenerationJob:
     task: asyncio.Task | None = None
     marker_filter: Any = None  # v1.5 immersive mode: removes reaction markers from the stream (services/immersive.py)
     tag_filter: Any = None  # v1.7 portrait tags: removes [Name:N] tags from the stream (services/portrait_tags.py)
+    live: Any = None  # v0.6 portraits while writing: who speaks in each paragraph (services/live_speakers.py)
 
     def publish(self, event: dict[str, Any]) -> None:
         for q in list(self.subscribers):
@@ -192,10 +193,10 @@ class GenerationManager:
         return next((j for j in self.jobs.values() if j.branch_id == branch_id and j.status == "streaming"), None)
 
     def start(self, message: Message, resolved: Resolved, system: str, messages: list[ChatMessage],
-              marker_filter: Any = None) -> GenerationJob:
+              marker_filter: Any = None, live: Any = None) -> GenerationJob:
         from .portrait_tags import TagFilter
         job = GenerationJob(message.id, message.story_id, message.branch_id, marker_filter=marker_filter,
-                            tag_filter=TagFilter())
+                            tag_filter=TagFilter(), live=live if marker_filter is None else None)
         self.jobs[message.id] = job
         self.stop_side_requests(message.story_id)
         job.task = self.ctx.spawn(self._run(job, resolved, system, messages))
@@ -250,6 +251,7 @@ class GenerationManager:
                 first_text = first_text or time.monotonic() - started
                 job.text += piece
                 job.publish({"type": "delta", "text": piece})
+                self._follow_speakers(job)
                 if time.monotonic() - last_ck >= CHECKPOINT_SECONDS:
                     await asyncio.to_thread(self._save, job, final=False)
                     last_ck = time.monotonic()
@@ -260,6 +262,7 @@ class GenerationManager:
                 if tail:
                     job.text += tail
                     job.publish({"type": "delta", "text": tail})
+            self._follow_speakers(job, final=True)
             r.adapter.raise_if_cut_off(params)
             job.status = "complete" if job.text.strip() else "failed"
             if not job.text.strip():
@@ -280,6 +283,8 @@ class GenerationManager:
         meta["diagnostics"] = diagnostics(r, job, params, first_text, meta["duration_s"])
         if job.tag_filter is not None and job.tag_filter.tags:
             meta["portrait_tags_raw"] = job.tag_filter.found()  # resolved to characters by portrait_tags.apply
+        if job.live is not None and job.live.beats:
+            meta["live_speakers"] = job.live.found()  # shown at once by portrait_tags.apply when no tag was written
         if job.tag_filter is not None and job.tag_filter.music:
             meta["music_tags"] = job.tag_filter.music  # v0.5: what the story's music player follows (services/music.py)
         log.info("generation %s: %s", job.message_id, meta["diagnostics"])  # figures and ids only, never story text
@@ -311,6 +316,20 @@ class GenerationManager:
             except Exception:
                 log.exception("post-generation hook failed")
 
+    @staticmethod
+    def _follow_speakers(job: GenerationJob, final: bool = False) -> None:
+        """v0.6: the portrait of whoever speaks, as soon as a tag or a name next to the quotes shows it."""
+        if job.live is None:
+            return
+        try:
+            beats = job.live.feed(job.text, job.tag_filter.tags if job.tag_filter is not None else [], final=final)
+        except Exception:  # never lose the reply over a portrait
+            log.exception("live speaker detection failed; turned off for this reply")
+            job.live = None
+            return
+        if beats is not None:
+            job.publish({"type": "portraits", "beats": beats})
+
     async def subscribe(self, message_id: str) -> AsyncIterator[dict[str, Any]]:
         job = self.jobs.get(message_id)
         if job is None:
@@ -337,6 +356,8 @@ class GenerationManager:
         job.subscribers.append(q)
         try:
             yield {"type": "snapshot", "text": job.text, "status": job.status}
+            if job.live is not None and job.live.beats:
+                yield {"type": "portraits", "beats": job.live.view()}
             if job.status != "streaming":
                 yield {"type": "done", "status": job.status, "error": job.error}
                 return
