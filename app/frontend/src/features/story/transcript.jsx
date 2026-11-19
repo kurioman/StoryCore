@@ -112,9 +112,18 @@ function MessageProse({
     _ = new Set(),
     v = new Map(),
     y = [];
-  for (let e of d) {
-    if (_.has(e.character_id)) continue;
+  // v0.6: a character's portrait comes back when their expression changes or when they speak again after someone
+  // else; two paragraphs in a row with the same face show it once. Decided over the whole reply (the same choice in
+  // every slice of an immersive reply); silent "present" characters still appear once.
+  let lastFace = new Map(),
+    lastCharacter = null;
+  for (let e of [...d].sort((a, b) => (a.paragraph ?? -1) - (b.paragraph ?? -1))) {
+    let inText = e.beat !== `present` && e.paragraph != null;
+    if (!inText) {
+      if (_.has(e.character_id)) continue;
+    } else if (lastCharacter === e.character_id && lastFace.get(e.character_id) === e.expression) continue;
     _.add(e.character_id);
+    inText && (lastFace.set(e.character_id, e.expression), (lastCharacter = e.character_id));
     let t = e.paragraph == null ? -1 : e.paragraph - paragraphOffset;
     e.paragraph == null || e.paragraph < 0
       ? showTopBeats && y.push(e)

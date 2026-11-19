@@ -772,8 +772,8 @@ async def _analyse(ctx: AppContext, message_id: str, *, force: bool = False) -> 
             # analysis confirms as a speaker keeps its portrait (the analysis lists one line per speaker)
             said = {sp["character_id"]: sp["expression"] for sp in result["speakers"]}
             taken = {b.get("paragraph") for b in result["beats"] if b.get("beat") == "speaking"}
-            extra = [{**b, "expression": said[b["character_id"]]} for b in tag_view["beats"]
-                     if b["character_id"] in said and b.get("paragraph") not in taken]
+            extra = [{**b, "expression": b["expression"] if b.get("mood") else said[b["character_id"]]}
+                     for b in tag_view["beats"] if b["character_id"] in said and b.get("paragraph") not in taken]
             result["beats"] = sorted(result["beats"] + extra,
                                      key=lambda b: (b["paragraph"] if b.get("paragraph") is not None else 10_000))
             tag_view = None

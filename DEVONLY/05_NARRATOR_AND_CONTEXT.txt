@@ -241,4 +241,8 @@ at ~4 s, portrait at ~10 s in the simulation; tagged replies showed it only at t
     in the history (tokens saved); live detection and the analysis still show the portraits.
   - Screen: StoryPage keeps the live beats per message (shown while streaming, and until the saved presentation
     arrives); lib/portraits.usePreloadPortraits loads the 6 expressions (full + thumb) of everyone in the scene.
+  - Several portraits of one character in a reply: each line keeps its own expression (its tag; else the mood of its
+    paragraph's narration, expressions.mood_of, French + English words, no model call; else that character's last face
+    in the reply). An untagged line of a tagged character keeps its portrait too. On screen (transcript.MessageProse)
+    a portrait comes back when the expression changes or when the character speaks again after someone else.
   Tests: app/backend/tests/test_portraits_live.py.

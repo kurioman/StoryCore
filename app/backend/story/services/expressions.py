@@ -24,6 +24,38 @@ KEYWORDS: dict[int, list[str]] = {
 }
 
 
+# v0.6: French mood words, as they look after entities.norm (no accents). Whole-word starts only ("rit" must not match
+# "esprit"), so they are matched with a regex rather than by substring like the English list.
+FR_KEYWORDS: dict[int, str] = {
+    2: r"sourit|souriant|sourire|souriante|rit|riant|rieuse|eclate de rire|joyeu|heureu|ravie?s?|enthousias|gaiement|"
+       r"s illumine|petille|amuse",
+    3: r"larmes?|triste|tristement|tristesse|sanglot|pleur|chagrin|melancol|abattue?|soupire|la gorge serree|"
+       r"voix tremblante|baisse les yeux|desole",
+    4: r"colere|furieu|rage|enrage|hurle|fusille du regard|foudroie|grogne|menace|poings? serres?|serre les dents|"
+       r"agressi|degaine|s emporte|irrite",
+    5: r"mepris|meprisant|dedain|dedaigneu|degout|ricane|toise|renifle|hautain|froidement|leve les yeux au ciel|"
+       r"condescend|moqueu",
+    6: r"rougi|rougit|rougissante?|rouge aux joues|joues roses|timide|timidement|gene|genee|intimide|"
+       r"detourne le regard|balbutie|bafouille|amoureu|tendrement|le coeur battant",
+}
+_FR_PATTERNS = {slot: re.compile(rf"\b(?:{words})\b") for slot, words in FR_KEYWORDS.items()}
+
+
+def mood_of(text: str) -> tuple[int, str] | None:
+    """(expression 2-6, word found) for a short narration text (French or English), or None when nothing clear.
+    A tie between two moods is no mood."""
+    s = norm(text)
+    scores: dict[int, list[str]] = {}
+    for slot, kws in KEYWORDS.items():
+        scores[slot] = [k for k in kws if k in s]
+    for slot, pat in _FR_PATTERNS.items():
+        scores[slot] = scores.get(slot, []) + pat.findall(s)
+    ranked = sorted(((len(v), slot, v) for slot, v in scores.items() if v), reverse=True)
+    if not ranked or (len(ranked) > 1 and ranked[0][0] == ranked[1][0]):
+        return None
+    return ranked[0][1], ranked[0][2][0]
+
+
 def _sentences(text: str) -> list[str]:
     return [s for s in re.split(r"(?<=[.!?…])\s+|\n+", text) if s.strip()]
 

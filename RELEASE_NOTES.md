@@ -43,6 +43,8 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
   and a short reminder sits next to your message, so small models start writing the tags themselves. The six
   expressions of the characters in the scene are loaded ahead (instant change of expression). New setting in
   Settings > Memory: **Ask the AI to mark who speaks** (turn it off for a model that never writes the tags).
+- **A character's face follows the scene**: in one reply, Lily can first appear neutral and, a few lines later, sad
+  (from the narrator's tag, or from the words around her line such as "les larmes aux yeux" / "she blushed").
 
 ## New in v0.5
 

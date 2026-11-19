@@ -55,10 +55,23 @@ class DetectionTest(unittest.TestCase):
             b = live.feed(text[:i], [])
             if b is not None:
                 events.append((i, [(x["character_id"], x["paragraph"]) for x in b]))
-        # one event, as soon as "Selphina" is written (never Lily from the previous paragraph first)
-        self.assertEqual(len(events), 1)
+        # shown as soon as "Selphina" is written (never Lily from the previous paragraph first), then her face follows
+        # the mood of the line ("en souriant": happy) while it is still being written
         self.assertEqual(events[0][1], [("selphina", 1)])
         self.assertLess(events[0][0], len(text))
+        self.assertTrue(all(e[1] == [("selphina", 1)] for e in events))
+        self.assertEqual(live.beats[-1]["slot"], 2)
+
+    def test_one_character_can_change_face_within_a_reply(self):
+        """Owner's example: line 1 neutral, line 2 sad: two portraits of the same character in one reply."""
+        live = LiveSpeakers(INDEX, protagonist={"Kurio"}, portraits={}, held={})
+        text = ("« Bonjour », dit Lily.\n\nElle s'arrête. « Ma sœur est partie », murmure Lily, les larmes aux yeux."
+                "\n\n« Mais tu es là », ajoute Lily.")
+        self.assertEqual([(b["paragraph"], b["slot"]) for b in live.compute(text, [], final=True)], [(0, 1), (1, 3), (2, 3)])
+        from story.services.expressions import mood_of
+        self.assertEqual(mood_of("Lily rougit violemment.")[0], 6)
+        self.assertIsNone(mood_of("Elle parle de son esprit."))  # "rit" is not a word here
+        self.assertIsNone(mood_of("Lily sourit, les larmes aux yeux."))  # two moods: no guess
 
     def test_a_tag_wins_for_its_paragraph(self):
         live = LiveSpeakers(INDEX, protagonist={"Kurio"}, portraits={}, held={})
@@ -116,7 +129,7 @@ class LivePortraitFlowTest(AppTestCase):
         self.wait_reply(sid, r2["assistant_message_id"])
         sent = self.seen[-1]
         earlier = [m for m in sent if m.role == "assistant"][-1].content
-        self.assertIn("[Selphina:6] « Oh !", earlier)
+        self.assertIn("[Selphina:2] « Oh !", earlier)  # "en souriant": her own (happy) face for that line
         self.assertIn("[Selphina:6] « Vous voulez", earlier)
         self.assertIn("e.g. [Selphina:2]", sent[-1].content)  # the short note next to the player's message
 

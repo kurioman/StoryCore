@@ -197,17 +197,28 @@ class LiveSpeakers:
             lst = [x for x in tagged.setdefault(k, []) if x["character_id"] != cid]  # the later tag wins
             tagged[k] = lst + [{"character_id": cid, "slot": self._slot(cid, int(t.get("slot") or 1)), "paragraph": k,
                                 "pos": pos, "source": "tag", "confidence": 1.0}]
+        from .expressions import mood_of
+
         beats: list[dict[str, Any]] = []
         prev: list[str] = []
+        face: dict[str, int] = {}  # each character's last expression in this reply (a tag, or a mood read below)
         for k in range(len(paras)):
             closed = not (open_last and k == len(paras) - 1)
             if k in tagged:
                 beats.extend(tagged[k])
+                face.update({x["character_id"]: x["slot"] for x in tagged[k]})
             else:
-                for cid, pos, conf in self._detect(text, paras, k, closed, prev):
-                    if not any(x["character_id"] == cid and x["paragraph"] == k for x in beats):
-                        beats.append({"character_id": cid, "slot": self._held_slot(cid), "paragraph": k, "pos": pos,
-                                      "source": "detected", "confidence": conf})
+                found = self._detect(text, paras, k, closed, prev)
+                # v0.6: the mood of this paragraph's narration ("les larmes aux yeux", "she blushed") gives this line its
+                # own expression, so one character can look neutral early in a reply and sad later on
+                mood = mood_of(SPEECH.sub(" ", text[paras[k][0]:paras[k][1]])) if len({c for c, _, _ in found}) == 1 else None
+                for cid, pos, conf in found:
+                    if any(x["character_id"] == cid and x["paragraph"] == k for x in beats):
+                        continue
+                    slot = self._slot(cid, mood[0]) if mood else face.get(cid, self._held_slot(cid))
+                    face[cid] = slot
+                    beats.append({"character_id": cid, "slot": slot, "paragraph": k, "pos": pos, "source": "detected",
+                                  "confidence": conf, "mood": bool(mood)})
             a, b = paras[k]
             names = self._names(SPEECH.sub(" ", text[a:b]))
             if names:
@@ -238,7 +249,8 @@ class LiveSpeakers:
 
     def found(self) -> list[dict[str, Any]]:
         """Stored with the reply (``live_speakers``)."""
-        return [{k: x[k] for k in ("character_id", "slot", "paragraph", "pos", "source", "confidence")} for x in self.beats]
+        return [{k: x.get(k) for k in ("character_id", "slot", "paragraph", "pos", "source", "confidence", "mood")}
+                for x in self.beats]
 
 
 def for_story(db, story, branch_id: str) -> LiveSpeakers | None:

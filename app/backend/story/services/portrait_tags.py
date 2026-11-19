@@ -147,13 +147,13 @@ def apply(db: Session, message_id: str) -> bool:
     text = m.content
     paras = _paragraphs(text)
 
-    def place(name: str, cid: str, slot: int, pos: int, source: str, conf: float) -> dict[str, Any]:
+    def place(name: str, cid: str, slot: int, pos: int, source: str, conf: float, mood: bool = False) -> dict[str, Any]:
         para = next((k for k, (a, b) in enumerate(paras) if a <= pos < b), None)
         end = paras[para][1] if para is not None else len(text)
         q = QUOTED.search(text, pos, end)
         line = q.group(0) if q else None
         return {"name": name, "character_id": cid, "slot": int(slot), "pos": pos, "paragraph": para, "line": line,
-                "anchor": line or text[pos:pos + 60].strip(), "source": source, "confidence": conf}
+                "anchor": line or text[pos:pos + 60].strip(), "source": source, "confidence": conf, "mood": mood}
 
     resolved: list[dict[str, Any]] = []
     search_from = 0
@@ -170,19 +170,31 @@ def apply(db: Session, message_id: str) -> bool:
             continue
         search_from = pos + 1
         resolved.append(place(name, cid, int(t["slot"]), pos, "tag", 1.0))
+    if resolved:  # v0.6: a later line of a tagged character that the narrator left untagged keeps its own portrait
+        tagged_paras = {r["paragraph"] for r in resolved}
+        for x in live:
+            cid, pos = x.get("character_id"), x.get("pos")
+            if not isinstance(pos, int) or not 0 <= pos < len(text):
+                continue
+            earlier = [r for r in resolved if r["character_id"] == cid and r["source"] == "tag" and r["pos"] <= pos]
+            para = next((k for k, (a, b) in enumerate(paras) if a <= pos < b), None)
+            if earlier and para not in tagged_paras:  # the mood read in its paragraph, else their last tag's
+                slot = int(x.get("slot") or 1) if x.get("mood") else earlier[-1]["slot"]
+                resolved.append(place(earlier[-1]["name"], cid, slot, pos, "detected", 0.8, bool(x.get("mood"))))
+        resolved.sort(key=lambda r: r["pos"])
     if not resolved:  # v0.6: no tag written (most small models): the speakers found next to the quotes
         for x in live:
             cid, pos = x.get("character_id"), x.get("pos")
             if cid in index.entities and index.entities[cid].category == "character" and isinstance(pos, int) \
                     and 0 <= pos < len(text) and index.name(cid).casefold() not in me:
                 resolved.append(place(index.name(cid), cid, int(x.get("slot") or 1), pos, "detected",
-                                      float(x.get("confidence") or 0.6)))
+                                      float(x.get("confidence") or 0.6), bool(x.get("mood"))))
     md["portrait_tags"] = [{k: r[k] for k in ("name", "character_id", "slot", "pos", "paragraph", "source")}
                            for r in resolved]
     m.generation_metadata_json = md
     if not resolved:
         return False
-    tagged = resolved[0]["source"] == "tag"
+    tagged = any(r["source"] == "tag" for r in resolved)
 
     cfg = settings_service.get_all(db)
     branch = story_tree.get_branch(db, story, m.branch_id)
@@ -200,7 +212,8 @@ def apply(db: Session, message_id: str) -> bool:
             beats = [b for b in beats if (b["character_id"], b["paragraph"]) != key]  # the later tag in a paragraph wins
         seen.add(key)
         beats.append({"character_id": r["character_id"], "expression": slot_for(r), "beat": "speaking",
-                      "anchor": r["anchor"], "paragraph": r["paragraph"], "source": r["source"]})
+                      "anchor": r["anchor"], "paragraph": r["paragraph"], "source": r["source"],
+                      **({"mood": True} if r.get("mood") else {})})
     last = {}
     for r in resolved:
         last[r["character_id"]] = r
