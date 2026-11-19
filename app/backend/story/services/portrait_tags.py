@@ -27,6 +27,7 @@ from ..models import Message, Story, TurnAnalysis, now_iso
 from . import settings_service, state_service, story_tree
 from .entities import build_index
 from .music import MUSIC_TAG
+from .story_events import CHOICE_TAG, EVENT_TAG
 
 TAG = re.compile(r"\[\s*([^\[\]\n:|+#]{1,40}?)\s*[:|+#]\s*([1-6])\s*\]")
 MAX_TAG_LEN = 48
@@ -53,6 +54,8 @@ class TagFilter:
         self.clean = ""
         self.tags: list[dict[str, Any]] = []
         self.music: list[dict[str, Any]] = []  # v0.5 music tags: [Music:combat] (services/music.py)
+        self.events: list[str] = []  # v0.6 planned events: [Event:entrance_ceremony] (services/story_events.py)
+        self.choices: list[dict[str, str]] = []  # v0.6 player choices: [Choice:wing=knight]
         self._eat = False  # drop the spaces (and one line break) right after a tag
         self._at_line_start = True
 
@@ -86,6 +89,17 @@ class TagFilter:
                     continue
                 self.buf = rest  # maybe a tag still arriving
                 break
+            em = EVENT_TAG.fullmatch(rest[:j + 1]) or CHOICE_TAG.fullmatch(rest[:j + 1])
+            if em:
+                self._at_line_start = not self.clean or self.clean.endswith("\n")
+                if em.re is EVENT_TAG:
+                    if em.group(1) not in self.events:
+                        self.events.append(em.group(1))
+                else:
+                    self.choices.append({"choice": em.group(1), "value": em.group(2)})
+                self._eat = True
+                self.buf = rest[j + 1:]
+                continue
             mm = MUSIC_TAG.fullmatch(rest[:j + 1])
             if mm:
                 self._at_line_start = not self.clean or self.clean.endswith("\n")
@@ -276,8 +290,11 @@ def retag(m: Message, content: str, fallback: list[dict[str, Any]] | None = None
     meta = m.generation_metadata_json or {}
     tags = (meta.get("portrait_tags") or fallback or []) if portraits else []
     music = meta.get("music_tags") or []
-    if (not tags and not music) or m.edited_at or content != m.content:
+    marks = [f"[Event:{e}]" for e in meta.get("event_tags") or []] + [  # v0.6 planned events and choices
+        f"[Choice:{c['choice']}={c['value']}]" for c in meta.get("choice_tags") or [] if c.get("choice") and c.get("value")]
+    if (not tags and not music and not marks) or m.edited_at or content != m.content:
         return content
+    top = "".join(f"{x}\n" for x in marks)  # where they were written does not matter to the model: on top
     out = content
     for t in sorted(music, key=lambda t: t.get("offset") or 0, reverse=True):  # v0.5: the narrator's music tags too
         p = t.get("offset")
@@ -289,7 +306,7 @@ def retag(m: Message, content: str, fallback: list[dict[str, Any]] | None = None
             out = f"{out[:p]}[{t['name']}:{t['slot']}] {out[p:]}"
     if music and tags:  # both kinds of offsets refer to the streamed text: keep it simple, the first music tag on top
         out = f"[Music:{music[0]['tag']}]\n{out}"
-    return out
+    return top + out
 
 
 def history_fallback(db: Session, messages: list[Message], name_of) -> dict[str, list[dict[str, Any]]]:

@@ -18,7 +18,7 @@ from ..models import (Avatar, EntityFact, LocalCanon, LoreChunk, LoreEntity, Mes
                       StoryEvent, UserNote, World)
 from ..providers.base import ChatMessage
 from . import music as music_svc
-from . import narration_language, portrait_tags, settings_service, state_service, story_tree
+from . import narration_language, portrait_tags, settings_service, state_service, story_events, story_tree, world_pack
 from .entities import EntityIndex, build_index
 
 STOPWORDS = set("""the and that with this from have what your their there they them then than into about would could should
@@ -305,7 +305,7 @@ SAFETY_MARGIN = 0.9  # the chars/4 estimate can undercount real tokens; never pl
 # v0.5 phase 7.3 "stable" layout: these stay in the system prompt (they rarely change, so its beginning can be cached);
 # every other section goes with the player's latest message, under TURN_OPEN (narration rules last)
 STABLE_SECTIONS = {"core", "global_note", "story_note", "avatar", "roles", "known", "recap", "scene_summaries",
-                   "portrait_tags", "music_tags", "narration_language"}
+                   "portrait_tags", "music_tags", "narration_language", "choice_tags"}
 TURN_OPEN = "[Story context for this turn: written by the app for the narrator, not by the player]"
 TURN_CLOSE = "[The player's turn]"
 OPTIONAL_SECTIONS = ("repetition", "lore", "encounters", "events", "facts", "recalled", "character_memory", "recap", "threads",
@@ -698,6 +698,25 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
                                            "in mind, never force them)",
                                 "\n".join(f"- {t['text']} (since #{t['seq']})" for t in threads),
                                 [{"type": "thread", "label": t["text"][:80]} for t in threads]))
+    # 9d. v0.6 planned events (pack.json "events"): at most one due event, decided by the author, played the narrator's way
+    planned = None
+    pack = world_pack.of(db, story.world_id) if story.world_id else {}
+    if story_events.events_of(pack) or story_events.choices_of(pack):
+        prot = (av or {}).get("name") or "the protagonist"
+        prog = story_events.progress(pack, path)
+        rule = story_events.choice_rule(pack, prog["choices"], prot)
+        if rule:
+            sections.append(Section("choice_tags", "Player choices (marks removed before the player reads)", rule,
+                                    [{"type": "prompt", "label": "Choice marks"}]))
+        from .world_state import calendar_of as _calendar_of
+        d = story_events.due(pack, prog, state.get("scene") or {}, _calendar_of(db, story.world_id)["year_start"])
+        if d:
+            ev = d["event"]
+            planned = {"id": ev["id"], "firm": d["firm"]}
+            sections.append(Section("planned_event", "Planned event (decided by the story's author; play it your way)",
+                                    story_events.narrator_note(d, pack, index.name, prot),
+                                    [{"type": "event", "id": ev["id"], "label": story_events.text_of(ev.get("title"))}]))
+
     # 9e. v0.5 phase 7.6: phrasing the narrator keeps reusing (found without any model call)
     if cfg.get("anti_repetition", True) is not False:
         from . import continuity
@@ -898,6 +917,8 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
         # model window (when known) and the separate scene-analysis request, which does not use this budget
         "model_context_limit": context_limit,
         "analysis_output_budget": _analysis_budget(),
+        # v0.6: the planned event asked for in this request (services/story_events.py counts the reminders from it)
+        "planned_event": planned,
     }
     return BuiltContext(system=system, messages=msgs, manifest=manifest, secrets=secret_texts, turn_context=turn_context)
 

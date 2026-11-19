@@ -31,7 +31,8 @@ KNOWN_MODULES = {"school"}  # genre modules the engine has behaviour for; other 
 STAT_TYPES = {"current_max", "number", "text"}
 FACT_KINDS = {"aunt_of", "sibling_of", "parent_of", "spouse_of", "family_branch", "other"}
 DEFAULT_FILES = {"system_prompt": "ai/narrative_system_prompt.md", "premise": "lore/premise.md", "images": None}
-SECTIONS = ("stats", "starters", "posts", "closed_groups", "facts", "gatherings", "places", "calendar", "never_random")
+SECTIONS = ("stats", "starters", "posts", "closed_groups", "facts", "gatherings", "places", "calendar", "never_random",
+            "choices", "events")  # v0.6: planned events and the player choices they depend on (services/story_events.py)
 LIBRARY_KEYS = ("summary", "tags", "cover")
 TOP_KEYS = {"format_version", "id", "name", "description", "canon_note", "modules", "files", "codex", "music", *LIBRARY_KEYS,
             *SECTIONS}
@@ -118,6 +119,7 @@ def load(pack_dir: Path) -> tuple[dict[str, Any] | None, dict[str, list[str]]]:
         clean = VALIDATORS[sec](value, rep)
         if clean is not None:
             out[sec] = clean
+    rep.warnings.extend(check_choices(out))
     return out, rep.to_dict()
 
 
@@ -144,6 +146,9 @@ def check_references(manifest: dict[str, Any], character_ids: set[str]) -> list[
     for p in manifest.get("places") or []:
         for m in p.get("regulars") or []:
             chk(f"places[{p['id']}].regulars", m)
+    for e in manifest.get("events") or []:
+        for m in e.get("characters") or []:
+            chk(f"events[{e['id']}].characters", m)
     return warnings
 
 
@@ -479,5 +484,91 @@ def _never_random(v: Any, rep: _Report) -> list[str] | None:
     return _strs(v)
 
 
-VALIDATORS = {"stats": _stats, "starters": _starters, "posts": _posts, "closed_groups": _closed_groups, "facts": _facts,
+def _choices(v: Any, rep: _Report) -> list[dict[str, Any]] | None:
+    """v0.6: player choices that planned events depend on, e.g. the academy wing:
+    {"id": "wing", "name": {"en": "wing", "fr": "aile"}, "options": [{"id": "knight", "name": ..., "keywords": [...]}]}"""
+    items = _list_of_objects("choices", v, rep)
+    if items is None:
+        return None
+    out = []
+    for c in _need_ids("choices", items, rep):
+        opts = [o for o in _need_ids(f"choices[{c['id']}].options", _list_of_objects(f"choices[{c['id']}].options",
+                                                                                      c.get("options") or [], rep) or [], rep)]
+        if len(opts) < 2:
+            rep.warnings.append(f"choices[{c['id']}]: needs at least two options; skipped.")
+            continue
+        out.append({"id": c["id"], "name": _localized(c.get("name")) or c["id"],
+                    "options": [{"id": o["id"], "name": _localized(o.get("name")) or o["id"],
+                                 "keywords": _strs(o.get("keywords"))} for o in opts]})
+    return out
+
+
+EVENT_INTS = ("from_turn", "delay_turns", "from_story_day", "firm_after", "give_up_after")
+
+
+def _events(v: Any, rep: _Report) -> list[dict[str, Any]] | None:
+    """v0.6: planned events (scenes decided by the author, played freely by the narrator). Checked against each other
+    and against the choices here; character ids after the lore import (check_references)."""
+    items = _list_of_objects("events", v, rep)
+    if items is None:
+        return None
+    out = []
+    for e in _need_ids("events", items, rep):
+        brief = _str(e.get("brief"))
+        if not brief:
+            rep.warnings.append(f"events[{e['id']}]: \"brief\" (what must happen, for the narrator) is required; skipped.")
+            continue
+        item: dict[str, Any] = {"id": e["id"], "title": _localized(e.get("title")) or e["id"], "brief": brief,
+                                "characters": _strs(e.get("characters")), "after": _strs(e.get("after"))}
+        for k in EVENT_INTS:
+            if k in e:
+                if isinstance(e[k], int) and not isinstance(e[k], bool) and e[k] >= 0:
+                    item[k] = e[k]
+                else:
+                    rep.warnings.append(f"events[{e['id']}].{k}: must be a whole number (0 or more); ignored.")
+        fd = e.get("from_date")
+        if fd is not None:
+            month = fd.get("month") if isinstance(fd, dict) else None
+            if isinstance(month, int) and 1 <= month <= 12:
+                month = MONTHS[month - 1]
+            month = next((m for m in MONTHS if isinstance(month, str) and m.casefold() == month.casefold()), None)
+            day = fd.get("day", 1) if isinstance(fd, dict) else None
+            if month and isinstance(day, int) and 1 <= day <= 31:
+                item["from_date"] = {"month": month, "day": day}
+            else:
+                rep.warnings.append(f"events[{e['id']}].from_date: must be {{\"month\": \"December\", \"day\": 20}}; ignored.")
+        for k in ("needs_choice", "skip_if_choice"):
+            if _str(e.get(k)):
+                item[k] = _str(e[k])
+        if isinstance(e.get("variants"), dict):
+            item["variants"] = {str(k): x.strip() for k, x in e["variants"].items() if isinstance(x, str) and x.strip()}
+        elif e.get("variants") is not None:
+            rep.warnings.append(f"events[{e['id']}].variants: must be an object {{\"option\": \"text\"}}; ignored.")
+        out.append(item)
+    ids = {e["id"] for e in out}
+    for e in out:
+        for a in e["after"]:
+            if a not in ids:
+                rep.warnings.append(f"events[{e['id']}].after: unknown event \"{a}\".")
+            elif a == e["id"]:
+                rep.warnings.append(f"events[{e['id']}].after: an event cannot wait for itself.")
+    return out
+
+
+def check_choices(manifest: dict[str, Any]) -> list[str]:
+    """Warnings for events that name a choice or an option the manifest does not define."""
+    warnings: list[str] = []
+    choices = {c["id"]: {o["id"] for o in c["options"]} for c in manifest.get("choices") or []}
+    for e in manifest.get("events") or []:
+        for k in ("needs_choice", "skip_if_choice"):
+            if e.get(k) and e[k] not in choices:
+                warnings.append(f"events[{e['id']}].{k}: unknown choice \"{e[k]}\" (see \"choices\").")
+        known = set().union(*choices.values()) if choices else set()
+        for opt in e.get("variants") or {}:
+            if opt not in known:
+                warnings.append(f"events[{e['id']}].variants: unknown option \"{opt}\" (see \"choices\").")
+    return warnings
+
+
+VALIDATORS = {"choices": _choices, "events": _events, "stats": _stats, "starters": _starters, "posts": _posts, "closed_groups": _closed_groups, "facts": _facts,
               "gatherings": _gatherings, "places": _places, "calendar": _calendar, "never_random": _never_random}

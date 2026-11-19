@@ -569,6 +569,27 @@ def context_preview(sid: str, full: bool = False, ctx: AppContext = Depends(get_
     return out
 
 
+# --------------------------------------------------------------------------- v0.6 planned events
+@router.get("/stories/{sid}/events")
+def planned_events(sid: str, lang: str = "en", db: Session = Depends(get_db)) -> dict[str, Any]:
+    """The planned events already played on the current path, and the choices already settled (the Journal shows them;
+    events still to come stay a surprise)."""
+    from ..services import story_events
+    s = story_tree.get_story(db, sid)
+    b = story_tree.get_branch(db, s)
+    pack = world_pack.of(db, s.world_id)
+    if not story_events.events_of(pack) and not story_events.choices_of(pack):
+        return {"played": [], "choices": []}
+    prog = story_events.progress(pack, story_tree.path_messages(db, b.head_message_id))
+    choices = []
+    for c in story_events.choices_of(pack):
+        if c["id"] in prog["choices"]:
+            o = next((o for o in c.get("options") or [] if o["id"] == prog["choices"][c["id"]]), {})
+            choices.append({"id": c["id"], "name": story_events.text_of(c.get("name"), lang),
+                            "value": o.get("id"), "label": story_events.text_of(o.get("name"), lang)})
+    return {"played": story_events.played(pack, prog, lang), "choices": choices}
+
+
 class ExclusionIn(BaseModel):
     key: str  # e.g. "lore:<id>", "fact:<id>", "event:<id>", "canon:<id>"
     excluded: bool

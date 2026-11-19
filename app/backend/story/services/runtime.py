@@ -287,6 +287,10 @@ class GenerationManager:
             meta["live_speakers"] = job.live.found()  # shown at once by portrait_tags.apply when no tag was written
         if job.tag_filter is not None and job.tag_filter.music:
             meta["music_tags"] = job.tag_filter.music  # v0.5: what the story's music player follows (services/music.py)
+        if job.tag_filter is not None and job.tag_filter.events:
+            meta["event_tags"] = job.tag_filter.events  # v0.6 planned events played in this reply (services/story_events.py)
+        if job.tag_filter is not None and job.tag_filter.choices:
+            meta["choice_tags"] = job.tag_filter.choices
         log.info("generation %s: %s", job.message_id, meta["diagnostics"])  # figures and ids only, never story text
         if job.marker_filter is not None:
             try:
