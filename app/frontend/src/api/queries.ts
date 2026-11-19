@@ -117,6 +117,8 @@ export type Message = MessagesResponse["messages"][number];
 export const streamEventSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("snapshot"), text: z.string(), status: z.string() }),
   z.object({ type: z.literal("delta"), text: z.string() }),
+  // v0.6: who speaks in each paragraph, found while the reply is written (backend services/live_speakers.py)
+  z.object({ type: z.literal("portraits"), beats: z.array(z.any()) }),
   z.object({ type: z.literal("done"), status: z.string(), error: z.any().nullable().optional() }),
   z.object({ type: z.literal("ping") }),
   z.object({ type: z.literal("error"), error: z.any() }),

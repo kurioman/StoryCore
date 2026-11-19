@@ -28,9 +28,12 @@ import { StoryHeader } from "@/features/story/header";
 import { cn, isCloudModelId } from "@/lib/util";
 import { useLocalState, useMediaQuery } from "@/lib/hooks";
 import { useScene } from "@/features/story/api";
+import { usePreloadPortraits } from "@/lib/portraits";
 
 function runCommand(e, t, n) {
   let [r, i] = React.useState(null),
+    // v0.6: portraits found while a reply is written, per message (kept until the saved ones arrive)
+    [livePortraits, setLivePortraits] = React.useState({}),
     [a, o] = React.useState(null),
     s = React.useRef(null),
     c = React.useRef(null),
@@ -81,6 +84,8 @@ function runCommand(e, t, n) {
                   text: a.text,
                   status: a.status,
                 })
+              : a.type === `portraits`
+                ? setLivePortraits((p) => ({ ...p, [t]: a.beats }))
               : a.type === `delta`
                 ? i((e) =>
                     e && e.messageId === t
@@ -157,6 +162,7 @@ function runCommand(e, t, n) {
     }, [a]);
   return {
     live: r,
+    livePortraits,
     generating: r?.status === `streaming`,
     run: h,
     stop: g,
@@ -200,6 +206,15 @@ export function StoryPage({ storyId }) {
     ),
     de = runCommand(storyId, n.data?.messages, ue);
   useAnalysisWatcher(storyId, scene.data?.message_id ?? null, scene.data?.status ?? `none`, invalidateStory);
+  // v0.6: the six expressions of everyone in the scene are loaded ahead (instant change of expression)
+  usePreloadPortraits(story.data?.world_id, [
+    ...(storyState.data?.state?.scene?.present ?? []),
+    ...(scene.data?.cast?.present ?? []),
+    ...(scene.data?.speakers ?? []).map((e) => e.character_id),
+    ...Object.values(de.livePortraits)
+      .flat()
+      .map((e) => e.character_id),
+  ]);
   let fe = (e) => {
       (ee(
         e
@@ -471,6 +486,7 @@ export function StoryPage({ storyId }) {
                   storyId={storyId}
                   liveText={de.live?.messageId === t.id ? de.live.text : undefined}
                   liveStatus={de.live?.messageId === t.id ? de.live.status : undefined}
+                  livePortraits={de.livePortraits[t.id]}
                   speaker={
                     t.speaker_character_id
                       ? (Te[t.speaker_character_id] ?? {

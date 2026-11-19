@@ -233,6 +233,19 @@ export function MemorySettings() {
           description={msg("Off keeps the expressions you set yourself. Locked portraits never change either way.")}
         />
         <Toggle
+          checked={r.portrait_tags_enabled ?? true}
+          onChange={(e) =>
+            i({
+              ...r,
+              portrait_tags_enabled: e,
+            })
+          }
+          label={msg("Ask the AI to mark who speaks (portrait tags)")}
+          description={msg(
+            "The AI writes [Name:N] before each spoken line, so the right portrait and expression appear while it writes. Turn it off if your model never writes them: a few tokens are saved and the app still finds who speaks from the names next to the quotation marks.",
+          )}
+        />
+        <Toggle
           checked={r.scene_summaries_enabled ?? true}
           onChange={(e) =>
             i({
@@ -280,6 +293,7 @@ export function MemorySettings() {
               action_suggestions_enabled: r.action_suggestions_enabled,
               show_scene_portraits: r.show_scene_portraits,
               inline_portraits: r.inline_portraits,
+              portrait_tags_enabled: r.portrait_tags_enabled ?? true,
             })
           }
         >

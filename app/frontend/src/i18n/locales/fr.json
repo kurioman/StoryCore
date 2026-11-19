@@ -2148,5 +2148,7 @@
  "Other information ({{v0}})": "Autres informations ({{v0}})",
  "Information from the original world. The narrator reads it too.": "Informations venant du monde d’origine. Le narrateur les lit aussi.",
  "No archived stories.": "Aucune histoire archivée.",
- "No templates yet.": "Aucun modèle pour l’instant."
+ "No templates yet.": "Aucun modèle pour l’instant.",
+ "Ask the AI to mark who speaks (portrait tags)": "Demander à l'IA d'indiquer qui parle (balises de portrait)",
+ "The AI writes [Name:N] before each spoken line, so the right portrait and expression appear while it writes. Turn it off if your model never writes them: a few tokens are saved and the app still finds who speaks from the names next to the quotation marks.": "L'IA écrit [Nom:N] avant chaque réplique : le bon portrait et la bonne expression s'affichent pendant qu'elle écrit. Désactivez-le si votre modèle ne les écrit jamais : vous économisez quelques tokens, et l'application trouve quand même qui parle grâce aux noms placés à côté des guillemets."
 }

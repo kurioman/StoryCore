@@ -176,6 +176,7 @@ export function MessageItem({
   storyId,
   liveText,
   liveStatus,
+  livePortraits,
   speaker,
   speakerName,
   busy,
@@ -349,7 +350,14 @@ export function MessageItem({
           ) : (
             <MessageProse
               text={oe}
-              presentation={ae === `streaming` ? undefined : e.presentation}
+              presentation={
+                // v0.6: the portraits found while writing show at once, until the saved ones replace them
+                ae === `streaming`
+                  ? livePortraits?.length
+                    ? { beats: livePortraits }
+                    : undefined
+                  : (e.presentation ?? (livePortraits?.length && !e.edited_at ? { beats: livePortraits } : undefined))
+              }
               inline={settings.data?.inline_portraits ?? true}
               className={cn(`prose-story`, ae === `streaming` && `caret`)}
               dialogueStyle={re}
