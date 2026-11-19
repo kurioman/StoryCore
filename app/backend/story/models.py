@@ -368,7 +368,7 @@ class MemoryExtractionRun(Base):
     start_seq: Mapped[int] = mapped_column(Integer, default=0)
     end_seq: Mapped[int] = mapped_column(Integer, default=0)
     capture_method: Mapped[str] = mapped_column(String(40), default="manual")
-    status: Mapped[str] = mapped_column(String(20), default="queued")  # queued | running | succeeded | failed
+    status: Mapped[str] = mapped_column(String(20), default="queued")  # queued | running | succeeded | failed | cancelled | skipped
     provider_id: Mapped[Optional[str]] = mapped_column(String(36))
     model_id: Mapped[Optional[str]] = mapped_column(String(200))
     error_summary: Mapped[Optional[str]] = mapped_column(Text)

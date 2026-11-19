@@ -353,6 +353,9 @@ def post_process(ctx: AppContext, message_id: str) -> str | None:
         every = int(settings_service.get(db, "event_capture_batch_turns") or 3)
         if mode == "after_each_turn" or (mode == "batch" and cur.assistant_turns_since >= every):
             return m.branch_id
+        from .extraction import was_cancelled
+        if mode == "batch" and was_cancelled(db, m.branch_id):
+            return m.branch_id  # v0.6 (B2): a stopped capture resumes at the next reply, not after another batch
     return None
 
 

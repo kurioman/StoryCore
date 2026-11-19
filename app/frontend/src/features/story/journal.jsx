@@ -1976,7 +1976,7 @@ function MaintenanceTab({ storyId }) {
               key={e.id}
             >
               <Badge tone={e.status === `succeeded` ? `ok` : e.status === `failed` ? `danger` : `warn`}>
-                {e.status}
+                {msgKey(e.status)}
               </Badge>
               <span>
                 #{e.start_seq}–#{e.end_seq}
@@ -1995,9 +1995,11 @@ function MaintenanceTab({ storyId }) {
                 </span>
               )}
               {e.error_summary && (
-                <span className={e.status === `skipped` ? `text-warn` : `text-danger`}>{e.error_summary}</span>
+                <span className={e.status === `skipped` || e.status === `cancelled` ? `text-warn` : `text-danger`}>
+                  {msgKey(e.error_summary)}
+                </span>
               )}
-              {e.status === `failed` && (
+              {(e.status === `failed` || e.status === `cancelled`) && (
                 <Button
                   size="sm"
                   className="ml-auto"

@@ -424,8 +424,8 @@ async def retry_run(sid: str, rid: str, ctx: AppContext = Depends(get_ctx)) -> d
         r = db.get(MemoryExtractionRun, rid)
         if r is None or r.story_id != sid:
             raise HTTPException(404, "Run not found")
-        if r.status not in ("failed",):
-            raise ValueError("Only failed runs can be retried.")
+        if r.status not in ("failed", "cancelled"):
+            raise ValueError("Only failed or stopped runs can be retried.")
         bid = r.branch_id
         # a cut-off answer is not requested again unchanged: a bounded run that was cut off retries in halves (legacy
         # unbounded runs of 50+ messages already become normal chunks); other failures retry with the normal chunk

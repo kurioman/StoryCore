@@ -395,8 +395,11 @@ def recover_interrupted(db_: Database) -> int:
         for a in db.scalars(select(TurnAnalysis).where(TurnAnalysis.status.in_(("pending", "running")))):
             a.status, a.error = "failed", msg
             a.suggestions_error = msg if not a.suggestions_json else a.suggestions_error
-        for r in db.scalars(select(MemoryExtractionRun).where(MemoryExtractionRun.status == "running")):
-            r.status, r.error_summary, r.finished_at = "failed", msg, now_iso()
+        # v0.6 (test 30 tours, B1): a capture left "running" was stopped, not broken: "cancelled" lets automatic capture
+        # resume (a "failed" run without a category would pause it until the player acts in the Journal)
+        for r in db.scalars(select(MemoryExtractionRun).where(MemoryExtractionRun.status.in_(("queued", "running")))):
+            r.status, r.error_summary, r.finished_at = "cancelled", msg, now_iso()
+            r.result_json = {**(r.result_json or {}), "error_category": "interrupted"}
     return n
 
 

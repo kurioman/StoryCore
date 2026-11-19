@@ -347,6 +347,29 @@ MANUAL_MAX_CHUNKS, MANUAL_MAX_REQUESTS = 4, 8
 MAX_ATTEMPTS_PER_CHUNK = 3  # first try + one repair (parse) or up to two halvings (cut off)
 TRANSIENT = {"network", "timeout", "rate_limit", "unavailable"}  # worth an automatic retry later; anything else pauses
 AUTOMATIC_METHODS = ("automatic_batch", "after_each_turn")
+# v0.6 (test 30 tours, B2): a capture takes 18-33 s on a local 12B model, so a player who answers within 30 s stopped
+# it at every turn and it never caught up. After a cancelled run, automatic capture comes back at the very next reply
+# (without waiting for another batch of turns) and sends one exchange (player message + reply) at a time.
+RESUME_CHUNK_MESSAGES = 2
+CANCELLED_NOTE = "Stopped: the next reply had priority. Capture resumes after it."
+
+
+def was_cancelled(db: Session, branch_id: str) -> bool:
+    """The latest capture run of this branch was stopped before it finished (narration first, or the app stopped)."""
+    last = db.scalar(select(MemoryExtractionRun).where(MemoryExtractionRun.branch_id == branch_id)
+                     .order_by(MemoryExtractionRun.started_at.desc()).limit(1))
+    return last is not None and last.status == "cancelled"
+
+
+def _mark_cancelled(ctx, run_id: str) -> None:
+    try:
+        with ctx.db.session() as db:
+            r = db.get(MemoryExtractionRun, run_id)
+            if r is not None and r.status == "running":
+                r.status, r.error_summary, r.finished_at = "cancelled", CANCELLED_NOTE, now_iso()
+                r.result_json = {**(r.result_json or {}), "error_category": "cancelled"}
+    except Exception:  # never turn a cancellation into another error
+        log.exception("could not mark capture run %s as cancelled", run_id)
 
 
 def _capture_params(params: dict[str, Any], context_limit: int | None = None) -> dict[str, Any]:
@@ -476,6 +499,10 @@ class ExtractionService:
         chunks_left = max_chunks or (AUTO_MAX_CHUNKS if automatic else MANUAL_MAX_CHUNKS)
         requests_left = AUTO_MAX_REQUESTS if automatic else MANUAL_MAX_REQUESTS
         size = max(1, min(chunk_messages or CHUNK_MAX_MESSAGES, CHUNK_MAX_MESSAGES))
+        if automatic and rebuild_from_seq is None and chunk_messages is None:
+            with self.ctx.db.session() as db:
+                if was_cancelled(db, branch_id):
+                    size = RESUME_CHUNK_MESSAGES  # B2: one exchange at a time, so a capture fits into the player's pause
         totals: dict[str, Any] = {k: 0 for k in ("events", "facts", "proposals", "contradictions", "duplicates_skipped",
                                                  "dropped_invalid_source_ids", "review_items", "relationship_changes_skipped",
                                                  "summaries")}
@@ -551,7 +578,14 @@ class ExtractionService:
                     db.add(run)
                     db.flush()
                     run_id = last_run_id = run.id
-                data, diagnostics, part, err = await self._request(resolved, head, part, extra, requests_left)
+                try:
+                    data, diagnostics, part, err = await self._request(resolved, head, part, extra, requests_left)
+                except asyncio.CancelledError:
+                    # v0.6 (test 30 tours, B1): the next reply had priority (runtime.stop_side_requests) or the app is
+                    # stopping. The run must not stay "running" forever: it becomes "cancelled", and automatic capture
+                    # resumes after the next reply with a smaller chunk (B2, see resume_after_cancel)
+                    _mark_cancelled(self.ctx, run_id)
+                    raise
                 from . import usage as usage_svc
                 usage_svc.record(self.ctx, story_id, "capture", resolved.adapter)
                 requests_left -= len(diagnostics)
