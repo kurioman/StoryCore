@@ -41,6 +41,11 @@ class DetectionTest(unittest.TestCase):
         self.assertEqual(found("Lily vous regarde.\n\n« D'accord », répondez-vous."), [])
         self.assertEqual(found("« Allons-y », dit Kurio."), [])
         self.assertEqual(found("Lily marche dans le couloir."), [])
+        # live with Rocinante: the narrator wrote the player's line; "you call out" is not in any verb list
+        self.assertEqual(found('You make your way over to Lily, a smile on your face. "Lily! You made it too?" you call out.'), [])
+        self.assertEqual(found("Vous rejoignez Lily. « Te voilà ! » lancez-vous."), [])
+        self.assertEqual(found('You smile at Lily: "Hi."'), [])
+        self.assertEqual(found('"Hi," you say. "Oh, hello," Lily answers.'), [("lily", 0)])
 
     def test_streaming_shows_the_speaker_before_the_end_without_guessing_early(self):
         live = LiveSpeakers(INDEX, protagonist={"Kurio"}, portraits={}, held={})

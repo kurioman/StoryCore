@@ -31,9 +31,9 @@ local de jeu de rôle textuel par IA, basé sur des « Lore packs » (des mondes
   - Outil des clés de traduction : `mkdir -p $HOME/tools && cp DEVONLY/tools/frontend_reconstruction/keys.mjs $HOME/tools/ && cd $HOME/tools && npm init -y && npm i @babel/parser @babel/traverse`
 - Compilation : `rsync -a --delete app/frontend/src/ $HOME/fe/src/`, puis dans `$HOME/fe` : `npx tsc --noEmit && npm run build`,
   puis recopier `$HOME/fe/dist/` dans `app/frontend/dist/` (supprimer l'ancien `dist` d'abord). Ne pas faire `npm install` dans le dossier monté.
-- Tests (**73**, ~3 min 15 au total : la commande a une limite de 3 min, donc **les lancer en deux moitiés**) :
+- Tests (**79**, ~3 min 20 au total : la commande a une limite de 3 min, donc **les lancer en deux moitiés**) :
   `PYTHONPYCACHEPREFIX=$HOME/pyc $HOME/v312/bin/python DEVONLY/run_tests.py test_api_basics test_bug_report test_codex test_lmstudio test_music test_narration_language test_pack_check test_providers test_remote test_usage test_continuity`
-  puis `... DEVONLY/run_tests.py test_context_layout test_story_flow test_summaries test_creator test_phase9`.
+  puis `... DEVONLY/run_tests.py test_context_layout test_story_flow test_summaries test_creator test_phase9 test_portraits_live`.
 - Clés de traduction manquantes : `node $HOME/tools/keys.mjs app/frontend/src app/frontend/src/i18n/locales/en.json`
   (met à jour en.json), puis comparer avec fr.json (chaque clé de en.json doit exister dans fr.json). Ajouter les traductions
   avec un petit script node (Object.assign) pour garder le format du fichier.
@@ -88,6 +88,16 @@ local de jeu de rôle textuel par IA, basé sur des « Lore packs » (des mondes
   pas : sans lui le modèle répète et écrit « Human: »), « Limit Model Offload to Dedicated GPU Memory » activé.
   Vitesse mesurée : ~14-16 tokens/s (attendu 30-40 sur une 3060) : reste à comprendre (autres applis sur la carte ?).
 
+- **Portraits (19/11, testé en direct avec Rocinante sur mon PC)** : `services/live_speakers.py` repère qui parle
+  pendant l'écriture (nom à côté des guillemets, sans token) et l'écran affiche le portrait aussitôt (événement
+  `portraits`) ; sans balise, ces portraits sont enregistrés tout de suite, l'analyse corrige ensuite ; balises remises
+  dans l'historique (aussi pour les vieilles réponses analysées) ; rappel `[Lily:2] « Bonjour. »` à côté de mon message ;
+  préchargement des 6 expressions ; interrupteur « Demander à l'IA d'indiquer qui parle » (Réglages > Mémoire).
+  Mesures : sans balise, portrait à 2,2 s (pendant l'écriture) au lieu de 9,9 s ; en direct, Rocinante s'est mis à
+  écrire `[Lily:2]` lui-même dès le 3e tour. Tests : `test_portraits_live` (79 tests au total ; la 2e moitié de la
+  commande des tests reçoit aussi `test_portraits_live`). Vitesse vue pendant ce test : ~23-26 tokens/s.
+  Une histoire « [TEST portraits] à supprimer » est restée dans ma liste.
+
 ## Pas encore vérifié avec du vrai matériel
 - Phase 6 sur mon vrai téléphone (pare-feu Windows : cocher « Réseaux privés »).
 - Phase 7 avec mon modèle (qualité des résumés et du récap sur une longue partie).
@@ -98,22 +108,8 @@ local de jeu de rôle textuel par IA, basé sur des « Lore packs » (des mondes
 Vision : le travail jusqu'à la **V1** = rendre le jeu confortable (vitesse, qualité, portraits), puis de nouveaux packs.
 Priorité générale : pouvoir jouer dans de bonnes conditions avant tout le reste.
 
-1. **Portraits** (prochaine étape conseillée). Constat du 18/11 : Rocinante n'écrit presque jamais les balises
-   `[Nom:N]` ; le portrait n'apparaît alors qu'après l'analyse de scène (plusieurs secondes après la réponse).
-   a. **Vérifier d'abord** à quel moment le portrait s'affiche aujourd'hui (`portrait_tags.py`, `runtime.py` tag_filter,
-      écran de jeu), par un test en direct.
-   b. **Balises dans l'historique** : quand une réponse n'a pas de balises mais que l'analyse a trouvé qui parle,
-      réécrire les balises dans les anciennes réponses envoyées au modèle (comme `portrait_tags.retag`). Les petits
-      modèles imitent ce qu'ils voient dans l'historique : c'est le moyen le plus efficace de les faire écrire.
-   c. **Rappel court au bon endroit** : une ligne dans le contexte du tour (près de mon message) plutôt que seulement
-      dans les consignes du début (exemple : `[Lily:2] "Bonjour."`).
-   d. **Détection sans balise, en direct** : pendant le flux, repérer le nom à côté des guillemets (`"..." dit Lily`,
-      `Lily sourit : "..."`) avec `turn_analysis.attribute_dialogue` (aucun token) et afficher le portrait tout de suite.
-   e. **Portrait en direct** : envoyer un événement à l'interface dès qu'une balise (ou une détection) arrive pendant
-      la génération, au lieu d'attendre la fin de la réponse.
-   f. **Préchargement** des 6 expressions des personnages présents (changement d'expression instantané).
-   g. Option : désactiver les balises pour les modèles qui ne les écrivent pas (gain de tokens) et s'appuyer sur d et
-      sur l'analyse.
+1. ~~Portraits~~ : **fait le 19/11** (voir « Ce qui est fait »). Reste éventuel : un même personnage n'a qu'un
+   portrait par réponse dans le texte (le changement d'expression au milieu d'une réponse ne s'y voit pas).
 2. **Style de narration** à travailler ensemble (j'aime : réponses courtes, actions entre *astérisques*, proche
    d'OOC.AI). Idée : un préréglage « Chat ».
 3. **Début fixe de Lumencia** : je le conçois moi-même. Côté moteur, prévoir un champ « introduction fixe » dans les

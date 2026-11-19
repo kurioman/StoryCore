@@ -41,6 +41,11 @@ FR_PROTAGONIST_SPEAKS = re.compile(
     r"soufflez|chuchotez) vous\b")
 
 
+# the protagonist's own line ("…," you call out / « … », répondez-vous / You smile: "…"), on normalised text
+YOU_AFTER = re.compile(r'^\s*[,.!?…]*\s*(?:you|vous|tu)\b|^\s*[,.!?…]*\s*[a-z]+ez vous\b')
+YOU_BEFORE = re.compile(r'(?:^|[.!?]\s+|"\s*)(?:you|vous|tu)\b[^".!?]{0,60}[:,]?\s*$')
+
+
 def paragraphs(text: str) -> list[tuple[int, int]]:
     """(start, end) of the non-empty blank-line-separated paragraphs (the same split as the screen and turn_analysis)."""
     out, pos = [], 0
@@ -103,11 +108,27 @@ class LiveSpeakers:
     def _names(self, narration: str) -> list[str]:
         return list(dict.fromkeys(c for c, _, _ in self._mentions(norm(narration))))
 
-    def _strong(self, para: str) -> list[tuple[str, int]]:
-        """Speakers named right next to the quotation marks: (character id, number of the quote in the paragraph)."""
+    @staticmethod
+    def _flat(para: str) -> str:
         t = norm(para)
         for ch in "“”«»":
             t = t.replace(ch, '"')
+        return t
+
+    def _protagonist_quotes(self, t: str) -> set[int]:
+        """Numbers of the quotes that the protagonist says (never a portrait)."""
+        marks = [i for i, ch in enumerate(t) if ch == '"']
+        out = set()
+        for q in range(len(marks) // 2):
+            a, b = marks[2 * q], marks[2 * q + 1]
+            if YOU_AFTER.match(t[b + 1:b + 60]) or YOU_BEFORE.search(t[max(0, a - 80):a]):
+                out.add(q)
+        return out
+
+    def _strong(self, para: str) -> list[tuple[str, int]]:
+        """Speakers named right next to the quotation marks: (character id, number of the quote in the paragraph)."""
+        t = self._flat(para)
+        mine = self._protagonist_quotes(t)
         found: list[tuple[str, int]] = []
         ments = self._mentions(t)
         for k, (cid, a, b) in enumerate(ments):
@@ -124,7 +145,7 @@ class LiveSpeakers:
                     found.append((cid, q_before // 2))
         out, seen = [], set()
         for cid, q in found:  # one speaker per quote, the first rule that named one
-            if q not in seen:
+            if q not in seen and q not in mine:
                 seen.add(q)
                 out.append((cid, q))
         return out
@@ -145,7 +166,11 @@ class LiveSpeakers:
         if closed and para in self._cache:
             return self._cache[para]
         out = [(cid, self._quote_pos(para, a, q), 0.8) for cid, q in self._strong(para)]
-        if not out and closed:
+        flat = self._flat(para)
+        quotes = flat.count('"') // 2
+        if not out and closed and quotes and len(self._protagonist_quotes(flat)) >= quotes:
+            out = []  # every line here is the protagonist's
+        elif not out and closed:
             narration = SPEECH.sub(" ", para)
             names = self._names(narration)
             if len(names) == 1:

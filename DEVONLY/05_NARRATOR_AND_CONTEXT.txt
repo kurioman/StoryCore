@@ -144,7 +144,8 @@ starter_blueprint) as the instruction for the first reply (routers/stories.py, "
 -------------------
 main.py -> after_generation(message_id), only for replies that ended normally:
   a. turns.post_process         cheap offline heuristics (speaker, mood)
-  a2. portrait_tags.apply       the narrator's [Name:N] tags -> portraits + expressions at once (no extra request)
+  a2. portrait_tags.apply       the narrator's [Name:N] tags -> portraits + expressions at once (no extra request);
+                                without tags, the speakers found while streaming (live_speakers, see below)
   b. turn_analysis.analyse      ONE small JSON request to a model (ANALYSIS_MAX_TOKENS = 1800):
                                   - speakers and reactions with an expression 1-6 (portraits),
                                   - who is present / left (scene_cast.py),
@@ -215,3 +216,29 @@ Engine changes:
     cancelled when its next narration starts; a running scene analysis is marked skipped ("the next reply had
     priority"); capture and summaries catch up on a later turn.
   Tests: app/backend/tests/test_phase9.py.
+
+PORTRAITS WHILE THE REPLY IS WRITTEN (v0.6, "Portraits")
+--------------------------------------------------------
+Measured before: Rocinante 12B almost never wrote [Name:N], so the portrait waited for the scene analysis (reply ends
+at ~4 s, portrait at ~10 s in the simulation; tagged replies showed it only at the very end, never while streaming).
+  - services/live_speakers.py: LiveSpeakers follows the streamed text (runtime.GenerationManager._follow_speakers, after
+    every delta). Per paragraph: a narrator tag wins; else the name next to the quotes ("« ... », dit Lily",
+    '"...," Lily said', "Lily sourit : « ... »", French + English speech verbs); else, once the paragraph is finished,
+    the one character named in its narration or (« ... », dit-elle) in the paragraph before. The protagonist's lines
+    are never attributed ('"...," you call out', "« ... », répondez-vous", 'You smile: "..."'). No model call.
+    Each change -> stream event {"type": "portraits", "beats": [...]} (also replayed after "snapshot"); stored with the
+    reply as generation_metadata_json.live_speakers. Off in immersive interleaving (marker filter active).
+  - portrait_tags.apply: without narrator tags, the detected speakers become the reply's portraits at once (beats
+    source "detected"; the expression shown is kept). turn_analysis: detected beats give way to the analysis' speakers;
+    a detected line of a confirmed speaker keeps its portrait. Narrator tags still win over the analysis.
+  - History tags: generation_metadata_json.portrait_tags (source tag | detected | analysis; the analysis writes them
+    with portrait_tags.from_beats) are put back into earlier replies by portrait_tags.retag; replies analysed before
+    0.6 get theirs from their analysis row (portrait_tags.history_fallback). Small models copy the transcript: in the
+    live test Rocinante wrote [Lily:2] itself two turns later.
+  - Per-turn note (context_builder, after the OOC reminder, before the language note which stays last):
+    "(Portraits: ... e.g. [Lily:2] « Bonjour. » ...)" with the last speaker or someone present as the example.
+  - Setting portrait_tags_enabled (Settings > Memory, "Ask the AI to mark who speaks"): off = no rule, no note, no tags
+    in the history (tokens saved); live detection and the analysis still show the portraits.
+  - Screen: StoryPage keeps the live beats per message (shown while streaming, and until the saved presentation
+    arrives); lib/portraits.usePreloadPortraits loads the 6 expressions (full + thumb) of everyone in the scene.
+  Tests: app/backend/tests/test_portraits_live.py.

@@ -37,6 +37,12 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
   writing your next turn itself (a model loaded with the wrong chat template) is cut there.
 - The narrator no longer invents a shared past with characters you have never met.
 - Shorter scene-analysis instructions (same rules).
+- **Portraits while the narrator writes.** The app now finds who speaks from the names next to the quotation marks
+  (« … », dit Lily / "…," Lily said) and shows the portrait at once, even when the model writes no portrait tag; the
+  scene analysis corrects a wrong guess afterwards. Earlier replies are sent back to the model with their portrait tags
+  and a short reminder sits next to your message, so small models start writing the tags themselves. The six
+  expressions of the characters in the scene are loaded ahead (instant change of expression). New setting in
+  Settings > Memory: **Ask the AI to mark who speaks** (turn it off for a model that never writes the tags).
 
 ## New in v0.5
 
