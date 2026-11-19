@@ -311,7 +311,10 @@ def message_out(db: Session, m: Message, alt: dict[str, Any] | None = None) -> d
     md = d.get("generation_metadata_json") or {}
     d["generation"] = {k: md.get(k) for k in ("provider_name", "provider_type", "model_id", "started_at", "finished_at",
                                                "duration_s", "approx_output_tokens", "error", "mood_suggestions",
-                                               "mentioned_characters", "lore_conflicts", "immersive", "usage", "diagnostics")}
+                                               "mentioned_characters", "lore_conflicts", "immersive", "usage", "diagnostics",
+                                               # v0.6: the notices under a reply (repetition B9, dead speaker, time
+                                               # going back, pinned memory) were never sent to the screen
+                                               "continuity_alerts")}
     d.pop("generation_metadata_json", None)
     d["has_context"] = "context" in md
     d["version_count"] = db.scalar(select(func.count()).select_from(MessageVersion).where(MessageVersion.message_id == m.id)) or 0

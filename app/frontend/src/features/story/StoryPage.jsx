@@ -667,66 +667,79 @@ function firstVisibleArticle(e) {
   };
 }
 
+// v0.6 (test report "30 tours", B12): the view used to jump to the bottom before the portraits had loaded; each image
+// then pushed the new reply further down and the view stayed on an older message (the ↓ button stopped short the same
+// way). Now the view "follows" the end of the story: whenever the content grows (text streaming in, images loading)
+// while following, it goes back to the bottom. Following starts again when a message is added, when the ↓ button is
+// used or when the reader scrolls back to the end; it stops when the view is moved away from the end (the reader
+// scrolling up, or a jump to an older message).
 function AutoScroll({ children, deps }) {
   let n = React.useRef(null),
+    content = React.useRef(null),
     [r, i] = React.useState(true),
-    a = React.useRef(true),
+    follow = React.useRef(true),
+    count = React.useRef(deps[0]),
     o = React.useRef(null),
-    s = React.useRef(true);
-  return (
-    React.useLayoutEffect(() => {
+    toBottom = () => {
       let e = n.current;
-      if (!e || typeof ResizeObserver > `u`) return;
-      let t = e.clientWidth,
-        r = new ResizeObserver(() => {
-          if (e.clientWidth !== t) {
-            if (((t = e.clientWidth), s.current)) e.scrollTop = e.scrollHeight;
-            else if (o.current) {
-              let t = document.getElementById(o.current.id);
-              if (t) {
-                let n = t.getBoundingClientRect();
-                e.scrollTop += n.top - e.getBoundingClientRect().top + o.current.into * n.height;
-              }
-            }
+      e && (e.scrollTop = e.scrollHeight);
+    };
+  React.useLayoutEffect(() => {
+    let e = n.current,
+      c = content.current;
+    if (!e || !c || typeof ResizeObserver > `u`) return;
+    let t = e.clientWidth,
+      ro = new ResizeObserver(() => {
+        if (follow.current) return toBottom();
+        if (e.clientWidth !== t && o.current) {
+          // the window was resized while reading: keep the same article in view
+          let a = document.getElementById(o.current.id);
+          if (a) {
+            let b = a.getBoundingClientRect();
+            e.scrollTop += b.top - e.getBoundingClientRect().top + o.current.into * b.height;
           }
-        });
-      return (r.observe(e), () => r.disconnect());
-    }, []),
-    React.useLayoutEffect(() => {
-      let e = n.current;
-      e && (a.current || r) && ((e.scrollTop = e.scrollHeight), (a.current = false));
-    }, deps),
-    (
-      <div className="relative min-h-0 flex-1">
-        <div
-          ref={n}
-          onScroll={(e) => {
-            let t = e.currentTarget,
-              n = t.scrollHeight - t.scrollTop - t.clientHeight < 80;
-            (i(n), (s.current = n), (o.current = firstVisibleArticle(t)));
-          }}
-          className="story-scroll h-full overflow-y-auto overflow-x-hidden px-3 pb-6 sm:px-6"
-          aria-live="polite"
-          aria-busy={false}
-        >
-          {children}
-        </div>
-        {!r && (
-          <IconButton
-            label={msg("Scroll to latest")}
-            className="absolute bottom-3 right-6 size-8 border border-line bg-raised shadow"
-            onClick={() =>
-              n.current?.scrollTo({
-                top: n.current.scrollHeight,
-                behavior: `smooth`,
-              })
-            }
-          >
-            <Icon.ArrowDown className="size-4" />
-          </IconButton>
-        )}
+        }
+        t = e.clientWidth;
+      });
+    ro.observe(e);
+    ro.observe(c);
+    return () => ro.disconnect();
+  }, []);
+  React.useLayoutEffect(() => {
+    if (deps[0] > (count.current ?? 0)) follow.current = true; // a new message (the player's turn, a new reply)
+    count.current = deps[0];
+    if (follow.current) (toBottom(), i(true));
+  }, deps);
+  return (
+    <div className="relative min-h-0 flex-1">
+      <div
+        ref={n}
+        onScroll={(e) => {
+          let t = e.currentTarget,
+            atEnd = t.scrollHeight - t.scrollTop - t.clientHeight < 80;
+          follow.current = atEnd;
+          (i(atEnd), (o.current = firstVisibleArticle(t)));
+        }}
+        className="story-scroll h-full overflow-y-auto overflow-x-hidden px-3 pb-6 sm:px-6"
+        aria-live="polite"
+        aria-busy={false}
+      >
+        <div ref={content}>{children}</div>
       </div>
-    )
+      {!r && (
+        <IconButton
+          label={msg("Scroll to latest")}
+          className="absolute bottom-3 right-6 size-8 border border-line bg-raised shadow"
+          onClick={() => {
+            follow.current = true;
+            i(true);
+            toBottom();
+          }}
+        >
+          <Icon.ArrowDown className="size-4" />
+        </IconButton>
+      )}
+    </div>
   );
 }
 

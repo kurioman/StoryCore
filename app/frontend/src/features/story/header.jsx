@@ -147,6 +147,32 @@ export function StoryHeader({
   );
 }
 
+// v0.6 (test report "30 tours", B11): inside the "⋯" menu (narrow window) these switches were popovers inside a
+// popover: a click in the inner one counted as a click outside the menu, so the menu closed under it and the inner
+// panel was left at the top-left corner of the screen, out of reach. Inside the menu they now open in place.
+function MaybePopover({ inline, trigger, className, align, children }) {
+  let [open, setOpen] = React.useState(false);
+  if (!inline)
+    return (
+      <Popover>
+        <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+        <PopoverContent className={className} align={align}>
+          {children}
+        </PopoverContent>
+      </Popover>
+    );
+  return (
+    <div className="w-full">
+      {React.cloneElement(trigger, { onClick: () => setOpen(!open), "aria-expanded": open })}
+      {open && (
+        <div className={cn(`mt-1 w-full rounded border border-line bg-panel-2/40 p-1`, className.replace(/\bw-\d+\b/g, ``))}>
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function MoreToolsMenu({ story, onOpen, compact }) {
   let [r, i] = React.useState(false),
     a = `flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-muted hover:bg-panel-2 hover:text-fg`,
@@ -160,12 +186,12 @@ function MoreToolsMenu({ story, onOpen, compact }) {
           <Icon.Ellipsis className="size-4" />
         </IconButton>
       </PopoverTrigger>
-      <PopoverContent className="w-60 p-1" align="end">
+      <PopoverContent className={cn(`p-1`, compact ? `max-h-[80vh] w-80 overflow-y-auto` : `w-60`)} align="end">
         {compact && (
           <div className="mb-1 flex flex-col items-start gap-0.5 border-b border-line pb-1">
-            <AvatarSwitch story={story} />
-            <ModelSwitch story={story} />
-            <StoryOptions story={story} />
+            <AvatarSwitch story={story} inline />
+            <ModelSwitch story={story} inline />
+            <StoryOptions story={story} inline />
           </div>
         )}
         <button className={a} onClick={() => o(`notes`)}>
@@ -279,7 +305,7 @@ function BranchMenu({ story, branches, disabled }) {
   );
 }
 
-function AvatarSwitch({ story }) {
+function AvatarSwitch({ story, inline = false }) {
   let avatars = useAvatars(),
     invalidateStory = useInvalidateStory(),
     { confirm, toast } = useUi(),
@@ -307,8 +333,7 @@ function AvatarSwitch({ story }) {
         }
     };
   return (
-    <Popover>
-      <PopoverTrigger asChild>
+    <MaybePopover inline={inline} align="start" className="w-64 p-1" trigger={
         <button
           className="flex items-center gap-1.5 rounded px-1.5 py-1 text-xs text-muted hover:bg-panel-2"
           title={msg("Active avatar")}
@@ -317,8 +342,7 @@ function AvatarSwitch({ story }) {
           <span className="max-w-24 truncate">{story.avatar_name ?? msg("No avatar")}</span>
           <Icon.ChevronDown className="size-3" />
         </button>
-      </PopoverTrigger>
-      <PopoverContent className="w-64 p-1" align="start">
+      }>
         {avatars.data?.map((t) => (
           <button
             onClick={() => t.id !== story.active_avatar_id && a(t.id)}
@@ -341,12 +365,11 @@ function AvatarSwitch({ story }) {
             <Icon.UserRound className="size-3.5" /> {msg("Manage avatars")}
           </button>
         </div>
-      </PopoverContent>
-    </Popover>
+      </MaybePopover>
   );
 }
 
-function ModelSwitch({ story }) {
+function ModelSwitch({ story, inline = false }) {
   let t = useProviders(),
     invalidateStory = useInvalidateStory(),
     [r, i] = React.useState({}),
@@ -382,8 +405,7 @@ function ModelSwitch({ story }) {
       }));
     };
   return (
-    <Popover>
-      <PopoverTrigger asChild>
+    <MaybePopover inline={inline} align="start" className="w-80 p-1" trigger={
         <button
           className="flex items-center gap-1.5 rounded px-1.5 py-1 text-xs text-muted hover:bg-panel-2"
           title={msg("Provider and model")}
@@ -399,8 +421,7 @@ function ModelSwitch({ story }) {
           <span className="max-w-36 truncate">{s ? s.display_name : msg("No model")}</span>
           <Icon.ChevronDown className="size-3" />
         </button>
-      </PopoverTrigger>
-      <PopoverContent className="w-80 p-1" align="start">
+      }>
         <p className="px-2 py-1 text-[11px] text-faint">
           {u
             ? msg("Remote model — story content is sent to the provider.")
@@ -454,12 +475,11 @@ function ModelSwitch({ story }) {
             {msg("Manage providers")}
           </Button>
         </div>
-      </PopoverContent>
-    </Popover>
+      </MaybePopover>
   );
 }
 
-function StoryOptions({ story }) {
+function StoryOptions({ story, inline = false }) {
   let settings = useSettings(),
     queryClient = useQueryClient(),
     r = story.settings_json,
@@ -478,8 +498,7 @@ function StoryOptions({ story }) {
     },
     presets = settings.data?.narration_presets ?? [];
   return (
-    <Popover>
-      <PopoverTrigger asChild>
+    <MaybePopover inline={inline} align="start" className="w-80 space-y-2.5" trigger={
         <button
           className="flex items-center gap-1 rounded px-1.5 py-1 text-xs text-muted hover:bg-panel-2"
           title={msg("Story mode and generation options")}
@@ -488,8 +507,7 @@ function StoryOptions({ story }) {
           {presetName(presets.find((preset) => preset.id === (r.preset_id ?? `balanced`))) || msg("Balanced")}
           <Icon.ChevronDown className="size-3" />
         </button>
-      </PopoverTrigger>
-      <PopoverContent className="w-80 space-y-2.5" align="start">
+      }>
         <label className="block text-xs text-muted">
           {msg("Narration preset")}
           <Select value={String(r.preset_id ?? `balanced`)} onChange={(e) => i(`preset_id`, e.target.value)}>
@@ -595,7 +613,6 @@ function StoryOptions({ story }) {
         <Button size="sm" variant="ghost" onClick={() => navigate(`/settings/generation`)}>
           {msg("Edit presets")}
         </Button>
-      </PopoverContent>
-    </Popover>
+      </MaybePopover>
   );
 }

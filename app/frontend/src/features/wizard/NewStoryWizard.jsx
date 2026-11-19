@@ -19,7 +19,7 @@ import {
 } from "@/components/ui";
 import { ContextManifest } from "@/features/story/composer";
 import { cn } from "@/lib/util";
-import { navigate } from "@/lib/router";
+import { navigate, useHashPath } from "@/lib/router";
 import { portraitSlot, usePortraitMap } from "@/lib/portraits";
 import { DEFAULT_PRESET_ID, presetName } from "@/lib/presets";
 
@@ -62,6 +62,8 @@ export function NewStoryWizard() {
       featured_characters: [],
       story_note: ``,
     })),
+    hashPath = useHashPath(),
+    applied = React.useRef(null),
     portraitMap = usePortraitMap(p.world_id || null), // v0.5: the chosen world's portraits
     v = worlds.data?.find((e) => e.id === p.world_id),
     // v0.5: only the world's own openings (chosen by the pack's author)
@@ -106,6 +108,25 @@ export function NewStoryWizard() {
     },
     C = () => c((e) => Math.min(e + 1, WIZARD_STEPS().length - 1)),
     w = s !== 0 || p.title.trim().length > 0;
+  // v0.6 (test report "30 tours", B13): the world chosen in the library is applied whenever the address carries one
+  // (also when the wizard was already open, or when the list of worlds arrives after the first render); a world may be
+  // named by its id or by its slug
+  React.useEffect(() => {
+    let q = new URLSearchParams(hashPath.split(`?`)[1] ?? ``),
+      w = q.get(`world`);
+    if (!w || !worlds.data || applied.current === hashPath) return;
+    let found = worlds.data.find((e) => e.id === w || e.slug === w);
+    if (!found) return;
+    applied.current = hashPath;
+    let starters = found.data_json?.starters ?? [],
+      st = q.get(`starter`);
+    g((prev) => ({
+      ...prev,
+      world_id: found.id,
+      starter_id: starters.some((e) => e.id === st) ? st : (starters[0]?.id ?? ``),
+      ...(prev.world_id === found.id ? {} : { starting_location: ``, featured_characters: [] }),
+    }));
+  }, [hashPath, worlds.data]);
   return (
     <div className="h-full overflow-y-auto">
       <div className="mx-auto max-w-3xl px-6 py-8">
@@ -137,13 +158,15 @@ export function NewStoryWizard() {
             >
               {msg("This is the context the first request will use. Nothing has been sent to any model yet.")}
             </Callout>
-            {d && <ContextManifest manifest={d} />}
-            <div className="flex gap-2">
+            {/* v0.6 (test report "30 tours", B14): the buttons come before the context preview, which arrives about a
+                second later and used to push them down under the cursor (a click on "Generate" then missed) */}
+            <div className="flex flex-wrap gap-2">
               <Button onClick={() => S(false)}>{msg("Open story and write the first move myself")}</Button>
               <Button variant="primary" onClick={() => S(true)}>
                 <Icon.Play className="size-4" /> {msg("Generate the opening scene")}
               </Button>
             </div>
+            {d ? <ContextManifest manifest={d} /> : <div className="min-h-24" aria-hidden />}
           </div>
         ) : (
           <div className="space-y-5">
@@ -485,7 +508,7 @@ export function NewStoryWizard() {
               <div className="space-y-2 text-sm">
                 <ReviewRow k={msg("Title")} v={p.title} />
                 <ReviewRow k={msg("World")} v={v?.name ?? msg("None", {})} />
-                <ReviewRow k={msg("Starting mode")} v={b?.name ?? msg("None", {})} />
+                <ReviewRow k={msg("Starting mode")} v={b ? packText(b.i18n?.name, b.name) : msg("None", {})} />
                 <ReviewRow
                   k={msg("Location / time")}
                   v={[p.starting_location, p.starting_time].filter(Boolean).join(` · `) || msg("Narrator decides", {})}

@@ -2191,5 +2191,12 @@
  "What the player chooses": "Ce que le joueur choisit",
  "Words that show this choice": "Mots qui montrent ce choix",
  "{{v0}} (not confirmed by the narrator)": "{{v0}} (non confirmé par le narrateur)",
- "Add a player choice first (section below).": "Ajoutez d’abord un choix du joueur (section ci-dessous)."
+ "Add a player choice first (section below).": "Ajoutez d’abord un choix du joueur (section ci-dessous).",
+ "Repetitive reply": "Réponse répétitive",
+ "Repetitive reply: it only repeats earlier replies.": "Réponse répétitive : elle ne fait que répéter les réponses précédentes.",
+ "Repetitive reply: {{v0}} of the {{v1}} characters written repeated earlier replies and were removed.": "Réponse répétitive : {{v0}} des {{v1}} caractères écrits répétaient les réponses précédentes et ont été retirés.",
+ "reacts": "réagit",
+ "speaks": "parle",
+ "Stopped: the next reply had priority. Capture resumes after it.": "Arrêtée : la réponse suivante était prioritaire. La capture reprend après elle.",
+ "Interrupted: the app stopped while this was running. Retry to run it again.": "Interrompue : l'application s'est arrêtée pendant ce travail. Réessayez pour le relancer."
 }

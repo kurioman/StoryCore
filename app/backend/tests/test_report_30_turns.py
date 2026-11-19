@@ -239,5 +239,36 @@ class LoreTitleTest(AppTestCase):
                 self.assertEqual(roles.detect_conflicts(fine, reg, index), [], fine)
 
 
+class InterfaceDataTest(AppTestCase):
+    """B15: build folders are never offered as lore packs; B9: the notices under a reply reach the screen."""
+
+    def test_work_and_release_folders_are_not_lore_packs(self):
+        import json as _json
+        import tempfile
+        from pathlib import Path
+        from story.services import lore_import
+        root = Path(tempfile.mkdtemp(prefix="storycore_b15_"))
+        for rel in ("Lorepack/my_pack", "_work/release/stage/Lorepack/my_pack", "_release/x/my_pack", "DEVONLY/old_pack"):
+            d = root / rel
+            d.mkdir(parents=True)
+            (d / "pack.json").write_text(_json.dumps({"format_version": 2, "id": "my_pack", "name": "My pack"}), "utf-8")
+        found = [Path(c["path"]).relative_to(root).as_posix() for c in lore_import.discover(root)]
+        self.assertEqual(found, ["Lorepack/my_pack"])
+
+    def test_continuity_notices_are_sent_to_the_screen(self):
+        st = self.new_story("Notices", world_slug="hero_chronicle")
+        sid = st["id"]
+        r = self.post(f"/stories/{sid}/start")
+        self.wait_reply(sid, r["assistant_message_id"])
+        from story.models import Message
+        with self.ctx.db.session() as db:
+            m = db.get(Message, r["assistant_message_id"])
+            m.generation_metadata_json = {**(m.generation_metadata_json or {}), "continuity_alerts": [
+                {"kind": "mostly_repeated", "generated": 546, "kept": 55, "nothing_left": False}]}
+        msgs = self.get(f"/stories/{sid}/messages")["messages"]
+        mine = next(x for x in msgs if x["id"] == r["assistant_message_id"])
+        self.assertEqual(mine["generation"]["continuity_alerts"][0]["kind"], "mostly_repeated")
+
+
 if __name__ == "__main__":
     unittest.main()

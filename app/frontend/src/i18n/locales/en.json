@@ -2009,5 +2009,10 @@
   "•••••••• (stored — enter a new key to replace)": "•••••••• (stored — enter a new key to replace)",
   "•••••••• saved (enter a new key to replace)": "•••••••• saved (enter a new key to replace)",
   "…of which from the cache": "…of which from the cache",
-  "…of which read from the cache": "…of which read from the cache"
+  "…of which read from the cache": "…of which read from the cache",
+  "Repetitive reply": "Repetitive reply",
+  "Repetitive reply: it only repeats earlier replies.": "Repetitive reply: it only repeats earlier replies.",
+  "Repetitive reply: {{v0}} of the {{v1}} characters written repeated earlier replies and were removed.": "Repetitive reply: {{v0}} of the {{v1}} characters written repeated earlier replies and were removed.",
+  "reacts": "reacts",
+  "speaks": "speaks"
 }

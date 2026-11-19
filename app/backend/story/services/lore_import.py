@@ -67,7 +67,9 @@ def _slug(text: str) -> str:
 REF_FIELDS_SINGLE = ("location_id", "parent_location_id", "polity_id", "headquarters_location_id", "department_id",
                      "deity_id", "capital_location_id", "target_id", "from", "to", "faction_id")
 REF_FIELDS_LIST = ("faction_ids", "involved_ids", "key_members", "leaders_or_members", "rivals", "worshipped_by", "members")
-SKIP_DIRS = {".git", "node_modules", "__pycache__", ".venv", "data", "app"}
+# v0.6 (test report "30 tours", B15): build and scratch folders (_work\release\stage held a copy of the packs) and the
+# developer folder are never offered as lore packs
+SKIP_DIRS = {".git", "node_modules", "__pycache__", ".venv", "data", "app", "_work", "_release", "DEVONLY"}
 
 
 # --------------------------------------------------------------------------- discovery
