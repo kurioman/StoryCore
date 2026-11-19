@@ -322,6 +322,8 @@ def attribute_dialogue(text: str, index: EntityIndex, speakers: set[str], named=
     paras = [p for p in re.split(r"\n\s*\n", text or "") if p.strip()]
     out: list[dict[str, Any]] = []
     last: list[str] = []
+    from .speaker_guard import unknown_person
+    stranger = lambda narration: unknown_person(index, narration)  # noqa: E731
     for i, p in enumerate(paras):
         narration = SPEECH.sub(" ", p)
         names = named(narration) if named else index.find_mentions(narration, ("character",))
@@ -340,8 +342,15 @@ def attribute_dialogue(text: str, index: EntityIndex, speakers: set[str], named=
             else:
                 who = None
             out.append({"paragraph": i, "character_id": who})
-        if names:
+        # test 2 (same fix as B6 for portraits): only the paragraph just before counts, and not when it is about an
+        # unnamed or unknown person ("Welcome to the Central Empire" was labelled with a goddess named three
+        # paragraphs earlier); a paragraph that names nobody but whose line went to one speaker passes them on
+        if stranger(narration):
+            last = []
+        elif names:
             last = names
+        else:
+            last = [out[-1]["character_id"]] if out and out[-1]["paragraph"] == i and out[-1]["character_id"] in speakers else []
     return out
 
 
@@ -652,8 +661,8 @@ async def _analyse(ctx: AppContext, message_id: str, *, force: bool = False) -> 
         named = identity.resolver(index, registry, canon, set(mentioned) | set(state["scene"].get("present", [])))
         # v0.6 (test report "30 tours", B6/B7/B10): who may be shown at all in this reply
         from . import speaker_guard
-        may_show = speaker_guard.may_appear(index, reply, state["scene"].get("present") or [],
-                                            {r.character_id for r in ctx_refs})
+        named_now = speaker_guard.named_here(index, reply, {r.character_id for r in ctx_refs})
+        may_show = set(state["scene"].get("present") or []) | named_now
         # v0.5 phase 7.5: a short reply with no character, in a scene whose place and time are known, gives the analysis
         # nothing to do (no speaker, reaction, relationship or discovery): no request is spent on it
         if (not tagged and not force and not cfg.get("action_suggestions_enabled", True) and not mentioned
@@ -735,7 +744,7 @@ async def _analyse(ctx: AppContext, message_id: str, *, force: bool = False) -> 
                                draft_check=draft_check, min_suggestions=3 if attempt == 1 else 2,
                                scene_present=list(state["scene"].get("present") or []), player_turn=user_text)
             result["world_state_raw"] = obj.get("world_state")  # validated against the scene when it is applied
-            hidden = speaker_guard.filter_result(result, may_show)
+            hidden = speaker_guard.filter_result(result, may_show, named_now)
             if hidden:
                 result["guard_removed"] = hidden
             if want and result["suggestions_error"] and attempt == 1:
@@ -852,7 +861,7 @@ async def _analyse(ctx: AppContext, message_id: str, *, force: bool = False) -> 
             scene_now = state_service.normalize(st_now.state_json if st_now else {})["scene"]
             year_start = world_state.calendar_of(db, story.world_id)["year_start"]
             update = world_state.validate(result.get("world_state_raw"), m.content, user_text, scene_now, year_start)
-            update = world_state.with_cues(update, m.content, scene_now, year_start)  # B3: plain cues as a fallback
+            update = world_state.with_cues(update, m.content, scene_now, year_start, user_text)  # B3: plain cues
             went_back = ("time" in update["changes"] and not update["days_passed"] and "story_day" not in update["changes"]
                          and continuity.time_went_back(scene_now.get("time"), update["changes"]["time"]))
             continuity.set_alerts(m, "time_back", [{"from": scene_now.get("time"), "to": update["changes"]["time"]}]

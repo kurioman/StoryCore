@@ -361,6 +361,22 @@ def was_cancelled(db: Session, branch_id: str) -> bool:
     return last is not None and last.status == "cancelled"
 
 
+BEHIND_MESSAGES = 4  # two exchanges or more waiting: the capture goes before the scene analysis (test 2, B2)
+
+
+def behind(db: Session, branch_id: str) -> bool:
+    """Memory capture has fallen behind on this branch: its last run was stopped, or at least two exchanges wait.
+    Then the capture runs before the scene analysis after a reply (the player's pause is often shorter than both)."""
+    if was_cancelled(db, branch_id):
+        return True
+    branch = db.get(MessageBranch, branch_id)
+    cur = db.get(ExtractionCursor, branch_id)
+    if branch is None:
+        return False
+    _, pending = ExtractionService._pending(db, branch, cur.last_seq if cur else -1)
+    return len(pending) >= BEHIND_MESSAGES
+
+
 def _mark_cancelled(ctx, run_id: str) -> None:
     try:
         with ctx.db.session() as db:
@@ -501,7 +517,7 @@ class ExtractionService:
         size = max(1, min(chunk_messages or CHUNK_MAX_MESSAGES, CHUNK_MAX_MESSAGES))
         if automatic and rebuild_from_seq is None and chunk_messages is None:
             with self.ctx.db.session() as db:
-                if was_cancelled(db, branch_id):
+                if behind(db, branch_id):
                     size = RESUME_CHUNK_MESSAGES  # B2: one exchange at a time, so a capture fits into the player's pause
         totals: dict[str, Any] = {k: 0 for k in ("events", "facts", "proposals", "contradictions", "duplicates_skipped",
                                                  "dropped_invalid_source_ids", "review_items", "relationship_changes_skipped",

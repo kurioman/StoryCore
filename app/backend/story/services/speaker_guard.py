@@ -43,6 +43,7 @@ ton ta tes et mais ou donc or ni car puis alors quand lorsque tandis comme si ou
 comment qui que quoi dans sur sous avec sans pendant apres avant depuis enfin soudain seigneur dame sire princesse
 empereur imperatrice roi reine heros heroine capitaine commandant chevalier deesse dieu majeste altesse empire royaume
 """.split())
+SUBJECT_PRONOUN = re.compile(r"(?:^|[.!?…]\s+|\n)\s*(he|she|they|il|elle|ils|elles)\b")
 CAPITAL = re.compile(r"\b[A-ZÀ-Ý][a-zà-ÿ'’]{2,}\b")
 
 
@@ -78,6 +79,9 @@ def unknown_person(index: EntityIndex, narration_text: str, protagonist: Iterabl
     t = norm(narration_text)
     me = {norm(p) for n in protagonist or [] if n for p in [n, *n.split()]}
     spots = [m.start() for m in PERSON.finditer(t)]
+    # test 2: "He addresses Seria with a nod" is about him, not her: a pronoun opening a sentence before any lore
+    # name is someone else (a speaker the narration does not name)
+    spots += [m.start(1) for m in SUBJECT_PRONOUN.finditer(t)]
     for w in CAPITAL.finditer(narration_text or ""):
         k = norm(w.group(0)).strip("'’")
         if k in NOT_NAMES or k in me or k in index.alias_map:
@@ -93,18 +97,36 @@ def unknown_person(index: EntityIndex, narration_text: str, protagonist: Iterabl
     return not lore or min(spots) < min(lore)
 
 
-def may_appear(index: EntityIndex, reply: str, present_before: Iterable[str], refs: Iterable[str] = ()) -> set[str]:
-    """B10: the characters who may be shown in this reply: already in the scene, named in its narration, named in full,
-    or clearly referred to ("the Empress": ``refs``)."""
-    ok = set(present_before or []) | named_in_narration(index, reply) | set(refs or [])
+def named_here(index: EntityIndex, reply: str, refs: Iterable[str] = ()) -> set[str]:
+    """Characters this reply itself names: in its narration, by full name, or by a clear reference ("the Empress")."""
+    ok = named_in_narration(index, reply) | set(refs or [])
     ok |= {cid for cid, e in index.entities.items() if e.category == "character" and full_name_in(index, cid, reply)}
     return ok
 
 
-def filter_result(result: dict[str, Any], allowed: set[str]) -> list[str]:
+def may_appear(index: EntityIndex, reply: str, present_before: Iterable[str], refs: Iterable[str] = ()) -> set[str]:
+    """B10: the characters who may be shown in this reply: already in the scene, or named by the reply itself."""
+    return set(present_before or []) | named_here(index, reply, refs)
+
+
+def filter_result(result: dict[str, Any], allowed: set[str], named: set[str] | None = None) -> list[str]:
     """Remove from an analysis result the characters who may not appear (portraits, speakers, presence). Returns the
-    removed ids (kept in the diagnostics)."""
+    removed ids (kept in the diagnostics).
+
+    ``named`` (test 2): a SILENT presence (no line, no visible reaction) also needs the reply to name the character:
+    the goddess of the opening stayed "also present" in a village 25 turns later, because she was still in the scene."""
     gone: set[str] = set()
+    if named is not None:
+        active = {b.get("character_id") for b in result.get("beats") or [] if b.get("beat") in ("speaking", "reacting")}
+        silent = {b.get("character_id") for b in result.get("beats") or []
+                  if b.get("beat") == "present" and b.get("character_id") not in active and b.get("character_id") not in named}
+        if silent:
+            gone |= silent
+            result["beats"] = [b for b in result.get("beats") or []
+                               if not (b.get("beat") == "present" and b.get("character_id") in silent)]
+            cast = result.get("cast") or {}
+            if "present" in cast:
+                cast["present"] = [c for c in cast["present"] if c not in silent]
 
     def keep(cid: Any) -> bool:
         if cid in allowed:

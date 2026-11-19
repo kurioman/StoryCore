@@ -230,6 +230,7 @@ export function StoryPage({ storyId }) {
         (D(`story`),
           setTimeout(() => {
             let t = document.getElementById(`msg-${e}`);
+            t && window.dispatchEvent(new Event(`story-jump`)); // the view stays on that message (AutoScroll)
             t
               ? (t.scrollIntoView({
                   behavior: `smooth`,
@@ -671,13 +672,15 @@ function firstVisibleArticle(e) {
 // then pushed the new reply further down and the view stayed on an older message (the ↓ button stopped short the same
 // way). Now the view "follows" the end of the story: whenever the content grows (text streaming in, images loading)
 // while following, it goes back to the bottom. Following starts again when a message is added, when the ↓ button is
-// used or when the reader scrolls back to the end; it stops when the view is moved away from the end (the reader
-// scrolling up, or a jump to an older message).
+// used or when the reader scrolls back to the end. It stops only when the READER moves away from the end (wheel,
+// finger, keys, scrollbar) or a jump to an older message asks for it (event "story-jump"). Test 2: the browser's own
+// "scroll anchoring" moved the view when a portrait loaded, and that alone used to stop following, so it is off.
 function AutoScroll({ children, deps }) {
   let n = React.useRef(null),
     content = React.useRef(null),
     [r, i] = React.useState(true),
     follow = React.useRef(true),
+    userInput = React.useRef(0),
     count = React.useRef(deps[0]),
     o = React.useRef(null),
     toBottom = () => {
@@ -703,8 +706,11 @@ function AutoScroll({ children, deps }) {
       });
     ro.observe(e);
     ro.observe(c);
-    return () => ro.disconnect();
+    let jump = () => (follow.current = false);
+    window.addEventListener(`story-jump`, jump);
+    return () => (ro.disconnect(), window.removeEventListener(`story-jump`, jump));
   }, []);
+  let gesture = () => (userInput.current = Date.now());
   React.useLayoutEffect(() => {
     if (deps[0] > (count.current ?? 0)) follow.current = true; // a new message (the player's turn, a new reply)
     count.current = deps[0];
@@ -714,10 +720,16 @@ function AutoScroll({ children, deps }) {
     <div className="relative min-h-0 flex-1">
       <div
         ref={n}
+        style={{ overflowAnchor: `none` }}
+        onWheel={gesture}
+        onTouchMove={gesture}
+        onPointerDown={gesture}
+        onKeyDown={(e) => [`ArrowUp`, `ArrowDown`, `PageUp`, `PageDown`, `Home`, `End`, ` `].includes(e.key) && gesture()}
         onScroll={(e) => {
           let t = e.currentTarget,
             atEnd = t.scrollHeight - t.scrollTop - t.clientHeight < 80;
-          follow.current = atEnd;
+          if (atEnd) follow.current = true;
+          else if (Date.now() - userInput.current < 1200) follow.current = false; // the reader moved away
           (i(atEnd), (o.current = firstVisibleArticle(t)));
         }}
         className="story-scroll h-full overflow-y-auto overflow-x-hidden px-3 pb-6 sm:px-6"

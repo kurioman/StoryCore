@@ -66,6 +66,8 @@ def clean_value(field: str, v: Any) -> Any:
     s = re.sub(r"\s+", " ", str(v or "")).strip().strip("\"'“”")
     if field == "time":
         s = state_service.strip_day_token(s)
+        if not (clock_of(s) or TIME_WORD.search(s)):
+            return None  # test 2: "past" was stored as the time of day
     if s.casefold() in PLACEHOLDERS or len(s) > MAX_LEN[field]:
         return None
     return s
@@ -199,7 +201,9 @@ def validate(raw: Any, reply: str, player_turn: str, scene: dict[str, Any], year
             continue
         f = c["field"]
         val = clean_value(f, c.get("value"))
-        ev = grounded(c.get("evidence"), loose=f in ("time", "weather"))
+        # test 2: a reworded quote also counts for the place (it was refused 4 times in 30 turns); a place quoted
+        # only inside dialogue is still refused just below
+        ev = grounded(c.get("evidence"), loose=f in ("time", "weather", "location"))
         if val is None or ev is None:
             out["dropped"].append({"field": f, "value": str(c.get("value"))[:80],
                                    "reason": "invalid value" if val is None else "evidence not found in the text"})
@@ -279,10 +283,15 @@ def loose_quote(text: str, quote: Any, share: float = 0.75) -> str | None:
 # B3: the clock never moved in a 30-turn game (sunset, a night, "the next morning"): the scene analysis is often
 # skipped or stopped by the next reply, and its quotes were reworded. These plain cues, read in the narration only
 # (never in what characters say: "be ready by dawn"), move the time of day forward and count a new day. No model call.
+TIME_WORD = re.compile(r"\b(?:\d{1,2}[:h]\d{2}|dawn|daybreak|sunrise|morning|forenoon|noon|midday|afternoon|evening|dusk|"
+                       r"sunset|twilight|night|midnight|bell|bells|hour|o'clock|first\s+light|aube|matin|matin[ée]e|midi|"
+                       r"apr[èe]s-midi|soir|soir[ée]e|cr[ée]puscule|nuit|minuit|heure|heures)\b", re.I)
 PERIODS = ("dawn", "morning", "noon", "afternoon", "evening", "night")
 PERIOD_CUES = [
-    ("dawn", re.compile(r"\b(?:at\s+dawn|dawn\s+breaks|daybreak|sunrise|first\s+light|[àa]\s+l['’]aube|l['’]aube\s+"
+    ("dawn", re.compile(r"\b(?:dawn|daybreak|sunrise|first\s+light|[àa]\s+l['’]aube|l['’]aube\s+"
                         r"(?:se\s+l[èe]ve|pointe)|lever\s+du\s+soleil|point\s+du\s+jour)\b", re.I)),
+    ("morning", re.compile(r"\b(?:morning\s+(?:sun|light|air|mist|chill)|early\s+morning|wake\s+(?:up\s+)?(?:the\s+next|in\s+the)\s+"
+                           r"morning|ce\s+matin|au\s+matin|le\s+matin|la\s+matin[ée]e)\b", re.I)),
     ("noon", re.compile(r"\b(?:at\s+noon|midday\s+sun|[àa]\s+midi)\b", re.I)),
     ("afternoon", re.compile(r"\b(?:afternoon\s+sun|late\s+afternoon|in\s+the\s+afternoon|l['’]apr[èe]s[- ]midi|"
                              r"fin\s+d['’]apr[èe]s[- ]midi)\b", re.I)),
@@ -296,6 +305,10 @@ PERIOD_CUES = [
 NEXT_DAY = re.compile(r"\b(?:the\s+next\s+(?:morning|day)|next\s+morning|the\s+following\s+(?:morning|day)|the\s+morning\s+"
                       r"after|(?:le|au)\s+lendemain(?:\s+matin)?|le\s+jour\s+suivant|le\s+matin\s+suivant)\b", re.I)
 MORNING_WORD = re.compile(r"morning|matin", re.I)
+# test 2: "I lie down and try to sleep" then "at dawn" never counted a new day (the cues read only the reply)
+SLEEP = re.compile(r"\b(?:go(?:es)?\s+to\s+(?:bed|sleep)|went\s+to\s+bed|fall(?:s)?\s+asleep|fell\s+asleep|sleep(?:s)?\s+through|"
+                   r"(?:try|tries)\s+to\s+sleep|lie\s+down\s+and\s+(?:try\s+to\s+)?sleep|bed\s+early|night'?s\s+sleep|"
+                   r"(?:me|se|vous)\s+couch|m['’]endor|s['’]endor|vous\s+endorm|dorm(?:ir|ez|ons))\b", re.I)
 
 
 def period_rank(value: Any) -> int:
@@ -318,7 +331,7 @@ def period_rank(value: Any) -> int:
     return 0
 
 
-def time_cues(reply: str, scene: dict[str, Any]) -> dict[str, Any]:
+def time_cues(reply: str, scene: dict[str, Any], player_turn: str = "") -> dict[str, Any]:
     """{"time": period | None, "days": 0/1, "evidence": quote} read in the reply's narration (see B3 above)."""
     narration = SPEECH_SPANS.sub(lambda m: " " * len(m.group(0)), reply or "")
     out: dict[str, Any] = {"time": None, "days": 0, "evidence": ""}
@@ -336,8 +349,9 @@ def time_cues(reply: str, scene: dict[str, Any]) -> dict[str, Any]:
         return out
     name, m = last
     new_rank, cur_rank = PERIODS.index(name) + 1, period_rank(scene.get("time"))
-    if not out["days"] and cur_rank == 6 and new_rank <= 2:
-        out["days"] = 1  # from the night to dawn or morning: a new day
+    slept = bool(SLEEP.search(player_turn or "") or SLEEP.search(narration))
+    if not out["days"] and new_rank <= 2 and (cur_rank >= 4 or (slept and cur_rank >= 2)):
+        out["days"] = 1  # from the afternoon, evening or night (or after a night's sleep) to dawn or morning: a new day
     if out["days"] or new_rank > cur_rank:
         out["time"], out["evidence"] = name, out["evidence"] or m.group(0)
         if out["days"] and not nd:
@@ -345,15 +359,59 @@ def time_cues(reply: str, scene: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
-def with_cues(update: dict[str, Any], reply: str, scene: dict[str, Any], year_start: str = "January") -> dict[str, Any]:
+# Test 2: most moves were never reported by the analysis (cut by the next reply, or silent about the place): the
+# scene stayed in the "Pure White Space" for 15 turns. A clear arrival in the narration ("you step into the dining
+# hall", "she leads you into a large bedchamber", "you find yourself in an opulent throne room") sets the place when
+# the analysis gives none. Narration only; a short noun phrase; never a place someone talks about.
+_ARTICLE = r"(?:the|a|an|his|her|their|your|its)"
+ARRIVAL = re.compile(
+    r"\b(?:(?:you|vous)\s+(?:step|walk|stride|wander|ride|head|go)\s+(?:in|into|out\s+into|through\s+into)|"
+    r"(?:you|vous)\s+(?:to\s+)?(?:enter|arrive\s+(?:at|in)|reach|emerge\s+into|make\s+your\s+way\s+(?:down\s+|up\s+|back\s+)?(?:to|into))|"
+    r"(?:you|vous)\s+find\s+yourself\s+(?:standing\s+|sitting\s+|lying\s+)?(?:in|at|inside)(?:\s+the\s+(?:middle|center|centre)\s+of)?|"
+    r"leads?\s+you\s+(?:\w+\s+){0,9}?(?:into|to|out\s+into)|emerging\s+into)\s+"
+    rf"(?:{_ARTICLE}\s+)?((?:[A-Za-zÀ-ÿ'’-]+\s+){{0,4}}?[A-Za-zÀ-ÿ'’-]+)"
+    r"(?=\s*(?:[,.;:!?]|$|\s+(?:for|with|where|as|and|to|of|that|which|while|at|in|on|beyond|behind|before|after|"
+    r"under|near|filled|lined|surrounded|dominated|tomorrow|today|tonight|now|again|once|later|soon|alone)\b))", re.I)
+ASKED = re.compile(r"\b(?:tells?|asks?|orders?|wants?|urges?|invites?|begs?|expects?|needs?|commands?)\s+you\s+to\b", re.I)
+PLACE_STOP = {"view", "silence", "light", "darkness", "hand", "arms", "embrace", "eyes", "conversation", "room", "door",
+              "doorway", "doors", "it", "them", "him", "her", "place", "fray", "fight"}
+LEAD_ADJ = re.compile(r"^(?:large|small|vast|grand|huge|massive|opulent|spacious|dimly\s+lit|quiet|busy|crowded|"
+                      r"lavish|ornate|cozy|cosy|narrow|wide|long|bright|dark)\s+", re.I)
+
+
+def place_cue(reply: str, scene: dict[str, Any]) -> tuple[str, str] | None:
+    """(place, quote) of the last clear arrival in the narration, when it differs from the current place."""
+    from .scene_cast import same_place
+    narration = SPEECH_SPANS.sub(lambda m: " " * len(m.group(0)), reply or "")
+    hits = [m for m in ARRIVAL.finditer(narration)
+            if not ASKED.search(narration[max(0, m.start() - 30):m.start() + 10])]  # "tells you to enter": not a move
+    for m in reversed(hits):
+        place = LEAD_ADJ.sub("", m.group(1).strip()).strip()
+        words = place.split()
+        if not words or len(place) < 3 or (len(words) == 1 and words[0].casefold() in PLACE_STOP) \
+                or len(place) > MAX_LEN["location"]:
+            continue
+        if scene.get("location") and same_place(scene.get("location"), place):
+            return None
+        return place, m.group(0).strip()[:160]
+    return None
+
+
+def with_cues(update: dict[str, Any], reply: str, scene: dict[str, Any], year_start: str = "January",
+              player_turn: str = "") -> dict[str, Any]:
     """Complete a validated update with the narration's time cues when the analysis set no time and no new day."""
     update = update or {"changes": {}, "days_passed": 0, "evidence": {}, "dropped": []}
     update.setdefault("changes", {})
     update.setdefault("evidence", {})
     changes = update["changes"]
+    if "location" not in changes:
+        hit = place_cue(reply, scene)
+        if hit:
+            changes["location"], update["evidence"]["location"] = hit
+            update["cues"] = True
     if changes.get("time") and changes["time"] != "":
         return update
-    cue = time_cues(reply, scene)
+    cue = time_cues(reply, scene, player_turn)
     if update.get("days_passed"):  # the analysis counted the day: only the time of day may still be missing
         if cue["time"] and changes.get("time") == "":
             changes["time"], update["evidence"]["time"] = cue["time"], cue["evidence"]

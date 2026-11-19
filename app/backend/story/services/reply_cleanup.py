@@ -100,6 +100,23 @@ def quoted_narration_spans(reply: str, names: set[str] | None = None) -> list[tu
     return out
 
 
+# Test 2: the model copied the app's own notes into its reply: "(OOC: Please continue with Kurio's actions and
+# dialogue.)" and the portrait-tag reminder sent next to the player's message. Such a line is removed.
+INSTRUCTION_LINE = re.compile(r"^[ \t]*[\[(]\s*(?:OOC\b|Portraits?\s*:|Note\s+to\s+(?:the\s+)?(?:player|user)\b|"
+                              r"Story\s+context\b|Remember\s*:)[^\n]*[\])][ \t]*$", re.I | re.M)
+
+
+def instruction_spans(reply: str) -> list[tuple[int, int]]:
+    """Lines that are notes to the model or the player, not story (with the line break before them)."""
+    out = []
+    for m in INSTRUCTION_LINE.finditer(reply):
+        a = m.start()
+        while a > 0 and reply[a - 1] in "\n \t":
+            a -= 1
+        out.append((a, m.end()))
+    return out
+
+
 MOSTLY_REPEATED = 0.5  # B9: share of a reply removed as repetition above which the player is told (and offered a retry)
 
 
@@ -120,6 +137,10 @@ def clean(reply: str, earlier: list[str], *, cut_by_length: bool = False,
         repeated_chars = sum(b - a for a, b in _merge(removed))
         if repeated_chars > len(reply.strip()) * MOSTLY_REPEATED:
             report["mostly_repeated"] = True  # B9: shown under the reply with a "Regenerate" button
+    notes = instruction_spans(reply)
+    if notes:
+        removed += notes
+        report["instruction_lines"] = len(notes)
     unquoted = [s for s in quoted_narration_spans(reply, names)
                 if not any(a <= s[0] < b for a, b in removed)]
     if unquoted:

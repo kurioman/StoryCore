@@ -358,9 +358,11 @@ def post_process(ctx: AppContext, message_id: str) -> str | None:
         every = int(settings_service.get(db, "event_capture_batch_turns") or 3)
         if mode == "after_each_turn" or (mode == "batch" and cur.assistant_turns_since >= every):
             return m.branch_id
-        from .extraction import was_cancelled
-        if mode == "batch" and was_cancelled(db, m.branch_id):
-            return m.branch_id  # v0.6 (B2): a stopped capture resumes at the next reply, not after another batch
+        from .extraction import behind
+        if mode == "batch" and behind(db, m.branch_id):
+            # v0.6 (B2): a stopped capture, or two exchanges or more waiting, resume at the next reply (not after
+            # another batch of turns), before the scene analysis (main.after_generation)
+            return m.branch_id
     return None
 
 
@@ -370,12 +372,21 @@ def _clock_from_cues(db, story: Story, m: Message, index) -> None:
     if branch.head_message_id != m.id:
         return
     world_state.revert_message(db, story, branch, {m.id}, "the reply was read again")
+    from . import scene_cast
+    scene_cast.revert_message(db, story, branch, {m.id}, "the reply was read again")
     st = state_service.current(db, branch.id)
     scene = state_service.normalize(st.state_json if st else {})["scene"]
-    update = world_state.with_cues(None, m.content, scene, world_state.calendar_of(db, story.world_id)["year_start"])
+    user = db.get(Message, m.parent_id) if m.parent_id else None
+    player_turn = user.content if user is not None and user.role == "user" else ""
+    update = world_state.with_cues(None, m.content, scene, world_state.calendar_of(db, story.world_id)["year_start"],
+                                   player_turn)
     if update.get("cues"):
         world_state.apply_from_analysis(db, story, branch, m.id, update, index, first_reply=chrono.tracked_from_start(db, m))
         chrono.record_current(db, m, branch, "analysis")
+        if "location" in update["changes"]:  # test 2: a move leaves behind whoever the reply does not name
+            from . import scene_cast, speaker_guard
+            scene_cast.apply_from_analysis(db, story, branch, m.id, [], [], index, location_changed=True,
+                                           named_here=speaker_guard.named_in_narration(index, m.content))
 
 
 def character_names(index) -> set[str]:

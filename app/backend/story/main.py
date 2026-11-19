@@ -102,6 +102,13 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
             tagged = await asyncio.to_thread(_apply_tags, message_id)
         except Exception:
             log.exception("portrait tags failed for %s", message_id)
+        capture_first = False
+        if method_branch:  # v0.6 (test 2, B2): memory behind -> the capture uses the player's pause first
+            from .services import extraction as extraction_svc
+            with ctx.db.session() as s:
+                capture_first = extraction_svc.behind(s, method_branch)
+        if capture_first:
+            await _capture(message_id, method_branch)
         try:
             await turn_analysis.analyse(ctx, message_id, force=tagged)
         except Exception:  # never let optional metadata affect the finished reply or the extraction that follows
@@ -116,9 +123,8 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
             from .models import Message
             m = s.get(Message, message_id)
             story_id, branch_id = m.story_id, m.branch_id
-            mode = settings_service.get(s, "event_capture_mode")
-        if method_branch:
-            await ctx.extraction.run(story_id, method_branch, "after_each_turn" if mode == "after_each_turn" else "automatic_batch")
+        if method_branch and not capture_first:
+            await _capture(message_id, method_branch)
         try:  # v0.5 phase 7.5: the real prompt size corrects the token estimate of this story
             from .services import usage
             with ctx.db.session() as s:
@@ -130,6 +136,13 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
             await summaries.catch_up(ctx, story_id, branch_id)
         except Exception:
             log.exception("memory summary catch-up crashed for %s", message_id)
+
+    async def _capture(message_id: str, branch_id: str) -> None:
+        from .models import Message
+        with ctx.db.session() as s:
+            story_id = s.get(Message, message_id).story_id
+            mode = settings_service.get(s, "event_capture_mode")
+        await ctx.extraction.run(story_id, branch_id, "after_each_turn" if mode == "after_each_turn" else "automatic_batch")
 
     def _apply_tags(message_id: str) -> bool:
         from .services import portrait_tags
