@@ -31,7 +31,7 @@ local de jeu de rôle textuel par IA, basé sur des « Lore packs » (des mondes
   - Outil des clés de traduction : `mkdir -p $HOME/tools && cp DEVONLY/tools/frontend_reconstruction/keys.mjs $HOME/tools/ && cd $HOME/tools && npm init -y && npm i @babel/parser @babel/traverse`
 - Compilation : `rsync -a --delete app/frontend/src/ $HOME/fe/src/`, puis dans `$HOME/fe` : `npx tsc --noEmit && npm run build`,
   puis recopier `$HOME/fe/dist/` dans `app/frontend/dist/` (supprimer l'ancien `dist` d'abord). Ne pas faire `npm install` dans le dossier monté.
-- Tests (**110**, plus les 4 de l'installateur en cours ; ~3 min 30 au total : la commande a une limite de 3 min, donc **les lancer en deux moitiés**) :
+- Tests (**117**, plus les 4 de l'installateur en cours ; ~3 min 40 au total : la commande a une limite de 3 min, donc **les lancer en deux moitiés**) :
   `PYTHONPYCACHEPREFIX=$HOME/pyc $HOME/v312/bin/python DEVONLY/run_tests.py test_api_basics test_bug_report test_codex test_lmstudio test_music test_narration_language test_pack_check test_providers test_remote test_usage test_continuity test_cinematic`
   puis `... DEVONLY/run_tests.py test_context_layout test_story_flow test_summaries test_creator test_phase9 test_portraits_live test_story_events test_report_30_turns`.
 - Clés de traduction manquantes : `node $HOME/tools/keys.mjs app/frontend/src app/frontend/src/i18n/locales/en.json`
@@ -110,6 +110,16 @@ local de jeu de rôle textuel par IA, basé sur des « Lore packs » (des mondes
   À faire ensuite (axes du rapport, pas des bugs) : langue de l'histoire demandée dans l'assistant, apparence et liens
   de famille dans le pack Hero's Chronicle, portraits plus petits, traduction des derniers textes anglais. Refaire
   30 tours en français dès le départ avec 60 s entre les tours.
+
+- **Test 2 (19/11, 30 tours en anglais joués par Claude sur mon PC)** : rapport « StoryCore 0.6.0 — Test 2 » (Claude Docs).
+  Corrigé ensuite (commit « Test 2 (30 tours en anglais) : corrections ») : capture avant l'analyse quand la mémoire a
+  du retard (`extraction.behind`), défilement (`overflow-anchor: none`, suivi coupé seulement par un geste du joueur),
+  lieu (citation proche + arrivées de la narration, `world_state.place_cue`), présence silencieuse nommée, étiquettes de
+  nom (`attribute_dialogue`), lignes « (OOC: …) » retirées, horloge (sommeil puis aube = nouveau jour). 121 tests.
+  Attention : après un redémarrage, recharger la page (F5), sinon l'ancienne interface reste en mémoire.
+  Le volet navigateur de Claude caché ne dessine rien : les mesures de défilement s'y font en Chrome sans écran.
+  Reste : réponses trop longues pour « Moyen », répétitions de descriptions, apparence et genre dans les fiches du
+  pack, narrateur qui écrit les répliques du héros, 0 fait extrait par la capture mémoire.
 
 ## Pas encore vérifié avec du vrai matériel
 - Phase 6 sur mon vrai téléphone (pare-feu Windows : cocher « Réseaux privés »).
