@@ -64,6 +64,9 @@ function App() {
     React.useEffect(() => {
       document.documentElement.dataset.readingSize = settings.data?.reading_size ?? `comfortable`;
     }, [settings.data?.reading_size]),
+    React.useEffect(() => {
+      document.documentElement.dataset.dialogue = settings.data?.dialogue_style ?? `cinematic`;
+    }, [settings.data?.dialogue_style]),
     React.useEffect(() => o(false), [hashPath]));
   let l, u;
   l = (u = matchRoute(hashPath, `/story/:id`)) ? (

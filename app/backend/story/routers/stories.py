@@ -65,7 +65,7 @@ class StoryCreate(BaseModel):
     agency_policy: Optional[str] = None  # optional extra text; the built-in player-agency rules always apply
     content_prefs: dict[str, Any] = Field(default_factory=dict)
     model_profile_id: Optional[str] = None
-    preset_id: str = "balanced"
+    preset_id: str = "cinematic"  # v0.6: settings_service.DEFAULT_PRESET_ID
     stat_template: str = "world"
     featured_characters: list[str] = Field(default_factory=list)
     story_note: str = ""

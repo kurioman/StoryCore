@@ -360,7 +360,13 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
 
     sections: list[Section] = []
     # 1. core prompt
-    presets = {p["id"]: p for p in cfg["narration_presets"]}
+    av = story.avatar_snapshot_json
+    if story.active_avatar_id:
+        a = db.get(Avatar, story.active_avatar_id)
+        if a:
+            av = {"name": a.name, "profile": a.profile_json}
+    presets = {p["id"]: p for p in settings_service.NARRATION_PRESETS}  # built-in ones always exist...
+    presets.update({p["id"]: p for p in cfg["narration_presets"] if isinstance(p, dict) and p.get("id")})  # ...edits win
     preset = presets.get(ssettings.get("preset_id") or "balanced")
     core = (world.system_prompt.strip() if world and world.system_prompt and ssettings.get("use_world_prompt", True)
             else cfg["default_system_prompt"])
@@ -368,13 +374,17 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
         core = ssettings["system_prompt_override"]
     parts = [core]
     if preset:
-        parts.append(f"Style preset — {preset['name']}: {preset['instructions']}")
+        instructions = str(preset.get("instructions") or "").replace("{name}", (av or {}).get("name") or "the protagonist")
+        parts.append(f"Style preset — {preset['name']}: {instructions}")
     if ssettings.get("tone"):
         parts.append(f"Desired tone: {ssettings['tone']}")
     if ssettings.get("pacing"):
         parts.append(f"Narrative pacing: {ssettings['pacing']}")
     if ssettings.get("output_length"):
-        parts.append(f"Target response length: {ssettings['output_length']}")
+        target = ssettings["output_length"]
+        if preset and preset.get("length_in_words"):  # many one-line paragraphs: a paragraph count means nothing here
+            target = settings_service.WORD_TARGETS.get(str(target).split(" ")[0].lower(), target)
+        parts.append(f"Target response length: {target}")
     if ssettings.get("agency_policy"):
         parts.append(f"Player agency: {ssettings['agency_policy']}")
     cp = ssettings.get("content_prefs") or {}
@@ -405,12 +415,7 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
         sections.append(Section("story_note", "Story user note (takes precedence over the global note and baseline lore)",
                                 sn.content.strip(), [{"type": "note", "id": sn.id, "label": "Story note (active)"}]))
 
-    # 4. avatar + player state
-    av = story.avatar_snapshot_json
-    if story.active_avatar_id:
-        a = db.get(Avatar, story.active_avatar_id)
-        if a:
-            av = {"name": a.name, "profile": a.profile_json}
+    # 4. avatar + player state (av is read before the core prompt: a preset may name the protagonist)
     from .world_state import calendar_of
     player_text, scene_text = render_state(state, index, calendar_of(db, story.world_id)["year_label"])
     if av:  # v0.5: the profile (stable) and the current state (changes every turn) are separate sections

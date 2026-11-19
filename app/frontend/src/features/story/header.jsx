@@ -22,6 +22,7 @@ import { UsageMeter } from "@/features/story/UsageMeter";
 import { CodexButton } from "@/features/codex/CodexDialog";
 import { cn, isCloudModelId } from "@/lib/util";
 import { navigate } from "@/lib/router";
+import { presetName } from "@/lib/presets";
 
 var WIDE_HEADER = 960;
 
@@ -475,7 +476,7 @@ function StoryOptions({ story }) {
           queryKey: queryKeys.context(story.id),
         }));
     },
-    a = settings.data?.narration_presets ?? [];
+    presets = settings.data?.narration_presets ?? [];
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -484,7 +485,7 @@ function StoryOptions({ story }) {
           title={msg("Story mode and generation options")}
         >
           <Icon.SlidersHorizontal className="size-3.5" />{" "}
-          {a.find((e) => e.id === (r.preset_id ?? `balanced`))?.name ?? msg("Balanced")}
+          {presetName(presets.find((preset) => preset.id === (r.preset_id ?? `balanced`))) || msg("Balanced")}
           <Icon.ChevronDown className="size-3" />
         </button>
       </PopoverTrigger>
@@ -492,9 +493,9 @@ function StoryOptions({ story }) {
         <label className="block text-xs text-muted">
           {msg("Narration preset")}
           <Select value={String(r.preset_id ?? `balanced`)} onChange={(e) => i(`preset_id`, e.target.value)}>
-            {a.map((e) => (
-              <option value={e.id} key={e.id}>
-                {e.name}
+            {presets.map((preset) => (
+              <option value={preset.id} key={preset.id}>
+                {presetName(preset)}
               </option>
             ))}
           </Select>

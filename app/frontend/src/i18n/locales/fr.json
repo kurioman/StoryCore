@@ -333,8 +333,6 @@
  "Description": "Description",
  "Details": "Détails",
  "Dialogue": "Dialogues",
- "Dialogue emphasis (default)": "Dialogues mis en valeur (défaut)",
- "Dialogue emphasis keeps spoken words at full contrast with narration in a quieter grey, labels who speaks (when the scene analysis knows) and marks spoken paragraphs with a thin accent line. Classic keeps the earlier look.": "La mise en valeur garde les paroles en plein contraste et la narration dans un gris plus discret, indique qui parle (quand l'analyse de scène le sait) et marque les paragraphes parlés d'un fin trait d'accent. Classique garde l'ancien affichage.",
  "Dialogue presentation": "Présentation des dialogues",
  "Direct API billing can be inexpensive, especially with efficient models, but the total experience and included features differ from hosted story platforms.": "La facturation directe par API peut être peu chère, surtout avec des modèles efficaces, mais l'expérience et les fonctions incluses diffèrent des plateformes d'histoires hébergées.",
  "Disable the global note for this story": "Désactiver la note globale pour cette histoire",
@@ -2150,5 +2148,12 @@
  "No archived stories.": "Aucune histoire archivée.",
  "No templates yet.": "Aucun modèle pour l’instant.",
  "Ask the AI to mark who speaks (portrait tags)": "Demander à l'IA d'indiquer qui parle (balises de portrait)",
- "The AI writes [Name:N] before each spoken line, so the right portrait and expression appear while it writes. Turn it off if your model never writes them: a few tokens are saved and the app still finds who speaks from the names next to the quotation marks.": "L'IA écrit [Nom:N] avant chaque réplique : le bon portrait et la bonne expression s'affichent pendant qu'elle écrit. Désactivez-le si votre modèle ne les écrit jamais : vous économisez quelques tokens, et l'application trouve quand même qui parle grâce aux noms placés à côté des guillemets."
+ "The AI writes [Name:N] before each spoken line, so the right portrait and expression appear while it writes. Turn it off if your model never writes them: a few tokens are saved and the app still finds who speaks from the names next to the quotation marks.": "L'IA écrit [Nom:N] avant chaque réplique : le bon portrait et la bonne expression s'affichent pendant qu'elle écrit. Désactivez-le si votre modèle ne les écrit jamais : vous économisez quelques tokens, et l'application trouve quand même qui parle grâce aux noms placés à côté des guillemets.",
+ "Cinematic": "Cinématique",
+ "Cinematic (default)": "Cinématique (par défaut)",
+ "Cinematic shows spoken words bright and narration in a clearly darker grey, as on OOC.AI. Dialogue emphasis does the same with a softer grey. Both label who speaks (when the scene analysis knows) and mark spoken paragraphs with a thin accent line. Classic keeps the earlier look.": "Cinématique affiche les répliques en clair et la narration dans un gris nettement plus sombre, comme sur OOC.AI. Dialogues mis en avant fait de même avec un gris plus doux. Les deux indiquent qui parle (quand l’analyse de la scène le sait) et marquent les paragraphes parlés d’un fin trait doré. Classique garde l’ancien aspect.",
+ "Dark Fantasy": "Dark Fantasy",
+ "Dialogue emphasis": "Dialogues mis en avant",
+ "Fast": "Rapide",
+ "Literary": "Littéraire"
 }

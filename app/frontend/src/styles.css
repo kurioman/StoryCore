@@ -56,6 +56,12 @@ body{background:var(--c-bg);color:var(--c-fg);font-family:var(--font-sans);-webk
 .story-plain{color:var(--c-fg)}
 .story-dialogue{color:var(--c-fg);font-weight:450}
 .story-narration em,.story-dialogue em{color:inherit}
+/* v0.6 "cinematic" (OOC.AI-like): narration in a clearly darker grey; a stressed word (italic or bold) takes the other colour */
+[data-theme=dark][data-dialogue=cinematic],:root[data-dialogue=cinematic]{--c-narration-cine:#8e8a82}
+[data-theme=light][data-dialogue=cinematic]{--c-narration-cine:#76716a}
+[data-dialogue=cinematic] .story-narration{color:var(--c-narration-cine)}
+[data-dialogue=cinematic] .story-narration em,[data-dialogue=cinematic] .story-narration strong{color:var(--c-fg)}
+[data-dialogue=cinematic] .story-dialogue em,[data-dialogue=cinematic] .story-dialogue strong,[data-dialogue=cinematic] em>.story-dialogue,[data-dialogue=cinematic] strong>.story-dialogue{color:var(--c-narration-cine)}
 .story-scroll{container:story/inline-size}
 .story-beats{grid-template-columns:minmax(0,1fr);gap:.75rem;max-width:min(100%,34rem);margin:.4em 0 .9em;display:grid}
 .story-beats-multi{grid-template-columns:repeat(auto-fit,minmax(min(100%,13rem),1fr));max-width:100%}

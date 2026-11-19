@@ -246,3 +246,18 @@ at ~4 s, portrait at ~10 s in the simulation; tagged replies showed it only at t
     in the reply). An untagged line of a tagged character keeps its portrait too. On screen (transcript.MessageProse)
     a portrait comes back when the expression changes or when the character speaks again after someone else.
   Tests: app/backend/tests/test_portraits_live.py.
+
+Narration style "Cinematic" (v0.6, 19/11 - the OOC.AI-like style Kurio asked for)
+  - settings_service.NARRATION_PRESETS: preset "cinematic" (default for new stories: routers/stories.StoryCreate and
+    the wizard, lib/presets.DEFAULT_PRESET_ID). Close third person, past tense, the protagonist called by name
+    ("{name}" in the instructions is replaced by the avatar's name in context_builder), short paragraphs, fragments
+    for beats, emotions shown by the body, actions in plain narration (never between asterisks), at most one stressed
+    word in italics (_word_), inner voice of other characters only (never the protagonist's), humour by timing,
+    mundane details to undercut heavy moments, a short closing line that lands.
+  - "length_in_words": the story's length target (short/medium/long) is sent in words (settings_service.WORD_TARGETS),
+    since a paragraph count means nothing with one-line paragraphs. The reply ceilings (REPLY_TOKEN_CAPS) are unchanged.
+  - context_builder merges the built-in presets with the stored list (stored entries win), so a list saved before
+    v0.6 still finds "cinematic"; migration 0011 also adds it once to a stored list so the menus show it.
+  - Display: dialogue_style "cinematic" (default; Settings > Appearance > Dialogue) = the "emphasis" reading with a
+    darker grey for narration (styles.css, html[data-dialogue=cinematic]); a stressed word takes the other colour.
+  Tests: app/backend/tests/test_cinematic.py.

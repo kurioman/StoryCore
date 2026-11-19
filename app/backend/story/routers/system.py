@@ -67,8 +67,8 @@ def put_settings(values: dict[str, Any], db: Session = Depends(get_db)) -> dict[
         raise ValueError("relationship_mode must be auto_conservative, review or off")
     if "story_font" in values and values["story_font"] not in ("sans", "serif"):
         raise ValueError("story_font must be sans or serif")
-    if "dialogue_style" in values and values["dialogue_style"] not in ("emphasis", "classic"):
-        raise ValueError("dialogue_style must be emphasis or classic")
+    if "dialogue_style" in values and values["dialogue_style"] not in ("cinematic", "emphasis", "classic"):
+        raise ValueError("dialogue_style must be cinematic, emphasis or classic")
     if "narration_language" in values:
         from ..services.narration_language import LANGUAGES
         if values["narration_language"] not in LANGUAGES:

@@ -104,8 +104,10 @@ function MessageProse({
   let u = (presentation?.dialogue ?? []).map((e) => e.text),
     d = inline ? (presentation?.beats ?? []) : [],
     f = new Map();
-  if (dialogueStyle === `emphasis`) for (let e of presentation?.paragraphs ?? []) f.set(e.paragraph, e);
-  let p = dialogueStyle === `emphasis` ? `full` : `verified`;
+  // "cinematic" reads like "emphasis"; only its colours differ (styles.css, html[data-dialogue=cinematic])
+  let emphasis = dialogueStyle === `emphasis` || dialogueStyle === `cinematic`;
+  if (emphasis) for (let e of presentation?.paragraphs ?? []) f.set(e.paragraph, e);
+  let p = emphasis ? `full` : `verified`;
   if (!d.length && !f.size)
     return <StoryMarkdown text={text} className={className} dialogue={u} reading={p} streaming={streaming} />;
   let g = text.split(/\n\s*\n/).filter((e) => e.trim()),
@@ -206,7 +208,7 @@ export function MessageItem({
     [E, D] = React.useState(false),
     [O, ee] = React.useState(false),
     [te, ne] = React.useState(false),
-    re = settings.data?.dialogue_style ?? `emphasis`,
+    re = settings.data?.dialogue_style ?? `cinematic`,
     ie = isPlayerStory(e) && !!e.immersive_reply_id,
     ae = liveStatus ?? e.status,
     oe = liveText ?? e.content,

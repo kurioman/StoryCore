@@ -70,11 +70,11 @@ export function AppearanceSettings() {
       <Field
         label={msg("Dialogue")}
         hint={msg(
-          "Dialogue emphasis keeps spoken words at full contrast with narration in a quieter grey, labels who speaks (when the scene analysis knows) and marks spoken paragraphs with a thin accent line. Classic keeps the earlier look.",
+          "Cinematic shows spoken words bright and narration in a clearly darker grey, as on OOC.AI. Dialogue emphasis does the same with a softer grey. Both label who speaks (when the scene analysis knows) and mark spoken paragraphs with a thin accent line. Classic keeps the earlier look.",
         )}
       >
         <Select
-          value={settings.data?.dialogue_style ?? `emphasis`}
+          value={settings.data?.dialogue_style ?? `cinematic`}
           onChange={(e) =>
             saveSettings.mutate({
               dialogue_style: e.target.value,
@@ -82,7 +82,8 @@ export function AppearanceSettings() {
           }
           aria-label={msg("Dialogue presentation")}
         >
-          <option value="emphasis">{msg("Dialogue emphasis (default)")}</option>
+          <option value="cinematic">{msg("Cinematic (default)")}</option>
+          <option value="emphasis">{msg("Dialogue emphasis")}</option>
           <option value="classic">{msg("Classic")}</option>
         </Select>
       </Field>

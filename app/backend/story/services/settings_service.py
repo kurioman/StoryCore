@@ -27,7 +27,23 @@ NARRATION_PRESETS = [
     {"id": "literary", "name": "Literary", "instructions": "Write rich, literary prose with careful imagery, interiority for NPCs, and deliberate pacing."},
     {"id": "fast", "name": "Fast", "instructions": "Keep responses short and punchy (1–2 paragraphs). Prioritise momentum and dialogue."},
     {"id": "dark_fantasy", "name": "Dark Fantasy", "instructions": "Lean into tension, dread, moral ambiguity and real danger while staying grounded in established lore."},
+    # v0.6 (19/11): the "chat" style Kurio likes (OOC.AI): close third person, short lines, beats, a closing line that lands.
+    # {name} is the protagonist's name; "length_in_words" turns the paragraph count of the length target into words, since
+    # this style uses many one-line paragraphs.
+    {"id": "cinematic", "name": "Cinematic", "length_in_words": True, "instructions": (
+        "Close third person, past tense: call the protagonist {name} (with the pronouns of their profile), never \"you\". "
+        "Short paragraphs of one to three sentences; many are a single line. Use fragments for beats (\"Her jaw "
+        "tightened. Released.\"). Show emotion through small physical reactions, never by naming it. Dialogue carries "
+        "the scene; break a long line with a brief action beat. Write actions as plain narration, never between "
+        "asterisks; italicise at most one stressed word in a line of dialogue (_word_). Narration may slip into another "
+        "character's inner voice, never {name}'s. Use timing for humour: counted beats, numbered conclusions, absurdly "
+        "precise details. Undercut heavy moments with a mundane detail from the surroundings. End on a short, separate "
+        "line that lands: a callback, a twist or a silence.")},
 ]
+DEFAULT_PRESET_ID = "cinematic"
+# target lengths in words for presets with "length_in_words" (keyed by the first word of the story's output_length)
+WORD_TARGETS = {"short": "short (about 80–150 words)", "medium": "medium (about 150–250 words)",
+                "long": "long (about 250–400 words)"}
 
 # v0.5: no generic openings any more. A story's openings come only from its lore pack (pack.json starters or its
 # scenarios files), chosen by the pack's author. The setting stays (empty) so older stored values are harmless.
@@ -91,7 +107,8 @@ DEFAULTS: dict[str, Any] = {
     "role_assignments": [],
     "canon_facts": [],
     # v1.5 reading: "emphasis" = speaker labels and a thin accent rule on dialogue paragraphs; "classic" = v1.4 styling
-    "dialogue_style": "emphasis",
+    # v0.6: "cinematic" = emphasis with the stronger contrast of OOC.AI (narration in a darker grey)
+    "dialogue_style": "cinematic",
     # v1.6 story text size: compact (the size before v1.6) | comfortable | large
     "reading_size": "comfortable",
     "narration_presets": NARRATION_PRESETS,

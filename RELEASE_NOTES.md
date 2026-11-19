@@ -37,6 +37,10 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
   writing your next turn itself (a model loaded with the wrong chat template) is cut there.
 - The narrator no longer invents a shared past with characters you have never met.
 - Shorter scene-analysis instructions (same rules).
+- **New narration style "Cinematic"** (the default for new stories), close to OOC.AI: the hero is called by name
+  (third person), short paragraphs and short lines, emotions shown through small gestures, a closing line that lands.
+  Its matching display (Settings > Appearance > Dialogue, also the default) shows spoken lines bright and narration in a
+  darker grey. The other styles are still available in the story's menu.
 - **Portraits while the narrator writes.** The app now finds who speaks from the names next to the quotation marks
   (« … », dit Lily / "…," Lily said) and shows the portrait at once, even when the model writes no portrait tag; the
   scene analysis corrects a wrong guess afterwards. Earlier replies are sent back to the model with their portrait tags

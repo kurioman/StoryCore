@@ -21,6 +21,7 @@ import { ContextManifest } from "@/features/story/composer";
 import { cn } from "@/lib/util";
 import { navigate } from "@/lib/router";
 import { portraitSlot, usePortraitMap } from "@/lib/portraits";
+import { DEFAULT_PRESET_ID, presetName } from "@/lib/presets";
 
 var WIZARD_STEPS = () => ([
     msg("Story", {}),
@@ -55,7 +56,7 @@ export function NewStoryWizard() {
       output_length: WIZARD_A,
       max_tokens: WIZARD_B,
       agency_policy: ``,
-      preset_id: `balanced`,
+      preset_id: DEFAULT_PRESET_ID,
       model_profile_id: ``,
       stat_template: `world`,
       featured_characters: [],
@@ -361,9 +362,9 @@ export function NewStoryWizard() {
                         })
                       }
                     >
-                      {settings.data?.narration_presets.map((e) => (
-                        <option value={e.id} key={e.id}>
-                          {e.name}
+                      {settings.data?.narration_presets.map((preset) => (
+                        <option value={preset.id} key={preset.id}>
+                          {presetName(preset)}
                         </option>
                       ))}
                     </Select>
@@ -496,7 +497,7 @@ export function NewStoryWizard() {
                 />
                 <ReviewRow
                   k={msg("Preset")}
-                  v={settings.data?.narration_presets.find((e) => e.id === p.preset_id)?.name ?? p.preset_id}
+                  v={presetName(settings.data?.narration_presets.find((preset) => preset.id === p.preset_id)) || p.preset_id}
                 />
 
                 <ReviewRow
