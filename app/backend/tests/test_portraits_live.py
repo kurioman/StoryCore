@@ -74,7 +74,8 @@ class DetectionTest(unittest.TestCase):
         self.assertIsNone(mood_of("Lily sourit, les larmes aux yeux."))  # two moods: no guess
 
     def test_a_tag_wins_for_its_paragraph(self):
-        live = LiveSpeakers(INDEX, protagonist={"Kurio"}, portraits={}, held={})
+        # Lily is in the scene: her first name alone in a tag means her (test report "30 tours", B7)
+        live = LiveSpeakers(INDEX, protagonist={"Kurio"}, portraits={}, held={}, present={"lily"})
         beats = live.compute("Elle sourit.\n\n« Oui », dit Selphina.", [{"name": "Lily", "slot": 4, "offset": 14}])
         self.assertEqual([(b["character_id"], b["paragraph"], b["slot"], b["source"]) for b in beats],
                          [("lily", 1, 4, "tag")])

@@ -72,8 +72,11 @@ class LiveSpeakers:
     """Follows one streamed reply. ``feed`` returns the new beat list when it changed (else ``None``)."""
 
     def __init__(self, index: EntityIndex, *, protagonist: set[str], portraits: dict[str, dict[int, str]],
-                 held: dict[str, dict[str, Any]], auto_expressions: bool = True) -> None:
+                 held: dict[str, dict[str, Any]], auto_expressions: bool = True,
+                 present: set[str] | None = None) -> None:
         self.index = index
+        self.protagonist = {n for n in protagonist if n}
+        self.present = set(present or [])  # v0.6 (B7): who is in the scene before this reply
         self.me = {n.casefold() for n in protagonist if n}
         self.me_ids = {cid for n in protagonist if n for cid in [index.resolve(n)] if cid}
         self.portraits = portraits
@@ -171,11 +174,16 @@ class LiveSpeakers:
         if not out and closed and quotes and len(self._protagonist_quotes(flat)) >= quotes:
             out = []  # every line here is the protagonist's
         elif not out and closed:
+            # v0.6 (test report "30 tours", B6): a line with no name next to it gets a portrait only when the narration
+            # around it is about exactly one lore character and nobody else (no "maid", "old woman", "Elric"):
+            # otherwise "unknown" (no portrait) is better than the wrong face
+            from .speaker_guard import unknown_person
             narration = SPEECH.sub(" ", para)
             names = self._names(narration)
-            if len(names) == 1:
+            stranger = unknown_person(self.index, narration, self.protagonist)
+            if len(names) == 1 and not stranger:
                 out = [(names[0], self._quote_pos(para, a, 0), 0.6)]
-            elif not names and not _protagonist_speaks(narration) and len(prev_names) == 1:
+            elif not names and not stranger and not _protagonist_speaks(narration) and len(prev_names) == 1:
                 out = [(prev_names[0], self._quote_pos(para, a, 0), 0.5)]
         if closed:
             self._cache[para] = out
@@ -191,6 +199,9 @@ class LiveSpeakers:
             cid = self.index.resolve(name) or self.index.resolve(name.split(" ")[0])
             if not self._is_character(cid) or name.casefold() in self.me:
                 continue
+            from .speaker_guard import name_may_mean
+            if not name_may_mean(self.index, name, cid, self.present, text):
+                continue  # B7: a first name alone is a lore character only when they are in the scene
             off = int(t.get("offset") or 0)
             k = paragraph_at(paras, off)
             pos = paras[k][0] if k < len(paras) and off < paras[k][0] else off
@@ -220,9 +231,14 @@ class LiveSpeakers:
                     beats.append({"character_id": cid, "slot": slot, "paragraph": k, "pos": pos, "source": "detected",
                                   "confidence": conf, "mood": bool(mood)})
             a, b = paras[k]
-            names = self._names(SPEECH.sub(" ", text[a:b]))
-            if names:
-                prev = names
+            narration = SPEECH.sub(" ", text[a:b])
+            from .speaker_guard import unknown_person
+            # B6: only the paragraph just before counts, and not when it is about an unnamed or unknown person
+            if unknown_person(self.index, narration, self.protagonist):
+                prev = []
+            else:  # a paragraph that names nobody but whose line was given to one character passes that speaker on
+                who = list(dict.fromkeys(x["character_id"] for x in beats if x["paragraph"] == k))
+                prev = self._names(narration) or (who if len(who) == 1 else [])
         for k, lst in tagged.items():  # a tag at the very end, before its paragraph has any text
             if k >= len(paras):
                 beats.extend(lst)
@@ -270,4 +286,4 @@ def for_story(db, story, branch_id: str) -> LiveSpeakers | None:
     held = ((story.settings_json or {}).get("expressions") or {}).get(branch_id) or {}
     auto = bool(settings_service.get(db, "auto_apply_expression_suggestions"))
     return LiveSpeakers(index, protagonist=me, portraits=assets.portrait_map(db, story.world_id), held=held,
-                        auto_expressions=auto)
+                        auto_expressions=auto, present=set((state.get("scene") or {}).get("present") or []))

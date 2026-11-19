@@ -192,12 +192,78 @@ def render_block(registry: dict[str, Any], index: EntityIndex, present: list[str
     lines.append("Never give a post to anyone else, even when its holder is absent (keep them offscreen or away). Use "
                  "canonical names (aliases are fine). New minor characters "
                  + ("(students, staff, townsfolk)" if registry.get("school") else "(townsfolk, staff, passers-by)")
-                 + " are fine if they hold no post and contradict no lore. No new gods or celestial beings.")
+                 + " are fine if they hold no post and contradict no lore, and never share a name (or first name) with an "
+                   "established character. No new gods or celestial beings.")
     return "\n".join(lines)
 
 
 AUTHORITY = re.compile(r"\b(Headmaster|Headmistress|Professor|Instructor|Dean|Principal|Celestial|Goddess|God)\s+"
                        r"([A-Z][a-zà-ÿ'’]+(?:\s+[A-Z][a-zà-ÿ'’]+)?)")
+
+
+# v0.6 (test report "30 tours", B4): the narrator invented "Emperor Alaric" twice while the pack's registry names the
+# Empress Diana, and nothing was reported. Any "<office title> <Name>" whose office is a locked post of the registry is
+# now checked against the post's holder. English and French titles; the feminine form is the same office.
+OFFICE_WORDS = {"emperor": "emperor", "empress": "emperor", "empereur": "emperor", "imperatrice": "emperor",
+                "king": "king", "queen": "king", "roi": "king", "reine": "king",
+                "commander": "commander", "commandant": "commander", "commandante": "commander",
+                "chancellor": "chancellor", "chancelier": "chancellor", "chanceliere": "chancellor",
+                "pope": "pope", "pape": "pope", "archbishop": "archbishop", "archeveque": "archbishop",
+                "chieftain": "chieftain", "chef": "chieftain"}
+OFFICE_AUTHORITY = re.compile(
+    r"(?i:\b(?:([a-zà-ÿ0-9]+)\s+)?(emperor|empress|empereur|impératrice|imperatrice|king|queen|roi|reine|commander|"
+    r"commandant|commandante|chancellor|chancelier|chancelière|pope|pape|archbishop|archevêque|chieftain))\s+"
+    r"([A-ZÀ-Ý][a-zà-ÿ'’]+(?:\s+[A-ZÀ-Ý][a-zà-ÿ'’]+)?)")
+TITLE_FILLER = {"the", "a", "an", "her", "his", "their", "our", "of", "le", "la", "l", "les", "du", "de", "sa", "son",
+                "notre", "votre", "title"}
+
+
+def _office_entries(registry: dict[str, Any]) -> list[tuple[str, str | None, dict[str, Any]]]:
+    """(office, word just before it or None, post) for every office word in a locked post's title and aliases:
+    "the Emperor" -> ("emperor", None), "Dragon Emperor" -> ("emperor", "dragon")."""
+    out = []
+    for r in registry["roles"]:
+        if not r.get("locked", True):
+            continue
+        for phrase in [r["title"], *r["aliases"]]:
+            words = re.findall(r"[a-z0-9]+", norm(phrase))
+            for i, w in enumerate(words):
+                if w in OFFICE_WORDS:
+                    before = words[i - 1] if i and words[i - 1] not in TITLE_FILLER else None
+                    out.append((OFFICE_WORDS[w], before, r))
+    return out
+
+
+def office_conflicts(text: str, registry: dict[str, Any], index: EntityIndex, ignore: set[str]) -> list[dict[str, Any]]:
+    """B4: "<title> <Name>" for a locked office held by someone else (or by several people, none of them that name)."""
+    entries = _office_entries(registry)
+    out: list[dict[str, Any]] = []
+    if not entries:
+        return out
+    for m in OFFICE_AUTHORITY.finditer(text or ""):
+        before = norm(m.group(1) or "")
+        office = OFFICE_WORDS[norm(m.group(2))]
+        name = re.sub(r"['’]s$", "", m.group(3))
+        first = name.split()[0]
+        if norm(name) in ignore or norm(first) in ignore or norm(first) in OFFICE_WORDS:
+            continue
+        cands = [(mod, r) for o, mod, r in entries if o == office]
+        exact = [r for mod, r in cands if mod and mod == before]  # "Dragon Emperor Azra": the Dragon Emperor's post
+        posts = exact or [r for mod, r in cands if mod is None]
+        posts = list({r["role_id"]: r for r in posts}.values())
+        if not posts:
+            continue
+        cid = index.resolve(name) or index.resolve(first)
+        if cid in {r["character_id"] for r in posts}:
+            continue
+        said = m.group(0).strip()
+        if m.group(1) and not exact:
+            said = said[len(m.group(1)):].strip()
+        holders = ", ".join(f"{r['character_name']} ({r['title']})" for r in posts)
+        out.append({"kind": "conflict", "text": said, "role_id": posts[0]["role_id"], "holder": posts[0]["character_id"],
+                    "message": (f"“{said}” — the {posts[0]['title']} is {posts[0]['character_name']} (lore)."
+                                if len(posts) == 1 else f"“{said}” is none of the lore's holders of this title: {holders}.")})
+    return out
 
 
 def detect_conflicts(text: str, registry: dict[str, Any], index: EntityIndex, ignore: set[str] | None = None) -> list[dict[str, Any]]:
@@ -242,4 +308,9 @@ def detect_conflicts(text: str, registry: dict[str, Any], index: EntityIndex, ig
             known = ", ".join(f"{r['character_name']} ({r['title']})" for r in posts)
             out.append({"kind": "unknown_authority", "text": said, "role_id": None, "holder": None,
                         "message": f"“{said}” is not an established character" + (f"; lore teachers: {known}." if known else ".")})
+    taken = {o["text"] for o in out}
+    for c in office_conflicts(text, registry, index, ignore):
+        if c["text"] not in taken:
+            taken.add(c["text"])
+            out.append(c)
     return out[:5]

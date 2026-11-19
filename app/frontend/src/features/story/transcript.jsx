@@ -46,7 +46,7 @@ function BeatPortrait({ b }) {
         </span>
         <span className={n ? `text-accent` : undefined}>
           {"· "}
-          {n ? `speaks` : `reacts`}
+          {n ? msg("speaks") : msg("reacts")}
         </span>
       </figcaption>
     </figure>
@@ -381,7 +381,9 @@ export function MessageItem({
         ) : null}
       </div>
       {!se && !ue && ae !== `streaming` && <LoreConflicts items={de.lore_conflicts} />}
-      {!se && !ue && ae !== `streaming` && <ContinuityAlerts items={de.continuity_alerts} />}
+      {!se && !ue && ae !== `streaming` && (
+        <ContinuityAlerts items={de.continuity_alerts} onRegenerate={busy ? undefined : () => onRegenerate(e.id)} />
+      )}
       {!se && (ae !== `complete` || fe) && ae !== `streaming` && (
         <div
           className={cn(
@@ -645,8 +647,11 @@ function LoreConflicts({ items }) {
 }
 
 // v0.5 phase 7.6: continuity notices found after the reply (no model call, or inside the scene analysis)
-function ContinuityAlerts({ items }) {
-  let list = (Array.isArray(items) ? items : []).filter((e) => e && typeof e.kind == `string`),
+function ContinuityAlerts({ items, onRegenerate }) {
+  let all = (Array.isArray(items) ? items : []).filter((e) => e && typeof e.kind == `string`),
+    // v0.6 (test report "30 tours", B9): most of the reply repeated earlier replies and was removed
+    repeated = all.find((e) => e.kind === `mostly_repeated`),
+    list = all.filter((e) => e.kind !== `mostly_repeated`),
     text = (e) =>
       e.kind === `dead_speaks`
         ? msg("{{v0}} speaks, but the journal records their death.", { v0: e.name })
@@ -656,7 +661,29 @@ function ContinuityAlerts({ items }) {
             ? msg("May contradict a pinned memory: {{v0}}", { v0: e.text })
             : null;
   list = list.filter((e) => text(e));
-  return list.length ? (
+  let repeatedNote = repeated ? (
+    <div className="mt-2 flex flex-wrap items-center gap-2 rounded-md bg-warn-soft px-2.5 py-1.5 text-xs text-warn"
+      role="note" aria-label={msg("Repetitive reply")}>
+      <span className="font-medium">
+        {repeated.nothing_left
+          ? msg("Repetitive reply: it only repeats earlier replies.")
+          : msg("Repetitive reply: {{v0}} of the {{v1}} characters written repeated earlier replies and were removed.", {
+              v0: Math.max(0, (repeated.generated ?? 0) - (repeated.kept ?? 0)),
+              v1: repeated.generated ?? 0,
+            })}
+      </span>
+      {onRegenerate && (
+        <Button size="sm" variant="ghost" onClick={onRegenerate}>
+          <Icon.RefreshCw className="size-3" /> {msg("Regenerate")}
+        </Button>
+      )}
+    </div>
+  ) : null;
+  if (!list.length) return repeatedNote;
+  return (
+    <>
+      {repeatedNote}
+      {list.length ? (
     <div className="mt-2 rounded-md bg-warn-soft px-2.5 py-1.5 text-xs text-warn" role="note"
       aria-label={msg("Possible continuity problem")}>
       <p className="font-medium">{msg("Possible continuity problem — the reply was not changed:")}</p>
@@ -667,7 +694,9 @@ function ContinuityAlerts({ items }) {
       </ul>
       <p className="mt-0.5 text-faint">{msg("Regenerate or edit the reply if this was not intended.")}</p>
     </div>
-  ) : null;
+      ) : null}
+    </>
+  );
 }
 
 function VersionsDialog({ storyId, m: t, onClose, onRestored }) {

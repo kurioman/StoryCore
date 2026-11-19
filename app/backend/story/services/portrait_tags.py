@@ -160,14 +160,22 @@ def apply(db: Session, message_id: str) -> bool:
                                  str((state.get("player") or {}).get("name") or "")) if n}
     text = m.content
     paras = _paragraphs(text)
+    from . import speaker_guard
+    present = set((state.get("scene") or {}).get("present") or [])
 
     def place(name: str, cid: str, slot: int, pos: int, source: str, conf: float, mood: bool = False) -> dict[str, Any]:
         para = next((k for k, (a, b) in enumerate(paras) if a <= pos < b), None)
         end = paras[para][1] if para is not None else len(text)
         q = QUOTED.search(text, pos, end)
         line = q.group(0) if q else None
+        # v0.6 (test report "30 tours", B8): a tag on a paragraph with no spoken line (narration, or narration that was
+        # wrapped in quotes and unwrapped by reply_cleanup) is not a line: a visible reaction when the paragraph names
+        # the character, else nothing
+        beat = "speaking" if line else ("reacting" if para is not None and cid in index.find_mentions(
+            text[paras[para][0]:paras[para][1]], ("character",)) else None)
         return {"name": name, "character_id": cid, "slot": int(slot), "pos": pos, "paragraph": para, "line": line,
-                "anchor": line or text[pos:pos + 60].strip(), "source": source, "confidence": conf, "mood": mood}
+                "anchor": line or text[pos:pos + 60].strip(), "source": source, "confidence": conf, "mood": mood,
+                "beat": beat}
 
     resolved: list[dict[str, Any]] = []
     search_from = 0
@@ -176,6 +184,8 @@ def apply(db: Session, message_id: str) -> bool:
         cid = index.resolve(name) or index.resolve(name.split(" ")[0])
         if not cid or index.entities[cid].category != "character" or name.casefold() in me:
             continue
+        if not speaker_guard.name_may_mean(index, name, cid, present, text):
+            continue  # B7: "[Lily:2]" for a maid called Lily is not the goddess Lily Lumina, who is not in the scene
         snip = (t.get("snippet") or "")[:40]
         pos = text.find(snip, search_from) if snip else -1
         if pos < 0 and snip:
@@ -203,8 +213,9 @@ def apply(db: Session, message_id: str) -> bool:
                     and 0 <= pos < len(text) and index.name(cid).casefold() not in me:
                 resolved.append(place(index.name(cid), cid, int(x.get("slot") or 1), pos, "detected",
                                       float(x.get("confidence") or 0.6), bool(x.get("mood"))))
+    resolved = [r for r in resolved if r["beat"]]
     md["portrait_tags"] = [{k: r[k] for k in ("name", "character_id", "slot", "pos", "paragraph", "source")}
-                           for r in resolved]
+                           for r in resolved if r["beat"] == "speaking"]
     m.generation_metadata_json = md
     if not resolved:
         return False
@@ -225,20 +236,22 @@ def apply(db: Session, message_id: str) -> bool:
         if key in seen:
             beats = [b for b in beats if (b["character_id"], b["paragraph"]) != key]  # the later tag in a paragraph wins
         seen.add(key)
-        beats.append({"character_id": r["character_id"], "expression": slot_for(r), "beat": "speaking",
+        beats.append({"character_id": r["character_id"], "expression": slot_for(r), "beat": r["beat"],
                       "anchor": r["anchor"], "paragraph": r["paragraph"], "source": r["source"],
                       **({"mood": True} if r.get("mood") else {})})
     last = {}
     for r in resolved:
         last[r["character_id"]] = r
+    spoken = [r for r in resolved if r["beat"] == "speaking"]
+    said = {r["character_id"] for r in spoken}
     speakers = [{"character_id": c, "expression": slot_for(r), "evidence": r["anchor"], "confidence": r["confidence"]}
-                for c, r in last.items()]
+                for c, r in last.items() if c in said]
     dialogue = [{"character_id": r["character_id"], "text": r["line"]} for r in resolved if r["line"]]
     row = db.query(TurnAnalysis).filter(TurnAnalysis.message_id == m.id).one_or_none()
     if row is None:
         row = TurnAnalysis(message_id=m.id, story_id=m.story_id, branch_id=m.branch_id)
         db.add(row)
-    row.speakers_json, row.active_speaker_id = speakers, resolved[-1]["character_id"]
+    row.speakers_json, row.active_speaker_id = speakers, spoken[-1]["character_id"] if spoken else None
     row.beats_json, row.dialogue_json = beats, dialogue
     row.suggestions_json = row.suggestions_json or []
     row.discoveries_json = row.discoveries_json or []
@@ -246,7 +259,7 @@ def apply(db: Session, message_id: str) -> bool:
     from .turn_analysis import SCHEMA_VERSION
     row.schema_version = SCHEMA_VERSION
     row.diagnostics_json = [{"source": "portrait_tags" if tagged else "live_speakers", "tags": len(resolved)}]
-    m.speaker_character_id = resolved[-1]["character_id"]
+    m.speaker_character_id = spoken[-1]["character_id"] if spoken else m.speaker_character_id
     m.generation_metadata_json = {**md, "portrait_tags_applied": True}  # a new dict: JSON columns track reassignment only
     if branch.head_message_id == m.id and auto and tagged:  # a detected speaker keeps the expression already shown
         from .turns import apply_expressions

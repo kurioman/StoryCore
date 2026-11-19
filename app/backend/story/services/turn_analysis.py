@@ -650,6 +650,10 @@ async def _analyse(ctx: AppContext, message_id: str, *, force: bool = False) -> 
             if r.character_id not in mentioned:
                 mentioned.append(r.character_id)
         named = identity.resolver(index, registry, canon, set(mentioned) | set(state["scene"].get("present", [])))
+        # v0.6 (test report "30 tours", B6/B7/B10): who may be shown at all in this reply
+        from . import speaker_guard
+        may_show = speaker_guard.may_appear(index, reply, state["scene"].get("present") or [],
+                                            {r.character_id for r in ctx_refs})
         # v0.5 phase 7.5: a short reply with no character, in a scene whose place and time are known, gives the analysis
         # nothing to do (no speaker, reaction, relationship or discovery): no request is spent on it
         if (not tagged and not force and not cfg.get("action_suggestions_enabled", True) and not mentioned
@@ -731,6 +735,9 @@ async def _analyse(ctx: AppContext, message_id: str, *, force: bool = False) -> 
                                draft_check=draft_check, min_suggestions=3 if attempt == 1 else 2,
                                scene_present=list(state["scene"].get("present") or []), player_turn=user_text)
             result["world_state_raw"] = obj.get("world_state")  # validated against the scene when it is applied
+            hidden = speaker_guard.filter_result(result, may_show)
+            if hidden:
+                result["guard_removed"] = hidden
             if want and result["suggestions_error"] and attempt == 1:
                 raise ValueError(result["suggestions_error"])  # e.g. two suggestions: worth the one repair attempt
             diagnostics.append({"attempt": attempt, "ok": True, "seconds": round(time.monotonic() - t0, 2), "chars": len(raw),
@@ -766,6 +773,8 @@ async def _analyse(ctx: AppContext, message_id: str, *, force: bool = False) -> 
             return {"status": "gone"}
         story = db.get(Story, m.story_id)
         branch = story_tree.get_branch(db, story, m.branch_id)
+        if result.get("guard_removed"):
+            diagnostics.append({"source": "speaker_guard", "not_in_scene": result["guard_removed"]})
         if tag_view is not None and result["speakers"] and \
                 all(b.get("source") == "detected" for b in tag_view["beats"]):
             # v0.6: the speakers guessed while streaming give way to the analysis' own; a guessed line of someone the
@@ -836,10 +845,14 @@ async def _analyse(ctx: AppContext, message_id: str, *, force: bool = False) -> 
         # in-story time/place/weather (v1.4): only the live head moves the clock (an older reply re-analysed must not
         # set the world back); every value needs a quote found in the reply or the player's turn
         if is_head:
+            # this reply's own earlier clock update (the time cues applied right after it was written) is undone first,
+            # so the analysis compares with the scene as it was before the reply
+            world_state.revert_message(db, story, branch, {m.id}, "the reply was analysed")
             st_now = state_service.current(db, branch.id)
             scene_now = state_service.normalize(st_now.state_json if st_now else {})["scene"]
             year_start = world_state.calendar_of(db, story.world_id)["year_start"]
             update = world_state.validate(result.get("world_state_raw"), m.content, user_text, scene_now, year_start)
+            update = world_state.with_cues(update, m.content, scene_now, year_start)  # B3: plain cues as a fallback
             went_back = ("time" in update["changes"] and not update["days_passed"] and "story_day" not in update["changes"]
                          and continuity.time_went_back(scene_now.get("time"), update["changes"]["time"]))
             continuity.set_alerts(m, "time_back", [{"from": scene_now.get("time"), "to": update["changes"]["time"]}]
@@ -855,7 +868,8 @@ async def _analyse(ctx: AppContext, message_id: str, *, force: bool = False) -> 
                 chrono.record_current(db, m, branch, "analysis")
             # v1.5: who is physically here (never mentions); a move to a new place replaces the previous cast
             scene_cast.apply_from_analysis(db, story, branch, m.id, result["cast"]["present"], result["cast"]["left"],
-                                           index, location_changed=moved)
+                                           index, location_changed=moved,
+                                           named_here=speaker_guard.named_in_narration(index, m.content))
     return {"status": "succeeded", **{k: result[k] for k in ("speakers", "active_speaker_id", "suggestions")}}
 
 

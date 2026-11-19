@@ -103,9 +103,14 @@ def clean_ids(ids: list[Any], index: EntityIndex) -> list[str]:
 
 
 def apply_from_analysis(db: Session, story: Story, branch: MessageBranch, message_id: str, present: list[str],
-                        left: list[str], index: EntityIndex, *, location_changed: bool) -> dict[str, Any] | None:
+                        left: list[str], index: EntityIndex, *, location_changed: bool,
+                        named_here: set[str] | None = None) -> dict[str, Any] | None:
     """Apply one reply's presence for the branch head; idempotent (an earlier update from the same reply is reverted
-    first). Returns the history entry, or None when nothing changed."""
+    first). Returns the history entry, or None when nothing changed.
+
+    v0.6 (test report "30 tours", B10): a move to another place with nobody reported present no longer keeps the whole
+    previous cast (the goddess of the opening stayed "present" for 30 turns): only those named in the narration of the
+    reply (``named_here``) come along."""
     revert_message(db, story, branch, {message_id}, "the reply was analysed again")
     row = state_service.current(db, branch.id)
     state = state_service.normalize(json.loads(json.dumps(row.state_json)) if row else {})
@@ -114,6 +119,8 @@ def apply_from_analysis(db: Session, story: Story, branch: MessageBranch, messag
     present, left = clean_ids(present, index), clean_ids(left, index)
     if location_changed and present:
         after = list(present)
+    elif location_changed and named_here is not None:
+        after = [c for c in before if c in named_here and c not in left]
     else:
         after = [c for c in before if c not in left] + [c for c in present if c not in before and c not in left]
     if after == before:

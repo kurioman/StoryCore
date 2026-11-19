@@ -324,7 +324,7 @@ def post_process(ctx: AppContext, message_id: str) -> str | None:
         # (the demo narrator repeats one canned paragraph on purpose: nothing to clean there)
         if m.kind == "story" and m.role == "assistant" and m.status == "complete" and not md.get("cleanup") \
                 and md.get("provider_type") != "mock" and settings_service.get(db, "reply_cleanup") is not False:
-            _clean_reply(db, m, md)
+            _clean_reply(db, m, md, character_names(index))
         if m.kind == "story":
             m.speaker_character_id = detect_speaker(m.content, index)
             mentioned = index.find_mentions(m.content, ("character",))
@@ -344,6 +344,11 @@ def post_process(ctx: AppContext, message_id: str) -> str | None:
         m.generation_metadata_json = md
         if m.kind != "story" or m.status != "complete":
             return None
+        if m.role == "assistant":
+            try:  # v0.6 (test report "30 tours", B3): the clock follows the narration even when the analysis does not run
+                _clock_from_cues(db, story, m, index)
+            except Exception:
+                log.exception("time cues failed for %s", m.id)
         cur = db.get(ExtractionCursor, m.branch_id)
         if cur is None:
             cur = ExtractionCursor(branch_id=m.branch_id, story_id=story.id, last_seq=-1)
@@ -359,17 +364,44 @@ def post_process(ctx: AppContext, message_id: str) -> str | None:
     return None
 
 
-def _clean_reply(db, m: Message, md: dict[str, Any]) -> None:
-    """v0.6 (phase 9): paragraphs copied from the last replies, an unfinished last sentence, a trailing options menu
-    (services/reply_cleanup.py). The stored tag positions move with the text."""
+def _clock_from_cues(db, story: Story, m: Message, index) -> None:
+    from . import chrono, world_state
+    branch = story_tree.get_branch(db, story, m.branch_id)
+    if branch.head_message_id != m.id:
+        return
+    world_state.revert_message(db, story, branch, {m.id}, "the reply was read again")
+    st = state_service.current(db, branch.id)
+    scene = state_service.normalize(st.state_json if st else {})["scene"]
+    update = world_state.with_cues(None, m.content, scene, world_state.calendar_of(db, story.world_id)["year_start"])
+    if update.get("cues"):
+        world_state.apply_from_analysis(db, story, branch, m.id, update, index, first_reply=chrono.tracked_from_start(db, m))
+        chrono.record_current(db, m, branch, "analysis")
+
+
+def character_names(index) -> set[str]:
+    """The names (and unique first names) of the world's characters, as the index knows them."""
+    return {k for k, v in index.alias_map.items() if len(v) == 1 and len(k) >= 3
+            and index.entities[next(iter(v))].category == "character"}
+
+
+def _clean_reply(db, m: Message, md: dict[str, Any], names: set[str] | None = None) -> None:
+    """v0.6 (phase 9): paragraphs copied from the last replies, an unfinished last sentence, a trailing options menu,
+    and (test report "30 tours", B8) the quotation marks around a paragraph of narration (services/reply_cleanup.py).
+    The stored tag positions move with the text. B9: a reply that was mostly repetition gets a notice with "Regenerate"."""
     from . import reply_cleanup
 
     earlier = [p.content for p in story_tree.path_messages(db, m.parent_id)
                if p.role == "assistant" and p.kind == "story" and p.content.strip()][-reply_cleanup.LOOKBACK:] \
         if m.parent_id else []
     cut = (md.get("diagnostics") or {}).get("finish_reason") == "length"
-    text, spans, report = reply_cleanup.clean(m.content, earlier, cut_by_length=cut)
+    original = m.content
+    text, spans, report = reply_cleanup.clean(original, earlier, cut_by_length=cut, names=names)
     md["cleanup"] = report or {"checked": True}
+    if report.get("mostly_repeated"):
+        alerts = [a for a in md.get("continuity_alerts") or [] if a.get("kind") != "mostly_repeated"]
+        md["continuity_alerts"] = alerts + [{"kind": "mostly_repeated", "generated": len(original.strip()),
+                                             "kept": len(text.strip()) if spans else len(original.strip()),
+                                             "nothing_left": not spans}]
     if not spans:
         return
     md["cleanup"]["removed_chars"] = len(m.content) - len(text)

@@ -186,19 +186,27 @@ def validate(raw: Any, reply: str, player_turn: str, scene: dict[str, Any], year
     raw = raw if isinstance(raw, dict) else {}
     out: dict[str, Any] = {"changes": {}, "days_passed": 0, "evidence": {}, "dropped": []}
 
-    def grounded(quote: Any) -> str | None:
+    def grounded(quote: Any, loose: bool = False) -> str | None:
         hit = locate(reply, quote, 4) or locate(player_turn, quote, 4)
-        return hit[0] if hit else None
+        if hit:
+            return hit[0]
+        # v0.6 (test report "30 tours", B3): small models reword their quote ("the sun sets" for "the sun begins to
+        # set"); for the clock, the weather and passing days a sentence holding most of the quote's words is enough
+        return (loose_quote(reply, quote) or loose_quote(player_turn, quote)) if loose else None
 
     for c in (raw.get("changes") or [])[:len(FIELDS) + 2]:
         if not isinstance(c, dict) or c.get("field") not in FIELDS:
             continue
         f = c["field"]
         val = clean_value(f, c.get("value"))
-        ev = grounded(c.get("evidence"))
+        ev = grounded(c.get("evidence"), loose=f in ("time", "weather"))
         if val is None or ev is None:
             out["dropped"].append({"field": f, "value": str(c.get("value"))[:80],
                                    "reason": "invalid value" if val is None else "evidence not found in the text"})
+            continue
+        if f == "location" and in_dialogue(reply, ev) and not locate(player_turn, ev, 4):
+            # B5: a place someone talks about ("there is an outpost not far from here") is not where the scene is
+            out["dropped"].append({"field": f, "value": str(c.get("value"))[:80], "reason": "only mentioned in dialogue"})
             continue
         if f == "time":
             val, refused = resolve_time(val, ev, scene.get("time"))
@@ -212,7 +220,7 @@ def validate(raw: Any, reply: str, player_turn: str, scene: dict[str, Any], year
         days = int(raw.get("days_passed") or 0)
     except (TypeError, ValueError):
         days = 0
-    if days and (days < 0 or days > MAX_DAYS_PASSED or grounded(raw.get("days_evidence")) is None):
+    if days and (days < 0 or days > MAX_DAYS_PASSED or grounded(raw.get("days_evidence"), loose=True) is None):
         out["dropped"].append({"field": "days_passed", "value": str(days), "reason": "out of range or no evidence"})
         days = 0
     new_wd, old_wd = out["changes"].get("weekday"), scene.get("weekday")
@@ -220,7 +228,7 @@ def validate(raw: Any, reply: str, player_turn: str, scene: dict[str, Any], year
         days = (WEEKDAYS.index(new_wd) - WEEKDAYS.index(old_wd)) % 7  # a stated new weekday means days have passed
     if days:
         out["days_passed"] = days
-        out["evidence"].setdefault("days_passed", grounded(raw.get("days_evidence")) or out["evidence"].get("weekday"))
+        out["evidence"].setdefault("days_passed", grounded(raw.get("days_evidence"), loose=True) or out["evidence"].get("weekday"))
         for k, v in advance(scene, days, year_start).items():  # derived, unless the reply states the value itself
             out["changes"].setdefault(k, v)
         if scene.get("time") and "time" not in out["changes"]:
@@ -230,6 +238,139 @@ def validate(raw: Any, reply: str, player_turn: str, scene: dict[str, Any], year
         if month in MONTHS and out["changes"]["day"] > MONTH_DAYS[MONTHS.index(month)]:
             out["dropped"].append({"field": "day", "value": str(out["changes"].pop("day")), "reason": "not a day of that month"})
     return out
+
+
+SPEECH_SPANS = re.compile(r'"[^"\n]*"|“[^”\n]*”|«[^»\n]*»')
+
+
+def in_dialogue(text: str, quote: str) -> bool:
+    """True when ``quote`` is found in ``text`` only inside quoted speech."""
+    if not quote:
+        return False
+    spans = [(m.start(), m.end()) for m in SPEECH_SPANS.finditer(text or "")]
+    pos, found = (text or "").find(quote), False
+    while pos >= 0:
+        found = True
+        if not any(a <= pos < b for a, b in spans):
+            return False
+        pos = text.find(quote, pos + 1)
+    return found
+
+
+def _words_of(s: Any) -> list[str]:
+    from .entities import norm
+    return [w for w in re.findall(r"[^\W_]+", norm(str(s or ""))) if len(w) >= 3]
+
+
+def loose_quote(text: str, quote: Any, share: float = 0.75) -> str | None:
+    """The sentence of ``text`` holding most of the words of a reworded quote (at least three words), else None."""
+    want = set(_words_of(quote))
+    if len(want) < 3 or not text:
+        return None
+    best, score = None, 0.0
+    for sent in re.split(r"(?<=[.!?…])\s+|\n+", text):
+        have = set(_words_of(sent))
+        k = len(want & have) / len(want)
+        if k > score:
+            best, score = sent.strip(), k
+    return best[:160] if best and score >= share else None
+
+
+# B3: the clock never moved in a 30-turn game (sunset, a night, "the next morning"): the scene analysis is often
+# skipped or stopped by the next reply, and its quotes were reworded. These plain cues, read in the narration only
+# (never in what characters say: "be ready by dawn"), move the time of day forward and count a new day. No model call.
+PERIODS = ("dawn", "morning", "noon", "afternoon", "evening", "night")
+PERIOD_CUES = [
+    ("dawn", re.compile(r"\b(?:at\s+dawn|dawn\s+breaks|daybreak|sunrise|first\s+light|[àa]\s+l['’]aube|l['’]aube\s+"
+                        r"(?:se\s+l[èe]ve|pointe)|lever\s+du\s+soleil|point\s+du\s+jour)\b", re.I)),
+    ("noon", re.compile(r"\b(?:at\s+noon|midday\s+sun|[àa]\s+midi)\b", re.I)),
+    ("afternoon", re.compile(r"\b(?:afternoon\s+sun|late\s+afternoon|in\s+the\s+afternoon|l['’]apr[èe]s[- ]midi|"
+                             r"fin\s+d['’]apr[èe]s[- ]midi)\b", re.I)),
+    ("evening", re.compile(r"\b(?:sun\s+(?:\w+\s+){0,3}(?:sets|setting|set|sinks|sinking)|sunset|dusk|twilight|evening|"
+                           r"dinner|supper|coucher\s+du\s+soleil|soleil\s+(?:\w+\s+){0,2}couche|cr[ée]puscule|"
+                           r"ce\s+soir|la\s+soir[ée]e|le\s+soir|d[îi]ner|souper)\b", re.I)),
+    ("night", re.compile(r"\b(?:night\s+(?:falls|has\s+fallen)|nightfall|dead\s+of\s+(?:the\s+)?night|late\s+at\s+night|"
+                         r"midnight|moonlight|the\s+night\s+is|la\s+nuit\s+(?:est\s+)?tomb[ée]e?|tomb[ée]e\s+de\s+la\s+nuit|"
+                         r"nuit\s+noire|minuit|en\s+pleine\s+nuit|clair\s+de\s+lune)\b", re.I)),
+]
+NEXT_DAY = re.compile(r"\b(?:the\s+next\s+(?:morning|day)|next\s+morning|the\s+following\s+(?:morning|day)|the\s+morning\s+"
+                      r"after|(?:le|au)\s+lendemain(?:\s+matin)?|le\s+jour\s+suivant|le\s+matin\s+suivant)\b", re.I)
+MORNING_WORD = re.compile(r"morning|matin", re.I)
+
+
+def period_rank(value: Any) -> int:
+    """0 unknown, then 1 dawn ... 6 night, for a stored time ("09:00", "evening", "late morning")."""
+    v = str(value or "").strip()
+    if not v:
+        return 0
+    m = re.fullmatch(r"(\d{1,2}):(\d{2})", v)
+    if m:
+        h = int(m.group(1)) % 24
+        return 1 if 5 <= h < 7 else 2 if 7 <= h < 12 else 3 if h == 12 else 4 if 13 <= h < 18 else 5 if 18 <= h < 21 else 6
+    low = v.casefold()
+    for k, name in reversed(list(enumerate(PERIODS, 1))):
+        if name in low:
+            return k
+    for k, words in ((1, ("aube",)), (2, ("matin",)), (3, ("midi",)), (4, ("après-midi", "apres-midi")),
+                     (5, ("soir", "crépuscule")), (6, ("nuit", "minuit"))):
+        if any(w in low for w in words):
+            return k
+    return 0
+
+
+def time_cues(reply: str, scene: dict[str, Any]) -> dict[str, Any]:
+    """{"time": period | None, "days": 0/1, "evidence": quote} read in the reply's narration (see B3 above)."""
+    narration = SPEECH_SPANS.sub(lambda m: " " * len(m.group(0)), reply or "")
+    out: dict[str, Any] = {"time": None, "days": 0, "evidence": ""}
+    nd = NEXT_DAY.search(narration)
+    start = 0
+    if nd:
+        out.update(days=1, evidence=nd.group(0), time="morning" if MORNING_WORD.search(nd.group(0)) else None)
+        start = nd.end()
+    last = None
+    for name, pat in PERIOD_CUES:
+        for m in pat.finditer(narration, start):
+            if last is None or m.start() > last[1].start():
+                last = (name, m)
+    if last is None:
+        return out
+    name, m = last
+    new_rank, cur_rank = PERIODS.index(name) + 1, period_rank(scene.get("time"))
+    if not out["days"] and cur_rank == 6 and new_rank <= 2:
+        out["days"] = 1  # from the night to dawn or morning: a new day
+    if out["days"] or new_rank > cur_rank:
+        out["time"], out["evidence"] = name, out["evidence"] or m.group(0)
+        if out["days"] and not nd:
+            out["evidence"] = m.group(0)
+    return out
+
+
+def with_cues(update: dict[str, Any], reply: str, scene: dict[str, Any], year_start: str = "January") -> dict[str, Any]:
+    """Complete a validated update with the narration's time cues when the analysis set no time and no new day."""
+    update = update or {"changes": {}, "days_passed": 0, "evidence": {}, "dropped": []}
+    update.setdefault("changes", {})
+    update.setdefault("evidence", {})
+    changes = update["changes"]
+    if changes.get("time") and changes["time"] != "":
+        return update
+    cue = time_cues(reply, scene)
+    if update.get("days_passed"):  # the analysis counted the day: only the time of day may still be missing
+        if cue["time"] and changes.get("time") == "":
+            changes["time"], update["evidence"]["time"] = cue["time"], cue["evidence"]
+        return update
+    if cue["days"]:
+        update["days_passed"] = 1
+        update["evidence"]["days_passed"] = cue["evidence"]
+        for k, v in advance(scene, 1, year_start).items():
+            changes.setdefault(k, v)
+        changes["time"] = cue["time"] or ""
+        if cue["time"]:
+            update["evidence"]["time"] = cue["evidence"]
+        update["cues"] = True
+    elif cue["time"] and cue["time"] != scene.get("time"):
+        changes["time"], update["evidence"]["time"] = cue["time"], cue["evidence"]
+        update["cues"] = True
+    return update
 
 
 def apply_from_analysis(db: Session, story: Story, branch: MessageBranch, message_id: str, update: dict[str, Any],
@@ -400,7 +541,9 @@ def date_suggestion(db: Session, story: Story, sc: dict[str, Any]) -> dict[str, 
 ANALYSIS_SHAPE = ('"world_state": {"changes": [{"field": "location|time|weather|weekday|day|month|year", "value": str, '
                   '"evidence": "exact short quote"}], "days_passed": 0, "days_evidence": ""},')
 ANALYSIS_RULE = ("- world_state: only what the REPLY or PLAYER TURN explicitly establishes or changes (place, time of day, "
-                 "weather, calendar) compared with CURRENT WORLD STATE, each with an exact short quote. days_passed: "
+                 "weather, calendar) compared with CURRENT WORLD STATE. location: only where the protagonist now IS (they "
+                 "went or arrived there in the narration); a place someone only talks about, plans or remembers is not a "
+                 "change. Each change with an exact short quote. days_passed: "
                  "in-story days passing in this reply (sleeping until morning = 1), with a quote; else 0. Weather from a "
                  "concrete description (\"rain drummed on the windows\" -> rain), time of day from light or bells. An hour "
                  "stated in the text (\"at eight thirty\", \"20h15\") as 24-hour HH:MM; anything vaguer stays a time of day "

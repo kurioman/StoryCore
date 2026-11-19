@@ -56,20 +56,75 @@ def _last_sentence_end(text: str) -> int | None:
 
 LEAK = re.compile(r"\n\s*(?:Human:|User:|<\|im_(?:start|end)\|>|\[Story context for this turn)")
 
+# v0.6 (test report "30 tours", B8): small models sometimes wrap a whole paragraph of narration in quotation marks
+# ("The hero's toast raises smiles all around the table..."). The screen then showed it as a line spoken by the last
+# character. Such a paragraph loses its two quotation marks when it reads as narration: no first person, long enough,
+# and told about "you" / the hero / a named character in the third person. Real lines keep their quotes.
+OPEN_Q, CLOSE_Q = "\"“«", "\"”»"
+FIRST_PERSON = re.compile(r"\b(?:i|i'm|i’m|i've|i’ve|i'll|i’ll|i'd|i’d|me|my|mine|myself|we|we're|we’re|we've|we’ve|"
+                          r"we'll|we’ll|us|our|ours|ourselves|je|j|moi|mon|ma|mes|nous|notre|nos|m)\b", re.I)
+YOU_ACT = re.compile(r"(?:^|[.!?;,]\s+|\b(?:and|then|et|puis)\s+)(?:you|vous|tu)\s+(?!(?:must|should|will|would|can|could|"
+                     r"may|might|need|have|are|were|do|did|don|know|see|devez|pouvez|allez|êtes|avez|savez|voyez)\b|"
+                     r"[’'])[a-zà-ÿ]+", re.I)
+THE_HERO = re.compile(r"\b(?:the\s+hero|le\s+h[ée]ros|la\s+h[ée]ro[ïi]ne)\b", re.I)
+THIRD = re.compile(r"\b(?:he|she|they|his|her|their|him|them|il|elle|ils|elles|lui|leur|leurs|sa|son|ses)\b", re.I)
+YOU = re.compile(r"\b(?:you|your|vous|votre|vos)\b", re.I)
+NARRATIVE_START = re.compile(r"^(?:as|when|while|then|after|before|with|lorsque|quand|tandis|alors|puis|après|avant|"
+                             r"pendant|le\s+lendemain|the\s+next)\b", re.I)
+NARRATION_MIN = 80
 
-def clean(reply: str, earlier: list[str], *, cut_by_length: bool = False) -> tuple[str, list[tuple[int, int]], dict[str, Any]]:
-    """(new text, removed spans of the original text, report)."""
+
+def reads_as_narration(inner: str, names: set[str] | None = None) -> bool:
+    """A quoted paragraph (without its quotation marks) that is really narration (see B8 above)."""
+    t = inner.strip()
+    if len(t) < NARRATION_MIN or FIRST_PERSON.search(t) or re.search(r'["“”«»]', t):
+        return False
+    if YOU_ACT.search(t) or THE_HERO.search(t):
+        return True
+    named = bool(names) and any(re.search(rf"\b{re.escape(n)}\b", t, re.I) for n in names)
+    return named and bool(THIRD.search(t)) and (bool(YOU.search(t)) or bool(NARRATIVE_START.match(t)))
+
+
+def quoted_narration_spans(reply: str, names: set[str] | None = None) -> list[tuple[int, int]]:
+    """The opening and closing quotation marks of every paragraph of narration wrapped in quotes (1-character spans)."""
+    out: list[tuple[int, int]] = []
+    for a, b in _paragraph_spans(reply):
+        para = reply[a:b]
+        lead = len(para) - len(para.lstrip())
+        body = para.strip()
+        if len(body) < 3 or body[0] not in OPEN_Q or body[-1] not in CLOSE_Q:
+            continue
+        if reads_as_narration(body[1:-1], names):
+            start = a + lead
+            out += [(start, start + 1), (start + len(body) - 1, start + len(body))]
+    return out
+
+
+MOSTLY_REPEATED = 0.5  # B9: share of a reply removed as repetition above which the player is told (and offered a retry)
+
+
+def clean(reply: str, earlier: list[str], *, cut_by_length: bool = False,
+          names: set[str] | None = None) -> tuple[str, list[tuple[int, int]], dict[str, Any]]:
+    """(new text, removed spans of the original text, report). ``names``: the world's character names (B8)."""
     from .context_builder import strip_trailing_menu
 
     leak = LEAK.search(reply)
     if leak and leak.start() > 0:  # the model went on writing the next turn itself (wrong chat template): cut there
-        text, spans, report = clean(reply[:leak.start()], earlier, cut_by_length=False)
+        text, spans, report = clean(reply[:leak.start()], earlier, cut_by_length=False, names=names)
         return text, spans + [(leak.start(), len(reply))], {**report, "leaked_turn_cut": True}
     # a removed paragraph takes the blank line after it along (positions stay exact: nothing else is reflowed)
     removed = [(a, len(reply) - len(reply[b:].lstrip())) for a, b in repeated_spans(reply, earlier)]
     report: dict[str, Any] = {}
     if removed:
         report["repeated_paragraphs"] = len(removed)
+        repeated_chars = sum(b - a for a, b in _merge(removed))
+        if repeated_chars > len(reply.strip()) * MOSTLY_REPEATED:
+            report["mostly_repeated"] = True  # B9: shown under the reply with a "Regenerate" button
+    unquoted = [s for s in quoted_narration_spans(reply, names)
+                if not any(a <= s[0] < b for a, b in removed)]
+    if unquoted:
+        removed += unquoted
+        report["unquoted_narration"] = len(unquoted) // 2
     kept_until = len(reply)
     if cut_by_length:
         end = _last_sentence_end(reply)
@@ -87,8 +142,8 @@ def clean(reply: str, earlier: list[str], *, cut_by_length: bool = False) -> tup
         report["trailing_menu"] = True
     removed = _merge(removed)
     text, _ = _apply(reply, removed)
-    if not text.strip():
-        return reply, [], {}
+    if not text.strip():  # nothing would be left: the reply is kept as it is, but the player is still told (B9)
+        return reply, [], {"mostly_repeated": True} if report.get("mostly_repeated") else {}
     return text, removed, report
 
 
