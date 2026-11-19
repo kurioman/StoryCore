@@ -90,40 +90,47 @@ local de jeu de rôle textuel par IA, basé sur des « Lore packs » (des mondes
 
 ## Pas encore vérifié avec du vrai matériel
 - Phase 6 sur mon vrai téléphone (pare-feu Windows : cocher « Réseaux privés »).
-- Phase 7 avec mon modèle LM Studio (qualité des résumés et du récap, vitesse avec la requête stable).
-- Phase 8 : « Proposer avec l'IA » avec mon modèle LM Studio (qualité des brouillons JSON).
-- Phase 9.1 : qualité du narrateur avec les fiches de lore compactes.
+- Phase 7 avec mon modèle (qualité des résumés et du récap sur une longue partie).
+- Phase 8 : « Proposer avec l'IA » avec mon modèle (qualité des brouillons JSON).
+- Phase 9 : une vraie partie longue (plus de 30 tours) pour confirmer la fin des scènes rejouées.
 
 ## Feuille de route restante
-Vision : après la Phase 8 (version **0.6.0**), le reste du travail jusqu'à la **V1** sera surtout des optimisations
-(comme celles ci-dessous) et l'ajout de nouveaux Lore packs.
+Vision : le travail jusqu'à la **V1** = rendre le jeu confortable (vitesse, qualité, portraits), puis de nouveaux packs.
+Priorité générale : pouvoir jouer dans de bonnes conditions avant tout le reste.
 
-1. **Phase 9 (suite)** : style de narration à travailler ensemble (j'aime : réponses courtes, actions entre *astérisques*,
-   proche d'OOC.AI) ; début fixe de Lumencia (je le conçois moi-même) ; vitesse de génération (14 tok/s) ; les balises
-   de portrait que Rocinante n'écrit presque jamais. Continuer à rendre
-   lisible le code reconstruit (`journal.jsx`, `Providers.jsx`, `dialogs.jsx`) au fur et à mesure des fichiers touchés.
-   **Phase 10** : deux nouveaux Lore packs, créés par moi avec le créateur.
-2. **Optimisations images et vitesse** (après la Phase 8) :
-   - **Vérification d'abord** : contrôler à quel moment le portrait s'affiche aujourd'hui. Il doit apparaître dès que
-     l'IA écrit la balise `[Nom:N]` pendant la génération, et non après la fin de la réponse ou après l'analyse de scène.
-     (D'après les notes de la v1.7, il s'affiche à la fin de la réponse : à confirmer dans le code, `portrait_tags.py`,
-     `runtime.py` (tag_filter) et l'écran de jeu, puis par un test.)
-   - **Portrait en direct** : dès que la balise est reconnue pendant le flux, envoyer un événement à l'interface
-     et afficher le portrait tout de suite (même principe que l'URL d'image d'une application concurrente, mais avec
-     notre balise courte : ~5 tokens au lieu de 15–30, pas d'adresse inventée, portraits du monde de l'histoire).
-   - **Préchargement** des 6 expressions des personnages présents dans la scène (changement d'expression instantané).
-   - **Narration prioritaire** : LM Studio traite une requête à la fois. Les requêtes secondaires (analyse de scène,
-     capture mémoire, résumés) ne doivent pas faire attendre le message du joueur ni effacer le cache du narrateur :
-     les mettre en pause ou les reporter quand le joueur envoie un message.
-3. Petits restes : conseils LM Studio (Flash Attention, cache K/V en Q8) dans l'assistant ; mettre en avant l'option
-   « réponses courtes » (préréglage Fast) ; chapitre fermé automatiquement après un changement de lieu ou un saut dans
-   le temps ; le narrateur de démonstration recopie le texte des consignes.
-4. Nouveaux Lore packs (moi), avec le créateur de la Phase 8. Moi aussi : les images manquantes de Lumencia Academy.
-5. **Installateur Windows** (gardé). Priorité générale : pouvoir jouer dans de bonnes conditions (génération rapide,
-   fonctionnalités efficaces) avant tout le reste.
-   **Application Android (APK) avec une IA en ligne : pour la V1**, une fois l'application terminée (pas avant).
-   Abandonnés pour le moment (trop mineurs) : mécaniques de jeu optionnelles, arbre de choix.
-6. En tout dernier : lien d'invitation Discord (`DISCORD_URL` vide dans `lib/links.ts`).
+1. **Portraits** (prochaine étape conseillée). Constat du 18/11 : Rocinante n'écrit presque jamais les balises
+   `[Nom:N]` ; le portrait n'apparaît alors qu'après l'analyse de scène (plusieurs secondes après la réponse).
+   a. **Vérifier d'abord** à quel moment le portrait s'affiche aujourd'hui (`portrait_tags.py`, `runtime.py` tag_filter,
+      écran de jeu), par un test en direct.
+   b. **Balises dans l'historique** : quand une réponse n'a pas de balises mais que l'analyse a trouvé qui parle,
+      réécrire les balises dans les anciennes réponses envoyées au modèle (comme `portrait_tags.retag`). Les petits
+      modèles imitent ce qu'ils voient dans l'historique : c'est le moyen le plus efficace de les faire écrire.
+   c. **Rappel court au bon endroit** : une ligne dans le contexte du tour (près de mon message) plutôt que seulement
+      dans les consignes du début (exemple : `[Lily:2] "Bonjour."`).
+   d. **Détection sans balise, en direct** : pendant le flux, repérer le nom à côté des guillemets (`"..." dit Lily`,
+      `Lily sourit : "..."`) avec `turn_analysis.attribute_dialogue` (aucun token) et afficher le portrait tout de suite.
+   e. **Portrait en direct** : envoyer un événement à l'interface dès qu'une balise (ou une détection) arrive pendant
+      la génération, au lieu d'attendre la fin de la réponse.
+   f. **Préchargement** des 6 expressions des personnages présents (changement d'expression instantané).
+   g. Option : désactiver les balises pour les modèles qui ne les écrivent pas (gain de tokens) et s'appuyer sur d et
+      sur l'analyse.
+2. **Style de narration** à travailler ensemble (j'aime : réponses courtes, actions entre *astérisques*, proche
+   d'OOC.AI). Idée : un préréglage « Chat ».
+3. **Début fixe de Lumencia** : je le conçois moi-même. Côté moteur, prévoir un champ « introduction fixe » dans les
+   débuts (`starters[].intro`), affichée sans appel à l'IA, et modifiable dans le créateur.
+4. **Vitesse** : 14-16 tokens/s mesurés au lieu de 30-40 attendus sur ma 3060. Pistes : fermer les applications qui
+   utilisent la carte (Opera GX…), vérifier la mémoire vidéo dans le Gestionnaire des tâches, essayer « Max Concurrent
+   Predictions » à 1 dans LM Studio. Je peux supprimer l'ancien Rocinante Q6_K_L (10,4 Go) dans My Models.
+5. **Assistant de premier lancement** : y ajouter les conseils LM Studio appris le 18/11 (Q4_K_M pour 12 Go, contexte
+   16-24k, cache K/V Q8_0, Flash Attention, format ChatML si le GGUF n'en a pas, limite à la mémoire de la carte) et,
+   si possible, détecter un modèle sans format de conversation.
+6. Petits restes : mettre en avant l'option « réponses courtes » ; chapitre fermé automatiquement après un changement
+   de lieu ou un saut dans le temps ; le narrateur de démonstration recopie le texte des consignes ; rendre lisible le
+   code reconstruit (`journal.jsx`, `Providers.jsx`, `dialogs.jsx`) au fur et à mesure des fichiers touchés.
+7. **Phase 10** : nouveaux Lore packs (moi), avec le créateur. Moi aussi : les images manquantes de Lumencia Academy.
+8. **Installateur Windows** (gardé). **Application Android (APK) avec une IA en ligne : pour la V1**, une fois
+   l'application terminée. Abandonnés pour le moment : mécaniques de jeu optionnelles, arbre de choix.
+9. En tout dernier : lien d'invitation Discord (`DISCORD_URL` vide dans `lib/links.ts`).
 
 ## Ce que je te demande maintenant
 (à compléter)
