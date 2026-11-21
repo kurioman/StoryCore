@@ -33,7 +33,8 @@ local de jeu de rôle textuel par IA, basé sur des « Lore packs » (des mondes
   puis recopier `$HOME/fe/dist/` dans `app/frontend/dist/` (supprimer l'ancien `dist` d'abord). Ne pas faire `npm install` dans le dossier monté.
 - Tests (**117**, plus les 4 de l'installateur en cours ; ~3 min 40 au total : la commande a une limite de 3 min, donc **les lancer en deux moitiés**) :
   `PYTHONPYCACHEPREFIX=$HOME/pyc $HOME/v312/bin/python DEVONLY/run_tests.py test_api_basics test_bug_report test_codex test_lmstudio test_music test_narration_language test_pack_check test_providers test_remote test_usage test_continuity test_cinematic`
-  puis `... DEVONLY/run_tests.py test_context_layout test_story_flow test_summaries test_creator test_phase9 test_portraits_live test_story_events test_report_30_turns`.
+  puis `... DEVONLY/run_tests.py test_context_layout test_story_flow test_summaries test_creator test_phase9 test_portraits_live test_story_events test_report_30_turns`,
+  et (phase 2) `... test_report_50_turns test_info_table test_phase2_flow`. Avec la limite de 3 min, lancer test_summaries seul.
 - Clés de traduction manquantes : `node $HOME/tools/keys.mjs app/frontend/src app/frontend/src/i18n/locales/en.json`
   (met à jour en.json), puis comparer avec fr.json (chaque clé de en.json doit exister dans fr.json). Ajouter les traductions
   avec un petit script node (Object.assign) pour garder le format du fichier.
@@ -120,6 +121,32 @@ local de jeu de rôle textuel par IA, basé sur des « Lore packs » (des mondes
   Le volet navigateur de Claude caché ne dessine rien : les mesures de défilement s'y font en Chrome sans écran.
   Reste : réponses trop longues pour « Moyen », répétitions de descriptions, apparence et genre dans les fiches du
   pack, narrateur qui écrit les répliques du héros, 0 fait extrait par la capture mémoire.
+
+## Phase 2 : qualité de la narration (21/11/2026, après le test « Lumencia 50 tours » avec Rocinante)
+Plan suivi : `RELEASE_NOTES.md` (section « Phase 2 »). Étapes faites, un commit chacune (2 et 3 ensemble, 4 à 7 ensemble) :
+1. Filet de sécurité (`services/reply_cleanup.py`) : ``` et étiquettes retirés (réponse, historique envoyé, anciennes
+   histoires une fois au démarrage : `turns.sanitize_stored_replies`), écho du joueur retiré, réponse sans récit redemandée
+   une fois puis erreur `no_story` (`runtime._run`), anti-répétition sur 8 réponses, narration à la 3e personne
+   (profil `v6_third_person`, note `<narrator-note>` au lieu de « (OOC: …) »), contexte du tour entre `<context>` et
+   `</context>` (l'ancienne étiquette « [The player's turn] » était recopiée), plafond de longueur en mots (Cinématique).
+2. Instructions : prompt Lumencia réécrit (`ai/narrative_system_prompt.md`, avec « Fixed truths »), titres et consignes
+   des sections raccourcis.
+3. Lore : champ `gender` (tous les personnages des deux packs sont des femmes), fiche courte d'une ligne par personnage
+   présent ou nommé (`context_builder.character_card`), lore sans métadonnées (`compact_record`), recherche par mots
+   limitée, avertissement de Check Lore Packs, champ Genre du créateur. Aria : élève devenue la Sainte, qui enseigne aussi.
+4. Tableau d'informations (`services/info_table.py`) : bloc `<info>` en lignes simples à la fin de chaque réponse, retiré
+   du flux, vérifié, enregistré, affiché sous la réponse (corriger / annuler), annulé si la réponse est régénérée ou
+   supprimée. Quand le bloc est là, l'analyse de scène n'est plus envoyée (elle revient si le modèle ne l'écrit pas).
+5. Récaps (`services/summaries.py`, mode `recap_mode`) : un récap toutes les `recap_every` réponses (10), un récap global
+   tous les 5, dans une tâche jamais stoppée (`main._recaps`), qui attend la fin du narrateur en local.
+6. Contexte : messages non couverts par un récap seulement (au moins 8), journal et faits capturés non envoyés, capture de
+   mémoire coupée avec les récaps, `cached_tokens` dans le journal.
+7. Journal > Mémoire de l'IA : verrouiller, réécrire, revenir à la version de l'IA.
+Mesure sur la requête du tour 50 du test : partie fixe ≈ 5 400 → ≈ 3 300 tokens ; avec les récaps, l'historique passe
+de ≈ 17 000 tokens (100 messages) à 8-20 messages.
+Prochaine étape : Kurio refait le test de 50 tours avec Rocinante, puis avec DeepSeek, et écrit un rapport. Si
+Rocinante n'écrit pas le bloc `<info>`, l'analyse de scène prend le relais toute seule ; si ses récaps sont mauvais, les
+corriger dans le Journal ou désactiver « Récaps automatiques » (Paramètres > Mémoire).
 
 ## Pas encore vérifié avec du vrai matériel
 - Phase 6 sur mon vrai téléphone (pare-feu Windows : cocher « Réseaux privés »).

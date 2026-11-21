@@ -5,6 +5,22 @@ Code: services/context_builder.py (build), services/turns.py, services/runtime.p
 services/extraction.py. In the app, open a story and use the Context Inspector to see exactly what was sent.
 
 
+0. PHASE 2 (21/11/2026): WHAT CHANGED
+-------------------------------------
+- Narration rules: profile v6_third_person (default). Third person, story only, one priority order for sources. The
+  per-turn note after the player's message is <narrator-note>...</narrator-note> (it was "(OOC: ...)").
+- The per-turn block is between <context note="..."> and </context> (TURN_OPEN / TURN_CLOSE); the old closing label
+  "[The player's turn]" was copied by Rocinante into its replies.
+- Earlier replies are sent without code fences and labels (reply_cleanup.strip_for_history) and with their info block.
+- Characters present or named: one short card each (gender; role; social status: traits; looks), never the full record.
+  Lore records are sent without bookkeeping (compact_record); a word match adds at most two places, groups or terms.
+- Info block (services/info_table.py): section "info_table" (stable); the reply ends with <info>...</info>, taken out
+  while streaming (InfoFilter, runtime), applied after the reply (main._apply_info) instead of the scene analysis.
+- Recaps (services/summaries.py, recap_mode): level "scene" = a recap of recap_every replies, level "story" = the global
+  recap. With them: section "scene_summaries" holds the global recap and the recaps, only the messages no recap covers are
+  sent (at least recent_messages_min = 8), "events" and "facts" are not sent, memory capture is not sent after a reply.
+  They run in main._recaps, never stopped by "narration first".
+
 1. ONE REQUEST = A SYSTEM PROMPT + RECENT MESSAGES
 --------------------------------------------------
 context_builder.build() returns:
