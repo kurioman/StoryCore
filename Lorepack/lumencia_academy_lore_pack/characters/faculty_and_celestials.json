@@ -4,6 +4,7 @@
     {
       "id": "artemis",
       "name": "Artemis",
+      "gender": "female",
       "aliases": [],
       "type": "faculty",
       "role": "Head Professor of the Knight Department",
@@ -36,6 +37,7 @@
     {
       "id": "elena_caldwin",
       "name": "Elena Caldwin",
+      "gender": "female",
       "aliases": [
         "Elena"
       ],
@@ -72,6 +74,7 @@
     {
       "id": "emily",
       "name": "Emily",
+      "gender": "female",
       "aliases": [],
       "type": "faculty_and_celestial",
       "role": "Headmaster of Lumencia Academy; one of the Four Celestials",
@@ -108,6 +111,7 @@
     {
       "id": "ethera",
       "name": "Ethera",
+      "gender": "female",
       "aliases": [],
       "type": "faculty_and_celestial",
       "role": "Tower Master; one of the Four Celestials",
@@ -148,6 +152,7 @@
     {
       "id": "carne",
       "name": "Carne",
+      "gender": "female",
       "aliases": [],
       "type": "celestial",
       "role": "Commander of the Imperial Guard; one of the Four Celestials",
@@ -190,6 +195,7 @@
     {
       "id": "seriel",
       "name": "Seriel",
+      "gender": "female",
       "aliases": [],
       "type": "celestial",
       "role": "Wandering archer known as the Dawn of the Empire; one of the Four Celestials",

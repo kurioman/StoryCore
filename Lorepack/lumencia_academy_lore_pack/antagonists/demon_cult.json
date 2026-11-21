@@ -13,6 +13,7 @@
     {
       "id": "nemesis",
       "name": "Nemesis",
+      "gender": "female",
       "aliases": [],
       "type": "apostle",
       "aspect": "Despair",
@@ -61,6 +62,7 @@
     {
       "id": "veradin",
       "name": "Veradin",
+      "gender": "female",
       "aliases": [],
       "type": "apostle",
       "aspect": "Void",
@@ -99,6 +101,7 @@
     {
       "id": "kartia",
       "name": "Kartia",
+      "gender": "female",
       "aliases": [],
       "type": "apostle",
       "aspect": "Desire",
@@ -137,6 +140,7 @@
     {
       "id": "arien",
       "name": "Arien",
+      "gender": "female",
       "aliases": [],
       "type": "apostle",
       "aspect": "Grief",
@@ -175,6 +179,7 @@
     {
       "id": "pria",
       "name": "Pria",
+      "gender": "female",
       "aliases": [],
       "type": "sin_bishop",
       "sin": "Pride",
@@ -192,6 +197,7 @@
     {
       "id": "sloth",
       "name": "Sloth",
+      "gender": "female",
       "aliases": [],
       "type": "sin_bishop",
       "sin": "Sloth",
@@ -208,6 +214,7 @@
     {
       "id": "aris",
       "name": "Aris",
+      "gender": "female",
       "aliases": [],
       "type": "sin_bishop",
       "sin": "Greed",
@@ -224,6 +231,7 @@
     {
       "id": "beelzebub",
       "name": "Beelzebub",
+      "gender": "female",
       "aliases": [],
       "type": "sin_bishop",
       "sin": "Gluttony",
@@ -240,6 +248,7 @@
     {
       "id": "asmo",
       "name": "Asmo",
+      "gender": "female",
       "aliases": [],
       "type": "sin_bishop",
       "sin": "Lust",
@@ -256,6 +265,7 @@
     {
       "id": "leviane",
       "name": "Leviane",
+      "gender": "female",
       "aliases": [],
       "type": "sin_bishop",
       "sin": "Envy",
@@ -272,6 +282,7 @@
     {
       "id": "belian",
       "name": "Belian",
+      "gender": "female",
       "aliases": [],
       "type": "sin_bishop",
       "sin": "Wrath",

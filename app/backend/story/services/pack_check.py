@@ -79,6 +79,7 @@ def check_pack(pack_dir: Path) -> dict[str, Any]:
                 rep.stats["character_ids"] = {cid: index.name(cid) for cid in sorted(index.entities)}
                 if world is not None:
                     _check_starters(world, index, rep)
+                _check_gender(s, rep)
                 lib = (manifest or {}).get("library") or {}
                 if manifest and not lib.get("summary"):
                     rep.info.append("No summary (pack.json \"summary\", format 2): the story library card has no text.")
@@ -164,6 +165,17 @@ def _character_index(s) -> EntityIndex:
     ents = [Entity(le.entity_id, le.name, "character", le.entity_type, list(le.aliases_json or []))
             for le in s.scalars(select(LoreEntity).where(LoreEntity.category == "character"))]
     return EntityIndex(ents)
+
+
+def _check_gender(s, rep: Report) -> None:
+    """Phase 2 (step 3): without a gender the narrator guessed it (Laris and Elena written as men in the test of 19/11)."""
+    from ..models import LoreEntity
+    missing = sorted(e.name for e in s.scalars(select(LoreEntity).where(LoreEntity.category == "character"))
+                     if not str((e.data_json or {}).get("gender") or "").strip())
+    if missing:
+        rep.warnings.append(f"No \"gender\" for {len(missing)} character(s): {', '.join(missing[:12])}"
+                            + (" ..." if len(missing) > 12 else "") + ". The narrator may guess it wrong (add \"gender\": "
+                            "\"female\" / \"male\" / another word, and \"pronouns\" if useful).")
 
 
 def _check_starters(world: World, index: EntityIndex, rep: Report) -> None:

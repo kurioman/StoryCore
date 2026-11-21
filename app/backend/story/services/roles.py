@@ -139,7 +139,7 @@ def build_registry(db: Session, world_id: str | None, index: EntityIndex) -> dic
             out["conflicts"].append({"role_id": rid, "lore": prev["character_id"], "owner": cid,
                                      "message": f"{'Lore' if prev['source'].startswith('lore') else 'The pack'} names "
                                                 f"{prev['character_name']} for {prev['title']}; {who} assigned {chars[cid].name}."})
-        elif not prev and lore_desc:
+        elif not prev and lore_desc and not note:  # phase 2: a note written by the author already explains the post
             note = " ".join(x for x in [note, f"(Lore describes {chars[cid].name} as {lore_desc}; this post is {who}'s assignment.)"] if x)
         roles[rid] = {**(prev or {}), "role_id": rid, "title": a.get("title") or (prev or {}).get("title") or rid,
                       "character_id": cid, "character_name": chars[cid].name,

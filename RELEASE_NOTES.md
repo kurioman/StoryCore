@@ -14,6 +14,15 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
 - **One narrative voice: the third person** (the OOC.AI style). The narration rules no longer say "you" while the
   Cinematic style said "never you"; the per-turn note is no longer an "(OOC: …)" line the model answered or copied.
 - **Length**: with a target in words (Cinematic), a reply stops near that target (a medium reply could reach 480 words).
+- **Clearer, shorter instructions.** The Lumencia narrator prompt was rewritten for StoryCore (1,560 → about 400 tokens):
+  no more generic game-master advice nor "this lore is uncertain" notes, and a short list of fixed truths (Emily is the
+  Headmaster and a Celestial, an ally; the Demon God Cult fights the Celestials; Aria is a student who became the
+  Saintess and also teaches Theology). The scene, canon facts and encounters are said in a few lines.
+- **Characters: gender and short cards.** Character records have a `gender` field (all the characters of Lumencia
+  Academy and Hero's Chronicle are female); the world creator has a Gender field and Check Lore Packs warns when it is
+  missing. A character present or named is sent as one line (gender, role, traits, looks) instead of her whole record.
+- **Lore sent without bookkeeping**: no confidence marks, source ids or duplicates (a character's local override was
+  sent with her full record); a word match brings at most two places, groups or terms, never an absent character.
 
 ## New in v0.6
 

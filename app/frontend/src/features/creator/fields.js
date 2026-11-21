@@ -25,6 +25,7 @@ export function cardKinds() {
       subtitle: (c) => [c.type, c.affiliation].filter(Boolean).join(` · `),
       fields: [
         { key: `name`, label: msg("Name"), type: `text` },
+        { key: `gender`, label: msg("Gender"), type: `text`, placeholder: msg("female, male…") },
         { key: `type`, label: msg("Role"), type: `text`, placeholder: msg("Captain, student, innkeeper…") },
         { key: `race`, label: msg("Species or origin"), type: `text` },
         { key: `title`, label: msg("Title"), type: `text` },

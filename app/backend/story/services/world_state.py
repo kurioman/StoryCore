@@ -528,21 +528,16 @@ def calendar_text(sc: dict[str, Any], year_label: str = "Year") -> str | None:
 def render_for_narrator(sc: dict[str, Any], year_label: str = "Year") -> str:
     """Scene lines for the narrator: every field, 'not established' when unknown, plus the consistency rule.
     ``year_label``: the world's name for its years (pack.json → calendar), e.g. "Imperial Calendar 1301"."""
-    lines = [f"In-story day: D{sc.get('story_day') or 1} (story-world time, not the real date)",
-             f"Calendar: {calendar_text(sc, year_label) or NOT_ESTABLISHED}",
-             f"Time of day: {fmt(sc.get('time'))}", f"Location: {fmt(sc.get('location'))}", f"Weather: {fmt(sc.get('weather'))}",
-             "Keep these consistent; change them only when the story moves on, visibly in the narration. When a lesson, "
-             "a meeting or a clock makes it natural, state the hour once."]
+    # phase 2: the same values and rules in three lines (they were nine)
+    cal = calendar_text(sc, year_label)
+    lines = [f"Day {sc.get('story_day') or 1} of the story" + (f" ({cal})" if cal else "") + f", {fmt(sc.get('time'))}; "
+             f"place: {fmt(sc.get('location'))}; weather: {fmt(sc.get('weather'))}."]
     missing = [label for label, v in (("time of day", sc.get("time")), ("weather", sc.get("weather"))) if not v]
+    rule = "Keep these until the story visibly moves on; never write a date/time/place header (the app shows one)."
     if missing:
-        # v1.5: in the owner's 120-message story the weather was almost never stated, so the bar showed "not established"
-        # for most of the session; the narrator is now asked to establish it — naturally, never as an invented clock
-        lines.append(f"Not yet established: {' and '.join(missing)}. When a scene begins or moves, or time passes, "
-                     "establish them in one brief natural detail (light, sky, bells, rain); an approximate time is enough.")
-    if not calendar_text(sc):
-        lines.append("Calendar date: not established; invent a precise date only if the story calls for one.")
-    # v1.5.1: the app shows a day/date/time/weather/place header above each reply from these values
-    lines.append("Never write a date/time/location header line (the app shows one).")
+        # v1.5: the weather was almost never stated; the narrator is asked to establish it naturally
+        rule += f" When the scene starts or moves, give the {' and '.join(missing)} in one brief natural detail."
+    lines.append(rule)
     return "\n".join(lines)
 
 

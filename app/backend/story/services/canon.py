@@ -271,5 +271,5 @@ def render_block(canon: dict[str, Any], index: EntityIndex, focus: set[str], act
             f"{_people(r)})" for r in others) + ".")
     if not lines:
         return ""
-    return ("Canon facts (family ties and classes; kinship never implies affection; rosters are the usual attendance; "
-            "the protagonist may not know these people yet):\n" + "\n".join(dict.fromkeys(lines)))
+    return ("Kinship never implies affection; the protagonist may not know these people yet.\n"
+            + "\n".join(dict.fromkeys(lines)))

@@ -18,7 +18,7 @@ PREMISE_CHARS = 1800
 MAX_TOKENS = 1100
 
 FIELDS = {
-    "character": ('{"name": "...", "type": "role in the story (e.g. Captain, Student, Merchant)", "race": "species or '
+    "character": ('{"name": "...", "gender": "female, male or another word", "type": "role in the story (e.g. Captain, Student, Merchant)", "race": "species or '
                   'origin, if it matters", "title": "", "affiliation": "group or family", "appearance": "2-3 sentences",'
                   ' "personality_traits": ["4 to 6 short words"], "speech": "how they talk, one sentence", '
                   '"notes": "who they are, 2-3 sentences", "background": "their past, 2-4 sentences", '

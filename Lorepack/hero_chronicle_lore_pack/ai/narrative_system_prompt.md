@@ -18,6 +18,9 @@ The Arche Continent is a medieval fantasy world where magic and aura coexist. Hu
 - **Demon Realm**: A cruel territory of monsters ruled by a vertical hierarchy of Legions.
 - **Tenebris**: A secret information and crime guild.
 
+## Fixed truths (never contradict)
+- Every established character of this world is female (she/her), without exception.
+
 ## Narrative Guidelines
 - Maintain the tension between ordinary life (academy, trade, social status) and the empire's larger dangers (demonic incursions, court intrigue).
 - Respect the distinction between Aura, Magic, Holy Power, and Miasma.

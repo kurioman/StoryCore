@@ -33,7 +33,7 @@ FACT_LABELS = {
 }
 
 
-LORE_BUDGET_MAX = 1600
+LORE_BUDGET_MAX = 700  # phase 2: places, groups and terms only (characters have their short card)
 
 
 def est_tokens(s: str) -> int:
@@ -162,6 +162,53 @@ def render_state(st: dict[str, Any], index: EntityIndex, year_label: str = "Year
         scene_lines.append("Present: " + ", ".join(index.name(c) for c in sc["present"]))
     scene_lines += render_relationships(st.get("relationships", []), index)
     return "\n".join(lines), "\n".join(scene_lines)
+
+
+# Phase 2 (step 3): lore records are sent without their bookkeeping (confidence, sources, ids...): it told the model
+# that the lore was uncertain, and cost tokens without helping to write.
+META_KEYS = re.compile(r"^\s*-?\s*(?:id|_index_type|confidence|canon_status|source_ids|story_functions|faction_ids|"
+                       r"relationship_notes|target_id|notes|term|schema_version|aliases)\s*:", re.I)
+
+
+def compact_record(body: str) -> str:
+    """A lore record without its bookkeeping lines and "[confidence: x]" marks."""
+    out = []
+    skipping = False
+    for line in body.split("\n"):
+        if META_KEYS.match(line):
+            skipping = line.rstrip().endswith(":")  # a block ("relationship_notes:") goes with its indented lines
+            continue
+        if skipping and (line.startswith("  ") or line.lstrip().startswith("- target_id")):
+            continue
+        skipping = False
+        line = re.sub(r"\s*\[(?:confidence|source confidence)[^\]]*\]", "", line)
+        line = re.sub(r";?\s*confidence:\s*\w+", "", line)
+        if line.strip():
+            out.append(line.rstrip())
+    return "\n".join(out)
+
+
+DEPARTMENTS = {"knight_department": "Knight", "magic_department": "Magic", "theology_department": "Theology"}
+
+
+def character_card(le, post: str | None = None) -> str:
+    """Phase 2 (step 3): one compact line per character: name (gender; role): traits; looks."""
+    d = le.data_json or {}
+    gender = ", ".join(x for x in (str(d.get("gender") or "").strip(), str(d.get("pronouns") or "").strip()) if x)
+    role = post or ""
+    if not role:
+        dept = DEPARTMENTS.get(str(d.get("department_id") or ""), str(d.get("department_id") or "").replace("_", " "))
+        year = d.get("year")
+        if le.entity_type == "student" or d.get("type") == "student":
+            nth = {1: "1st", 2: "2nd", 3: "3rd"}.get(year, f"{year}th") if isinstance(year, int) else ""
+            role = " ".join(x for x in (f"{nth}-year" if nth else "", dept, "student") if x)
+        else:
+            role = str(d.get("role") or d.get("occupation") or le.entity_type or "").replace("_", " ")
+    status = str(d.get("social_status") or "").split(";")[0].strip()
+    head = "; ".join(x for x in (gender, role, status) if x)
+    traits = ", ".join((d.get("personality_traits") or [])[:4]) or (le.summary or "")[:120]
+    looks = looks_of(d)
+    return f"- {le.name}" + (f" ({head})" if head else "") + (f": {traits}" if traits else "") + (f"; looks: {looks}" if looks else "")
 
 
 def looks_of(data: dict[str, Any] | None) -> str:
@@ -440,14 +487,14 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
         warnings.append("Global user note exists but is disabled" + (" for this story." if ssettings.get("disable_global_note") else "."))
     sn = db.scalar(select(UserNote).where(UserNote.scope == "story", UserNote.story_id == story.id))
     if sn and sn.enabled and sn.content.strip():
-        sections.append(Section("story_note", "Story user note (takes precedence over the global note and baseline lore)",
+        sections.append(Section("story_note", "Story note from the player (overrides lore)",
                                 sn.content.strip(), [{"type": "note", "id": sn.id, "label": "Story note (active)"}]))
 
     # 4. avatar + player state (av is read before the core prompt: a preset may name the protagonist)
     from .world_state import calendar_of
     player_text, scene_text = render_state(state, index, calendar_of(db, story.world_id)["year_label"])
     if av:  # v0.5: the profile (stable) and the current state (changes every turn) are separate sections
-        sections.append(Section("avatar", "Protagonist (controlled by the user — never act or speak for them)",
+        sections.append(Section("avatar", "Protagonist (played by the player)",
                                 render_avatar(av), [{"type": "avatar", "label": av.get("name") or "Avatar"}]))
     if player_text:
         sections.append(Section("player_state", "Protagonist's current state", player_text,
@@ -467,32 +514,34 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
     # is first noticed in this reply is described correctly too.
     classmates = [s["character_id"] for s in active_class["students"] if s["character_id"]] if active_class else []
     cast_lines = []
+    from . import roles as roles_svc
+    registry = roles_svc.build_registry(db, story.world_id, index)
+    post_of = {}
+    for r in registry["roles"]:
+        post_of.setdefault(r["character_id"], r["title"])
+    carded: set[str] = set()
     for cid in dict.fromkeys([*focus_entities[:8], *classmates]):
         le = db.scalar(select(LoreEntity).where(LoreEntity.world_id == story.world_id, LoreEntity.entity_id == cid)) if story.world_id else None
         if le and le.category == "character":
-            traits = ", ".join((le.data_json or {}).get("personality_traits") or [])
-            looks = looks_of(le.data_json)
-            cast_lines.append(f"- {le.name} ({le.entity_type}): {traits or le.summary}" + (f"; looks: {looks}" if looks else "")
-                              + ("" if le.confidence == "high" else f" [source confidence: {le.confidence}]"))
+            cast_lines.append(character_card(le, post_of.get(cid)))
+            carded.add(cid)
     # lore background between the characters in focus (v1.4): initial relationships, below the story-evolved values
     from .relationships import lore_relationships
     focus_set = set(focus_entities[:8])
     lore_rel = [f"- {r['source_name']} → {r['target_name']}: {r['type']}" for r in lore_relationships(db, story.world_id, focus_set)
                 if r["source_id"] in focus_set and r["target_id"] in focus_set][:8]
-    sc_text = "\n".join(x for x in [scene_text, ("Cast notes (\"looks\" is canon: never give one character another's hair "
-                                                 "or eyes):\n" + "\n".join(cast_lines)) if cast_lines else "",
+    sc_text = "\n".join(x for x in [scene_text, ("Characters here or named (cards are canon: keep each one's gender, "
+                                                 "role and looks):\n" + "\n".join(cast_lines)) if cast_lines else "",
                                     ("Lore background between these characters (initial; story-evolved values above take "
                                      "precedence):\n" + "\n".join(lore_rel)) if lore_rel else ""] if x)
     if sc_text:
-        sections.append(Section("scene", "Current scene, cast and relationships", sc_text,
+        sections.append(Section("scene", "Scene now", sc_text,
                                 [{"type": "entity", "id": c, "label": index.name(c)} for c in focus_entities[:8]]))
     # 5b. established posts and closed groups (v1.4): lore holds them, the narrator invented replacements without them.
     # Narrator-only knowledge: building context never records a discovery for the protagonist.
-    from . import roles as roles_svc
-    registry = roles_svc.build_registry(db, story.world_id, index)
     roles_text = roles_svc.render_block(registry, index, present)
     if roles_text:
-        sections.append(Section("roles", "Established characters and posts (lore registry — do not reassign)", roles_text,
+        sections.append(Section("roles", "Established characters and posts", roles_text,
                                 [{"type": "role", "id": r["role_id"], "label": f"{r['title']}: {r['character_name']}"}
                                  for r in registry["roles"]]))
     # 5c. v1.5: who the protagonist already knows (read-only use of discoveries — the v1.4 posts block alone said "may
@@ -511,7 +560,7 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
     # 5d. v1.5: structured canon (kinship, family branches, class rosters) relevant to this scene
     canon_text = canon_svc.render_block(canon, index, set(focus_entities[:8]), active_class)
     if canon_text:
-        sections.append(Section("canon", "Canon facts (owner-confirmed and lore — do not contradict)", canon_text,
+        sections.append(Section("canon", "Canon facts (never contradict)", canon_text,
                                 [{"type": "canon_fact", "label": active_class["class_id"] if active_class else "family ties"}]))
     # 5e. v1.6: a group scene is told who is in the room and who has been quiet (never trimmed; a few lines at most)
     group_text = scene_cast.group_scene(db, state, index, convo, active_class, set(known), recent_text)
@@ -562,9 +611,7 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
     relevant = sorted((e for e in events if e not in digest), key=score_event, reverse=True)[:8]
     ev_items, ev_lines = [], []
     for e in sorted(set(digest) | set(relevant), key=lambda e: (e.branch_sequence, e.created_at)):
-        tag = "" if e.verification_status in ("confirmed", "confirmed_from_transcript") else " [unverified]"
-        if e.evidence_kind not in ("witnessed", "confirmed"):
-            tag += f" [{e.evidence_kind}]"
+        tag = "" if e.evidence_kind in ("witnessed", "confirmed") else f" [{e.evidence_kind}]"
         ev_lines.append(f"- #{e.branch_sequence} {e.title}: {e.summary}{tag}" + (" (STALE: source message was edited)" if e.stale else ""))
         ev_items.append({"type": "event", "id": e.id, "label": e.title})
     mem_budget = max(400, int(budget * 0.18))
@@ -577,7 +624,7 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
         fact_items.append({"type": "fact", "id": f.id, "label": f.content[:80]})
         used += est_tokens(line)
     if ev_lines:
-        sections.append(Section("events", f"Story journal — timeline digest and relevant events ({len(events)} total)",
+        sections.append(Section("events", "Story so far (journal)",
                                 "\n".join(ev_lines), ev_items))
     if fact_lines:
         sections.append(Section("facts", "Relevant facts and memories (respect who knows what)", "\n".join(fact_lines), fact_items))
@@ -599,24 +646,35 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
             try:
                 ids = [r[0] for r in db.execute(text("SELECT id FROM lore_fts WHERE lore_fts MATCH :q AND world_id = :w ORDER BY rank LIMIT 6"),
                                                 {"q": fts_q, "w": story.world_id})]
-                chunks += [c for c in (db.get(LoreChunk, i) for i in ids) if c]
+                # phase 2: a word match brings places, groups and terms, never a character the scene does not have
+                # (the test of 19/11 sent Anastasia twice and Rena at a breakfast with Lilia alone)
+                found = [c for c in (db.get(LoreChunk, i) for i in ids) if c]
+                chunks += [c for c in found if not (c.entity_id and c.entity_id in index.entities
+                                                    and index.entities[c.entity_id].category == "character")
+                           and not (c.category == "premise" or c.title.lower().startswith("premise"))][:2]
             except Exception:
                 pass
         seen = set()
+        canon_rows = list(db.scalars(select(LocalCanon).where(LocalCanon.status == "approved",
+                                                              or_(LocalCanon.story_id == story.id, LocalCanon.scope.in_(("local", "global_draft"))),
+                                                              or_(LocalCanon.world_id == story.world_id, LocalCanon.world_id.is_(None)))))
+        overridden = {lc.overrides_entity_id for lc in canon_rows if lc.overrides_entity_id}
         # v0.5 phase 7.3: a character's full lore entry is sent when they come into the scene; while they stay (already
         # named in the recent messages before this exchange) the cast notes above (traits, looks) are their short card
         short_cards = cfg.get("lore_short_cards", True) is not False
         staying = set(index.find_mentions(" ".join(m.content for m in convo[-12:-2]))) if short_cards else set()
-        carded = {cid for cid in focus_entities[:8] if any(line.startswith(f"- {index.name(cid)} (") for line in cast_lines)}
         for c in chunks:
             if c.id in seen or f"lore:{c.id}" in exclusions:
                 continue
             seen.add(c.id)
-            if c.entity_id in staying and c.entity_id in carded and c.id not in pins:
+            if c.entity_id in carded and c.id not in pins and (short_cards or c.entity_id in staying):
                 lore_items.append({"type": "lore", "id": c.id, "label": c.title, "included": False,
-                                   "reason": "short card (already in the scene)"})
+                                   "reason": "short card"})
                 continue
-            body = c.content if len(c.content) < 2400 else c.content[:2400] + " …"
+            if c.entity_id in overridden and c.id not in pins:
+                continue
+            body = compact_record(c.content)
+            body = body if len(body) < 2400 else body[:2400] + " …"
             t = est_tokens(body)
             if used + t > lore_budget and c.id not in pins:
                 lore_items.append({"type": "lore", "id": c.id, "label": c.title, "included": False, "reason": "lore budget"})
@@ -624,19 +682,17 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
             lore_lines.append(f"## {c.title}\n{body}")
             lore_items.append({"type": "lore", "id": c.id, "label": c.title, "confidence": c.confidence, "canon_status": c.canon_status})
             used += t
-        canon_rows = list(db.scalars(select(LocalCanon).where(LocalCanon.status == "approved",
-                                                              or_(LocalCanon.story_id == story.id, LocalCanon.scope.in_(("local", "global_draft"))),
-                                                              or_(LocalCanon.world_id == story.world_id, LocalCanon.world_id.is_(None)))))
         for lc in canon_rows:
             if f"canon:{lc.id}" in exclusions:
                 continue
             if lc.entity_ids_json and not (set(lc.entity_ids_json) & focus) and lc.overrides_entity_id not in focus and len(canon_rows) > 12:
                 continue
-            lore_lines.append(f"## Local canon (campaign-established; overrides baseline lore): {lc.title}\n{lc.content}")
+            if lc.overrides_entity_id and (lc.overrides_entity_id in carded or lc.overrides_entity_id not in focus):
+                continue  # phase 2: only for what the scene has, and a character's short card is enough
+            lore_lines.append(f"## {lc.title} (campaign canon)\n{compact_record(lc.content)}")
             lore_items.append({"type": "canon", "id": lc.id, "label": lc.title})
     if lore_lines:
-        sections.append(Section("lore", "Reference lore (baseline lore is a research pack; low-confidence or community-"
-                                        "reconstructed details are not certain canon)", "\n\n".join(lore_lines), lore_items))
+        sections.append(Section("lore", "Lore", "\n\n".join(lore_lines), lore_items))
 
     # 8b. narrator-only secrets of the records in play (pack "hidden" fields; never shown to the player)
     secret_texts: list[str] = []

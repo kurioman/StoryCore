@@ -177,6 +177,4 @@ def render(result: dict[str, Any], index: EntityIndex) -> str:
     usual = ("In a lesson the teacher and usual students are present; prefer them over invented classmates."
              if school else "At a recurring gathering its leader and usual members are present; prefer them over invented "
              "ones.")
-    return (opening + "Possible encounters (established characters who could plausibly be here): use at most one, only "
-            f"if it fits naturally; never force a meeting or move the protagonist. {usual} Otherwise a minor unnamed extra "
-            "is fine.\n" + "\n".join(lines))
+    return (opening + f"At most one, only if it fits; never force a meeting. {usual}\n" + "\n".join(lines))

@@ -86,12 +86,16 @@ class ContextLayoutTest(AppTestCase):
             lore = next((x for x in b.manifest["sections"] if x["key"] == "lore"), {"items": []})
             return [i for i in lore["items"] if "Arbel" in i.get("label", "")]
 
+        # phase 2 (step 3): a character in the scene is always sent as her short card (gender, role, traits, looks),
+        # never as her whole lore record
         first = arbel_lore(self.build(sid))
-        self.assertTrue(first and all(i.get("included", True) for i in first), first)  # she arrives: full entry
+        self.assertTrue(first and all(i.get("reason") == "short card" for i in first), first)
         for t in ("Arbel nods at me.", "I ask Arbel about the North.", "I follow Arbel to the gate."):
             self.turn(sid, t)
         later = arbel_lore(self.build(sid))
-        self.assertTrue(later and all(i.get("reason") == "short card (already in the scene)" for i in later), later)
+        self.assertTrue(later and all(i.get("reason") == "short card" for i in later), later)
+        scene = next(x for x in self.build(sid).manifest["sections"] if x["key"] == "scene")
+        self.assertTrue(scene["tokens"] > 0)
         self.client.put("/api/settings", json={"lore_short_cards": False})
         try:
             self.assertTrue(all(i.get("included", True) for i in arbel_lore(self.build(sid))))

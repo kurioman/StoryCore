@@ -6,7 +6,7 @@
   "summary": {"en": "You arrive as a new student at Lumencia Academy, the most prestigious school of the empire, where sword arts, spellcraft and divine power are taught side by side. Classes, exams, rivalries and friendships between proud nobles and ambitious commoners... while a demonic cult stirs in the shadows.", "fr": "Vous arrivez comme nouvel élève à l'Académie Lumencia, l'école la plus prestigieuse de l'empire, où l'on enseigne côte à côte l'art de l'épée, la magie et le pouvoir divin. Cours, examens, rivalités et amitiés entre nobles fiers et roturiers ambitieux… pendant qu'un culte démoniaque s'agite dans l'ombre."},
   "tags": {"en": ["Academy", "Fantasy", "Lifestyle", "Action"], "fr": ["Académie", "Fantasy", "Lifestyle", "Action"]},
   "cover": "cover.webp",
-  "canon_note": "Imported from a research-based reference pack. Records carry confidence and canon_status; community reconstructions are not guaranteed official canon.",
+  "canon_note": "",
   "modules": ["school"],
 
   "files": {
@@ -47,7 +47,7 @@
       "note": "Instructor for knight and chivalry classes." },
     { "id": "instructor:theology_department", "title": "Theology instructor", "character": "aria",
       "aliases": ["theology professor", "theology teacher", "theology classes"],
-      "note": "Aria is the Saintess and a third-year student; she teaches Theology to first- and second-years because she is the Saintess." }
+      "note": "a third-year student who became the Saintess during her studies; she also teaches Theology to first- and second-years" }
   ],
 
   "closed_groups": [

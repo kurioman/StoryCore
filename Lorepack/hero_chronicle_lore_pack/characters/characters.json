@@ -3,6 +3,7 @@
     {
       "id": "diana",
       "name": "Diana",
+      "gender": "female",
       "type": "Noble",
       "race": "Human",
       "aliases": [
@@ -31,6 +32,7 @@
     {
       "id": "selphina",
       "name": "Selphina",
+      "gender": "female",
       "type": "Saint (Holy Maiden)",
       "race": "Human",
       "aliases": [
@@ -55,6 +57,7 @@
     {
       "id": "riana",
       "name": "Riana",
+      "gender": "female",
       "type": "Mage Tower Master",
       "race": "Human",
       "personality_traits": [
@@ -74,6 +77,7 @@
     {
       "id": "lilith",
       "name": "Lilith",
+      "gender": "female",
       "type": "Succubus and 3rd Legion Commander",
       "race": "Demon (Succubus)",
       "personality_traits": [
@@ -94,6 +98,7 @@
     {
       "id": "kashar",
       "name": "Kashar",
+      "gender": "female",
       "type": "Beastkin and 2nd Legion Commander",
       "race": "Beastkin (demi-human)",
       "personality_traits": [
@@ -114,6 +119,7 @@
     {
       "id": "iris",
       "name": "Iris",
+      "gender": "female",
       "type": "Dark Elf and 1st Legion Commander",
       "race": "Dark Elf",
       "personality_traits": [
@@ -133,6 +139,7 @@
     {
       "id": "irina",
       "name": "Irina",
+      "gender": "female",
       "type": "Elf",
       "race": "Elf",
       "personality_traits": [
@@ -153,6 +160,7 @@
     {
       "id": "azra",
       "name": "Azra",
+      "gender": "female",
       "type": "Dragonkin Chieftain (title: Dragon Emperor)",
       "race": "Dragonkin",
       "aliases": [
@@ -179,6 +187,7 @@
     {
       "id": "kriemhild",
       "name": "Kriemhild",
+      "gender": "female",
       "type": "Sword Saint (Human)",
       "race": "Human",
       "aliases": [
@@ -235,6 +244,7 @@
     {
       "id": "ymir",
       "name": "Ymir",
+      "gender": "female",
       "type": "Dwarf Blacksmith",
       "race": "Dwarf",
       "personality_traits": [
@@ -254,6 +264,7 @@
     {
       "id": "celestia",
       "name": "Celestia",
+      "gender": "female",
       "type": "Noble",
       "personality_traits": [
         "Cunning",
@@ -273,6 +284,7 @@
     {
       "id": "seria",
       "name": "Seria",
+      "gender": "female",
       "type": "Noble",
       "race": "Human",
       "aliases": [
@@ -299,6 +311,7 @@
     {
       "id": "sylvia",
       "name": "Sylvia",
+      "gender": "female",
       "type": "Noble",
       "aliases": [
         "the Second Princess"
@@ -322,6 +335,7 @@
     {
       "id": "isolde",
       "name": "Isolde",
+      "gender": "female",
       "type": "Noble",
       "personality_traits": [
         "Elitism",
@@ -343,6 +357,7 @@
     {
       "id": "seraphin",
       "name": "Seraphin",
+      "gender": "female",
       "type": "Noble",
       "personality_traits": [
         "Aestheticism",
@@ -364,6 +379,7 @@
     {
       "id": "arbel",
       "name": "Arbel",
+      "gender": "female",
       "type": "Noble",
       "personality_traits": [
         "Rigid",
@@ -384,6 +400,7 @@
     {
       "id": "bellona",
       "name": "Bellona",
+      "gender": "female",
       "type": "Noble",
       "personality_traits": [
         "Timid",
@@ -405,6 +422,7 @@
     {
       "id": "casey",
       "name": "Casey",
+      "gender": "female",
       "type": "Shaman",
       "race": "Beastkin (demi-human)",
       "personality_traits": [
@@ -425,6 +443,7 @@
     {
       "id": "vivian",
       "name": "Vivian",
+      "gender": "female",
       "type": "Information Broker, Thief and Hitman",
       "race": "Human",
       "personality_traits": [
@@ -445,6 +464,7 @@
     {
       "id": "lily",
       "name": "Lily Lumina",
+      "gender": "female",
       "type": "Goddess (Heavenly God)",
       "race": "Goddess",
       "aliases": [

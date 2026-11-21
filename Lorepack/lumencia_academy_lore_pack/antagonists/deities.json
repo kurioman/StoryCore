@@ -4,6 +4,7 @@
     {
       "id": "lily",
       "name": "Lily",
+      "gender": "female",
       "aliases": [],
       "type": "celestial_deity",
       "worshipped_by": [
@@ -28,6 +29,7 @@
     {
       "id": "delphirem",
       "name": "Delphirem",
+      "gender": "female",
       "aliases": [
         "Delpirem"
       ],

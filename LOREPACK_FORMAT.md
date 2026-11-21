@@ -272,6 +272,19 @@ Progress is read from the replies of the story's current path, so another branch
 In the app: World creator, tab **8. Events**. Lumencia Academy uses this for its first days (ceremony, optional
 orientation exam, wing exam, start-of-year event) and its end-of-year exam.
 
+## Characters: gender (phase 2)
+
+Every character record should have a `gender` field (`"female"`, `"male"`, or any other word), and may have `pronouns`
+(`"she/her"`). It goes into the character's short card, sent to the narrator as soon as the character is present or
+named, together with the role, the first traits and the looks:
+
+```
+- Laris (female; 1st-year Knight student; Member of a secondary branch of the Valenheart family): cold, terse; looks: white hair, red eyes
+```
+
+Without it the narrator guesses (the test of 19/11/2026 wrote Laris and Elena as men). **Check Lore Packs.bat** warns
+when a character has no `gender`. The world creator has a Gender field in the Characters tab.
+
 ## Hidden information (narrator-only secrets)
 
 Any record in the lore files (a character, a faction, a place, even an entry nested inside another record) can have a

@@ -4,6 +4,7 @@
     {
       "id": "lilia_valenheart",
       "name": "Lilia Valenheart",
+      "gender": "female",
       "type": "student",
       "group": "students",
       "file": "characters/students.json",
@@ -13,6 +14,7 @@
     {
       "id": "isabel",
       "name": "Isabel",
+      "gender": "female",
       "type": "student",
       "group": "students",
       "file": "characters/students.json",
@@ -22,6 +24,7 @@
     {
       "id": "sera",
       "name": "Sera",
+      "gender": "female",
       "type": "student",
       "group": "students",
       "file": "characters/students.json",
@@ -31,6 +34,7 @@
     {
       "id": "laris",
       "name": "Laris",
+      "gender": "female",
       "type": "student",
       "group": "students",
       "file": "characters/students.json",
@@ -40,6 +44,7 @@
     {
       "id": "anastasia",
       "name": "Anastasia",
+      "gender": "female",
       "type": "student",
       "group": "students",
       "file": "characters/students.json",
@@ -49,6 +54,7 @@
     {
       "id": "rena",
       "name": "Rena",
+      "gender": "female",
       "type": "student",
       "group": "students",
       "file": "characters/students.json",
@@ -58,6 +64,7 @@
     {
       "id": "sia",
       "name": "Sia",
+      "gender": "female",
       "type": "student",
       "group": "students",
       "file": "characters/students.json",
@@ -67,6 +74,7 @@
     {
       "id": "serena_caldwin",
       "name": "Serena Caldwin",
+      "gender": "female",
       "type": "student",
       "group": "students",
       "file": "characters/students.json",
@@ -76,6 +84,7 @@
     {
       "id": "chloe_brightwell",
       "name": "Chloe Brightwell",
+      "gender": "female",
       "type": "student",
       "group": "students",
       "file": "characters/students.json",
@@ -85,6 +94,7 @@
     {
       "id": "lucia_caldwin",
       "name": "Lucia Caldwin",
+      "gender": "female",
       "type": "student",
       "group": "students",
       "file": "characters/students.json",
@@ -94,6 +104,7 @@
     {
       "id": "elise_reihart",
       "name": "Elise Reihart",
+      "gender": "female",
       "type": "student",
       "group": "students",
       "file": "characters/students.json",
@@ -103,6 +114,7 @@
     {
       "id": "aria",
       "name": "Aria",
+      "gender": "female",
       "type": "student",
       "group": "students",
       "file": "characters/students.json",
@@ -112,6 +124,7 @@
     {
       "id": "mirabel",
       "name": "Mirabel",
+      "gender": "female",
       "type": "student",
       "group": "students",
       "file": "characters/students.json",
@@ -121,6 +134,7 @@
     {
       "id": "artemis",
       "name": "Artemis",
+      "gender": "female",
       "type": "faculty",
       "group": "faculty_and_celestials",
       "file": "characters/faculty_and_celestials.json",
@@ -130,6 +144,7 @@
     {
       "id": "elena_caldwin",
       "name": "Elena Caldwin",
+      "gender": "female",
       "type": "faculty",
       "group": "faculty_and_celestials",
       "file": "characters/faculty_and_celestials.json",
@@ -139,6 +154,7 @@
     {
       "id": "emily",
       "name": "Emily",
+      "gender": "female",
       "type": "faculty_and_celestial",
       "group": "faculty_and_celestials",
       "file": "characters/faculty_and_celestials.json",
@@ -148,6 +164,7 @@
     {
       "id": "ethera",
       "name": "Ethera",
+      "gender": "female",
       "type": "faculty_and_celestial",
       "group": "faculty_and_celestials",
       "file": "characters/faculty_and_celestials.json",
@@ -157,6 +174,7 @@
     {
       "id": "carne",
       "name": "Carne",
+      "gender": "female",
       "type": "celestial",
       "group": "faculty_and_celestials",
       "file": "characters/faculty_and_celestials.json",
@@ -166,6 +184,7 @@
     {
       "id": "seriel",
       "name": "Seriel",
+      "gender": "female",
       "type": "celestial",
       "group": "faculty_and_celestials",
       "file": "characters/faculty_and_celestials.json",
@@ -175,6 +194,7 @@
     {
       "id": "nemesis",
       "name": "Nemesis",
+      "gender": "female",
       "type": "apostle",
       "group": "demon_cult_members",
       "file": "antagonists/demon_cult.json",
@@ -184,6 +204,7 @@
     {
       "id": "veradin",
       "name": "Veradin",
+      "gender": "female",
       "type": "apostle",
       "group": "demon_cult_members",
       "file": "antagonists/demon_cult.json",
@@ -193,6 +214,7 @@
     {
       "id": "kartia",
       "name": "Kartia",
+      "gender": "female",
       "type": "apostle",
       "group": "demon_cult_members",
       "file": "antagonists/demon_cult.json",
@@ -202,6 +224,7 @@
     {
       "id": "arien",
       "name": "Arien",
+      "gender": "female",
       "type": "apostle",
       "group": "demon_cult_members",
       "file": "antagonists/demon_cult.json",
@@ -211,6 +234,7 @@
     {
       "id": "pria",
       "name": "Pria",
+      "gender": "female",
       "type": "sin_bishop",
       "group": "demon_cult_members",
       "file": "antagonists/demon_cult.json",
@@ -220,6 +244,7 @@
     {
       "id": "sloth",
       "name": "Sloth",
+      "gender": "female",
       "type": "sin_bishop",
       "group": "demon_cult_members",
       "file": "antagonists/demon_cult.json",
@@ -229,6 +254,7 @@
     {
       "id": "aris",
       "name": "Aris",
+      "gender": "female",
       "type": "sin_bishop",
       "group": "demon_cult_members",
       "file": "antagonists/demon_cult.json",
@@ -238,6 +264,7 @@
     {
       "id": "beelzebub",
       "name": "Beelzebub",
+      "gender": "female",
       "type": "sin_bishop",
       "group": "demon_cult_members",
       "file": "antagonists/demon_cult.json",
@@ -247,6 +274,7 @@
     {
       "id": "asmo",
       "name": "Asmo",
+      "gender": "female",
       "type": "sin_bishop",
       "group": "demon_cult_members",
       "file": "antagonists/demon_cult.json",
@@ -256,6 +284,7 @@
     {
       "id": "leviane",
       "name": "Leviane",
+      "gender": "female",
       "type": "sin_bishop",
       "group": "demon_cult_members",
       "file": "antagonists/demon_cult.json",
@@ -265,6 +294,7 @@
     {
       "id": "belian",
       "name": "Belian",
+      "gender": "female",
       "type": "sin_bishop",
       "group": "demon_cult_members",
       "file": "antagonists/demon_cult.json",
@@ -274,6 +304,7 @@
     {
       "id": "lily",
       "name": "Lily",
+      "gender": "female",
       "type": "celestial_deity",
       "group": "deities",
       "file": "antagonists/deities.json",
@@ -283,6 +314,7 @@
     {
       "id": "delphirem",
       "name": "Delphirem",
+      "gender": "female",
       "type": "demon_god",
       "group": "deities",
       "file": "antagonists/deities.json",
