@@ -691,7 +691,8 @@ function LMStudioQuickSetup({ onChanged }) {
       </h3>
       <ol className="space-y-2">
         <SetupStep n={1} title={msg("Install LM Studio and download a model")}>
-          <ExternalLinkText href="https://lmstudio.ai/">{msg("lmstudio.ai")}</ExternalLinkText>
+          <ExternalLinkText href="https://lmstudio.ai/download">{msg("lmstudio.ai/download")}</ExternalLinkText>{" "}
+          {msg("Download LM Studio, not LM Studio Bionic.")}
         </SetupStep>
         <SetupStep n={2} title={msg("Start the local server")}>
           {msg(

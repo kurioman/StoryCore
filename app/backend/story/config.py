@@ -2,6 +2,12 @@
 
 Runtime data lives in ``<project>/data`` unless ``STORY_DATA_DIR`` is set.
 Source lore and image folders are never written to.
+
+Two roots:
+- ``APP_ROOT``: the program files (code, bundled Python, built interface). Replaced by every update.
+- ``PROJECT_ROOT``: the player's folder (``Lorepack/``, ``Music/``, ``data/``). It is ``APP_ROOT`` when the app runs
+  from an extracted folder (``Start StoryCore.bat``), and ``%APPDATA%\\StoryCore`` when it was installed with
+  ``StoryCore-win-Setup.exe`` (``scripts/serve.py`` sets ``STORY_USER_ROOT`` before this module is imported).
 """
 from __future__ import annotations
 
@@ -10,8 +16,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
-FRONTEND_DIST = PROJECT_ROOT / "app" / "frontend" / "dist"
+APP_ROOT = Path(__file__).resolve().parents[3]
+PROJECT_ROOT = Path(os.environ["STORY_USER_ROOT"]).resolve() if os.environ.get("STORY_USER_ROOT") else APP_ROOT
+FRONTEND_DIST = APP_ROOT / "app" / "frontend" / "dist"
 APP_VERSION = "0.6.0"
 EXPORT_FORMAT_VERSION = 1
 

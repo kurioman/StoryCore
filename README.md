@@ -135,7 +135,7 @@ Anyone with your key can spend your credit, so never paste it into a story or a 
 
 LM Studio runs models on your own PC, with no API cost and no story text leaving your computer.
 
-1. Install LM Studio from [lmstudio.ai](https://lmstudio.ai/), download a model and load it. Set its **Context Length** (8192 or more is a good start).
+1. Install LM Studio from [lmstudio.ai/download](https://lmstudio.ai/download) (take **LM Studio**, not *LM Studio Bionic*), download a model and load it. Set its **Context Length** (8192 or more is a good start).
 2. In LM Studio, open the **Developer** tab and start the local server (it listens on port 1234).
 3. In StoryCore, open **Settings > Providers & models**, then under **All providers** press **Add provider** and choose **LM Studio (local)** (address `http://localhost:1234/v1`, no key).
 4. Press **Test connection**, add the loaded model, and select it. Under the model's **Parameters**, set its context limit to the same value as in LM Studio.

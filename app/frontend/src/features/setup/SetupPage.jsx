@@ -218,9 +218,10 @@ function Local() {
             {[
               <>
                 {msg("Install LM Studio (free):")}{" "}
-                <a className="text-[#f3d48c] underline" href="https://lmstudio.ai" target="_blank" rel="noreferrer">
-                  lmstudio.ai
-                </a>
+                <a className="text-[#f3d48c] underline" href="https://lmstudio.ai/download" target="_blank" rel="noreferrer">
+                  lmstudio.ai/download
+                </a>{" "}
+                {msg("Download LM Studio, not LM Studio Bionic.")}
               </>,
               msg("In LM Studio, open the search (magnifying glass), type {{v0}} and download the {{v1}} version.", {
                 v0: ROCINANTE.search,
