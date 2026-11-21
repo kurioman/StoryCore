@@ -36,7 +36,8 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
 - **Smaller requests.** The narrator receives the recaps, the scene now and the messages not yet in a recap (at least
   8) instead of the whole story: in the 50-turn test the last request was 21,400 tokens, mostly old messages. The
   journal and the captured facts are no longer sent while the recaps are on. The tokens read from a provider's cache
-  are written in the log for each reply.
+  are written in the log for each reply. The list of characters already met moved out of the start of the request:
+  meeting someone new no longer makes the whole request miss the provider's cache.
 - **Journal > AI memory**: recaps newest first; each can be corrected, locked (never rewritten), written again, or set
   back to the AI's version. A recap you corrected is never rewritten automatically.
 

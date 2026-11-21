@@ -378,7 +378,9 @@ SAFETY_MARGIN = 0.9  # the chars/4 estimate can undercount real tokens; never pl
 # trimmed in this order when space runs out; the automatic summaries go last (they replace whole scenes)
 # v0.5 phase 7.3 "stable" layout: these stay in the system prompt (they rarely change, so its beginning can be cached);
 # every other section goes with the player's latest message, under TURN_OPEN (narration rules last)
-STABLE_SECTIONS = {"core", "global_note", "story_note", "avatar", "roles", "known", "recap", "scene_summaries",
+# phase 2: "known" (characters already met) is not here any more: it changes each time the protagonist meets someone,
+# and in the system prompt that made the whole request miss the provider's cache for that turn
+STABLE_SECTIONS = {"core", "global_note", "story_note", "avatar", "roles", "recap", "scene_summaries",
                    "portrait_tags", "music_tags", "narration_language", "choice_tags", "info_table"}
 # step 1 (test report "50 tours"): the closing label used to be "[The player's turn]"; Rocinante copied it at the top of
 # its replies, then wrote the player's action again after it. A pair of tags around the app's notes is not a line a

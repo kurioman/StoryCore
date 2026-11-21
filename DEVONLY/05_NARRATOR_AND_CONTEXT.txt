@@ -33,7 +33,7 @@ context_builder.build() returns:
 
 Layout (v0.5 phase 7.3, setting context_layout):
   stable (default)  STABLE_SECTIONS stay in the system prompt: core, global_note, story_note, avatar (profile only),
-                    roles, known, recap, scene_summaries, portrait_tags, music_tags, narration_language. Every other
+                    roles, recap, scene_summaries, portrait_tags, music_tags, narration_language (phase 2: "known" is per turn). Every other
                     section (player_state, scene, canon, events, facts, lore, secrets, memories, threads, narration
                     rules last) goes at the top of the player's latest message, between TURN_OPEN and TURN_CLOSE. Old
                     messages leave in steps: the oldest message sent is moved forward to the first message after the
