@@ -29,7 +29,8 @@ class MockAdapter(ProviderAdapter):
 
     def _reply(self, messages: list[ChatMessage]) -> str:
         last = next((m.content for m in reversed(messages) if m.role == "user"), "")
-        last = last.split("[The player's turn]")[-1]  # v0.5 "stable" layout: the app's context block is not the action
+        last = last.split("</context>")[-1]  # v0.5 "stable" layout: the app's context block is not the action
+        last = re.sub(r"<narrator-note>.*?</narrator-note>", "", last, flags=re.S)
         snippet = re.sub(r"\s+", " ", last).strip()[:160]
         return (
             "*[Mock provider — offline demo text, not a real model]*\n\n"

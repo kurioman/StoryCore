@@ -18,6 +18,9 @@ ROOMY_LOCAL_WINDOW = 16384
 # v0.6 (phase 9): reply ceilings per target length (generous: the target itself is in the prompt) and the repetition
 # penalty sent to local servers for story replies (LM Studio / llama.cpp default is 1.0 = off)
 REPLY_TOKEN_CAPS = {"short": 380, "medium": 650, "long": 1050}
+# step 1 (test report "50 tours"): with a target in words (Cinematic) the ceiling of 650 tokens let a "medium" reply reach
+# 483 words for a target of 150-250. About 1.5 tokens per word of the upper target, plus room for the portrait tags.
+REPLY_TOKEN_CAPS_WORDS = {"short": 290, "medium": 440, "long": 660}
 LOCAL_REPEAT_PENALTY = 1.08
 # v0.6: with a known model window the context budget follows it (up to this), instead of a fixed 10,000 tokens
 AUTO_BUDGET_CAP = 24000
@@ -41,6 +44,11 @@ NARRATION_PRESETS = [
         "line that lands: a callback, a twist or a silence.")},
 ]
 DEFAULT_PRESET_ID = "cinematic"
+def preset_in_words(preset_id: str | None) -> bool:
+    """Whether a narration style counts its length target in words (Cinematic)."""
+    return any(p.get("length_in_words") for p in NARRATION_PRESETS if p["id"] == (preset_id or DEFAULT_PRESET_ID))
+
+
 # target lengths in words for presets with "length_in_words" (keyed by the first word of the story's output_length)
 WORD_TARGETS = {"short": "short (about 80–150 words)", "medium": "medium (about 150–250 words)",
                 "long": "long (about 250–400 words)"}

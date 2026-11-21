@@ -92,7 +92,16 @@ def _start_generation(ctx: AppContext, db: Session, story: Story, branch: Messag
         live = live_speakers.for_story(db, story, branch.id) if placeholder.kind == "story" else None
     except Exception:
         log.exception("live speaker detection unavailable for message %s", placeholder.id)
-    ctx.generations.start(placeholder, resolved, built.system, built.messages, marker_filter=marker_filter, live=live)
+    story_check = None
+    try:  # step 1: a reply without any story in it is asked for once more (services/runtime.py)
+        if placeholder.kind == "story" and resolved.provider.provider_type != "mock" \
+                and settings_service.get(db, "reply_cleanup") is not False:
+            story_check = {"player_turn": player_turn_of(db, placeholder),
+                           "protagonist": sorted(protagonist_names(db, story))}
+    except Exception:
+        log.exception("story check unavailable for message %s", placeholder.id)
+    ctx.generations.start(placeholder, resolved, built.system, built.messages, marker_filter=marker_filter, live=live,
+                          story_check=story_check)
     return built.manifest
 
 
@@ -324,7 +333,9 @@ def post_process(ctx: AppContext, message_id: str) -> str | None:
         # (the demo narrator repeats one canned paragraph on purpose: nothing to clean there)
         if m.kind == "story" and m.role == "assistant" and m.status == "complete" and not md.get("cleanup") \
                 and md.get("provider_type") != "mock" and settings_service.get(db, "reply_cleanup") is not False:
-            _clean_reply(db, m, md, character_names(index))
+            _clean_reply(db, m, md, character_names(index), protagonist_names(db, story))
+        elif m.role == "assistant" and m.kind != "story" and not md.get("cleanup"):
+            _clean_fences(m, md)  # step 1: an /ooc answer keeps its words, only the code fences go
         if m.kind == "story":
             m.speaker_character_id = detect_speaker(m.content, index)
             mentioned = index.find_mentions(m.content, ("character",))
@@ -395,7 +406,45 @@ def character_names(index) -> set[str]:
             and index.entities[next(iter(v))].category == "character"}
 
 
-def _clean_reply(db, m: Message, md: dict[str, Any], names: set[str] | None = None) -> None:
+def protagonist_names(db, story: Story) -> set[str]:
+    """The protagonist's name and the name the other characters call them (step 1: the echo of the player's turn)."""
+    from ..models import Avatar
+    av = db.get(Avatar, story.active_avatar_id) if story.active_avatar_id else None
+    snap = story.avatar_snapshot_json or {}
+    out = set()
+    for src in (snap, (av.profile_json if av is not None and isinstance(av.profile_json, dict) else {})):
+        prof = src.get("profile") if isinstance(src.get("profile"), dict) else src
+        for k in ("name", "display_name", "called_name"):
+            v = prof.get(k) or src.get(k)
+            if isinstance(v, str) and v.strip():
+                out.add(v.strip())
+    if av is not None and av.name:
+        out.add(av.name)
+    return out
+
+
+def _clean_fences(m: Message, md: dict[str, Any]) -> None:
+    from . import reply_cleanup
+    spans = reply_cleanup.fence_spans(m.content)
+    md["cleanup"] = {"code_fences": len(spans)} if spans else {"checked": True}
+    if spans:
+        text, spans = reply_cleanup.trim_start(m.content, spans)
+        if text.strip():
+            m.content = text
+
+
+def player_turn_of(db, m: Message) -> str:
+    """The player's message a reply answers (its command expansion for a slash command)."""
+    user = db.get(Message, m.parent_id) if m.parent_id else None
+    if user is None or user.role != "user":
+        return ""
+    if user.command_json and user.command_json.get("expansion"):
+        return ""  # "Continue" and other commands: there is no action of the player to repeat
+    return user.content or ""
+
+
+def _clean_reply(db, m: Message, md: dict[str, Any], names: set[str] | None = None,
+                 protagonist: set[str] | None = None) -> None:
     """v0.6 (phase 9): paragraphs copied from the last replies, an unfinished last sentence, a trailing options menu,
     and (test report "30 tours", B8) the quotation marks around a paragraph of narration (services/reply_cleanup.py).
     The stored tag positions move with the text. B9: a reply that was mostly repetition gets a notice with "Regenerate"."""
@@ -406,7 +455,8 @@ def _clean_reply(db, m: Message, md: dict[str, Any], names: set[str] | None = No
         if m.parent_id else []
     cut = (md.get("diagnostics") or {}).get("finish_reason") == "length"
     original = m.content
-    text, spans, report = reply_cleanup.clean(original, earlier, cut_by_length=cut, names=names)
+    text, spans, report = reply_cleanup.clean(original, earlier, cut_by_length=cut, names=names,
+                                              player_turn=player_turn_of(db, m), protagonist=protagonist)
     md["cleanup"] = report or {"checked": True}
     if report.get("mostly_repeated"):
         alerts = [a for a in md.get("continuity_alerts") or [] if a.get("kind") != "mostly_repeated"]
@@ -416,6 +466,13 @@ def _clean_reply(db, m: Message, md: dict[str, Any], names: set[str] | None = No
     if not spans:
         return
     md["cleanup"]["removed_chars"] = len(m.content) - len(text)
+    _move_positions(md, spans, text)
+    m.content = text
+
+
+def _move_positions(md: dict[str, Any], spans: list[tuple[int, int]], text: str) -> None:
+    """The positions stored with a reply (portrait tags, music tags, speakers) follow the removal of ``spans``."""
+    from . import reply_cleanup
     for key, field in (("portrait_tags", "pos"), ("music_tags", "offset"), ("live_speakers", "pos")):
         moved = []
         for t in md.get(key) or []:
@@ -425,7 +482,38 @@ def _clean_reply(db, m: Message, md: dict[str, Any], names: set[str] | None = No
                 moved.append({**t, field: min(new, len(text))})
         if key in md:
             md[key] = moved
-    m.content = text
+
+
+SANITIZED_KEY = "stored_replies_sanitized"  # step 1: done once on each database
+
+
+def sanitize_stored_replies(db) -> int:
+    """Step 1 (test report "50 tours"): code fences and the app's labels ("[The player's turn]"...) left in replies
+    saved before this version are removed once, so older stories read as normal text (tag positions follow)."""
+    from . import reply_cleanup
+    if settings_service.get(db, SANITIZED_KEY):
+        return 0
+    n = 0
+    for m in db.scalars(select(Message).where(Message.role == "assistant", Message.content.contains("```")
+                                              | Message.content.contains("[") | Message.content.contains("<"))):
+        spans = reply_cleanup.fence_spans(m.content)
+        if m.kind == "story":
+            spans += reply_cleanup.technical_spans(m.content)
+        if not spans:
+            continue
+        text, spans = reply_cleanup.trim_start(m.content, spans)
+        if not text.strip():
+            continue
+        md = dict(m.generation_metadata_json or {})
+        _move_positions(md, spans, text)
+        md.setdefault("cleanup", {})
+        if isinstance(md["cleanup"], dict):
+            md["cleanup"] = {**md["cleanup"], "sanitized_later": True}
+        m.generation_metadata_json = md
+        m.content = text
+        n += 1
+    settings_service.set_many(db, {SANITIZED_KEY: True})
+    return n
 
 
 def apply_expressions(story: Story, branch_id: str, suggestions: list[dict[str, Any]], *, source: str,

@@ -163,6 +163,14 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
         if n:
             log.info("recovered %d interrupted generation(s)", n)
         seed_defaults(ctx)
+        try:  # step 1 (v0.6.1): code fences and labels left in older replies, removed once
+            from .services.turns import sanitize_stored_replies
+            with ctx.db.session() as s:
+                n = sanitize_stored_replies(s)
+            if n:
+                log.info("older replies cleaned of code fences and labels: %d", n)
+        except Exception:
+            log.exception("cleaning older replies failed")
         if not testing:
             from .bundled import sync_lore_packs
             await asyncio.to_thread(sync_lore_packs, ctx)

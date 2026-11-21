@@ -49,7 +49,8 @@ def story_params(profile_params: dict[str, Any] | None, story: Story, hosted: bo
         params["max_tokens"] = window // 2
     # v0.6 (phase 9): a reply may not run far past its target length. Long free runs are where small models loop
     # (one 740-token reply told the same scene twice). A reply cut by this ceiling is trimmed to its last sentence.
-    cap = length_cap((story.settings_json or {}).get("output_length"))
+    cap = length_cap((story.settings_json or {}).get("output_length"),
+                     words=settings_service.preset_in_words((story.settings_json or {}).get("preset_id")))
     if cap and int(params.get("max_tokens") or cap + 1) > cap:
         params["max_tokens"] = cap
     if not hosted and "repeat_penalty" not in params:
@@ -57,10 +58,12 @@ def story_params(profile_params: dict[str, Any] | None, story: Story, hosted: bo
     return params
 
 
-def length_cap(output_length: str | None) -> int | None:
-    """Ceiling on a reply's tokens for the story's target length ("short (1–2 paragraphs)", "medium ...", "long ...")."""
+def length_cap(output_length: str | None, *, words: bool = False) -> int | None:
+    """Ceiling on a reply's tokens for the story's target length ("short (1–2 paragraphs)", "medium ...", "long ...").
+    ``words``: the style counts the target in words (Cinematic); step 1: its ceiling follows the word target."""
     text = (output_length or "").lower()
-    for word, cap in settings_service.REPLY_TOKEN_CAPS.items():
+    caps = settings_service.REPLY_TOKEN_CAPS_WORDS if words else settings_service.REPLY_TOKEN_CAPS
+    for word, cap in caps.items():
         if text.startswith(word):
             return cap
     return None
@@ -159,6 +162,9 @@ class GenerationJob:
     marker_filter: Any = None  # v1.5 immersive mode: removes reaction markers from the stream (services/immersive.py)
     tag_filter: Any = None  # v1.7 portrait tags: removes [Name:N] tags from the stream (services/portrait_tags.py)
     live: Any = None  # v0.6 portraits while writing: who speaks in each paragraph (services/live_speakers.py)
+    # step 1 (test report "50 tours"): {"player_turn", "protagonist"} when a reply with no story in it (only "```",
+    # "[The player's turn]" or the player's action told again) is asked for once more instead of being kept
+    story_check: dict[str, Any] | None = None
 
     def publish(self, event: dict[str, Any]) -> None:
         for q in list(self.subscribers):
@@ -193,10 +199,11 @@ class GenerationManager:
         return next((j for j in self.jobs.values() if j.branch_id == branch_id and j.status == "streaming"), None)
 
     def start(self, message: Message, resolved: Resolved, system: str, messages: list[ChatMessage],
-              marker_filter: Any = None, live: Any = None) -> GenerationJob:
+              marker_filter: Any = None, live: Any = None, story_check: dict[str, Any] | None = None) -> GenerationJob:
         from .portrait_tags import TagFilter
         job = GenerationJob(message.id, message.story_id, message.branch_id, marker_filter=marker_filter,
-                            tag_filter=TagFilter(), live=live if marker_filter is None else None)
+                            tag_filter=TagFilter(), live=live if marker_filter is None else None,
+                            story_check=story_check if marker_filter is None else None)
         self.jobs[message.id] = job
         self.stop_side_requests(message.story_id)
         job.task = self.ctx.spawn(self._run(job, resolved, system, messages))
@@ -236,37 +243,50 @@ class GenerationManager:
         last_ck = started
         first_text: float | None = None
         params = r.params
+        attempt = 1
         try:
-            async for piece in r.adapter.stream_chat(r.profile.model_id, system, messages, params):
-                if not piece:
+            while True:
+                async for piece in r.adapter.stream_chat(r.profile.model_id, system, messages, params):
+                    if not piece:
+                        continue
+                    if job.tag_filter is not None:  # the player never sees portrait tags, not even while streaming
+                        piece = job.tag_filter.feed(piece)
+                        if not piece:
+                            continue
+                    if job.marker_filter is not None:
+                        piece = job.marker_filter.feed(piece)
+                        if not piece:
+                            continue
+                    first_text = first_text or time.monotonic() - started
+                    job.text += piece
+                    job.publish({"type": "delta", "text": piece})
+                    self._follow_speakers(job)
+                    if time.monotonic() - last_ck >= CHECKPOINT_SECONDS:
+                        await asyncio.to_thread(self._save, job, final=False)
+                        last_ck = time.monotonic()
+                if job.tag_filter is not None:
+                    tail = job.tag_filter.flush()
+                    if tail and job.marker_filter is not None:
+                        tail = job.marker_filter.feed(tail)
+                    if tail:
+                        job.text += tail
+                        job.publish({"type": "delta", "text": tail})
+                self._follow_speakers(job, final=True)
+                r.adapter.raise_if_cut_off(params)
+                if attempt == 1 and job.story_check is not None and not self._has_story(job):
+                    attempt = 2
+                    log.info("generation %s: no story in the reply (only notes or the player's turn again); asking once more",
+                             job.message_id)
+                    self._restart(job)
                     continue
-                if job.tag_filter is not None:  # the player never sees portrait tags, not even while streaming
-                    piece = job.tag_filter.feed(piece)
-                    if not piece:
-                        continue
-                if job.marker_filter is not None:
-                    piece = job.marker_filter.feed(piece)
-                    if not piece:
-                        continue
-                first_text = first_text or time.monotonic() - started
-                job.text += piece
-                job.publish({"type": "delta", "text": piece})
-                self._follow_speakers(job)
-                if time.monotonic() - last_ck >= CHECKPOINT_SECONDS:
-                    await asyncio.to_thread(self._save, job, final=False)
-                    last_ck = time.monotonic()
-            if job.tag_filter is not None:
-                tail = job.tag_filter.flush()
-                if tail and job.marker_filter is not None:
-                    tail = job.marker_filter.feed(tail)
-                if tail:
-                    job.text += tail
-                    job.publish({"type": "delta", "text": tail})
-            self._follow_speakers(job, final=True)
-            r.adapter.raise_if_cut_off(params)
+                break
             job.status = "complete" if job.text.strip() else "failed"
             if not job.text.strip():
                 job.error = ProviderError("invalid_response", f"{r.adapter.label} returned an empty response.").to_dict()
+            elif attempt == 2 and not self._has_story(job):
+                job.status = "failed"
+                job.error = {"category": "no_story", "message": "The model answered twice without any story (only notes "
+                             "or your own action told again). Press Retry, or change your message a little."}
         except asyncio.CancelledError:
             job.status = "cancelled"
         except ProviderError as e:
@@ -319,6 +339,28 @@ class GenerationManager:
                     t.add_done_callback(lambda done, s=job.story_id: self.side_tasks.get(s, set()).discard(done))
             except Exception:
                 log.exception("post-generation hook failed")
+
+    @staticmethod
+    def _has_story(job: GenerationJob) -> bool:
+        from .reply_cleanup import has_story
+        try:
+            chk = job.story_check or {}
+            return has_story(job.text, chk.get("player_turn") or "", set(chk.get("protagonist") or ()))
+        except Exception:  # never lose a reply over this check
+            log.exception("story check failed")
+            return True
+
+    @staticmethod
+    def _restart(job: GenerationJob) -> None:
+        """Step 1: forget a reply without story and start over on the same message (the screen is cleared)."""
+        from .portrait_tags import TagFilter
+        job.text = ""
+        job.tag_filter = TagFilter()
+        if job.live is not None:
+            job.live.beats = []
+            job.live._cache = {}
+        job.publish({"type": "snapshot", "text": "", "status": "streaming"})
+        job.publish({"type": "portraits", "beats": []})
 
     @staticmethod
     def _follow_speakers(job: GenerationJob, final: bool = False) -> None:

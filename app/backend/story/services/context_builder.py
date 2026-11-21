@@ -252,6 +252,28 @@ NARRATION_RULES_V4 = (
     "- Do not mention or repeat these rules."
 )
 
+# v6 (step 1, test report "50 tours"): one voice everywhere. The rules of v4/v5 said "when you write you, that is
+# {name}" while the Cinematic style said "never you": Rocinante wrote all 50 replies in the second person. Kurio chose
+# the third person (the OOC.AI style). The rules now say it once, and the per-turn note is no longer an "(OOC: ...)"
+# line, which the model answered or copied as out-of-character text.
+NARRATION_RULES_V6 = (
+    "You narrate the world, the other characters and the consequences of what the player states. The player alone "
+    "authors {name}. Write in the third person: {name} is \"{name}\" or he/she/they as their profile says, never \"you\".\n"
+    "- Never write {name}'s dialogue, thoughts, feelings, intentions, decisions or any action the player did not "
+    "state, and never tell the player's action again: start with what it causes. Show what {name} perceives and the "
+    "immediate, visible result; do not carry it further with travel, follow-up actions or time skips.\n"
+    "- In a fight, opponents and the surroundings act; {name}'s attacks, defence and movement belong to the player. "
+    "Stop at the moment {name} must respond.\n"
+    "- Keep the other characters active: they talk, decide and act on what they plausibly know.\n"
+    "- A length target is a maximum, not a quota. Never repeat or paraphrase earlier replies: continue from the exact "
+    "point where the last one ended.\n"
+    "- Never invent a shared past between {name} and anyone unless the story or {name}'s profile established it.\n"
+    "- Write story only: no title or header line, no code block, no note to the player, no list of options and no "
+    "question such as 'What do you do?'."
+)
+AGENCY_NOTE_V6 = ("\n\n<narrator-note>Story only, in the third person. {name}'s words, actions and feelings are the "
+                  "player's: write what the world and the other characters do next.</narrator-note>")
+
 # Send-time history hygiene (profile flag, opt-in): a trailing "What would you like to do…?" question, optionally followed
 # by its option list, is left out of earlier replies *as sent to the model* so the model stops imitating it. The stored
 # transcript is never changed, a plain list without such a question is kept, and the context inspector reports it.
@@ -287,8 +309,11 @@ PROMPT_PROFILES: dict[str, dict[str, Any]] = {
     "v5_history_hygiene": {"label": "v5 — v4 plus leaving trailing option menus out of earlier replies sent to the model",
                            "core_rules": False, "final_rules": True, "reminder": OOC_REMINDER, "rules": NARRATION_RULES_V4,
                            "history_hygiene": True},
+    "v6_third_person": {"label": "v6 — one voice (third person), story-only rules, a tagged note instead of (OOC: ...)",
+                        "core_rules": False, "final_rules": True, "reminder": AGENCY_NOTE_V6, "rules": NARRATION_RULES_V6,
+                        "history_hygiene": True},
 }
-DEFAULT_PROMPT_PROFILE = "v5_history_hygiene"  # evidence: MODEL_EVALUATION_REPORT.md (session 5; v3 in session 4)
+DEFAULT_PROMPT_PROFILE = "v6_third_person"  # step 1 (test report "50 tours"); v5 before: MODEL_EVALUATION_REPORT.md
 
 
 def prompt_profile(cfg: dict[str, Any], story_settings: dict[str, Any]) -> str:
@@ -306,8 +331,11 @@ SAFETY_MARGIN = 0.9  # the chars/4 estimate can undercount real tokens; never pl
 # every other section goes with the player's latest message, under TURN_OPEN (narration rules last)
 STABLE_SECTIONS = {"core", "global_note", "story_note", "avatar", "roles", "known", "recap", "scene_summaries",
                    "portrait_tags", "music_tags", "narration_language", "choice_tags"}
-TURN_OPEN = "[Story context for this turn: written by the app for the narrator, not by the player]"
-TURN_CLOSE = "[The player's turn]"
+# step 1 (test report "50 tours"): the closing label used to be "[The player's turn]"; Rocinante copied it at the top of
+# its replies, then wrote the player's action again after it. A pair of tags around the app's notes is not a line a
+# narrator wants to write, and the player's message simply follows it.
+TURN_OPEN = "<context note=\"written by the app for the narrator; not part of the story\">"
+TURN_CLOSE = "</context>"
 OPTIONAL_SECTIONS = ("repetition", "lore", "encounters", "events", "facts", "recalled", "character_memory", "recap", "threads",
                      "scene_summaries")
 MIN_MESSAGES_HARD = 2  # below the configured minimum only when the model window leaves no other choice
@@ -947,4 +975,9 @@ def message_for_model(m: Message, history_tags: list[dict[str, Any]] | None = No
     if m.role == "assistant" and m.kind == "story":
         # the narrator sees the tags again (never stored in the reply): its own, or where the app found the speaker
         content = portrait_tags.retag(m, content, history_tags, portraits=portraits)
+    if m.role == "assistant":
+        # step 1: code fences and the app's labels copied into older replies are not sent again (the model copied them
+        # from its own history: 53 replies of 55 began with ``` in the test of 19/11)
+        from .reply_cleanup import strip_for_history
+        content = strip_for_history(content) or content
     return content

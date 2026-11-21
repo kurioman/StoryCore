@@ -56,7 +56,7 @@ class CleanupTest(unittest.TestCase):
 class ParamsTest(unittest.TestCase):
     def test_length_cap_and_local_repetition_penalty(self):
         class S:
-            settings_json = {"output_length": "medium (3–4 paragraphs)", "max_tokens": 8000}
+            settings_json = {"output_length": "medium (3–4 paragraphs)", "max_tokens": 8000, "preset_id": "balanced"}
         self.assertEqual(length_cap("short (1–2 paragraphs)"), 380)
         self.assertIsNone(length_cap(""))
         local = story_params({"max_tokens": 1024}, S(), hosted=False, context_limit=32768)

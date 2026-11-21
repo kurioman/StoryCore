@@ -3,6 +3,18 @@
 StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine: every world is a lore pack in the
 `Lorepack` folder, loaded automatically at start.
 
+## Phase 2: narration quality (after the 50-turn test of 19/11/2026)
+
+- **Clean replies, whatever the model.** Code fences (```), the app's own labels ("[The player's turn]",
+  "[The scene continues…]", "Please wait for my response…") and header lines are removed from new replies, from the
+  history sent to the model, and once from the replies already saved (older stories read as normal text again). A reply
+  that only tells your own action again loses that opening; a reply with no story at all is asked for once more, then
+  shown as an error with Retry. Repeated paragraphs are looked for in the last 8 replies (3 before), and a short line said
+  again word for word is removed.
+- **One narrative voice: the third person** (the OOC.AI style). The narration rules no longer say "you" while the
+  Cinematic style said "never you"; the per-turn note is no longer an "(OOC: …)" line the model answered or copied.
+- **Length**: with a target in words (Cinematic), a reply stops near that target (a medium reply could reach 480 words).
+
 ## New in v0.6
 
 - **World creator** (sidebar, or **Create a world** in the library): make a world without any technical knowledge, in
