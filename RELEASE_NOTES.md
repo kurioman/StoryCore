@@ -23,6 +23,22 @@ StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine
   missing. A character present or named is sent as one line (gender, role, traits, looks) instead of her whole record.
 - **Lore sent without bookkeeping**: no confidence marks, source ids or duplicates (a character's local override was
   sent with her full record); a word match brings at most two places, groups or terms, never an absent character.
+- **Info table under each reply.** The narrator ends each reply with a short block of plain lines saying what changed
+  (place, time, who is here, relationships, HP, mana, conditions, items, moods, important facts). The app takes it out
+  of the story, checks it (unknown names ignored, HP and mana kept between 0 and their maximum, a relationship moves by
+  at most 2 per reply, more goes to the review queue) and records it. It is shown under the reply ("What changed"),
+  where each line can be corrected or cancelled; regenerating or deleting the reply undoes it. When the block is there,
+  the separate scene-analysis request is no longer sent. Settings > Memory: "Info table written with each reply".
+- **Automatic recaps.** A recap every 10 narrator replies (5 to 30, Settings > Memory) and a global recap every 5
+  recaps, written by their own request, which your next message never stops (with a local model it waits until the
+  narrator has finished). They respect the world's fixed truths. While they are on, the memory capture after each reply
+  is not sent.
+- **Smaller requests.** The narrator receives the recaps, the scene now and the messages not yet in a recap (at least
+  8) instead of the whole story: in the 50-turn test the last request was 21,400 tokens, mostly old messages. The
+  journal and the captured facts are no longer sent while the recaps are on. The tokens read from a provider's cache
+  are written in the log for each reply.
+- **Journal > AI memory**: recaps newest first; each can be corrected, locked (never rewritten), written again, or set
+  back to the AI's version. A recap you corrected is never rewritten automatically.
 
 ## New in v0.6
 

@@ -7,6 +7,7 @@ import logging.handlers
 import re
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Any
 
 import httpx
 from fastapi import FastAPI, Request
@@ -16,7 +17,7 @@ from sqlalchemy import select
 
 from .config import APP_VERSION, FRONTEND_DIST, Settings, load_settings
 from .db import Database
-from .models import ModelProfile, Provider, UserNote
+from .models import ModelProfile, Provider, Story, UserNote
 from .providers import ProviderError
 from .secrets_store import RedactingFilter, make_secret_store
 from .services import commands as commands_svc
@@ -83,6 +84,17 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
     ctx.pulls = PullManager(ctx)
     ctx.extraction = ExtractionService(ctx)
 
+    def _apply_info(message_id: str) -> bool:
+        from .models import Message, Story
+        from .services import info_table
+        with ctx.db.session() as s:
+            m = s.get(Message, message_id)
+            if m is None or m.kind != "story" or m.status != "complete":
+                return False
+            if (m.generation_metadata_json or {}).get("info_raw") is None:
+                return False
+            return info_table.apply(s, s.get(Story, m.story_id), m) is not None
+
     async def after_generation(message_id: str) -> None:
         try:
             await _after_generation(message_id)
@@ -109,10 +121,16 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
                 capture_first = extraction_svc.behind(s, method_branch)
         if capture_first:
             await _capture(message_id, method_branch)
-        try:
-            await turn_analysis.analyse(ctx, message_id, force=tagged)
-        except Exception:  # never let optional metadata affect the finished reply or the extraction that follows
-            log.exception("turn analysis crashed for %s", message_id)
+        has_info = False
+        try:  # phase 2 (step 4): the narrator's info block replaces the scene analysis request
+            has_info = await asyncio.to_thread(_apply_info, message_id)
+        except Exception:
+            log.exception("info table failed for %s", message_id)
+        if not has_info:
+            try:
+                await turn_analysis.analyse(ctx, message_id, force=tagged)
+            except Exception:  # never let optional metadata affect the finished reply or the extraction that follows
+                log.exception("turn analysis crashed for %s", message_id)
         try:  # v0.5 phase 7.6: a character recorded as dead who speaks (no model call)
             from .services import continuity
             with ctx.db.session() as s:
@@ -131,11 +149,52 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
                 usage.calibrate(s, message_id)
         except Exception:
             log.exception("token calibration failed for %s", message_id)
+        from .services import summaries
+        with ctx.db.session() as s:
+            recaps = summaries.recap_mode(s)
+        if recaps:
+            # phase 2 (step 5): the recaps run in their own task, which the next reply never stops ("narration first")
+            if story_id not in recap_tasks or recap_tasks[story_id].done():
+                recap_tasks[story_id] = ctx.spawn(_recaps(story_id, branch_id))
+            return
         try:  # v0.5 phase 7.1: summaries that memory capture did not write (older games, capture off, an empty field)
-            from .services import summaries
             await summaries.catch_up(ctx, story_id, branch_id)
         except Exception:
             log.exception("memory summary catch-up crashed for %s", message_id)
+
+    recap_tasks: dict[str, Any] = {}
+
+    async def _recaps(story_id: str, branch_id: str) -> None:
+        """Phase 2 (step 5): recaps due for this story. With a local model, each request waits until the narrator has
+        finished (one request at a time on the PC); a cloud model writes them while the next reply is being written.
+        A failed request is tried once more, then the Journal's "Summarise now" button is there."""
+        from .services import summaries
+        try:
+            with ctx.db.session() as s:
+                story = s.get(Story, story_id)
+                try:
+                    local = not ctx.resolve(s, ctx.story_profile_id(s, story)).adapter.is_cloud
+                except Exception:
+                    return
+            for attempt in (1, 2):
+                if local:
+                    for _ in range(600):  # at most 5 minutes
+                        if not any(j.story_id == story_id and j.status == "streaming"
+                                   for j in ctx.generations.jobs.values()):
+                            break
+                        await asyncio.sleep(0.5)
+                summaries._failed_at.pop(branch_id, None)
+                out = await summaries.catch_up(ctx, story_id, branch_id, max_chunks=2, max_merges=1)
+                if out.get("status") != "failed":
+                    if out.get("written") or out.get("merged"):
+                        log.info("recaps for story %s: %d written, %d merged", story_id, out["written"], out["merged"])
+                    return
+                log.warning("recap request failed for story %s (attempt %d): %s", story_id, attempt, out.get("error"))
+                await asyncio.sleep(3)
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            log.exception("recaps crashed for story %s", story_id)
 
     async def _capture(message_id: str, branch_id: str) -> None:
         from .models import Message

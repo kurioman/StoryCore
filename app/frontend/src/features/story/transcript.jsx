@@ -384,6 +384,9 @@ export function MessageItem({
       {!se && !ue && ae !== `streaming` && (
         <ContinuityAlerts items={de.continuity_alerts} onRegenerate={busy ? undefined : () => onRegenerate(e.id)} />
       )}
+      {!se && !ue && ae !== `streaming` && de.info_table?.lines?.length > 0 && (
+        <InfoTable storyId={storyId} messageId={e.id} info={de.info_table} busy={busy} onChanged={onChanged} />
+      )}
       {!se && (ae !== `complete` || fe) && ae !== `streaming` && (
         <div
           className={cn(
@@ -644,6 +647,90 @@ function LoreConflicts({ items }) {
       <p className="mt-0.5 text-faint">{msg("Regenerate or edit the reply if this was not intended.")}</p>
     </div>
   ) : null;
+}
+
+// Phase 2 (step 4): what the narrator's info block changed (place, time, relationships, HP, mana...), shown under the
+// reply as a reminder and a safety net: each line can be cancelled or corrected (backend services/info_table.py)
+const INFO_ICONS = { place: `📍`, time: `🕒`, days: `📅`, present: `👥`, relationship: `❤️`, stat: `⚡`, condition: `🩹`,
+  item: `🎒`, mood: `🙂`, fact: `📜` };
+
+function InfoTable({ storyId, messageId, info, busy, onChanged }) {
+  let { toast } = useUi(),
+    [open, setOpen] = React.useState(false),
+    [editing, setEditing] = React.useState(null),
+    [value, setValue] = React.useState(``),
+    lines = info.lines.filter((l) => l.status !== `unchanged`),
+    mutation = useMutation({
+      mutationFn: ({ line, value }) => apiPost(`/stories/${storyId}/messages/${messageId}/info`, { line, value }),
+      onSuccess: () => {
+        setEditing(null);
+        onChanged();
+      },
+      onError: (e) => toast(errorMessage(e), `danger`),
+    }),
+    statusText = (l) =>
+      l.status === `proposed`
+        ? msg("to review")
+        : l.status === `dropped`
+          ? msg("ignored")
+          : null;
+  if (!lines.length) return null;
+  return (
+    <div className="mt-2 rounded-md border border-line bg-panel-2/50 px-2.5 py-1.5 text-xs" role="note"
+      aria-label={msg("What changed")}>
+      <button type="button" className="flex w-full items-center gap-1.5 text-left font-medium text-muted"
+        onClick={() => setOpen((v) => !v)} aria-expanded={open}>
+        <Icon.ClipboardList className="size-3.5" />
+        <span className="min-w-0 flex-1 truncate">
+          {msg("What changed")}
+          {!open && `: ` + lines.filter((l) => l.status !== `dropped`).map((l) => l.label).slice(0, 3).join(` · `)}
+          {!open && lines.length > 3 && ` …`}
+        </span>
+        {info.edited_by_player && <Badge>{msg("corrected")}</Badge>}
+        <Icon.ChevronDown className={cn(`size-3.5 transition-transform`, open && `rotate-180`)} />
+      </button>
+      {open && (
+        <ul className="mt-1 space-y-1">
+          {lines.map((l) => (
+            <li key={l.i} className={cn(`flex flex-wrap items-center gap-1.5`, l.status === `dropped` && `text-faint`)}>
+              {editing === l.i ? (
+                <form className="flex w-full flex-wrap items-center gap-1.5"
+                  onSubmit={(ev) => { ev.preventDefault(); mutation.mutate({ line: l.i, value }); }}>
+                  <input className="min-w-0 flex-1 rounded border border-line bg-panel px-2 py-1 text-xs"
+                    value={value} onChange={(ev) => setValue(ev.target.value)} autoFocus
+                    aria-label={msg("Corrected line")} />
+                  <Button size="sm" variant="primary" type="submit" loading={mutation.isPending}>{msg("Save")}</Button>
+                  <Button size="sm" variant="ghost" type="button" onClick={() => setEditing(null)}>{msg("Cancel")}</Button>
+                </form>
+              ) : (
+                <>
+                  <span aria-hidden="true">{INFO_ICONS[l.kind] ?? `•`}</span>
+                  <span className={cn(`min-w-0 flex-1`, l.status === `dropped` && `line-through`)}>{l.label}</span>
+                  {statusText(l) && (
+                    <span className={l.status === `proposed` ? `text-warn` : `text-faint`} title={l.reason || undefined}>
+                      {statusText(l)}
+                    </span>
+                  )}
+                  {!busy && l.status !== `dropped` && (
+                    <>
+                      <IconButton label={msg("Correct this line")}
+                        onClick={() => { setEditing(l.i); setValue(l.text); }}>
+                        <Icon.Pencil className="size-3.5" />
+                      </IconButton>
+                      <IconButton label={msg("Cancel this change")}
+                        onClick={() => mutation.mutate({ line: l.i, value: null })}>
+                        <Icon.X className="size-3.5" />
+                      </IconButton>
+                    </>
+                  )}
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
 }
 
 // v0.5 phase 7.6: continuity notices found after the reply (no model call, or inside the scene analysis)

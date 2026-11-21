@@ -100,8 +100,16 @@ def _start_generation(ctx: AppContext, db: Session, story: Story, branch: Messag
                            "protagonist": sorted(protagonist_names(db, story))}
     except Exception:
         log.exception("story check unavailable for message %s", placeholder.id)
+    info = False
+    try:  # phase 2 (step 4): the narrator ends with its info block (services/info_table.py)
+        from . import info_table
+        info = placeholder.kind == "story" and marker_filter is None and info_table.enabled(db)
+        if info:
+            resolved.extra_max_tokens = 150
+    except Exception:
+        log.exception("info table unavailable for message %s", placeholder.id)
     ctx.generations.start(placeholder, resolved, built.system, built.messages, marker_filter=marker_filter, live=live,
-                          story_check=story_check)
+                          story_check=story_check, info=info)
     return built.manifest
 
 
@@ -199,6 +207,9 @@ def regenerate(ctx: AppContext, db: Session, story_id: str, message_id: str) -> 
                                             status="streaming", parent_id=anchor.id)
     if msg.role == "assistant":
         _flag_stale(db, story, [msg.id], f"Message #{msg.seq} was regenerated")
+        if (msg.generation_metadata_json or {}).get("info_table"):
+            from . import info_table  # phase 2: what the replaced reply's info block changed leaves with it
+            info_table.revert(db, story, branch, msg, f"message #{msg.seq} was regenerated")
         from . import relationships, scene_cast, world_state  # automatic changes from the replaced reply leave with it
         relationships.reconcile(db, story, target_branch)
         world_state.reconcile(db, story, target_branch)
@@ -365,6 +376,9 @@ def post_process(ctx: AppContext, message_id: str) -> str | None:
             cur = ExtractionCursor(branch_id=m.branch_id, story_id=story.id, last_seq=-1)
             db.add(cur)
         cur.assistant_turns_since = (cur.assistant_turns_since or 0) + 1
+        from . import summaries
+        if summaries.recap_mode(db):
+            return None  # phase 2 (step 6): the recaps replace memory capture after each reply
         mode = settings_service.get(db, "event_capture_mode")
         every = int(settings_service.get(db, "event_capture_batch_turns") or 3)
         if mode == "after_each_turn" or (mode == "batch" and cur.assistant_turns_since >= every):

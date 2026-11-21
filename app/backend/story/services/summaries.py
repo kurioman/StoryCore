@@ -40,7 +40,7 @@ SUMMARY_MAX_TOKENS = 700
 MERGE_MAX_TOKENS = 900
 AUTO_MAX_CHUNKS = 2  # catch-up requests after one reply (a long old game is summarised a little at every turn)
 MAX_CHARS = 1500  # a scene summary longer than this is cut (a model that ignored "2 to 5 sentences")
-MAX_MERGED_CHARS = {"chapter": 2200, "story": 3200}
+MAX_MERGED_CHARS = {"chapter": 2200, "story": 2400}
 NOTE_CHARS = 240
 RETRY_AFTER_FAILURE = 600  # seconds before an automatic catch-up tries again after a failed request
 # layers: scenes beyond KEEP_SCENES are merged CHAPTER_SCENES at a time; chapters beyond KEEP_CHAPTERS are folded
@@ -52,7 +52,7 @@ _failed_at: dict[str, float] = {}
 
 RULES = """SCENE SUMMARY. You keep the memory of an interactive story. Summarise ONLY the messages marked NEW.
 Answer in exactly this format (English, even if the story is in another language; names exactly as written):
-SUMMARY: 2 to 5 short sentences, past tense, third person, about what happens. The protagonist is {name}.
+SUMMARY: 3 to 7 short sentences (at most 150 words), past tense, third person, about what happens. The protagonist is {name}.
 CHARACTERS:
 - Name: one sentence on what happened between this character and {name}, or what they learned, decided or now feel
 OPENED:
@@ -68,7 +68,7 @@ chapter summary of 4 to 8 sentences, past tense, in English, oldest first. Keep 
 injuries, discoveries and how relationships with {name} changed; drop small talk and repeated details. Never invent.
 Answer with the summary text only.""",
     "story": """STORY SO FAR. You keep the memory of an interactive story. Rewrite the story so far as ONE summary of at most
-12 sentences, past tense, in English, oldest first: the previous "story so far" (if any) followed by the chapters below.
+12 sentences (at most 300 words), past tense, in English, oldest first: the previous "story so far" (if any) followed by the summaries below.
 Keep what still matters: who {name} is with, important events, promises, enemies, discoveries, where things stand.
 Drop details that no longer matter. Never invent. Answer with the summary text only.""",
 }
@@ -86,6 +86,34 @@ CAPTURE_FIELD = (
 
 def enabled(db: Session) -> bool:
     return settings_service.get(db, "scene_summaries_enabled") is not False
+
+
+# Phase 2 (step 5): automatic recaps. A recap (level "scene") every N narrator replies (setting ``recap_every``, 5 to
+# 30, 10 by default: the replies and the player's messages between them), and a global recap (level "story") every 5
+# recaps, which folds the 5 recaps and the previous global recap into one. The recaps are written by their own request,
+# which the next reply never stops (main.after_generation); with a local model it waits until the narrator has finished.
+GLOBAL_EVERY = 5
+
+
+def recap_mode(db: Session) -> bool:
+    return enabled(db) and settings_service.get(db, "auto_recaps") is not False
+
+
+def recap_size(db: Session) -> int:
+    """Messages per recap: the narrator's replies and the player's messages between them."""
+    try:
+        every = int(settings_service.get(db, "recap_every") or 10)
+    except (TypeError, ValueError):
+        every = 10
+    return 2 * max(5, min(30, every))
+
+
+def fixed_truths(db: Session, story: Story) -> str:
+    """The "Fixed truths" of the world's narrator prompt, given to the recap requests so they never contradict them."""
+    from ..models import World
+    w = db.get(World, story.world_id) if story.world_id else None
+    m = re.search(r"##\s*Fixed truths[^\n]*\n(.*?)(?:\n##\s|\Z)", (w.system_prompt or "") if w else "", re.S | re.I)
+    return m.group(1).strip() if m else ""
 
 
 def path_messages(db: Session, branch: MessageBranch) -> list[Message]:
@@ -246,6 +274,8 @@ def mark_stale(db: Session, story_id: str, message_ids: list[str]) -> int:
     ids, stale = set(message_ids), []
     for r in db.scalars(select(MemorySummary).where(MemorySummary.story_id == story_id,
                                                     MemorySummary.status.in_(("active", "superseded")))):
+        if r.source == "edited" or (r.data_json or {}).get("locked"):
+            continue  # phase 2 (step 7): a recap the player corrected or locked is never written again automatically
         if ids & set(r.message_ids_json or []):
             r.status, r.updated_at = "stale", now_iso()
             stale.append(r.id)
@@ -279,8 +309,14 @@ def next_chunk(db: Session, story: Story, branch: MessageBranch, max_chars: int 
     path_ids = {m.id for m in path}
     todo = path_ids - covered_ids(scenes(db, story.id, path_ids))
     mode = settings_service.get(db, "event_capture_mode")
+    size, min_new = CHUNK_MESSAGES, MIN_NEW
+    if recap_mode(db):  # phase 2: one recap per N replies, written when the N replies are there
+        size = min_new = recap_size(db)
+        max_chars = max(max_chars, CHUNK_CHARS)
     if force:
         wait_for_more = False
+    elif recap_mode(db):
+        wait_for_more = True
     elif mode in ("batch", "after_each_turn") and settings_service.get(db, "extraction_model_source") != "none":
         cur = db.get(ExtractionCursor, branch.id)
         done = cur.last_seq if cur else -1
@@ -289,10 +325,10 @@ def next_chunk(db: Session, story: Story, branch: MessageBranch, max_chars: int 
     else:
         wait_for_more = True
     for run in _runs(path, todo):
-        if wait_for_more and run[-1].id == path[-1].id and len(run) < MIN_NEW:
+        if wait_for_more and run[-1].id == path[-1].id and len(run) < min_new:
             return []  # the newest few: wait until a chunk is worth a request
         out, used = [], 0
-        for m in run[:CHUNK_MESSAGES]:
+        for m in run[:size]:
             if out and used + len(m.content) > max_chars:
                 break
             out.append(m)
@@ -306,14 +342,17 @@ def protagonist(db: Session, story: Story) -> str:
     return (av.name if av else (story.avatar_snapshot_json or {}).get("name")) or "the protagonist"
 
 
-def _chunk_chars(resolved, fixed_text: str) -> int:
+RECAP_CHARS = 26000  # phase 2: 10 replies and the player's messages (≈ 6,500 tokens)
+
+
+def _chunk_chars(resolved, fixed_text: str, cap: int = CHUNK_CHARS) -> int:
     from .context_builder import SAFETY_MARGIN, effective_window, est_tokens
 
     window = effective_window(resolved.profile.context_limit, resolved.params)
     if not window:
-        return CHUNK_CHARS
+        return cap
     room = int(window * SAFETY_MARGIN) - SUMMARY_MAX_TOKENS - est_tokens(fixed_text) - 200
-    return max(1500, min(CHUNK_CHARS, room * 4))
+    return max(1500, min(cap, room * 4))
 
 
 def transcript(msgs: list[Message]) -> str:
@@ -332,6 +371,11 @@ def merge_candidate(db: Session, story: Story, branch: MessageBranch) -> tuple[s
     """The next merge, if one is due: ("chapter", oldest scenes) or ("story", [story so far?] + oldest chapters)."""
     path_ids = {m.id for m in path_messages(db, branch)}
     active_scenes = visible(db, story.id, path_ids, "scene")
+    if recap_mode(db):  # phase 2: every 5 recaps fold into the global recap (with the previous one)
+        if len(active_scenes) >= GLOBAL_EVERY:
+            prev = visible(db, story.id, path_ids, "story")
+            return "story", prev[-1:] + active_scenes[:GLOBAL_EVERY]
+        return None
     if len(active_scenes) >= KEEP_SCENES + CHAPTER_SCENES:
         return "chapter", active_scenes[:CHAPTER_SCENES]
     chapters = visible(db, story.id, path_ids, "chapter")
@@ -401,7 +445,11 @@ async def catch_up(ctx: AppContext, story_id: str, branch_id: str | None = None,
                     f"Earlier (context only, do not summarise again): {before[-1].content}" if before else "",
                     f"Open threads (use these ids under RESOLVED):\n{threads_text}" if threads_text else ""] if x)
                 context = context + "\n\n" if context else ""
-                part = next_chunk(db, story, branch, _chunk_chars(resolved, system + context), force=force)
+                truths = fixed_truths(db, story)
+                if truths:  # phase 2: a recap never contradicts the world's fixed truths
+                    context = f"Fixed truths of this world (never contradict them):\n{truths}\n\n" + context
+                cap = RECAP_CHARS if recap_mode(db) else CHUNK_CHARS
+                part = next_chunk(db, story, branch, _chunk_chars(resolved, system + context, cap), force=force)
                 ids = [m.id for m in part]
                 prompt = context + "NEW messages:\n" + transcript(part)
             try:
@@ -563,8 +611,11 @@ def memory_view(db: Session, story: Story, branch: MessageBranch) -> dict[str, A
     covered = covered_ids(all_scenes)
     return {
         "enabled": enabled(db),
+        "recap_mode": recap_mode(db), "recap_every": recap_size(db) // 2,
         "layers": [{"id": r.id, "level": r.level, "start_seq": r.start_seq, "end_seq": r.end_seq, "content": r.content,
                     "source": r.source, "title": (r.data_json or {}).get("title"),
+                    "locked": bool((r.data_json or {}).get("locked")),
+                    "has_model_text": bool((r.data_json or {}).get("model_text")),
                     "parts": sum(1 for x in all_scenes if x.parent_id == r.id) if r.level != "scene" else None}
                    for r in layers],
         "threads": open_threads(all_scenes, closed),

@@ -259,6 +259,36 @@ export function MemorySettings() {
           )}
         />
         <Toggle
+          checked={r.info_table ?? true}
+          onChange={(e) => i({ ...r, info_table: e })}
+          label={msg("Info table written with each reply")}
+          description={msg(
+            "The AI ends each reply with what changed (place, time, who is here, relationships, HP, mana, items). It is shown under the reply, where you can correct or cancel each line, and replaces the separate scene analysis. Turn it off if your model never writes it.",
+          )}
+        />
+        <Toggle
+          checked={r.auto_recaps ?? true}
+          onChange={(e) => i({ ...r, auto_recaps: e })}
+          label={msg("Automatic recaps")}
+          description={msg(
+            "A recap every few replies and a global recap every 5 recaps, sent to the AI instead of the old messages (fewer tokens, longer memory). Their request is never stopped by your next message. Off: the memory capture after each reply is used again.",
+          )}
+        />
+        {(r.auto_recaps ?? true) && (
+          <label className="flex flex-wrap items-center gap-2 text-sm">
+            <span>{msg("One recap every")}</span>
+            <input
+              type="number"
+              min={5}
+              max={30}
+              className="w-16 rounded-md border border-line bg-panel px-2 py-1"
+              value={r.recap_every ?? 10}
+              onChange={(e) => i({ ...r, recap_every: Math.max(5, Math.min(30, Number(e.target.value) || 10)) })}
+            />
+            <span>{msg("replies of the narrator")}</span>
+          </label>
+        )}
+        <Toggle
           checked={r.recap_auto_replace}
           onChange={(e) =>
             i({
@@ -294,6 +324,9 @@ export function MemorySettings() {
               show_scene_portraits: r.show_scene_portraits,
               inline_portraits: r.inline_portraits,
               portrait_tags_enabled: r.portrait_tags_enabled ?? true,
+              info_table: r.info_table ?? true,
+              auto_recaps: r.auto_recaps ?? true,
+              recap_every: r.recap_every ?? 10,
             })
           }
         >

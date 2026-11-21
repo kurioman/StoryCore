@@ -75,11 +75,15 @@ class Resolved:
     profile: ModelProfile
     adapter: ProviderAdapter
     story: Story | None = None  # set for story narration only; analysis and memory capture keep their own budgets
+    extra_max_tokens: int = 0  # phase 2 (step 4): room for the info block after the story
 
     @property
     def params(self) -> dict[str, Any]:
         if self.story is not None:
-            return story_params(self.profile.generation_settings_json, self.story, self.adapter.is_cloud, self.profile.context_limit)
+            p = story_params(self.profile.generation_settings_json, self.story, self.adapter.is_cloud, self.profile.context_limit)
+            if self.extra_max_tokens and p.get("max_tokens"):
+                p["max_tokens"] = int(p["max_tokens"]) + self.extra_max_tokens
+            return p
         return dict(self.profile.generation_settings_json or {})
 
 
@@ -165,6 +169,7 @@ class GenerationJob:
     # step 1 (test report "50 tours"): {"player_turn", "protagonist"} when a reply with no story in it (only "```",
     # "[The player's turn]" or the player's action told again) is asked for once more instead of being kept
     story_check: dict[str, Any] | None = None
+    info_filter: Any = None  # phase 2 (step 4): takes the narrator's <info> block out of the story (services/info_table.py)
 
     def publish(self, event: dict[str, Any]) -> None:
         for q in list(self.subscribers):
@@ -178,7 +183,7 @@ def diagnostics(r: Resolved, job: GenerationJob, params: dict[str, Any], first_t
     return {"model": r.profile.model_id, "provider": fin.get("provider"), "generation_id": fin.get("generation_id"),
             "status": job.status, "finish_reason": fin.get("reason"), "native_finish_reason": fin.get("native"),
             "reasoning": fin.get("reasoning"), "max_tokens": params.get("max_tokens"), "input_tokens": used.get("prompt_tokens"),
-            "output_tokens": out, "reasoning_tokens": thought,
+            "output_tokens": out, "reasoning_tokens": thought, "cached_tokens": used.get("cached_tokens"),
             "visible_tokens": out - thought if out is not None and thought is not None else None,
             "first_text_s": round(first_text, 2) if first_text is not None else None, "duration_s": duration,
             "chars": len(job.text), "text_hash": hashlib.sha1(job.text.encode("utf-8")).hexdigest()[:12],
@@ -199,11 +204,15 @@ class GenerationManager:
         return next((j for j in self.jobs.values() if j.branch_id == branch_id and j.status == "streaming"), None)
 
     def start(self, message: Message, resolved: Resolved, system: str, messages: list[ChatMessage],
-              marker_filter: Any = None, live: Any = None, story_check: dict[str, Any] | None = None) -> GenerationJob:
+              marker_filter: Any = None, live: Any = None, story_check: dict[str, Any] | None = None,
+              info: bool = False) -> GenerationJob:
         from .portrait_tags import TagFilter
         job = GenerationJob(message.id, message.story_id, message.branch_id, marker_filter=marker_filter,
                             tag_filter=TagFilter(), live=live if marker_filter is None else None,
                             story_check=story_check if marker_filter is None else None)
+        if info:
+            from .info_table import InfoFilter
+            job.info_filter = InfoFilter()
         self.jobs[message.id] = job
         self.stop_side_requests(message.story_id)
         job.task = self.ctx.spawn(self._run(job, resolved, system, messages))
@@ -249,6 +258,10 @@ class GenerationManager:
                 async for piece in r.adapter.stream_chat(r.profile.model_id, system, messages, params):
                     if not piece:
                         continue
+                    if job.info_filter is not None:  # the info block is read by the app, never shown in the story
+                        piece = job.info_filter.feed(piece)
+                        if not piece:
+                            continue
                     if job.tag_filter is not None:  # the player never sees portrait tags, not even while streaming
                         piece = job.tag_filter.feed(piece)
                         if not piece:
@@ -264,6 +277,13 @@ class GenerationManager:
                     if time.monotonic() - last_ck >= CHECKPOINT_SECONDS:
                         await asyncio.to_thread(self._save, job, final=False)
                         last_ck = time.monotonic()
+                if job.info_filter is not None:
+                    rest = job.info_filter.flush()
+                    if rest and job.tag_filter is not None:
+                        rest = job.tag_filter.feed(rest)
+                    if rest:
+                        job.text += rest
+                        job.publish({"type": "delta", "text": rest})
                 if job.tag_filter is not None:
                     tail = job.tag_filter.flush()
                     if tail and job.marker_filter is not None:
@@ -311,6 +331,12 @@ class GenerationManager:
             meta["event_tags"] = job.tag_filter.events  # v0.6 planned events played in this reply (services/story_events.py)
         if job.tag_filter is not None and job.tag_filter.choices:
             meta["choice_tags"] = job.tag_filter.choices
+        if job.info_filter is not None:
+            block = job.info_filter.block
+            if block is None and job.text:
+                from .info_table import split_loose
+                job.text, block = split_loose(job.text)
+            meta["info_raw"] = block  # None: the narrator wrote no block (the scene analysis runs instead)
         log.info("generation %s: %s", job.message_id, meta["diagnostics"])  # figures and ids only, never story text
         if job.marker_filter is not None:
             try:
@@ -356,6 +382,9 @@ class GenerationManager:
         from .portrait_tags import TagFilter
         job.text = ""
         job.tag_filter = TagFilter()
+        if job.info_filter is not None:
+            from .info_table import InfoFilter
+            job.info_filter = InfoFilter()
         if job.live is not None:
             job.live.beats = []
             job.live._cache = {}

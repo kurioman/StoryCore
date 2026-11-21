@@ -315,6 +315,9 @@ def message_out(db: Session, m: Message, alt: dict[str, Any] | None = None) -> d
                                                # v0.6: the notices under a reply (repetition B9, dead speaker, time
                                                # going back, pinned memory) were never sent to the screen
                                                "continuity_alerts")}
+    info = md.get("info_table")
+    if isinstance(info, dict):  # phase 2 (step 4): the lines of the info block, shown under the reply
+        d["generation"]["info_table"] = {"lines": info.get("lines") or [], "edited_by_player": bool(info.get("edited_by_player"))}
     d.pop("generation_metadata_json", None)
     d["has_context"] = "context" in md
     d["version_count"] = db.scalar(select(func.count()).select_from(MessageVersion).where(MessageVersion.message_id == m.id)) or 0
@@ -497,8 +500,32 @@ def edit_message(sid: str, mid: str, body: EditIn, db: Session = Depends(get_db)
     return message_out(db, m)
 
 
+class InfoLineIn(BaseModel):
+    line: int
+    value: Optional[str] = None  # None: the line is cancelled
+
+
+@router.post("/stories/{sid}/messages/{mid}/info")
+def edit_info_line(sid: str, mid: str, body: InfoLineIn, db: Session = Depends(get_db)) -> dict[str, Any]:
+    """Phase 2 (step 4): the player cancels or corrects one line of a reply's info table."""
+    from ..services import info_table
+    m = db.get(Message, mid)
+    if m is None or m.story_id != sid or m.role != "assistant":
+        raise HTTPException(404, "Message not found")
+    try:
+        info_table.edit_line(db, story_tree.get_story(db, sid), m, body.line, body.value)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    return message_out(db, m)
+
+
 @router.delete("/stories/{sid}/messages/{mid}")
 def delete_message(sid: str, mid: str, db: Session = Depends(get_db)) -> dict[str, Any]:
+    m0 = db.get(Message, mid)
+    if m0 is not None and m0.story_id == sid and (m0.generation_metadata_json or {}).get("info_table"):
+        from ..services import info_table  # phase 2: what the deleted reply's info block changed leaves with it
+        st = story_tree.get_story(db, sid)
+        info_table.revert(db, st, story_tree.get_branch(db, st, m0.branch_id), m0, f"message #{m0.seq} was deleted")
     m = turns.delete(db, sid, mid)
     _reconcile(db, sid, mid)
     return message_out(db, m)

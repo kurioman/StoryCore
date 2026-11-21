@@ -316,7 +316,9 @@ NARRATION_RULES_V6 = (
     "point where the last one ended.\n"
     "- Never invent a shared past between {name} and anyone unless the story or {name}'s profile established it.\n"
     "- Write story only: no title or header line, no code block, no note to the player, no list of options and no "
-    "question such as 'What do you do?'."
+    "question such as 'What do you do?'.\n"
+    "- When sources disagree: fixed truths and canon facts first, then the player's corrections, the scene now, the "
+    "recaps, and last the older messages."
 )
 AGENCY_NOTE_V6 = ("\n\n<narrator-note>Story only, in the third person. {name}'s words, actions and feelings are the "
                   "player's: write what the world and the other characters do next.</narrator-note>")
@@ -377,7 +379,7 @@ SAFETY_MARGIN = 0.9  # the chars/4 estimate can undercount real tokens; never pl
 # v0.5 phase 7.3 "stable" layout: these stay in the system prompt (they rarely change, so its beginning can be cached);
 # every other section goes with the player's latest message, under TURN_OPEN (narration rules last)
 STABLE_SECTIONS = {"core", "global_note", "story_note", "avatar", "roles", "known", "recap", "scene_summaries",
-                   "portrait_tags", "music_tags", "narration_language", "choice_tags"}
+                   "portrait_tags", "music_tags", "narration_language", "choice_tags", "info_table"}
 # step 1 (test report "50 tours"): the closing label used to be "[The player's turn]"; Rocinante copied it at the top of
 # its replies, then wrote the player's action again after it. A pair of tags around the app's notes is not a line a
 # narrator wants to write, and the player's message simply follows it.
@@ -400,6 +402,12 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
           extra_instruction: str | None = None) -> BuiltContext:
     cfg = settings_service.get_all(db)
     ssettings = story.settings_json or {}
+    from . import info_table as info_svc
+    from . import summaries as summaries_svc
+    info_on = info_svc.enabled(db)
+    # phase 2 (step 6): with the automatic recaps, the story so far comes from them; the journal and the facts of memory
+    # capture are not sent, and the messages a recap covers are not sent word for word (at least the minimum stays)
+    recap_on = summaries_svc.recap_mode(db)
     exclusions = set(ssettings.get("context_exclusions") or [])
     budget_cfg = int(ssettings.get("context_budget_tokens") or cfg["context_budget_tokens"])
     reply_tokens = int((params or {}).get("max_tokens") or 0)
@@ -623,10 +631,10 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
         fact_lines.append(line)
         fact_items.append({"type": "fact", "id": f.id, "label": f.content[:80]})
         used += est_tokens(line)
-    if ev_lines:
+    if ev_lines and not recap_on:
         sections.append(Section("events", "Story so far (journal)",
                                 "\n".join(ev_lines), ev_items))
-    if fact_lines:
+    if fact_lines and not recap_on:
         sections.append(Section("facts", "Relevant facts and memories (respect who knows what)", "\n".join(fact_lines), fact_items))
     contradictions = [f for f in facts if f.contradicts_fact_ids_json]
     if contradictions:
@@ -728,8 +736,9 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
                  if r.end_seq > recap_end]
     summ_section = None
     if summ_rows:
-        summ_section = Section("scene_summaries", "Earlier in the story (automatic memory of what is no longer shown word "
-                                                  "for word; oldest first)", "", [])
+        summ_section = Section("scene_summaries", "Story so far (recaps, oldest first; the recent messages follow)"
+                               if recap_on else "Earlier in the story (automatic memory of what is no longer shown word "
+                                                "for word; oldest first)", "", [])
         sections.append(summ_section)
 
     def fill_summaries(before_seq: int | None) -> None:
@@ -739,12 +748,12 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
             return
         cap, used_, keep = max(600, int(budget * 0.15)), 0, []
         for r in [r for r in summ_rows if r.level == "story"][-1:]:
-            keep.append((r, f"- Story so far (#{r.start_seq}–#{r.end_seq}): {r.content}"))
+            keep.append((r, f"- {'Global recap' if recap_on else 'Story so far'} (#{r.start_seq}–#{r.end_seq}): {r.content}"))
             used_ += est_tokens(keep[-1][1])
         for r in reversed([r for r in summ_rows if r.level != "story"]):
             if before_seq is not None and r.start_seq >= before_seq:
                 continue
-            line = f"- {'Chapter' if r.level == 'chapter' else 'Scene'} #{r.start_seq}–#{r.end_seq}: {r.content}"
+            line = f"- {'Chapter' if r.level == 'chapter' else 'Recap' if recap_on else 'Scene'} #{r.start_seq}–#{r.end_seq}: {r.content}"
             if keep and used_ + est_tokens(line) > cap:
                 break
             keep.append((r, line))
@@ -824,7 +833,7 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
     history_tags = portrait_tags.history_fallback(db, convo, index.name) if tags_on else {}
     candidates = []  # newest first: (message, body as sent, tokens, trailing menu left out)
     for m in reversed(convo):
-        body, cut = message_for_model(m, history_tags.get(m.id), portraits=tags_on), False
+        body, cut = message_for_model(m, history_tags.get(m.id), portraits=tags_on, info=info_on), False
         if profile.get("history_hygiene") and m.role == "assistant":
             body, cut = strip_trailing_menu(body)
         candidates.append((m, body, est_tokens(body) + 4, cut))
@@ -872,7 +881,17 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
         warnings.append(f"To fit at least the {want} most recent messages, these optional sections were left out this "
                         f"time: {', '.join(trimmed)} ({len(picked)} recent messages sent).")
     layout = cfg.get("context_layout") or "stable"
-    if layout == "stable" and len(picked) > want and len(picked) < len(candidates):
+    recap_cut = False
+    if recap_on and summ_rows:
+        # phase 2 (step 6): what a recap covers leaves the history in one block of N replies (the beginning of the
+        # request then stays the same for N turns: cache), the newest messages always stay
+        covered = summaries_svc.covered_ids(summ_rows)
+        keep = [x for x in picked if x[0].id not in covered]
+        if len(keep) < want:
+            keep = picked[:want]
+        if len(keep) < len(picked):
+            picked, used, recap_cut = keep, sum(t for _, _, t, _ in keep), True
+    if layout == "stable" and not recap_cut and len(picked) > want and len(picked) < len(candidates):
         # v0.5 phase 7.3: old messages leave in steps, at the end of a memory summary (or every 8 messages), so the
         # beginning of the request stays identical for several turns (prompt caches: LM Studio, DeepSeek, Claude...)
         pos = {m.id: i for i, m in enumerate(convo)}
@@ -932,6 +951,9 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
         # long system prompts and older replies that broke the rule get ignored by smaller models; a short per-request
         # reminder next to the player's turn helps. Sent only, never stored in the transcript.
         reminder = profile["reminder"].format(name=pname)
+        if info_svc.enabled(db):
+            reminder = (reminder.replace("</narrator-note>", info_svc.REMINDER + "</narrator-note>")
+                        if "</narrator-note>" in reminder else reminder + info_svc.REMINDER)
         msgs[-1] = ChatMessage("user", msgs[-1].content + reminder)
     if tags_text and msgs and msgs[-1].role == "user" and chosen[-1].kind == "story" and not opening:
         # v0.6: the portrait-tag note sits right next to the player's message, with a character of this scene as the
@@ -940,6 +962,9 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
                                                                                  lang_code))
     if lang_text and msgs and msgs[-1].role == "user" and chosen[-1].kind == "story" and not opening:
         msgs[-1] = ChatMessage("user", msgs[-1].content + narration_language.reminder(lang_code))  # the language note stays last
+    if info_on:
+        sections.append(Section("info_table", "Info block (read by the app, never part of the story)",
+                                info_svc.INSTRUCTION.replace("{name}", pname), [{"type": "prompt", "label": "Info block"}]))
     if tags_text:
         sections.append(Section("portrait_tags", "Portrait tags (removed before the player reads)", tags_text,
                                 [{"type": "prompt", "label": "Portrait tags"}]))
@@ -1022,7 +1047,8 @@ def _tag_example(index, state: dict[str, Any], convo: list[Message], pname: str)
     return index.name(cid).split(" ")[0] if cid else "Name"
 
 
-def message_for_model(m: Message, history_tags: list[dict[str, Any]] | None = None, *, portraits: bool = True) -> str:
+def message_for_model(m: Message, history_tags: list[dict[str, Any]] | None = None, *, portraits: bool = True,
+                      info: bool = False) -> str:
     content = m.content
     if m.role == "user" and m.command_json and m.command_json.get("expansion"):
         content = m.command_json["expansion"]
@@ -1036,4 +1062,10 @@ def message_for_model(m: Message, history_tags: list[dict[str, Any]] | None = No
         # from its own history: 53 replies of 55 began with ``` in the test of 19/11)
         from .reply_cleanup import strip_for_history
         content = strip_for_history(content) or content
+    if info and m.role == "assistant" and m.kind == "story":
+        # phase 2 (step 4): the narrator sees its earlier info blocks again (as the player corrected them), so it keeps
+        # writing them; every earlier reply keeps its block, so the start of the request stays the same (cache)
+        raw = ((m.generation_metadata_json or {}).get("info_table") or {}).get("raw")
+        if raw is not None:
+            content = f"{content}\n\n<info>\n{raw.strip()}\n</info>" if raw.strip() else f"{content}\n\n<info></info>"
     return content

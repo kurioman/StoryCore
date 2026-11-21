@@ -15,6 +15,13 @@ def wait_for(pred, timeout=20.0):
 
 
 class SummaryHelpers:
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        # these tests cover the memory of v0.5 (capture + scene, chapter and story layers), kept behind a setting since
+        # phase 2; the automatic recaps are tested in RecapModeTest
+        cls.client.put("/api/settings", json={"auto_recaps": False})
+
     def play(self, story_id, turns, start=True):
         if start:
             r = self.post(f"/stories/{story_id}/start")
@@ -302,3 +309,36 @@ class MemoryPanelTest(SummaryHelpers, AppTestCase):
 
         names = {c["name"]: c for c in self.get("/commands")["commands"]}
         self.assertIn("chapitre", names["chapter"]["aliases_json"])
+
+
+class RecapModeTest(SummaryHelpers, AppTestCase):
+    """Phase 2 (step 5): a recap every N replies, a global recap every 5 recaps, and the context that uses them."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.client.put("/api/settings", json={"auto_recaps": True, "recap_every": 5})
+
+    def test_recaps_global_and_context(self):
+        story = self.new_story("Recaps")
+        sid = story["id"]
+        self.play(sid, 9)  # the opening + 9 turns = 20 messages: two recaps of 5 replies
+        self.assertTrue(wait_for(lambda: len(self.rows(sid)) == 2), self.rows(sid))
+        rows = self.rows(sid)
+        self.assertEqual([len(r["message_ids_json"]) for r in rows], [10, 10])
+        self.assert_no_overlap(rows)
+        from story.services import context_builder, story_tree
+        with self.ctx.db.session() as s:
+            st = story_tree.get_story(s, sid)
+            b = context_builder.build(s, st, story_tree.get_branch(s, st), context_limit=32768)
+        keys = [x["key"] for x in b.manifest["sections"]]
+        self.assertIn("scene_summaries", keys)
+        self.assertNotIn("events", keys)
+        self.assertLessEqual(len(b.messages), 10)  # what the recaps cover is not sent again (at least 8 stay)
+        self.assertGreaterEqual(len(b.messages), 8)
+        self.play(sid, 16, start=False)  # 52 messages: 5 recaps fold into one global recap
+        self.assertTrue(wait_for(lambda: any(r["level"] == "story" for r in self.rows(sid)), timeout=30), self.rows(sid))
+        glob = [r for r in self.rows(sid) if r["level"] == "story"]
+        self.assertEqual(len(glob), 1)
+        self.assertEqual(len(glob[0]["message_ids_json"]), 50)
+

@@ -20,6 +20,11 @@ def _wait(fut, timeout: float = 10.0) -> None:
 class MemoryCaptureTest(AppTestCase):
     """B1: a stopped capture never stays "running"; B2: it resumes at the next reply, one exchange at a time."""
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.client.put("/api/settings", json={"auto_recaps": False})  # the memory capture of v0.6 (phase 2: recaps)
+
     def _story_with_turns(self, title: str, turns: int = 3) -> tuple[str, str]:
         st = self.new_story(title, world_slug="hero_chronicle")
         sid = st["id"]
@@ -344,6 +349,11 @@ class SecondTestFixesTest(unittest.TestCase):
 
 class CaptureFirstTest(AppTestCase):
     """B2 again: with memory behind, the capture runs before the scene analysis."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.client.put("/api/settings", json={"auto_recaps": False})  # the memory capture of v0.6 (phase 2: recaps)
 
     def test_capture_goes_first_when_behind(self):
         from story.models import MemoryExtractionRun, now_iso

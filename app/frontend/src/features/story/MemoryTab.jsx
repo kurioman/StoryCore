@@ -8,7 +8,8 @@ import { apiGet, apiPatch, apiPost, errorMessage } from "@/api/legacy";
 import { msg } from "@/i18n";
 import { Badge, Button, Callout, EmptyState, ErrorCallout, Input, SectionTitle, Spinner, Textarea, useUi } from "@/components/ui";
 
-function levelLabel(l) {
+function levelLabel(l, recaps) {
+  if (recaps) return l === `story` ? msg("Global recap") : l === `chapter` ? msg("Chapter") : msg("Recap");
   return l === `story` ? msg("Story so far") : l === `chapter` ? msg("Chapter") : msg("Scene");
 }
 
@@ -30,7 +31,7 @@ export function useCloseChapter(storyId) {
   });
 }
 
-function Layer({ storyId, row, onSaved }) {
+function Layer({ storyId, row, onSaved, recaps }) {
   let { toast } = useUi(),
     [editing, setEditing] = React.useState(false),
     [text, setText] = React.useState(row.content),
@@ -40,6 +41,18 @@ function Layer({ storyId, row, onSaved }) {
     try {
       onSaved(await apiPatch(`/stories/${storyId}/memory/${row.id}`, { content: text }));
       setEditing(false);
+    } catch (e) {
+      toast(errorMessage(e), `danger`);
+    } finally {
+      setBusy(false);
+    }
+  }
+  // phase 2 (step 7): lock (never written again automatically), back to the model's text, write it again
+  async function act(path, body) {
+    setBusy(true);
+    try {
+      let r = await apiPost(`/stories/${storyId}/memory/${row.id}/${path}`, body ?? {});
+      onSaved(r.memory ?? r);
     } catch (e) {
       toast(errorMessage(e), `danger`);
     } finally {
@@ -63,16 +76,33 @@ function Layer({ storyId, row, onSaved }) {
   return (
     <li className="rounded-lg border border-line bg-panel p-3">
       <div className="mb-1 flex flex-wrap items-center gap-2 text-xs text-faint">
-        <Badge tone={row.level === `scene` ? `neutral` : `accent`}>{levelLabel(row.level)}</Badge>
+        <Badge tone={row.level === `scene` ? `neutral` : `accent`}>{levelLabel(row.level, recaps)}</Badge>
         {row.title && <span className="font-medium text-fg">“{row.title}”</span>}
         <span>
           {msg("messages #{{v0}}–#{{v1}}", { v0: row.start_seq, v1: row.end_seq })}
           {row.parts ? ` · ${msg("{{v0}} part(s)", { v0: row.parts })}` : ``}
         </span>
         {row.source === `edited` && <Badge>{msg("edited")}</Badge>}
-        <span className="ml-auto flex gap-1">
+        {row.locked && <Badge tone="accent">{msg("locked")}</Badge>}
+        <span className="ml-auto flex flex-wrap gap-1">
           {!editing && (
             <>
+              <Button size="sm" variant="ghost" disabled={busy} onClick={() => act(`lock`, { locked: !row.locked })}
+                title={row.locked ? msg("Unlock: the AI may write it again") : msg("Lock: never written again automatically")}>
+                {row.locked ? <Icon.LockOpen className="size-3.5" /> : <Icon.Lock className="size-3.5" />}
+              </Button>
+              {row.has_model_text && (
+                <Button size="sm" variant="ghost" disabled={busy} onClick={() => act(`revert`)}
+                  title={msg("Back to the AI's version")}>
+                  <Icon.Undo2 className="size-3.5" />
+                </Button>
+              )}
+              {!row.locked && (
+                <Button size="sm" variant="ghost" disabled={busy} onClick={() => act(`regenerate`)}
+                  title={msg("Write it again")}>
+                  <Icon.RefreshCw className={busy ? `size-3.5 animate-spin` : `size-3.5`} />
+                </Button>
+              )}
               <Button size="sm" variant="ghost" onClick={() => setEditing(true)} title={msg("Correct this summary")}>
                 <Icon.Pencil className="size-3.5" />
               </Button>
@@ -140,6 +170,14 @@ export function MemoryTab({ storyId }) {
           "What the narrator remembers of the messages it no longer reads word for word. Written automatically while you play (in English, the language the AI understands best). You can correct a summary, pin it as a permanent memory, or settle a thread.",
         )}
       </Callout>
+      {m.recap_mode && (
+        <Callout tone="info">
+          {msg(
+            "A recap is written every {{v0}} replies of the narrator, and a global recap every 5 recaps. Newest first. A recap you correct or lock is never rewritten by the AI.",
+            { v0: m.recap_every },
+          )}
+        </Callout>
+      )}
       {!m.enabled && (
         <Callout tone="warn">{msg("Automatic summaries are off (Settings > Memory capture).")}</Callout>
       )}
@@ -180,8 +218,8 @@ export function MemoryTab({ storyId }) {
           </EmptyState>
         ) : (
           <ul className="space-y-2">
-            {m.layers.map((r) => (
-              <Layer key={r.id} storyId={storyId} row={r} onSaved={set} />
+            {(m.recap_mode ? [...m.layers].reverse() : m.layers).map((r) => (
+              <Layer key={r.id} storyId={storyId} row={r} onSaved={set} recaps={m.recap_mode} />
             ))}
           </ul>
         )}

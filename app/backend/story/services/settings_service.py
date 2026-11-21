@@ -64,7 +64,12 @@ RELATIONSHIP_MODES = ("auto_conservative", "review", "off")
 
 DEFAULTS: dict[str, Any] = {
     "context_budget_auto": True,  # v0.6: the budget follows the model's window (context_budget_tokens when unknown)
-    "reply_cleanup": True,  # v0.6: paragraphs copied from earlier replies are removed from a new reply
+    "reply_cleanup": True,
+    "info_table": True,
+    # phase 2 (step 5): a recap every N narrator replies and a global recap every 5 recaps, written by a request the next
+    # reply never stops; while they are on, memory capture after each reply is not sent (services/summaries.py)
+    "auto_recaps": True,
+    "recap_every": 10,  # phase 2 (step 4): the narrator ends each reply with its info block (services/info_table.py)  # v0.6: paragraphs copied from earlier replies are removed from a new reply
     "onboarding_done": False,  # v0.5: the first-run assistant (#/setup) was completed or skipped
     "default_model_profile_id": None,
     "extraction_model_source": "narration",  # narration | separate | none
@@ -92,7 +97,7 @@ DEFAULTS: dict[str, Any] = {
     "context_budget_tokens": 10000,
     # a planning figure taken out of the budget, never sent to the model: max_tokens is what limits a reply
     "reserve_output_tokens": 2000,
-    "recent_messages_min": 6,
+    "recent_messages_min": 8,  # phase 2: at least 8 recent messages word for word
     "context_warning_ratio": 0.85,
     "auto_recap_policy": "offer",  # off | offer
     # v0.5 phase 7.1: short summaries of the story written while playing (services/summaries.py) and sent for the messages
