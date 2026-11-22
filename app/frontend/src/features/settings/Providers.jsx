@@ -190,6 +190,136 @@ function CatalogModelRow({ m: e, provider, profile, isDefault, onAdded }) {
   );
 }
 
+// Any OpenRouter model, not only the recommended cards: the cards are suggestions, never a restriction.
+// A plain form (provider, base URL, key, model ID typed freely), plus the full searchable list and the player's own picks.
+function AnyOpenRouterModel({ provider, profiles, defaultId, cardSlugs, onChanged }) {
+  let { toast } = useUi(),
+    [open, setOpen] = React.useState(false),
+    [modelId, setModelId] = React.useState(``),
+    own = provider ? profiles.filter((m) => m.provider_id === provider.id && !cardSlugs.includes(m.model_id)) : [],
+    useModel = useMutation({
+      mutationFn: async (id) => {
+        let existing = profiles.find((m) => m.provider_id === provider.id && m.model_id === id);
+        if (existing) return apiPut(`/settings`, { default_model_profile_id: existing.id });
+        return apiPost(`/model-profiles`, { provider_id: provider.id, model_id: id, make_default: true });
+      },
+      onSuccess: (_, id) => {
+        setModelId(``);
+        onChanged();
+        toast(msg("{{v0}} is now the default model for new stories.", { v0: id }));
+      },
+      onError: (e) => toast(errorMessage(e), `danger`),
+    }),
+    makeDefault = useMutation({
+      mutationFn: (id) => apiPut(`/settings`, { default_model_profile_id: id }),
+      onSuccess: onChanged,
+      onError: (e) => toast(errorMessage(e), `danger`),
+    }),
+    row = `grid grid-cols-[minmax(0,8rem)_minmax(0,1fr)] items-center gap-2 border-b border-line py-1.5 last:border-b-0`;
+  return (
+    <div className="mt-3 rounded-lg border border-line bg-panel p-3">
+      <p className="text-sm font-semibold">{msg("Use any OpenRouter model")}</p>
+      <p className="mt-0.5 text-xs text-muted">
+        {msg(
+          "The cards above are only recommendations. Type the ID of any model available on OpenRouter (copied from its page on openrouter.ai), or search the full list.",
+        )}
+      </p>
+      <form
+        className="mt-2 text-[13px]"
+        onSubmit={(e) => {
+          e.preventDefault();
+          let id = modelId.trim();
+          provider && id && useModel.mutate(id);
+        }}
+      >
+        <div className={row}>
+          <span className="text-xs font-medium text-faint">{msg("Provider")}</span>
+          <span>OpenRouter</span>
+        </div>
+        <div className={row}>
+          <span className="text-xs font-medium text-faint">{msg("API Base URL")}</span>
+          <span className="font-mono text-xs [overflow-wrap:anywhere]">{provider?.base_url || `https://openrouter.ai/api/v1`}</span>
+        </div>
+        <div className={row}>
+          <span className="text-xs font-medium text-faint">{msg("API Key")}</span>
+          <span className={cn(`text-xs`, provider?.has_api_key ? `text-ok` : `text-warn`)}>
+            {provider?.has_api_key ? msg("Saved") : msg("Not saved yet: paste it in step 4 below")}
+          </span>
+        </div>
+        <div className={row}>
+          <label htmlFor="or-model-id" className="text-xs font-medium text-faint">
+            {msg("Model")}
+          </label>
+          <div className="flex min-w-0 flex-wrap gap-1.5">
+            <Input
+              id="or-model-id"
+              value={modelId}
+              onChange={(e) => setModelId(e.target.value)}
+              placeholder="~deepseek/deepseek-v4-flash-latest"
+              autoComplete="off"
+              spellCheck={false}
+              className="min-w-48 flex-1 font-mono"
+            />
+            <Button
+              size="md"
+              type="submit"
+              disabled={!provider || !modelId.trim()}
+              loading={useModel.isPending}
+              title={provider ? undefined : msg("Connect OpenRouter first (steps below)")}
+            >
+              {msg("Use this model")}
+            </Button>
+          </div>
+        </div>
+      </form>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <Button size="sm" variant="ghost" disabled={!provider} onClick={() => setOpen(true)}>
+          <Icon.Search className="size-3" /> {msg("Search the full OpenRouter list…")}
+        </Button>
+        <span className="text-[11px]">
+          <ExternalLinkText href={`${OPENROUTER_URL}models`}>{msg("Browse all models on openrouter.ai")}</ExternalLinkText>
+        </span>
+      </div>
+      {!provider && <p className="mt-1 text-[11px] text-faint">{msg("Connect OpenRouter first (steps below)")}</p>}
+      {own.length > 0 && (
+        <>
+          <p className="mt-3 text-xs font-medium">{msg("Your other OpenRouter models")}</p>
+          <ul className="mt-1 space-y-1">
+            {own.map((m) => (
+              <li key={m.id} className="flex min-w-0 flex-wrap items-center gap-1.5 text-xs">
+                <Icon.Check className="size-3 text-ok" aria-hidden />
+                <span className="font-mono [overflow-wrap:anywhere]">{m.model_id}</span>
+                {m.id === defaultId ? (
+                  <Badge tone="accent">{msg("Default for new stories")}</Badge>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    loading={makeDefault.isPending && makeDefault.variables === m.id}
+                    onClick={() => makeDefault.mutate(m.id)}
+                  >
+                    {msg("Make default")}
+                  </Button>
+                )}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      {open && provider && (
+        <AddModelDialog
+          p={provider}
+          defaultMakeDefault
+          onClose={() => {
+            setOpen(false);
+            onChanged();
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
 function ModelCatalog({ provider, profiles, defaultId }) {
   let queryClient = useQueryClient(),
     query = useQuery({
@@ -242,6 +372,9 @@ function ModelCatalog({ provider, profiles, defaultId }) {
           <Icon.RefreshCw className="size-3" /> {msg("Refresh prices")}
         </Button>
       </div>
+      <p className="mb-2 text-xs text-muted">
+        {msg("Suggestions only: you are free to pick any other OpenRouter model (see below the cards).")}
+      </p>
       {query.isLoading && <Spinner />}
       {o && (
         <ul className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,17rem),1fr))] gap-2">
@@ -257,6 +390,13 @@ function ModelCatalog({ provider, profiles, defaultId }) {
           ))}
         </ul>
       )}
+      <AnyOpenRouterModel
+        provider={provider}
+        profiles={profiles}
+        defaultId={defaultId}
+        cardSlugs={(o?.models ?? []).map((m) => m.slug)}
+        onChanged={s}
+      />
       <p className="mt-2 text-xs text-muted">
         {msg(
           "Start with GLM-5 for this project, try a cheaper model for experiments, and use Ollama when offline play or privacy comes first. Only GLM-5 has been tested with StoryCore; the others are options to evaluate. Prices can change and can differ by routed provider.",
@@ -409,7 +549,7 @@ function SelectedModelStatus({ provider, model, onChanged }) {
         </SetupStep>
         <SetupStep n={5} title={msg("Choose a model")}>
           {msg(
-            "Use Select on a card above, then pick it per story from the top bar. Selecting never changes a story by itself.",
+            "Use Select on a recommended card, or type any model ID in the Model field above. Then pick it per story from the top bar. Selecting never changes a story by itself.",
           )}
         </SetupStep>
         <SetupStep n={6} title={msg("Test the connection")}>
@@ -1314,7 +1454,7 @@ function ModelProfileRow({ m: e, p, isDefault }) {
   );
 }
 
-function AddModelDialog({ p, onClose }) {
+function AddModelDialog({ p, onClose, defaultMakeDefault = false }) {
   let queryClient = useQueryClient(),
     { toast } = useUi(),
     query = useQuery({
@@ -1323,7 +1463,7 @@ function AddModelDialog({ p, onClose }) {
     }),
     [a, o] = React.useState(``),
     [s, c] = React.useState(``),
-    [l, u] = React.useState(false),
+    [l, u] = React.useState(defaultMakeDefault),
     d = async (i, a) => {
       try {
         (await apiPost(`/model-profiles`, {
@@ -1335,6 +1475,9 @@ function AddModelDialog({ p, onClose }) {
           queryClient.invalidateQueries({
             queryKey: queryKeys.providers,
           }),
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.settings,
+          }),
           toast(
             msg("Added {{v0}}", {
               v0: i,
@@ -1345,7 +1488,9 @@ function AddModelDialog({ p, onClose }) {
         toast(errorMessage(e), `danger`);
       }
     },
-    f = (query.data?.models ?? []).filter((e) => e.id.toLowerCase().includes(s.toLowerCase()));
+    f = (query.data?.models ?? []).filter((e) =>
+      `${e.id} ${e.display_name ?? ``}`.toLowerCase().includes(s.toLowerCase()),
+    );
   return (
     <Modal
       open

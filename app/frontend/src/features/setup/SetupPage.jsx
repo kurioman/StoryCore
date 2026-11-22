@@ -252,7 +252,7 @@ function Cloud() {
       <h2 className="sc-brand text-3xl text-[#f3dca0]">{msg("Using an online AI")}</h2>
       <p className="mt-3 text-sm text-[#ece6d8b3]">
         {msg(
-          "The simplest way is OpenRouter: one account and one key give access to all the models below. You pay only for what you use, with credit you top up yourself.",
+          "The simplest way is OpenRouter: one account and one key give access to hundreds of models. The models below are only our suggestions: further down, you can type the ID of any other OpenRouter model. You pay only for what you use, with credit you top up yourself.",
         )}
       </p>
       <div className="mt-6 grid gap-3 sm:grid-cols-2">

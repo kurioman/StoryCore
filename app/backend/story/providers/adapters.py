@@ -542,7 +542,10 @@ class OpenAICompatAdapter(ProviderAdapter):
         left = info.get("limit_remaining")
         if isinstance(left, (int, float)):
             msg += f" Remaining on this key's limit: ${left:.2f}."
-        if model_id:
+        if model_id and model_id.startswith("~"):
+            # "~vendor/model-latest" aliases are resolved by OpenRouter at request time and are not always in /models.
+            msg += f" {model_id} is an OpenRouter alias: use the small paid test to check that it answers."
+        elif model_id:
             if not any(m.id == model_id for m in models):
                 raise ProviderError("not_found", f"{self.label}: your key works, but {model_id} is not in the catalog right now. "
                                                  "Choose another model; your stories keep their selection until you do.")
