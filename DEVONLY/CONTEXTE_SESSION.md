@@ -148,6 +148,20 @@ Prochaine étape : Kurio refait le test de 50 tours avec Rocinante, puis avec De
 Rocinante n'écrit pas le bloc `<info>`, l'analyse de scène prend le relais toute seule ; si ses récaps sont mauvais, les
 corriger dans le Journal ou désactiver « Récaps automatiques » (Paramètres > Mémoire).
 
+## Version 0.6.2 (22/11/2026, retour du test avec DeepSeek via OpenRouter)
+DeepSeek donne beaucoup moins d'incohérences que Rocinante. Corrigé (commit « Retour du test DeepSeek ») :
+- Défilement (`StoryPage.AutoScroll`) : l'écran ne suit plus le texte. À chaque nouveau message, il place UNE fois le
+  message du joueur en haut, puis ne bouge plus ; à l'ouverture d'une histoire, il va à la fin. Vérifié en Chrome sans écran.
+- Coût : `ProviderAdapter.spent_cost` additionne chaque requête payée (réponse redemandée, analyse réparée) ;
+  `usage.summary` compte toutes les réponses (régénérées, supprimées, autres branches) ; `usage.record` n'ajoute que le
+  nouveau. Affiché en doré dans la barre du haut (téléphone compris), 3 décimales. Les tests payants des paramètres ne
+  comptent pas (OpenRouter, lui, les facture).
+- Portraits : `LiveSpeakers.owns_line` / `_check_tags` et `portrait_tags.apply` : une balise sur une réplique de quelqu'un
+  d'autre (« lança un étudiant de deuxième année ») ne montre rien ; un personnage silencieux n'a un portrait que s'il est
+  nommé ET que son expression change. Mots d'école ajoutés à `speaker_guard.PERSON`.
+- Téléphone (`styles.css`, fin du fichier) : texte 15 px, zone de saisie sur une ligne, bulle du joueur plus compacte.
+126 tests (dont `test_usage.test_every_paid_request_counts`, `test_portraits_live.test_a_tag_on_someone_elses_line_shows_nothing`).
+
 ## Pas encore vérifié avec du vrai matériel
 - Phase 6 sur mon vrai téléphone (pare-feu Windows : cocher « Réseaux privés »).
 - Phase 7 avec mon modèle (qualité des résumés et du récap sur une longue partie).
