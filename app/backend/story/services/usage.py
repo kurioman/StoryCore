@@ -21,7 +21,7 @@ from ..providers.base import ProviderError
 
 log = logging.getLogger(__name__)
 
-KINDS = ("analysis", "capture", "summary", "recap")
+KINDS = ("analysis", "capture", "summary", "recap", "rewrite")
 RATIO_MIN, RATIO_MAX = 0.6, 2.0
 FIELDS = (("prompt_tokens", "input"), ("completion_tokens", "output"), ("cached_tokens", "cached"))
 

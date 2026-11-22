@@ -2245,5 +2245,15 @@
  "Budget settings": "Réglages du budget",
  "This month": "Ce mois-ci",
  "Cap": "Plafond",
- "Cap reached: paid requests are stopped until you raise it (Settings > Budget).": "Plafond atteint : les requêtes payantes sont bloquées jusqu’à ce que vous le releviez (Paramètres > Budget)."
+ "Cap reached: paid requests are stopped until you raise it (Settings > Budget).": "Plafond atteint : les requêtes payantes sont bloquées jusqu’à ce que vous le releviez (Paramètres > Budget).",
+ "Rewrite one paragraph": "Réécrire un paragraphe",
+ "Choose the paragraph to rewrite.": "Choisissez le paragraphe à réécrire.",
+ "Say what to change (optional), then ask for a new version.": "Dites ce qu’il faut changer (facultatif), puis demandez une nouvelle version.",
+ "e.g. more tension, Lilia stays cold, shorter… (empty: just write it better)": "ex. plus de tension, Lilia reste froide, plus court… (vide : simplement mieux écrit)",
+ "New version": "Nouvelle version",
+ "Another paragraph": "Autre paragraphe",
+ "Rewrite": "Réécrire",
+ "Keep this version": "Garder cette version",
+ "Paragraph replaced. “Edit history” brings the old text back.": "Paragraphe remplacé. « Historique des modifications » permet de retrouver l’ancien texte.",
+ "Rewritten paragraphs": "Paragraphes réécrits"
 }

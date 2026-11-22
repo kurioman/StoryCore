@@ -208,6 +208,7 @@ export function MessageItem({
     [E, D] = React.useState(false),
     [O, ee] = React.useState(false),
     [te, ne] = React.useState(false),
+    [rewriting, setRewriting] = React.useState(false),
     re = settings.data?.dialogue_style ?? `cinematic`,
     ie = isPlayerStory(e) && !!e.immersive_reply_id,
     ae = liveStatus ?? e.status,
@@ -491,6 +492,15 @@ export function MessageItem({
               >
                 <Icon.Pencil className="size-3.5" />
               </IconButton>
+              {!se && !ce && e.content?.trim() && (
+                <IconButton
+                  label={msg("Rewrite one paragraph")}
+                  disabled={busy || ae === `streaming`}
+                  onClick={() => setRewriting(true)}
+                >
+                  <Icon.WandSparkles className="size-3.5" />
+                </IconButton>
+              )}
               {(e.version_count ?? 0) > 0 && (
                 <IconButton label={msg("Edit history")} onClick={() => T(true)}>
                   <Icon.RotateCcwClock className="size-3.5" />
@@ -538,6 +548,9 @@ export function MessageItem({
       </div>
       {te && me && <DiagnosticsTable d={me} />}
       {w && <VersionsDialog storyId={storyId} m={e} onClose={() => T(false)} onRestored={onChanged} />}
+      {rewriting && (
+        <RewriteDialog storyId={storyId} m={e} onClose={() => setRewriting(false)} onSaved={onChanged} />
+      )}
       {E && <MessageContextDialog storyId={storyId} messageId={e.id} onClose={() => D(false)} />}
     </article>
   );
@@ -1171,5 +1184,113 @@ function RelationshipChanges({ changes, mode }) {
         </p>
       )}
     </div>
+  );
+}
+
+// v0.6.2: rewrite one paragraph of a reply. Pick the paragraph, say what to change (optional), look at the proposal,
+// then keep it (saved as an edit: "Edit history" brings the old text back) or try again.
+function splitParagraphs(text) {
+  return String(text ?? ``)
+    .split(/\n\s*\n/)
+    .filter((p) => p.trim());
+}
+
+function RewriteDialog({ storyId, m, onClose, onSaved }) {
+  let { toast } = useUi(),
+    parts = splitParagraphs(m.content),
+    [pick, setPick] = React.useState(null),
+    [wish, setWish] = React.useState(``),
+    [proposal, setProposal] = React.useState(null),
+    ask = useMutation({
+      mutationFn: () => apiPost(`/stories/${storyId}/messages/${m.id}/rewrite`, { paragraph: pick, instruction: wish }),
+      onSuccess: (r) => setProposal(r.text),
+      onError: (err) => toast(errorMessage(err), `danger`),
+    }),
+    keep = useMutation({
+      mutationFn: () => apiPost(`/stories/${storyId}/messages/${m.id}/rewrite`, { paragraph: pick, keep: proposal }),
+      onSuccess: () => {
+        (onSaved(), toast(msg("Paragraph replaced. “Edit history” brings the old text back.")), onClose());
+      },
+      onError: (err) => toast(errorMessage(err), `danger`),
+    });
+  return (
+    <Modal
+      open
+      onOpenChange={(o) => !o && onClose()}
+      title={msg("Rewrite one paragraph")}
+      description={
+        pick === null
+          ? msg("Choose the paragraph to rewrite.")
+          : msg("Say what to change (optional), then ask for a new version.")
+      }
+    >
+      {pick === null ? (
+        <div className="max-h-[60vh] space-y-1.5 overflow-y-auto">
+          {parts.map((p, k) => (
+            <button
+              type="button"
+              key={k}
+              className="block w-full rounded-md border border-line px-2.5 py-1.5 text-left text-sm text-muted hover:border-accent/60 hover:text-fg"
+              onClick={() => setPick(k)}
+            >
+              <span className="line-clamp-3">{p}</span>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <p className="max-h-40 overflow-y-auto whitespace-pre-wrap rounded-md border border-line bg-panel-2 p-2 text-sm text-muted">
+            {parts[pick]}
+          </p>
+          <Textarea
+            value={wish}
+            onChange={(ev) => setWish(ev.target.value)}
+            placeholder={msg("e.g. more tension, Lilia stays cold, shorter… (empty: just write it better)")}
+            className="min-h-16 text-sm"
+          />
+          {proposal !== null && (
+            <div>
+              <p className="mb-1 text-xs font-semibold text-fg">{msg("New version")}</p>
+              <Textarea
+                value={proposal}
+                onChange={(ev) => setProposal(ev.target.value)}
+                className="min-h-32 font-serif text-[15px]"
+              />
+            </div>
+          )}
+          <div className="flex flex-wrap justify-end gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => (setPick(null), setProposal(null))}
+              disabled={ask.isPending || keep.isPending}
+            >
+              {msg("Another paragraph")}
+            </Button>
+            <Button
+              size="sm"
+              variant={proposal === null ? `primary` : `secondary`}
+              loading={ask.isPending}
+              disabled={keep.isPending}
+              onClick={() => ask.mutate()}
+              title={msg("Sends a new request; on a paid model it is billed again")}
+            >
+              <Icon.WandSparkles className="size-3.5" /> {proposal === null ? msg("Rewrite") : msg("Try again")}
+            </Button>
+            {proposal !== null && (
+              <Button
+                size="sm"
+                variant="primary"
+                loading={keep.isPending}
+                disabled={ask.isPending || !proposal.trim()}
+                onClick={() => keep.mutate()}
+              >
+                <Icon.Check className="size-3.5" /> {msg("Keep this version")}
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+    </Modal>
   );
 }

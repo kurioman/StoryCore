@@ -24,6 +24,7 @@ const KIND_LABELS = () => ({
   capture: msg("Memory capture"),
   summary: msg("Summaries"),
   recap: msg("Recaps"),
+  rewrite: msg("Rewritten paragraphs"),
 });
 
 export function UsageMeter({ storyId, refreshKey }) {

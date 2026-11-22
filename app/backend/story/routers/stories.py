@@ -500,6 +500,29 @@ def edit_message(sid: str, mid: str, body: EditIn, db: Session = Depends(get_db)
     return message_out(db, m)
 
 
+class RewriteIn(BaseModel):
+    paragraph: int
+    instruction: str = ""
+    keep: Optional[str] = None  # the proposal the player keeps: saved as an edit of the message
+
+
+@router.post("/stories/{sid}/messages/{mid}/rewrite")
+async def rewrite_paragraph(sid: str, mid: str, body: RewriteIn, ctx: AppContext = Depends(get_ctx)) -> dict[str, Any]:
+    """v0.6.2: propose a new version of one paragraph of a reply (``keep`` empty), or save the one the player keeps."""
+    from ..services import rewrite
+    if body.keep is None:
+        return await rewrite.propose(ctx, sid, mid, body.paragraph, body.instruction)
+    with ctx.db.session() as db:
+        m = db.get(Message, mid)
+        if m is None or m.story_id != sid or m.role != "assistant":
+            raise HTTPException(404, "Message not found")
+        if not 0 <= body.paragraph < len(rewrite.split(m.content or "")) or not body.keep.strip():
+            raise HTTPException(400, "That paragraph does not exist.")
+        m = turns.edit(db, sid, mid, rewrite.replace(m.content, body.paragraph, body.keep))
+        _reconcile(db, sid, mid, edited=True)
+        return message_out(db, m)
+
+
 class InfoLineIn(BaseModel):
     line: int
     value: Optional[str] = None  # None: the line is cancelled
