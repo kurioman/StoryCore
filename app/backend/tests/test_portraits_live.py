@@ -76,9 +76,27 @@ class DetectionTest(unittest.TestCase):
     def test_a_tag_wins_for_its_paragraph(self):
         # Lily is in the scene: her first name alone in a tag means her (test report "30 tours", B7)
         live = LiveSpeakers(INDEX, protagonist={"Kurio"}, portraits={}, held={}, present={"lily"})
-        beats = live.compute("Elle sourit.\n\n« Oui », dit Selphina.", [{"name": "Lily", "slot": 4, "offset": 14}])
+        beats = live.compute("Elle sourit.\n\n« Oui », murmure-t-elle.", [{"name": "Lily", "slot": 4, "offset": 14}])
         self.assertEqual([(b["character_id"], b["paragraph"], b["slot"], b["source"]) for b in beats],
                          [("lily", 1, 4, "tag")])
+
+    def test_a_tag_on_someone_elses_line_shows_nothing(self):
+        # v0.6.2 (Kurio's DeepSeek test): Lilia's portrait came up for a line said by a second-year student
+        live = LiveSpeakers(INDEX, protagonist={"Kurio"}, portraits={}, held={}, present={"lily", "selphina"})
+        beats = live.compute("Elle sourit.\n\n« Oui », dit Selphina.", [{"name": "Lily", "slot": 4, "offset": 14}],
+                             final=True)
+        self.assertEqual([(b["character_id"], b["source"]) for b in beats], [("selphina", "detected")])
+        for text in ("« Bienvenue ! » lança un étudiant de deuxième année.",
+                     "Un étudiant de deuxième année s'avança : « Bienvenue ! »",
+                     '"Welcome!" a second-year student called out.'):
+            beats = live.compute(text, [{"name": "Lily", "slot": 2, "offset": 0}], final=True)
+            self.assertEqual(beats, [], text)
+            self.assertEqual(live.compute(text, [], final=True), [], text)  # no tag: no portrait either
+        # a silent character tagged without any change of expression: no portrait (one with a new face: a reaction)
+        live = LiveSpeakers(INDEX, protagonist={"Kurio"}, portraits={}, held={"lily": {"slot": 1}}, present={"lily"})
+        self.assertEqual(live.compute("Lily regarde la porte.", [{"name": "Lily", "slot": 1, "offset": 0}], final=True), [])
+        self.assertEqual([b["slot"] for b in live.compute("Lily rougit.", [{"name": "Lily", "slot": 6, "offset": 0}],
+                                                          final=True)], [6])
 
 
 REPLY = ("La porte de la bibliothèque grince. Une jeune femme aux cheveux argentés lève les yeux.\n\n"

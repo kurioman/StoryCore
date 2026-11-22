@@ -310,7 +310,7 @@ export var Composer = React.forwardRef(function (
                   (enterToSend || e.ctrlKey || e.metaKey) &&
                   (e.preventDefault(), ie());
             }}
-            rows={2}
+            rows={typeof window !== `undefined` && window.matchMedia?.(`(max-width: 640px)`).matches ? 1 : 2}
             disabled={disabled}
             placeholder={
               _
@@ -319,12 +319,12 @@ export var Composer = React.forwardRef(function (
                   : msg("Add instructions or text (optional)…", {})
                 : msg("What do you do? Type / for commands")
             }
-            className="block max-h-64 w-full resize-none bg-transparent px-3.5 py-2.5 font-serif text-base leading-relaxed text-fg placeholder:font-sans placeholder:text-sm placeholder:text-faint focus:outline-none"
+            className="sc-composer-input block max-h-64 w-full resize-none bg-transparent px-3.5 py-2.5 font-serif text-base leading-relaxed text-fg placeholder:font-sans placeholder:text-sm placeholder:text-faint focus:outline-none"
             id="story-composer"
             aria-label={msg("Message")}
           />
 
-          <div className="flex items-center gap-1 px-2 pb-2">
+          <div className="sc-composer-tools flex items-center gap-1 px-2 pb-2">
             <IconButton label={msg("Recap the story (/recap)")} onClick={() => onQuick(`recap`)}>
               <Icon.ScrollText className="size-4" />
             </IconButton>

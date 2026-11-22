@@ -296,3 +296,14 @@ button.sc-cx-card:hover{transform:translateY(-2px);border-color:#e2bd7270;box-sh
 .sc-welcome-foot{grid-template-columns:1fr auto;gap:.75rem}
 .sc-welcome-foot>:last-child{display:none}
 }
+
+/* v0.6.2 (Kurio's phone test): smaller story text and a smaller writing box on a phone, so more of the story fits */
+@media (max-width:640px){
+:root{--story-size:.9375rem;--story-leading:1.6}
+:root[data-reading-size=compact]{--story-size:.875rem;--story-leading:1.55}
+:root[data-reading-size=large]{--story-size:1.0625rem;--story-leading:1.65}
+.prose-story p{margin-bottom:.7em}
+.sc-composer-input{padding:.45rem .7rem;line-height:1.4;max-height:7.5rem}
+.sc-composer-tools{padding:0 .3rem .3rem}
+.sc-user-bubble{padding:.45rem .7rem;max-width:94%}
+}

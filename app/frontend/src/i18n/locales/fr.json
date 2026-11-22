@@ -2231,5 +2231,8 @@
  "{{v0}} is now the default model for new stories.": "{{v0}} est maintenant le modèle par défaut des nouvelles histoires.",
  "Search the full OpenRouter list…": "Chercher dans la liste complète d'OpenRouter…",
  "Browse all models on openrouter.ai": "Voir tous les modèles sur openrouter.ai",
- "Your other OpenRouter models": "Vos autres modèles OpenRouter"
+ "Your other OpenRouter models": "Vos autres modèles OpenRouter",
+ "As billed by the provider: every request counts, regenerated or removed replies included. Tests made in the settings are not part of it.": "Tel que facturé par le fournisseur : chaque requête compte, y compris les réponses régénérées ou supprimées. Les tests faits dans les paramètres n’en font pas partie.",
+ "Money spent on this story — click for the details": "Argent dépensé pour cette histoire — cliquez pour le détail",
+ "Spent on this story": "Dépensé pour cette histoire"
 }

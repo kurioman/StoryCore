@@ -46,7 +46,14 @@ def record(ctx, story_id: str, kind: str, adapter) -> None:
                 return
             settings = dict(s.settings_json or {})
             side = {k: dict(v) for k, v in (settings.get("usage_side") or {}).items()}
-            _add(side.setdefault(kind, {}), getattr(adapter, "last_usage", None))
+            u = dict(getattr(adapter, "last_usage", None) or {})
+            spent = float(getattr(adapter, "spent_cost", 0.0) or 0.0)
+            new_cost = round(spent - float(getattr(adapter, "recorded_cost", 0.0) or 0.0), 8)
+            u.pop("cost", None)  # v0.6.2: every request of this side job (retries included), not only the latest
+            if new_cost > 0:
+                u["cost"] = new_cost
+                adapter.recorded_cost = spent
+            _add(side.setdefault(kind, {}), u or None)
             settings["usage_side"] = side
             s.settings_json = settings
     except Exception:
@@ -95,10 +102,23 @@ def summary(db: Session, story: Story, path_ids: set[str]) -> dict[str, Any]:
             _add(narration, md.get("usage"))
             last = m
     side = (story.settings_json or {}).get("usage_side") or {}
+    # v0.6.2 (Kurio's DeepSeek test: $0.015 shown, $0.017 on OpenRouter): the money is what was really spent, not only
+    # the replies still in the story. Regenerated replies, removed ones, other branches and a reply asked twice
+    # (runtime: "no story") were billed too, so they all count in the cost (the token figures stay those of the path).
+    spent = 0.0
+    for m in db.scalars(select(Message).where(Message.story_id == story.id, Message.role == "assistant")):
+        md = m.generation_metadata_json or {}
+        c = md.get("spent_cost", (md.get("usage") or {}).get("cost"))
+        if isinstance(c, (int, float)):
+            spent += float(c)
     total: dict[str, Any] = {}
     for part in [narration, *side.values()]:
         for k, v in part.items():
             total[k] = round(total.get(k, 0) + v, 6) if isinstance(v, float) else total.get(k, 0) + v
+    total.pop("cost", None)
+    spent += sum(float(v.get("cost") or 0) for v in side.values() if isinstance(v, dict))
+    if spent > 0:
+        total["cost"] = round(spent, 6)
     ratio = ratio_of(story.settings_json)
     out_last = None
     if last is not None:

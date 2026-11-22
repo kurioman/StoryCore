@@ -297,7 +297,7 @@ export function MessageItem({
       )}
       <div
         className={cn(
-          se && !ie && `ml-auto w-fit max-w-[90%] min-w-0 rounded-lg border border-line bg-user px-3.5 py-2.5`,
+          se && !ie && `sc-user-bubble ml-auto w-fit max-w-[90%] min-w-0 rounded-lg border border-line bg-user px-3.5 py-2.5`,
           ie && !O && `ml-auto w-fit max-w-[90%]`,
           ie &&
             O &&

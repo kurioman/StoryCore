@@ -914,6 +914,8 @@ class ExtractionService:
             start_id, end_id, end_seq = path[0].id, path[-1].id, path[-1].seq
             version = (db.scalar(select(Recap.version).where(Recap.branch_id == branch.id).order_by(Recap.version.desc()).limit(1)) or 0) + 1
         text = await resolved.adapter.complete(resolved.profile.model_id, sys, [ChatMessage("user", prompt)], resolved.params)
+        from . import usage as usage_svc  # v0.6.2: every paid request counts in the story's cost
+        usage_svc.record(self.ctx, story_id, "recap", resolved.adapter)
         with self.ctx.db.session() as db:
             story = story_tree.get_story(db, story_id)
             auto = settings_service.get(db, "recap_auto_replace")
@@ -943,6 +945,8 @@ class ExtractionService:
                   f"\"fix_text\": str}}], \"summary\": str}}\n\nRecent transcript:\n{transcript}")
         raw = await resolved.adapter.complete(resolved.profile.model_id, built.instructions, [ChatMessage("user", prompt)],
                                               {**resolved.params, "temperature": 0.2}, json_mode=True)
+        from . import usage as usage_svc  # v0.6.2: every paid request counts in the story's cost
+        usage_svc.record(self.ctx, story_id, "analysis", resolved.adapter)
         try:
             data = parse_json_object(raw)
         except ValueError:
@@ -974,6 +978,8 @@ class ExtractionService:
             valid = {m.id for m in new}
         raw = await resolved.adapter.complete(resolved.profile.model_id, EXTRACTION_RULES, [ChatMessage("user", prompt)],
                                               _capture_params(resolved.params, resolved.profile.context_limit), json_mode=True)
+        from . import usage as usage_svc  # v0.6.2: every paid request counts in the story's cost
+        usage_svc.record(self.ctx, story_id, "analysis", resolved.adapter)
         data = Extraction.model_validate(parse_json_object(raw))
         n = skipped = 0
         with self.ctx.db.session() as db:

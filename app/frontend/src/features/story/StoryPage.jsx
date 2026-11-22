@@ -457,7 +457,7 @@ export function StoryPage({ storyId }) {
       <div className="flex min-h-0 flex-1">
         <div className="flex min-w-0 flex-1 flex-col">
           <div className={cn(`min-h-0 flex-1 flex-col`, E === `story` ? `flex` : `hidden`)}>
-            <AutoScroll deps={[be.length, de.live?.text]}>
+            <AutoScroll messages={be} ready={!n.isLoading}>
               {n.isLoading && <Spinner />}
               {n.isError && <ErrorCallout error={n.error} onRetry={() => n.refetch()} />}
               {be.length === 0 && !n.isLoading && (
@@ -668,24 +668,31 @@ function firstVisibleArticle(e) {
   };
 }
 
-// v0.6 (test report "30 tours", B12): the view used to jump to the bottom before the portraits had loaded; each image
-// then pushed the new reply further down and the view stayed on an older message (the ↓ button stopped short the same
-// way). Now the view "follows" the end of the story: whenever the content grows (text streaming in, images loading)
-// while following, it goes back to the bottom. Following starts again when a message is added, when the ↓ button is
-// used or when the reader scrolls back to the end. It stops only when the READER moves away from the end (wheel,
-// finger, keys, scrollbar) or a jump to an older message asks for it (event "story-jump"). Test 2: the browser's own
-// "scroll anchoring" moved the view when a portrait loaded, and that alone used to stop following, so it is off.
-function AutoScroll({ children, deps }) {
+// v0.6 (test report "30 tours", B12): images loading after the view moved used to leave it on an older message.
+// v0.6.2 (Kurio's DeepSeek test): following the end of a reply while it was written forced the reader to scroll back
+// up to read each new reply from its start. The view no longer follows the text. Rules now:
+// - when the story opens, the view goes to the end and stays there while the portraits load, until the reader moves;
+// - when a message is added (the player's turn, a new reply), the view moves ONCE so that the player's message (or,
+//   without one, the first new message) sits at the top of the screen: the reply is then written below it and the
+//   view never moves while it grows (the reader keeps their own framing);
+// - the ↓ button goes to the end once; a jump to an older message (event "story-jump") stops everything.
+// The browser's own "scroll anchoring" stays off (it moved the view when a portrait loaded).
+function AutoScroll({ children, messages, ready }) {
   let n = React.useRef(null),
     content = React.useRef(null),
     [r, i] = React.useState(true),
-    follow = React.useRef(true),
-    userInput = React.useRef(0),
-    count = React.useRef(deps[0]),
+    follow = React.useRef(true), // only while the story is opening
+    count = React.useRef(null), // null until the story's messages have loaded
     o = React.useRef(null),
     toBottom = () => {
       let e = n.current;
       e && (e.scrollTop = e.scrollHeight);
+    },
+    toTop = (id) => {
+      let e = n.current,
+        a = id && document.getElementById(`msg-${id}`);
+      if (!e || !a) return;
+      e.scrollTop += a.getBoundingClientRect().top - e.getBoundingClientRect().top - 8;
     };
   React.useLayoutEffect(() => {
     let e = n.current,
@@ -710,12 +717,21 @@ function AutoScroll({ children, deps }) {
     window.addEventListener(`story-jump`, jump);
     return () => (ro.disconnect(), window.removeEventListener(`story-jump`, jump));
   }, []);
-  let gesture = () => (userInput.current = Date.now());
+  let gesture = () => (follow.current = false);
   React.useLayoutEffect(() => {
-    if (deps[0] > (count.current ?? 0)) follow.current = true; // a new message (the player's turn, a new reply)
-    count.current = deps[0];
-    if (follow.current) (toBottom(), i(true));
-  }, deps);
+    if (!ready) return;
+    let before = count.current,
+      now = messages.length;
+    count.current = now;
+    if (before === null) return (follow.current && toBottom(), void i(true)); // the story just loaded
+    if (now <= before) return;
+    follow.current = false;
+    // a new message: put the player's latest message at the top (it is at most 2 messages from the end), else the
+    // first new message (a reply to "Continue", the opening scene)
+    let tail = messages.slice(-2),
+      mine = [...tail].reverse().find((m) => m.role === `user`);
+    toTop((mine ?? messages[before])?.id);
+  }, [messages, ready]);
   return (
     <div className="relative min-h-0 flex-1">
       <div
@@ -728,8 +744,6 @@ function AutoScroll({ children, deps }) {
         onScroll={(e) => {
           let t = e.currentTarget,
             atEnd = t.scrollHeight - t.scrollTop - t.clientHeight < 80;
-          if (atEnd) follow.current = true;
-          else if (Date.now() - userInput.current < 1200) follow.current = false; // the reader moved away
           (i(atEnd), (o.current = firstVisibleArticle(t)));
         }}
         className="story-scroll h-full overflow-y-auto overflow-x-hidden px-3 pb-6 sm:px-6"
@@ -743,7 +757,6 @@ function AutoScroll({ children, deps }) {
           label={msg("Scroll to latest")}
           className="absolute bottom-3 right-6 size-8 border border-line bg-raised shadow"
           onClick={() => {
-            follow.current = true;
             i(true);
             toBottom();
           }}

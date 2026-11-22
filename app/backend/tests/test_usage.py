@@ -25,6 +25,25 @@ class UsageShapesTest(AppTestCase):
         self.assertEqual(_usage({"usage": {"prompt_cache_hit_tokens": 700, "prompt_tokens": 900}})["cached_tokens"], 700)
         self.assertIsNone(_usage({"choices": []}))
 
+    def test_every_paid_request_counts(self):
+        # v0.6.2 (Kurio's DeepSeek test: $0.015 shown, $0.017 on OpenRouter): an adapter adds up every request it paid
+        # for (a reply asked twice, a repaired analysis), and a side job adds only what it has not added yet
+        from story.providers.adapters import MockAdapter
+        from story.services import usage as usage_svc
+        a = MockAdapter(None, None)
+        first = {"prompt_tokens": 10, "cost": 0.004}
+        a.last_usage = first
+        a.last_usage = first  # a stream that hands back the same figures is not paid twice
+        a.last_usage = {"prompt_tokens": 12, "cost": 0.003}
+        a.last_usage = None
+        self.assertAlmostEqual(a.spent_cost, 0.007)
+        story = self.new_story("Cost", world_slug=None)
+        usage_svc.record(self.ctx, story["id"], "analysis", a)
+        usage_svc.record(self.ctx, story["id"], "analysis", a)  # nothing new since the first record
+        side = self.get(f"/stories/{story['id']}/usage")["side"]["analysis"]
+        self.assertEqual(side["requests"], 2)
+        self.assertAlmostEqual(side["cost"], 0.007)
+
 
 class StoryUsageTest(AppTestCase):
     def test_accounting_calibration_and_light_analysis(self):

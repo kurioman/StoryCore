@@ -319,7 +319,9 @@ class GenerationManager:
             log.exception("unexpected generation error")
         meta = {"finished_at": now_iso(), "duration_s": round(time.monotonic() - started, 2),
                 "approx_output_tokens": len(job.text) // 4, "error": job.error,
-                **({"usage": r.adapter.last_usage} if r.adapter.last_usage else {})}
+                **({"usage": r.adapter.last_usage} if r.adapter.last_usage else {}),
+                # v0.6.2: everything this reply cost (a reply asked twice is billed twice)
+                **({"spent_cost": r.adapter.spent_cost} if getattr(r.adapter, "spent_cost", 0) else {})}
         meta["diagnostics"] = diagnostics(r, job, params, first_text, meta["duration_s"])
         if job.tag_filter is not None and job.tag_filter.tags:
             meta["portrait_tags_raw"] = job.tag_filter.found()  # resolved to characters by portrait_tags.apply

@@ -35,6 +35,11 @@ VERBS = (r"(?:dit|dis|demande|demanda|repond|repondit|murmure|murmura|chuchote|c
 AFTER_QUOTE = re.compile(rf'"\s*[,.!?…]*\s*(?:{VERBS})(?:\s+[a-z]+){{0,2}}\s*$')  # « … », dit (doucement) Lily
 NAME_THEN_VERB_AFTER_QUOTE = re.compile(rf'^\s+(?:{VERBS})\b')                       # "…," Lily said
 BEFORE_QUOTE = re.compile(r'^[^".!?]{0,80}?[:,]?\s*"')                                # Lily sourit : « … »
+# v0.6.2: a line said by someone the lore does not name: « … », lança un étudiant / "…," a second-year said /
+# "…," one of the girls said. Such a line never gets a portrait, and it is not passed on to the last name either.
+DETERMINERS = r"(?:un|une|le|la|l|les|des|cet|cette|ce|quelqu|the|a|an|one|another|someone|somebody|some)"
+UNNAMED_AFTER = re.compile(rf'"\s*[,.!?…]*\s*(?:{VERBS})\s+{DETERMINERS}\b')
+UNNAMED_SUBJECT_AFTER = re.compile(rf'"\s*[,.!?…]*\s*(?:a|an|the|one|another|someone|somebody)\b[^".!?]{{0,40}}?\b(?:{VERBS})\b')
 FR_PROTAGONIST_SPEAKS = re.compile(
     r"\b(?:vous|tu)\b[^\"]{0,30}\b(?:dites|dis|repondez|reponds|demandez|demandes|murmurez|murmures|ajoutez|ajoutes|"
     r"lancez|lances|soufflez|souffles|chuchotez|chuchotes)\b|\b(?:dites|repondez|demandez|murmurez|ajoutez|lancez|"
@@ -153,6 +158,36 @@ class LiveSpeakers:
                 out.append((cid, q))
         return out
 
+    def _unnamed_quotes(self, t: str) -> set[int]:
+        """Numbers of the quotes (in a flattened paragraph) said by someone the narration does not name."""
+        out = set()
+        for rx in (UNNAMED_AFTER, UNNAMED_SUBJECT_AFTER):
+            for m in rx.finditer(t):
+                n = t[:m.start() + 1].count('"')
+                if n % 2 == 0 and n:
+                    out.add(n // 2 - 1)
+        return out
+
+    def owns_line(self, para: str, cid: str) -> bool | None:
+        """v0.6.2: whether a portrait tag for ``cid`` on this paragraph really marks one of its lines. True: a line is
+        said by them; False: the lines belong to someone else (another lore character, an unnamed student...);
+        None: the paragraph has no line, or nothing tells who speaks (the tag is then trusted)."""
+        t = self._flat(para)
+        quotes = t.count('"') // 2
+        if not quotes:
+            return None
+        strong = self._strong(para)
+        if any(c == cid for c, _ in strong):
+            return True
+        taken = {q for _, q in strong} | self._unnamed_quotes(t) | self._protagonist_quotes(t)
+        if len(taken) >= quotes:
+            return False  # every line here is someone else's
+        from .speaker_guard import PERSON
+        narration = SPEECH.sub(" ", para)
+        if not strong and PERSON.search(norm(narration)) and not self._names(narration):
+            return False  # "Un étudiant de deuxième année s'avança : « … »" with a stray [Lilia:1] tag
+        return None
+
     def _quote_pos(self, para: str, start: int, q: int) -> int:
         quotes = list(SPEECH.finditer(para))
         if not quotes:
@@ -171,8 +206,8 @@ class LiveSpeakers:
         out = [(cid, self._quote_pos(para, a, q), 0.8) for cid, q in self._strong(para)]
         flat = self._flat(para)
         quotes = flat.count('"') // 2
-        if not out and closed and quotes and len(self._protagonist_quotes(flat)) >= quotes:
-            out = []  # every line here is the protagonist's
+        if not out and closed and quotes and len(self._protagonist_quotes(flat) | self._unnamed_quotes(flat)) >= quotes:
+            out = []  # every line here is the protagonist's, or said by someone the lore does not name
         elif not out and closed:
             # v0.6 (test report "30 tours", B6): a line with no name next to it gets a portrait only when the narration
             # around it is about exactly one lore character and nobody else (no "maid", "old woman", "Elric"):
@@ -216,9 +251,10 @@ class LiveSpeakers:
         for k in range(len(paras)):
             closed = not (open_last and k == len(paras) - 1)
             if k in tagged:
-                beats.extend(tagged[k])
-                face.update({x["character_id"]: x["slot"] for x in tagged[k]})
-            else:
+                kept = self._check_tags(text[paras[k][0]:paras[k][1]], tagged[k], closed, face)
+                beats.extend(kept)
+                face.update({x["character_id"]: x["slot"] for x in kept})
+            if k not in tagged or not any(x.get("owns") for x in tagged[k]):
                 found = self._detect(text, paras, k, closed, prev)
                 # v0.6: the mood of this paragraph's narration ("les larmes aux yeux", "she blushed") gives this line its
                 # own expression, so one character can look neutral early in a reply and sad later on
@@ -239,10 +275,33 @@ class LiveSpeakers:
             else:  # a paragraph that names nobody but whose line was given to one character passes that speaker on
                 who = list(dict.fromkeys(x["character_id"] for x in beats if x["paragraph"] == k))
                 prev = self._names(narration) or (who if len(who) == 1 else [])
-        for k, lst in tagged.items():  # a tag at the very end, before its paragraph has any text
-            if k >= len(paras):
-                beats.extend(lst)
+        # v0.6.2: a tag written before its paragraph has any text waits for the text (see _check_tags)
         return beats
+
+    def _check_tags(self, para: str, lst: list[dict[str, Any]], closed: bool, face: dict[str, int]) -> list[dict[str, Any]]:
+        """v0.6.2 (Kurio's DeepSeek test): a portrait tag shows a portrait only when its character speaks here, or
+        visibly reacts (named in the paragraph AND their expression changes). A tag on a paragraph whose lines are
+        someone else's, or on a silent character whose face does not change, shows nothing. While the paragraph is
+        still being written, the tag waits until its first line and a few words after it are there (who says it)."""
+        if not closed:
+            t = self._flat(para)
+            marks = [i for i, ch in enumerate(t) if ch == '"']
+            tail = t[marks[1] + 1:] if len(marks) >= 2 else ""
+            if len(marks) < 2 or (len(tail) < 30 and not re.search(r"[.!?…]", tail)):
+                return []  # who says the line is written just after it ("…", lança un étudiant.)
+        out = []
+        for x in lst:
+            cid = x["character_id"]
+            own = self.owns_line(para, cid)
+            x["owns"] = own is not False and bool(_QUOTE_RE.search(para))
+            if own is not False and _QUOTE_RE.search(para):
+                out.append(x)
+                continue
+            named = cid in self._names(SPEECH.sub(" ", para))
+            before = face.get(cid, self._held_slot(cid))
+            if named and x["slot"] != before:
+                out.append({**x, "reacting": True})
+        return out
 
     def feed(self, text: str, tags: list[dict[str, Any]], *, final: bool = False) -> list[dict[str, Any]] | None:
         beats = self.compute(text, tags, final=final)
@@ -259,7 +318,7 @@ class LiveSpeakers:
         for x in self.beats:
             asset_id, used, fallback = resolve_expression(self.portraits.get(x["character_id"], {}), x["slot"])
             out.append({"character_id": x["character_id"], "name": self.index.name(x["character_id"]),
-                        "expression": x["slot"], "beat": "speaking", "paragraph": x["paragraph"], "asset_id": asset_id,
+                        "expression": x["slot"], "beat": "reacting" if x.get("reacting") else "speaking", "paragraph": x["paragraph"], "asset_id": asset_id,
                         "slot_used": used, "is_fallback": fallback, "source": x["source"]})
         return out
 

@@ -30,7 +30,12 @@ PERSON = re.compile(
     r"servantes?|domestiques?|gardes?|soldats?|capitaine|chevaliers?|homme|hommes|femme|femmes|fille|filles|garcon|"
     r"garcons|enfants?|vieillard|vieille|refugies?|refugiees?|villageois|villageoise|marchands?|marchandes?|inconnus?|"
     r"inconnues?|voix|quelqu un|silhouette|pretres?|pretresse|majordome|messager|eclaireurs?|officier|aubergiste|"
-    r"serveuses?|serveurs?|foule)\b")
+    r"serveuses?|serveurs?|foule|"
+    # v0.6.2 (Kurio's DeepSeek test: "un étudiant de deuxième année" spoke with Lilia's portrait): school people
+    r"students?|classmates?|pupils?|teachers?|professors?|instructors?|upperclassm[ae]n|freshm[ae]n|seniors?|juniors?|"
+    r"first years?|second years?|third years?|boys?|lads?|etudiants?|etudiantes?|eleves?|camarades?|professeurs?|"
+    r"professeures?|enseignants?|enseignantes?|surveillants?|surveillantes?|premiere annee|deuxieme annee|"
+    r"troisieme annee|seconde annee|aines?|aine|ainees?|nouveaux|nouvelles?|novices?|apprentis?|apprenties?|jeune)\b")
 
 # capitalised words that are not names (sentence openers, titles, pronouns), lower case
 NOT_NAMES = set("""i a an the as when while with his her he she they it its you your yours we our their them this that

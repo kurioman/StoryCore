@@ -163,16 +163,30 @@ def apply(db: Session, message_id: str) -> bool:
     from . import speaker_guard
     present = set((state.get("scene") or {}).get("present") or [])
 
+    from .live_speakers import LiveSpeakers
+    judge = LiveSpeakers(index, protagonist=me, portraits={}, held={}, present=present)
+    held_now = ((story.settings_json or {}).get("expressions") or {}).get(m.branch_id) or {}
+    face: dict[str, int] = {}  # each character's expression so far in this reply
+
     def place(name: str, cid: str, slot: int, pos: int, source: str, conf: float, mood: bool = False) -> dict[str, Any]:
         para = next((k for k, (a, b) in enumerate(paras) if a <= pos < b), None)
         end = paras[para][1] if para is not None else len(text)
         q = QUOTED.search(text, pos, end)
         line = q.group(0) if q else None
+        if source == "tag" and para is not None and line:
+            # v0.6.2 (Kurio's DeepSeek test): a tag on a paragraph whose lines are someone else's (another character,
+            # "un étudiant de deuxième année") does not make the tagged character the speaker
+            if judge.owns_line(text[paras[para][0]:paras[para][1]], cid) is False:
+                line = None
+        before = face.get(cid, int((held_now.get(cid) or {}).get("slot") or 1))
+        face[cid] = int(slot)
         # v0.6 (test report "30 tours", B8): a tag on a paragraph with no spoken line (narration, or narration that was
         # wrapped in quotes and unwrapped by reply_cleanup) is not a line: a visible reaction when the paragraph names
         # the character, else nothing
-        beat = "speaking" if line else ("reacting" if para is not None and cid in index.find_mentions(
-            text[paras[para][0]:paras[para][1]], ("character",)) else None)
+        # v0.6.2: a reaction shows a portrait only when the expression changes (else there is nothing new to show)
+        beat = "speaking" if line else ("reacting" if para is not None and int(slot) != before and cid in
+                                        index.find_mentions(speaker_guard.narration(text[paras[para][0]:paras[para][1]]),
+                                                            ("character",)) else None)
         return {"name": name, "character_id": cid, "slot": int(slot), "pos": pos, "paragraph": para, "line": line,
                 "anchor": line or text[pos:pos + 60].strip(), "source": source, "confidence": conf, "mood": mood,
                 "beat": beat}

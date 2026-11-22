@@ -109,8 +109,26 @@ class ProviderAdapter:
     # complete(..., json_schema=...) constrains JSON output to a schema (otherwise callers rely on json_mode + validation)
     supports_json_schema = False
     connection_hint = ""
-    last_usage: dict[str, Any] | None = None  # the provider's own usage figures for the latest request, when it sends them
+    _last_usage: dict[str, Any] | None = None
+    # v0.6.2: money spent through this adapter (one adapter is built per job): every request that reports a cost adds
+    # it here, retries and repaired answers included, so the story's total matches the provider's bill
+    spent_cost: float = 0.0
+    recorded_cost: float = 0.0  # the part of spent_cost already added to a story by services.usage.record
+    _costed: Any = None
     last_finish: dict[str, Any] | None = None  # how the latest stream ended, as the provider reported it (v1.6.1)
+
+    @property
+    def last_usage(self) -> dict[str, Any] | None:
+        """The provider's own usage figures for the latest request, when it sends them."""
+        return self._last_usage
+
+    @last_usage.setter
+    def last_usage(self, u: dict[str, Any] | None) -> None:
+        self._last_usage = u
+        c = (u or {}).get("cost")
+        if isinstance(c, (int, float)) and c > 0 and u is not self._costed:  # a stream may hand back the same figures
+            self._costed = u
+            self.spent_cost = round(self.spent_cost + float(c), 8)
 
     def __init__(self, base_url: str | None, api_key: str | None, config: dict[str, Any] | None = None,
                  transport: httpx.AsyncBaseTransport | None = None):
