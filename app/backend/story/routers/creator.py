@@ -172,6 +172,28 @@ def delete_portraits(pid: str, char_id: str, n: int = 0, ctx: AppContext = Depen
     return _reload(ctx, db, pid)
 
 
+@router.post("/creator/worlds/{pid}/places/{place_id}/image")
+async def upload_place_image(pid: str, place_id: str, file: UploadFile = File(...),
+                             ctx: AppContext = Depends(get_ctx), db: Session = Depends(get_db)) -> dict[str, Any]:
+    """v0.6.2: the background picture of a place."""
+    data = await _read_upload(file)
+    try:
+        pack_editor.set_place_image(_root(ctx), pid, place_id, data)
+    except (EditorError, LookupError) as e:
+        raise _fail(e)
+    return _reload(ctx, db, pid)
+
+
+@router.delete("/creator/worlds/{pid}/places/{place_id}/image")
+def delete_place_image(pid: str, place_id: str, ctx: AppContext = Depends(get_ctx),
+                       db: Session = Depends(get_db)) -> dict[str, Any]:
+    try:
+        pack_editor.set_place_image(_root(ctx), pid, place_id, None)
+    except (EditorError, LookupError) as e:
+        raise _fail(e)
+    return _reload(ctx, db, pid)
+
+
 @router.get("/creator/worlds/{pid}/image")
 def world_image(pid: str, path: str, ctx: AppContext = Depends(get_ctx)) -> FileResponse:
     """The cover or a portrait of a world being edited (only files of its images folder and its cover)."""

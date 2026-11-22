@@ -234,11 +234,19 @@ export function WorldEditor({ worldId }) {
               items={doc[key]}
               onChange={(v) => change(key, v)}
               intro={intros()[key]}
-              extra={key === `characters` ? (c) => <PortraitSlots doc={doc} character={c} images={images} /> : undefined}
+              extra={
+                key === `characters`
+                  ? (c) => <PortraitSlots doc={doc} character={c} images={images} />
+                  : key === `locations`
+                    ? (l) => <PlaceImageSlot doc={doc} place={l} images={images} />
+                    : undefined
+              }
               onRemove={
                 key === `characters`
                   ? (c) => c.id && doc.portraits?.[c.id] && creatorApi.removePortraits(worldId, c.id).then(images.refresh)
-                  : undefined
+                  : key === `locations`
+                    ? (l) => l.id && doc.place_files?.[l.id] && creatorApi.removePlaceImage(worldId, l.id).then(images.refresh)
+                    : undefined
               }
             />
           </TabPanel>
@@ -418,6 +426,63 @@ function WorldTab({ doc, change }) {
 
 function expressionNames() {
   return [msg("Neutral"), msg("Happy"), msg("Sad"), msg("Angry"), msg("Disdain"), msg("Love / shy")];
+}
+
+// v0.6.2: the background picture of a place, shown behind the story text while the scene is there
+function PlaceImageSlot({ doc, place, images }) {
+  let { toast } = useUi(),
+    path = doc.place_files?.[place.id],
+    [busy, setBusy] = React.useState(false),
+    input = React.useRef(null);
+  if (!place.id) return <p className="mb-4 text-xs text-faint">{msg("Give the place a name to add its picture.")}</p>;
+  async function upload(file) {
+    if (!file) return;
+    setBusy(true);
+    try {
+      await creatorApi.uploadPlaceImage(doc.id, place.id, file);
+      images.bump();
+      await images.refresh();
+    } catch (e) {
+      toast(errorMessage(e), `danger`);
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="mb-5">
+      <p className="text-xs font-medium text-muted">{msg("Background picture")}</p>
+      <p className="mb-2 text-xs text-faint">
+        {msg("Shown softly behind the story text while the scene is in this place (landscape format works best).")}
+      </p>
+      <div className="flex items-end gap-2">
+        <button
+          onClick={() => input.current?.click()}
+          className={cn(
+            `relative flex aspect-video w-56 items-center justify-center overflow-hidden rounded-md border bg-panel-2 text-faint`,
+            path ? `border-line` : `border-dashed border-line hover:border-accent/60`,
+          )}
+          title={msg("Choose a picture")}
+        >
+          {busy ? (
+            <Spinner />
+          ) : path ? (
+            <img src={creatorApi.imageUrl(doc.id, path, images.version)} alt="" className="size-full object-cover" />
+          ) : (
+            <Icon.ImagePlus className="size-5" />
+          )}
+        </button>
+        {path && (
+          <button
+            className="text-xs text-faint hover:text-danger"
+            onClick={() => creatorApi.removePlaceImage(doc.id, place.id).then(images.refresh)}
+          >
+            {msg("Remove")}
+          </button>
+        )}
+      </div>
+      <input ref={input} type="file" accept="image/*" hidden onChange={(e) => (upload(e.target.files?.[0]), (e.target.value = ``))} />
+    </div>
+  );
 }
 
 function PortraitSlots({ doc, character, images }) {

@@ -121,6 +121,42 @@ class CreatorTest(unittest.TestCase):
             self.assertNotIn(p, self.worlds())
         self.assertFalse((self.project / "Lorepack" / f"{pid}_lore_pack").exists())
 
+    def test_place_backgrounds(self):
+        # v0.6.2: one picture per place (images/places/<id>.webp), behind the story text while the scene is there
+        pid = self.call("POST", "/creator/worlds", json={"name": "Décors"})["id"]
+        self.call("PUT", f"/creator/worlds/{pid}", json={
+            "characters": [{"id": "", "name": "Mara Vent"}],
+            "locations": [{"name": "Le Port"}, {"name": "Grand Phare"}]})
+        self.call("POST", f"/creator/worlds/{pid}/places/le_port/image", files={"file": ("p.png", png(size=(3000, 1500)), "image/png")})
+        self.call("POST", f"/creator/worlds/{pid}/portraits/mara_vent/1", files={"file": ("a.png", png(), "image/png")})
+        doc = self.call("GET", f"/creator/worlds/{pid}")
+        self.assertEqual(doc["place_files"], {"le_port": "images/places/le_port.webp"})
+        self.assertEqual(doc["portraits"], {"mara_vent": [1]})  # a place picture is not a portrait
+        im = Image.open(io.BytesIO(self.call("GET", f"/creator/worlds/{pid}/image",
+                                             params={"path": "images/places/le_port.webp"}).content))
+        self.assertLessEqual(max(im.size), 1920)
+        w = self.worlds()[pid]
+        story = self.call("POST", "/stories", json={"title": "Décor", "world_id": w["id"]})
+        self.assertIsNone(self.call("GET", f"/stories/{story['id']}/backdrop")["place_id"])  # no place yet
+        from story.services import state_service, story_tree
+        ctx = self.app.state.ctx
+        for loc, want in (("Le Port, au petit matin", "le_port"), ("Grand Phare", None)):  # the lighthouse has no picture
+            with ctx.db.session() as db:
+                st = story_tree.get_story(db, story["id"])
+                b = story_tree.get_branch(db, st)
+                cur = state_service.current(db, b.id)
+                state = dict(cur.state_json if cur else {})
+                state["scene"] = {**(state.get("scene") or {}), "location": loc}
+                state_service.save(db, st.id, b.id, state, source="test", summary="place")
+            bd = self.call("GET", f"/stories/{story['id']}/backdrop")
+            self.assertEqual(bd["place_id"], want, loc)
+        self.call("GET", f"/worlds/{w['id']}/places/le_port/image")
+        self.call("GET", f"/worlds/{w['id']}/places/grand_phare/image", expect=404)
+        self.call("DELETE", f"/creator/worlds/{pid}/places/le_port/image")
+        self.assertEqual(self.call("GET", f"/creator/worlds/{pid}")["place_files"], {})
+        self.call("DELETE", f"/stories/{story['id']}", params={"confirm": "true"})
+        self.call("DELETE", f"/creator/worlds/{pid}")
+
     def test_copy_a_bundled_pack(self):
         src = self.project / "Lorepack" / "hero_chronicle_lore_pack"
         before = {p.relative_to(src).as_posix(): p.stat().st_mtime_ns for p in src.rglob("*") if p.is_file()}

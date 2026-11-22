@@ -477,6 +477,16 @@ def _reconcile(db: Session, sid: str, mid: str, *, edited: bool = False) -> None
     scene_cast.reconcile(db, story, branch, also={mid} if edited else None)
 
 
+@router.get("/stories/{sid}/backdrop")
+def story_backdrop(sid: str, db: Session = Depends(get_db)) -> dict[str, Any]:
+    """v0.6.2: the picture of the scene's place, when the pack has one."""
+    from ..services import backdrops
+    b = backdrops.for_story(db, story_tree.get_story(db, sid))
+    if b.get("place_id"):
+        b["url"] = f"/api/worlds/{b['world_id']}/places/{b['place_id']}/image"
+    return b
+
+
 @router.post("/stories/{sid}/messages/{mid}/regenerate")
 def regenerate(sid: str, mid: str, ctx: AppContext = Depends(get_ctx), db: Session = Depends(get_db)) -> dict[str, Any]:
     return turns.regenerate(ctx, db, sid, mid)  # reconciles relationships before the new reply starts

@@ -212,6 +212,9 @@ function Detail({ item, kind }) {
           )}
         </div>
       )}
+      {kind === `places` && item.image && (
+        <img src={item.image} alt="" className="mb-4 aspect-video w-full rounded-xl object-cover" />
+      )}
       <h3 className="sc-brand text-2xl leading-tight text-[#f3dca0]">{item.name}</h3>
       {st && <span className={cn(`sc-cx-badge mt-2 inline-block`, st.tone)}>{st.label}</span>}
       {item.summary && <p className="mt-4 text-sm leading-relaxed text-[#ece6d8e6]">{item.summary}</p>}

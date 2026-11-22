@@ -117,6 +117,8 @@ def build(db: Session, story: Story, branch: MessageBranch, index: EntityIndex) 
     for m in replies:
         for pid in places_idx.find_mentions(m.content, ("location",)):
             pstatus.setdefault(pid, "rumored")
+    from .backdrops import images_dir, place_files
+    pictures = place_files(images_dir(world))  # v0.6.2: the place's background picture, once visited
     places = []
     for e in sorted((e for e in ents if e.category == "location"), key=lambda e: e.name.lower()):
         st = pstatus.get(e.entity_id, "locked")
@@ -127,6 +129,8 @@ def build(db: Session, story: Story, branch: MessageBranch, index: EntityIndex) 
         if st == "visited":
             item["summary"] = e.summary
             item["fields"].update(_fields(e.data_json or {}, PLACE_FIELDS))
+            if e.entity_id in pictures:
+                item["image"] = f"/api/worlds/{world.id}/places/{e.entity_id}/image"
         places.append(item)
 
     # discovered entries first (alphabetical); locked cards after them, so their position gives nothing away

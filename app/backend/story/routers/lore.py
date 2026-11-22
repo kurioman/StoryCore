@@ -51,6 +51,17 @@ def world_cover(wid: str, db: Session = Depends(get_db)):
     return FileResponse(f, headers={"Cache-Control": "no-cache"})
 
 
+@router.get("/worlds/{wid}/places/{pid}/image")
+def place_image(wid: str, pid: str, db: Session = Depends(get_db)):
+    """v0.6.2: the background picture of a place (services/backdrops.py)."""
+    from fastapi.responses import FileResponse
+    from ..services.backdrops import images_dir, place_files
+    f = place_files(images_dir(db.get(World, wid))).get(pid)
+    if f is None:
+        raise HTTPException(404, "No picture for this place")
+    return FileResponse(f, headers={"Cache-Control": "no-cache"})
+
+
 @router.get("/worlds/{wid}/roles")
 def world_roles(wid: str, db: Session = Depends(get_db)) -> dict[str, Any]:
     """Established posts and closed groups (lore-derived + owner-confirmed), ambiguous titles and lore/owner conflicts."""

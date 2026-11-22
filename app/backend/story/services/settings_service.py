@@ -124,6 +124,8 @@ DEFAULTS: dict[str, Any] = {
     "dialogue_style": "cinematic",
     # v1.6 story text size: compact (the size before v1.6) | comfortable | large
     "reading_size": "comfortable",
+    # v0.6.2: the picture of the scene's place behind the story text (when the pack has one)
+    "scene_backdrops": True,
     "narration_presets": NARRATION_PRESETS,
     "starter_presets": STARTER_PRESETS,
     "default_system_prompt": (

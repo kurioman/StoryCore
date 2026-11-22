@@ -2272,5 +2272,11 @@
  "Wary": "Méfiant(e)",
  "Rival": "Rival(e)",
  "Respected rival": "Rival(e) respecté(e)",
- "Torn — cares, but distrusts": "Partagé(e) — tient à vous, mais se méfie"
+ "Torn — cares, but distrusts": "Partagé(e) — tient à vous, mais se méfie",
+ "Give the place a name to add its picture.": "Donnez un nom au lieu pour ajouter son image.",
+ "Background picture": "Image de fond",
+ "Shown softly behind the story text while the scene is in this place (landscape format works best).": "Affichée en douceur derrière le texte de l’histoire tant que la scène se passe dans ce lieu (le format paysage convient le mieux).",
+ "Place backgrounds": "Décors des lieux",
+ "The picture of the scene's place, softly behind the story text (when the world has one).": "L’image du lieu de la scène, en douceur derrière le texte de l’histoire (quand le monde en a une).",
+ "Shown (default)": "Affichés (par défaut)"
 }

@@ -52,6 +52,19 @@ export function AppearanceSettings() {
           <option value="serif">{msg("Book serif")}</option>
         </Select>
       </Field>
+      <Field
+        label={msg("Place backgrounds")}
+        hint={msg("The picture of the scene's place, softly behind the story text (when the world has one).")}
+      >
+        <Select
+          value={settings.data?.scene_backdrops === false ? `off` : `on`}
+          onChange={(e) => saveSettings.mutate({ scene_backdrops: e.target.value === `on` })}
+          aria-label={msg("Place backgrounds")}
+        >
+          <option value="on">{msg("Shown (default)")}</option>
+          <option value="off">{msg("Hidden")}</option>
+        </Select>
+      </Field>
       <Field label={msg("Reading size")} hint={msg("Size of the story text only; menus and panels stay as they are.")}>
         <Select
           value={settings.data?.reading_size ?? `comfortable`}

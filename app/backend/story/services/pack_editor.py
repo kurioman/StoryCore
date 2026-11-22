@@ -54,6 +54,7 @@ SECTIONS = ("stats", "starters", "posts", "closed_groups", "facts", "gatherings"
 EXPRESSIONS = range(1, 7)
 IMAGE_MAX_SIDE = 1024
 COVER_MAX_SIDE = 1280
+BACKDROP_MAX_SIDE = 1920
 UPLOAD_MAX_BYTES = 25 * 1024 * 1024
 RECORD_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_\-]{0,119}$")
 
@@ -171,6 +172,8 @@ def read(project_root: Path, pid: str) -> dict[str, Any]:
     doc["cover"] = raw.get("cover") or ""
     doc["portraits"] = portraits(images)
     doc["portrait_files"] = portrait_files(folder, images)
+    from .backdrops import place_files
+    doc["place_files"] = {k: v.relative_to(folder).as_posix() for k, v in place_files(images).items()}
     managed = {pack_manifest.MANIFEST, PREMISE, NARRATOR, *(rel for rel, _ in LISTS.values())}
     doc["other_files"] = sorted(p.relative_to(folder).as_posix() for p in folder.rglob("*")
                                 if p.is_file() and p.suffix.lower() in (".json", ".md")
@@ -190,7 +193,7 @@ def _portrait_slots(images: Path) -> list[tuple[str, int, Path]]:
     out = []
     if images.is_dir():
         for p in sorted(images.rglob("*")):
-            if p.is_file() and p.suffix.lower() in IMAGE_EXTS:
+            if p.is_file() and p.suffix.lower() in IMAGE_EXTS and p.parent.name.casefold() != "places":
                 slug, num = parse_name(p.relative_to(images).as_posix())
                 if slug and num in EXPRESSIONS:
                     out.append((slug, num, p))
@@ -536,6 +539,19 @@ def set_cover(project_root: Path, pid: str, data: bytes | None, now: str) -> Non
         raw["cover"] = "cover.webp"
     raw[MARKER] = {**raw[MARKER], "updated": now}
     _write_json(folder / pack_manifest.MANIFEST, _ordered(raw))
+
+
+def set_place_image(project_root: Path, pid: str, place_id: str, data: bytes | None) -> None:
+    """v0.6.2: the background picture of a place (images/places/<place id>.webp); ``None`` removes it."""
+    if not RECORD_ID_RE.match(place_id):
+        raise EditorError("Unknown place.")
+    folder, raw = _editable_folder(project_root, pid)
+    places = _images_dir(folder, raw) / "places"
+    for old in places.glob(f"{place_id}.*") if places.is_dir() else []:
+        old.unlink()
+    if data is not None:
+        places.mkdir(parents=True, exist_ok=True)
+        (places / f"{place_id}.webp").write_bytes(_to_webp(data, BACKDROP_MAX_SIDE))
 
 
 def image_path(project_root: Path, pid: str, rel: str) -> Path:

@@ -12,8 +12,8 @@ import {
   useStoryState,
   useReviewCount,
 } from "@/api/queries";
-import { apiStream, ApiError, apiPost, errorMessage } from "@/api/legacy";
-import { useMutation } from "@tanstack/react-query";
+import { apiStream, ApiError, apiGet, apiPost, errorMessage } from "@/api/legacy";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import * as Icon from "lucide-react";
 import { msg } from "@/i18n";
 import { Button, Callout, EmptyState, ErrorCallout, IconButton, Modal, Spinner, useUi } from "@/components/ui";
@@ -456,7 +456,8 @@ export function StoryPage({ storyId }) {
 
       <div className="flex min-h-0 flex-1">
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className={cn(`min-h-0 flex-1 flex-col`, E === `story` ? `flex` : `hidden`)}>
+          <div className={cn(`relative isolate min-h-0 flex-1 flex-col`, E === `story` ? `flex` : `hidden`)}>
+            <Backdrop storyId={storyId} count={be.length} generating={de.generating} on={settings.data?.scene_backdrops !== false} />
             <AutoScroll messages={be} ready={!n.isLoading}>
               {n.isLoading && <Spinner />}
               {n.isError && <ErrorCallout error={n.error} onRetry={() => n.refetch()} />}
@@ -766,6 +767,21 @@ function AutoScroll({ children, messages, ready }) {
       )}
     </div>
   );
+}
+
+// v0.6.2: the picture of the scene's place behind the story text (services/backdrops.py). Asked again after each reply
+// (the place is updated just after it); a new place fades in.
+function Backdrop({ storyId, count, generating, on }) {
+  let query = useQuery({
+      queryKey: [`backdrop`, storyId, count, generating],
+      queryFn: () => apiGet(`/stories/${storyId}/backdrop`),
+      enabled: on && !generating,
+      staleTime: 5000,
+      refetchInterval: 20000,
+      placeholderData: (prev) => prev,
+    }),
+    url = on ? query.data?.url : null;
+  return url ? <div aria-hidden className="sc-backdrop" style={{ backgroundImage: `url("${url}")` }} key={url} /> : null;
 }
 
 function RemovedMessagesDialog({ storyId, onClose }) {

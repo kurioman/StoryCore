@@ -307,3 +307,8 @@ button.sc-cx-card:hover{transform:translateY(-2px);border-color:#e2bd7270;box-sh
 .sc-composer-tools{padding:0 .3rem .3rem}
 .sc-user-bubble{padding:.45rem .7rem;max-width:94%}
 }
+
+/* v0.6.2: place backgrounds behind the story text (StoryPage Backdrop): soft, dark, never in the way of reading */
+.sc-backdrop{position:absolute;inset:0;z-index:-1;pointer-events:none;background-size:cover;background-position:center;opacity:.22;filter:blur(1.5px) saturate(.85);animation:sc-backdrop-in .9s ease}
+.sc-backdrop::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,var(--c-bg) 0%,transparent 18%,transparent 70%,var(--c-bg) 100%)}
+@keyframes sc-backdrop-in{from{opacity:0}to{opacity:.22}}
