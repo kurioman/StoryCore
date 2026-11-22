@@ -2255,5 +2255,22 @@
  "Rewrite": "Réécrire",
  "Keep this version": "Garder cette version",
  "Paragraph replaced. “Edit history” brings the old text back.": "Paragraphe remplacé. « Historique des modifications » permet de retrouver l’ancien texte.",
- "Rewritten paragraphs": "Paragraphes réécrits"
+ "Rewritten paragraphs": "Paragraphes réécrits",
+ "Trust": "Confiance",
+ "Affection": "Affection",
+ "Respect": "Respect",
+ "Familiarity": "Familiarité",
+ "Rivalry": "Rivalité",
+ "Fear": "Peur",
+ "Deep bond": "Lien profond",
+ "Close / trusted": "Proche / de confiance",
+ "Friendly": "Amical",
+ "Familiar": "Familier",
+ "Acquaintance": "Connaissance",
+ "Afraid": "Effrayé(e)",
+ "Hostile": "Hostile",
+ "Wary": "Méfiant(e)",
+ "Rival": "Rival(e)",
+ "Respected rival": "Rival(e) respecté(e)",
+ "Torn — cares, but distrusts": "Partagé(e) — tient à vous, mais se méfie"
 }

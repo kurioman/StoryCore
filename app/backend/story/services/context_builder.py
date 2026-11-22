@@ -160,7 +160,7 @@ def render_state(st: dict[str, Any], index: EntityIndex, year_label: str = "Year
     scene_lines = [render_for_narrator(sc, year_label)] + [f"{k.capitalize()}: {sc[k]}" for k in ("chapter", "mood", "status") if sc.get(k)]
     if sc.get("present"):
         scene_lines.append("Present: " + ", ".join(index.name(c) for c in sc["present"]))
-    scene_lines += render_relationships(st.get("relationships", []), index)
+    scene_lines += render_relationships(st.get("relationships", []), index, focus=set(sc.get("present") or []))
     return "\n".join(lines), "\n".join(scene_lines)
 
 
@@ -219,13 +219,48 @@ def looks_of(data: dict[str, Any] | None) -> str:
     return ", ".join(f"{ap[k]} {k}" for k in ("hair", "eyes") if ap.get(k))
 
 
-def render_relationships(rels: list[dict[str, Any]], index: EntityIndex) -> list[str]:
+def relationship_memories(r: dict[str, Any], n: int = 2) -> list[str]:
+    """v0.6.2: why this relationship is where it is: its biggest change and its latest one ("defended her during the
+    duel"), oldest first. Reverted and reasonless changes are skipped."""
+    valid = []
+    for i, h in enumerate(r.get("history") or []):
+        why = str(h.get("reason") or "").strip().strip('"“”«» ')
+        try:
+            delta = abs(float(h.get("delta") or 0))
+        except (TypeError, ValueError):
+            delta = 0.0
+        if why and delta and why.casefold() != "info table" and not h.get("reverts") \
+                and h.get("source") != "analysis_revert":
+            valid.append((i, delta, why[:90]))
+    if not valid:
+        return []
+    picked = {max(valid, key=lambda x: (x[1], x[0]))[0], valid[-1][0]}
+    out = []
+    for i, _, why in valid:
+        if i in picked and why not in out:
+            out.append(why)
+    return out[-n:]
+
+
+def render_relationships(rels: list[dict[str, Any]], index: EntityIndex, focus: set[str] | None = None) -> list[str]:
     """Directional, as stored (v1.3 decision 6): a record without ``source_id`` is that character's view of the
     protagonist; with ``source_id`` it is one character's view of another (or the player's own stance). v1.4 fix: these
-    were all labelled "protagonist → NPC" and character-to-character records lost their source."""
+    were all labelled "protagonist → NPC" and character-to-character records lost their source.
+
+    v0.6.2 (Kurio: a close friend met again 50 messages later must still be a close friend): each line also gives the
+    stage in words ("Close / trusted"), and for the characters in the scene (``focus``) the last reasons the
+    relationship moved, so the narrator knows why, not only how much."""
+    from .relationships import tier
+
     def line(r: dict[str, Any], who: str) -> str:
         axes = ", ".join(f"{k} {v}" for k, v in (r.get("axes") or {}).items() if v)
-        return f"- {who}: {r.get('label', '')}" + (f" ({axes})" if axes else "") + (f" — {r['note']}" if r.get("note") else "")
+        stage = tier(r.get("axes") or {})["tier"] if any((r.get("axes") or {}).values()) else ""
+        label = r.get("label", "") or ""
+        head = " / ".join(x for x in (label, stage) if x and x != "Acquaintance") or label or stage
+        out = f"- {who}: {head}" + (f" ({axes})" if axes else "") + (f" — {r['note']}" if r.get("note") else "")
+        ids = {r.get("target_id"), r.get("source_id")}
+        mem = relationship_memories(r) if focus and ids & focus else []
+        return out + (f" — remembered: {'; '.join(mem)}" if mem else "")
 
     name = lambda r, k: r.get(f"{k}_name") or index.name(r.get(f"{k}_id") or "")  # noqa: E731
     towards = [line(r, f"{name(r, 'target')} → protagonist") for r in rels if not r.get("source_id")]

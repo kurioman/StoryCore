@@ -138,7 +138,7 @@ export function RelationsPanel({ storyId, worldId, onOpenCharacter }) {
                           }
                           title={t.reason}
                         >
-                          {t.tier}
+                          {tierLabel(t.tier)}
                         </Badge>
                       )}
                     </div>
@@ -328,12 +328,44 @@ function DuplicateRelations({ storyId, onMerged }) {
   ) : null;
 }
 
+// v0.6.2: the axes and stages are stored in English (the narrator reads them); shown in the player's language
+function axisLabel(k) {
+  return (
+    {
+      trust: msg("Trust"),
+      affection: msg("Affection"),
+      respect: msg("Respect"),
+      familiarity: msg("Familiarity"),
+      rivalry: msg("Rivalry"),
+      fear: msg("Fear"),
+    }[k] ?? k
+  );
+}
+
+function tierLabel(t) {
+  return (
+    {
+      "Deep bond": msg("Deep bond"),
+      "Close / trusted": msg("Close / trusted"),
+      Friendly: msg("Friendly"),
+      Familiar: msg("Familiar"),
+      Acquaintance: msg("Acquaintance"),
+      Afraid: msg("Afraid"),
+      Hostile: msg("Hostile"),
+      Wary: msg("Wary"),
+      Rival: msg("Rival"),
+      "Respected rival": msg("Respected rival"),
+      "Torn — cares, but distrusts": msg("Torn — cares, but distrusts"),
+    }[t] ?? t
+  );
+}
+
 function AxisValue({ label, value }) {
   let n = (Math.max(-100, Math.min(100, value)) + 100) / 2;
   return (
     <div className="text-[10px] text-faint" title={`${label}: ${value}`}>
       <div className="flex justify-between">
-        <span className="capitalize">{label}</span>
+        <span className="capitalize">{axisLabel(label)}</span>
         <span className="tabular-nums">{value}</span>
       </div>
       <div className="relative h-1 rounded-full bg-line">
