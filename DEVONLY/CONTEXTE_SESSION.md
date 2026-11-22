@@ -162,6 +162,21 @@ DeepSeek donne beaucoup moins d'incohérences que Rocinante. Corrigé (commit «
 - Téléphone (`styles.css`, fin du fichier) : texte 15 px, zone de saisie sur une ligne, bulle du joueur plus compacte.
 126 tests (dont `test_usage.test_every_paid_request_counts`, `test_portraits_live.test_a_tag_on_someone_elses_line_shows_nothing`).
 
+## Améliorations du 22-23/11 (après le retour DeepSeek), un commit par étape
+1. Vérifié : musique (complète ; ne joue que si la bibliothèque Music a des pistes : `Music/library.json` de ce dossier est
+   vide) ; le Codex n'avait pas de galerie (faite en 6).
+2. Plafond de dépense : Paramètres > Budget (`budget_story_usd`, `budget_month_usd`, `budget_warn_pct`, `spend_by_month`),
+   `usage.check_budget` avant chaque requête payante (narrateur, analyse, mémoire, récaps, réécriture) ; local jamais bloqué.
+3. Réécrire un paragraphe : `services/rewrite.py`, `POST /stories/{sid}/messages/{mid}/rewrite` (proposition, puis `keep`
+   = modification normale, donc « Historique des modifications »), `RewriteDialog` dans `transcript.jsx`.
+4. Relations : les jauges existaient ; ajout du palier en mots et des souvenirs (plus gros changement + dernier) pour les
+   personnages présents (`context_builder.relationship_memories`), libellés traduits.
+5. Décors par lieu : `images/places/<id>.webp`, `services/backdrops.py`, `GET /stories/{sid}/backdrop`, `Backdrop` dans
+   `StoryPage.jsx` (`.sc-backdrop`), réglage `scene_backdrops`, case dans le créateur, image dans le Codex.
+6. Galerie : `images/events/<id d'événement>.webp`, onglet Galerie du Codex, case dans le créateur (onglet Événements).
+Refusé : emploi du temps de Lumencia (l'IA doit rester libre), PWA et accès à distance (on attend l'APK).
+Prochaine grosse étape : l'APK (après le prochain reset de la limite hebdomadaire de Kurio).
+
 ## Pas encore vérifié avec du vrai matériel
 - Phase 6 sur mon vrai téléphone (pare-feu Windows : cocher « Réseaux privés »).
 - Phase 7 avec mon modèle (qualité des résumés et du récap sur une longue partie).
