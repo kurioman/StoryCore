@@ -2234,5 +2234,16 @@
  "Your other OpenRouter models": "Vos autres modèles OpenRouter",
  "As billed by the provider: every request counts, regenerated or removed replies included. Tests made in the settings are not part of it.": "Tel que facturé par le fournisseur : chaque requête compte, y compris les réponses régénérées ou supprimées. Les tests faits dans les paramètres n’en font pas partie.",
  "Money spent on this story — click for the details": "Argent dépensé pour cette histoire — cliquez pour le détail",
- "Spent on this story": "Dépensé pour cette histoire"
+ "Spent on this story": "Dépensé pour cette histoire",
+ "Budget": "Budget",
+ "Set a maximum to spend with online models. 0 means no cap. When a cap is reached, the app stops sending paid requests (your message is kept) until you raise it. Local models (LM Studio, Ollama) are free and never stopped.": "Fixez un montant maximum à dépenser avec les modèles en ligne. 0 = pas de plafond. Une fois le plafond atteint, l’application n’envoie plus de requêtes payantes (votre message est conservé) jusqu’à ce que vous le releviez. Les modèles locaux (LM Studio, Ollama) sont gratuits et jamais bloqués.",
+ "Cap per story ($)": "Plafond par histoire ($)",
+ "Cap per month ($)": "Plafond par mois ($)",
+ "Warn me at (% of the cap)": "M’avertir à (% du plafond)",
+ "Spent by month (all stories)": "Dépensé par mois (toutes les histoires)",
+ "Spending cap reached: nothing was sent and your message is kept. Raise the cap to keep playing.": "Plafond de dépense atteint : rien n’a été envoyé et votre message est conservé. Relevez le plafond pour continuer à jouer.",
+ "Budget settings": "Réglages du budget",
+ "This month": "Ce mois-ci",
+ "Cap": "Plafond",
+ "Cap reached: paid requests are stopped until you raise it (Settings > Budget).": "Plafond atteint : les requêtes payantes sont bloquées jusqu’à ce que vous le releviez (Paramètres > Budget)."
 }

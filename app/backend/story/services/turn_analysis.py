@@ -630,8 +630,12 @@ async def _analyse(ctx: AppContext, message_id: str, *, force: bool = False) -> 
         try:
             pid = ctx.extraction_profile_id(db, story) or ctx.story_profile_id(db, story)
             resolved = ctx.resolve(db, pid)
+            from .usage import check_budget
+            check_budget(db, story, resolved.adapter)  # v0.6.2 spending cap
         except NoModelConfigured as e:
             return keep_tags({"error": str(e)}) if tagged else _unavailable(row, str(e))
+        except ProviderError as e:  # the spending cap: no analysis (the portraits found while writing stay)
+            return keep_tags({"error": e.message}) if tagged else _unavailable(row, e.message)
         except ConsentRequired:
             msg_ = ("The analysis model is a cloud provider that has not been approved for data sharing. "
                     "Approve it in Settings, then retry.")

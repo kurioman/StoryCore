@@ -399,12 +399,20 @@ export function MessageItem({
           <span>
             {ae === `cancelled` && msg("Stopped — the text so far was kept.")}
             {ae === `partial` && msg("Incomplete response — the text received so far was kept.")}
-            {ae === `failed` && msg("Generation failed.")} {fe?.message}
+            {ae === `failed` && fe?.category !== `budget` && msg("Generation failed.")}{" "}
+            {fe?.category === `budget`
+              ? msg("Spending cap reached: nothing was sent and your message is kept. Raise the cap to keep playing.")
+              : fe?.message}
             {typeof pe == `number` &&
               msg(" This attempt cost ${{v0}}.", {
                 v0: pe.toFixed(4),
               })}
           </span>
+          {fe?.category === `budget` && (
+            <Button size="sm" variant="ghost" onClick={() => (window.location.hash = `#/settings/budget`)}>
+              <Icon.Coins className="size-3" /> {msg("Budget settings")}
+            </Button>
+          )}
           {!busy && (
             <Button
               size="sm"

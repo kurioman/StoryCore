@@ -43,6 +43,8 @@ def _start_generation(ctx: AppContext, db: Session, story: Story, branch: Messag
     try:
         resolved = ctx.resolve(db, ctx.story_profile_id(db, story))
         resolved.story = story
+        from .usage import check_budget
+        check_budget(db, story, resolved.adapter)  # v0.6.2 spending cap
         # v1.5 optional immersive interleaving: only when the story opted in and the player's turn clearly has several
         # quoted lines; the player's message itself is never changed (services/immersive.py)
         anchor = db.get(Message, placeholder.parent_id) if placeholder.parent_id else None
@@ -70,8 +72,10 @@ def _start_generation(ctx: AppContext, db: Session, story: Story, branch: Messag
         log.exception("could not start generation for message %s", placeholder.id)
         ph = db.get(Message, placeholder.id)
         ph.status = "failed"
-        ph.generation_metadata_json = {"error": {"category": "start_failed", "message": "The reply could not be started; your message is saved. Retry when ready.",
-                                                 "details": f"{type(e).__name__}: {str(e)[:300]}"}}
+        from .usage import BudgetReached
+        ph.generation_metadata_json = {"error": e.to_dict() if isinstance(e, BudgetReached) else {
+            "category": "start_failed", "message": "The reply could not be started; your message is saved. Retry when ready.",
+            "details": f"{type(e).__name__}: {str(e)[:300]}"}}
         db.commit()
         return None
     placeholder.generation_metadata_json = {

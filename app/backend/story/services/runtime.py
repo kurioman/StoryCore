@@ -322,6 +322,9 @@ class GenerationManager:
                 **({"usage": r.adapter.last_usage} if r.adapter.last_usage else {}),
                 # v0.6.2: everything this reply cost (a reply asked twice is billed twice)
                 **({"spent_cost": r.adapter.spent_cost} if getattr(r.adapter, "spent_cost", 0) else {})}
+        if meta.get("spent_cost"):
+            from .usage import add_spend_ctx
+            await asyncio.to_thread(add_spend_ctx, self.ctx, meta["spent_cost"])  # v0.6.2: this month's spending
         meta["diagnostics"] = diagnostics(r, job, params, first_text, meta["duration_s"])
         if job.tag_filter is not None and job.tag_filter.tags:
             meta["portrait_tags_raw"] = job.tag_filter.found()  # resolved to characters by portrait_tags.apply

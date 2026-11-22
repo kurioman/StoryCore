@@ -498,7 +498,10 @@ class ExtractionService:
         pid = self.ctx.extraction_profile_id(db, story)
         if not pid:
             raise NoModelConfigured("No extraction model is configured (Settings → Memory capture).")
-        return self.ctx.resolve(db, pid)
+        resolved = self.ctx.resolve(db, pid)
+        from .usage import check_budget
+        check_budget(db, story, resolved.adapter)  # v0.6.2 spending cap
+        return resolved
 
     # ------------------------------------------------------------------ main extraction
     @staticmethod
@@ -546,13 +549,14 @@ class ExtractionService:
                         return {"status": "paused", "reason": paused, "remaining_messages": len(pending), **totals}
                 try:
                     resolved = self._resolve(db, story)
-                except (NoModelConfigured, ConsentRequired) as e:
+                except (NoModelConfigured, ConsentRequired, ProviderError) as e:  # ProviderError: the spending cap
                     first = chunk(pending, size)
                     run = MemoryExtractionRun(story_id=story.id, branch_id=branch.id, start_message_id=first[0].id,
                                               end_message_id=first[-1].id, start_seq=first[0].seq, end_seq=first[-1].seq,
                                               capture_method=capture_method, status="failed", finished_at=now_iso(),
-                                              result_json={"error_category": "no_model" if isinstance(e, NoModelConfigured) else "consent"},
-                                              error_summary=str(e) if isinstance(e, NoModelConfigured) else
+                                              result_json={"error_category": "no_model" if isinstance(e, NoModelConfigured) else
+                                                           "budget" if isinstance(e, ProviderError) else "consent"},
+                                              error_summary=str(e) if isinstance(e, (NoModelConfigured, ProviderError)) else
                                               "The extraction provider needs your cloud data-sharing approval first.")
                     db.add(run)
                     db.flush()
@@ -886,6 +890,7 @@ class ExtractionService:
             story = story_tree.get_story(db, story_id)
             branch = story_tree.get_branch(db, story)
             resolved = self.ctx.resolve(db, self.ctx.extraction_profile_id(db, story) or self.ctx.story_profile_id(db, story))
+            from .usage import check_budget; check_budget(db, story, resolved.adapter)  # v0.6.2 spending cap
             path = [m for m in story_tree.path_messages(db, branch.head_message_id) if m.kind in ("story", "ooc") and m.content.strip()]
             if not path:
                 raise ValueError("Nothing to summarise yet.")
@@ -935,6 +940,7 @@ class ExtractionService:
             story = story_tree.get_story(db, story_id)
             branch = story_tree.get_branch(db, story)
             resolved = self.ctx.resolve(db, self.ctx.extraction_profile_id(db, story) or self.ctx.story_profile_id(db, story))
+            from .usage import check_budget; check_budget(db, story, resolved.adapter)  # v0.6.2 spending cap
             built = context_builder.build(db, story, branch, context_limit=resolved.profile.context_limit, params=resolved.params)
             path = story_tree.path_messages(db, branch.head_message_id)[-12:]
             transcript = _transcript_block(path, "recent")

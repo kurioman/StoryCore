@@ -44,6 +44,31 @@ class UsageShapesTest(AppTestCase):
         self.assertEqual(side["requests"], 2)
         self.assertAlmostEqual(side["cost"], 0.007)
 
+    def test_spending_cap(self):
+        # v0.6.2: caps per story and per month; only paid (cloud) requests are stopped
+        from types import SimpleNamespace
+        from story.services import settings_service, story_tree, usage as usage_svc
+        story = self.new_story("Cap", world_slug=None)
+        cloud, local = SimpleNamespace(is_cloud=True), SimpleNamespace(is_cloud=False)
+        a = SimpleNamespace(last_usage={"prompt_tokens": 5}, spent_cost=0.09, recorded_cost=0.0)
+        usage_svc.record(self.ctx, story["id"], "analysis", a)  # $0.09 for this story and this month
+        with self.ctx.db.session() as db:
+            st = story_tree.get_story(db, story["id"])
+            self.assertEqual(usage_svc.budget(db, st)["state"], "ok")  # no cap
+            usage_svc.check_budget(db, st, cloud)
+            settings_service.set_many(db, {"budget_story_usd": 0.1})
+            self.assertEqual(usage_svc.budget(db, st)["state"], "warn")  # 90 % of the cap
+            settings_service.set_many(db, {"budget_story_usd": 0.05})
+            self.assertEqual(usage_svc.budget(db, st)["state"], "over")
+            with self.assertRaises(usage_svc.BudgetReached):
+                usage_svc.check_budget(db, st, cloud)
+            usage_svc.check_budget(db, st, local)  # a local model is free: never stopped
+            settings_service.set_many(db, {"budget_story_usd": 0, "budget_month_usd": 0.08})
+            self.assertGreaterEqual(usage_svc.budget(db, st)["month_spent"], 0.09)  # other tests of this class too
+            with self.assertRaises(usage_svc.BudgetReached):
+                usage_svc.check_budget(db, st, cloud)
+            settings_service.set_many(db, {"budget_month_usd": 0})
+
 
 class StoryUsageTest(AppTestCase):
     def test_accounting_calibration_and_light_analysis(self):

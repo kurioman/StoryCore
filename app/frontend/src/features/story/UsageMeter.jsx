@@ -39,7 +39,18 @@ export function UsageMeter({ storyId, refreshKey }) {
     input = last.input ?? last.estimated_input,
     cachedShare = last.cached && last.input ? Math.round((100 * last.cached) / last.input) : null,
     labels = KIND_LABELS(),
-    cost = money(d.total.cost);
+    cost = money(d.total.cost),
+    b = d.budget ?? {},
+    limits = [
+      b.story_limit > 0 && { label: msg("This story"), used: b.story_spent ?? 0, limit: b.story_limit },
+      b.month_limit > 0 && { label: msg("This month"), used: b.month_spent ?? 0, limit: b.month_limit },
+    ].filter(Boolean),
+    tone =
+      b.state === `over`
+        ? `border-[#e5484d88] bg-[#e5484d1f] text-[#ff9b9b]`
+        : b.state === `warn`
+          ? `border-[#f5a52488] bg-[#f5a5241f] text-[#ffc56b]`
+          : `border-[#e9c46a55] bg-[#e9c46a14] text-[#f3dca0]`;
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -47,10 +58,10 @@ export function UsageMeter({ storyId, refreshKey }) {
           // v0.6.2: the money spent is the figure a newcomer cares about most: always shown, phone included
           <button
             type="button"
-            className="flex items-center gap-1 rounded-md border border-[#e9c46a55] bg-[#e9c46a14] px-2 py-0.5 text-xs font-semibold text-[#f3dca0] hover:bg-[#e9c46a26]"
+            className={`flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-semibold hover:brightness-125 ${tone}`}
             title={msg("Money spent on this story — click for the details")}
           >
-            <Icon.Coins className="size-3.5" />
+            {b.state === `over` ? <Icon.OctagonX className="size-3.5" /> : <Icon.Coins className="size-3.5" />}
             <span>{cost}</span>
           </button>
         ) : (
@@ -78,6 +89,36 @@ export function UsageMeter({ storyId, refreshKey }) {
                 "As billed by the provider: every request counts, regenerated or removed replies included. Tests made in the settings are not part of it.",
               )}
             </p>
+          </div>
+        )}
+        {limits.length > 0 && (
+          <div className="mb-3 space-y-1.5">
+            {limits.map((l) => {
+              let pct = Math.min(100, (100 * l.used) / l.limit);
+              return (
+                <div key={l.label}>
+                  <div className="flex justify-between text-[11px] text-muted">
+                    <span>
+                      {msg("Cap")} · {l.label}
+                    </span>
+                    <span>
+                      ${l.used.toFixed(3)} / ${l.limit.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded bg-panel-2">
+                    <div
+                      className={pct >= 100 ? `h-full bg-[#e5484d]` : pct >= (b.warn_pct ?? 80) ? `h-full bg-[#f5a524]` : `h-full bg-[#e9c46a]`}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+            {b.state === `over` && (
+              <p className="text-[11px] text-[#ff9b9b]">
+                {msg("Cap reached: paid requests are stopped until you raise it (Settings > Budget).")}
+              </p>
+            )}
           </div>
         )}
         <p className="mb-1 font-semibold text-fg">{msg("Latest turn")}</p>

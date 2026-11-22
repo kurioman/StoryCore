@@ -133,6 +133,11 @@ DEFAULTS: dict[str, Any] = {
         "a character only knows what they witnessed, were told, or could reasonably infer. Respect established facts, "
         "state and lore. End at a natural point for the player to act."
     ),
+    # v0.6.2 spending cap (services/usage.py): in dollars, 0 = no cap. Only paid (cloud) requests are stopped.
+    "budget_story_usd": 0,
+    "budget_month_usd": 0,
+    "budget_warn_pct": 80,
+    "spend_by_month": {},  # {"2026-11": 0.42}: what the app spent each month (kept by the app, not edited)
     "onboarding_dismissed": False,
     "last_backup_at": None,
 }

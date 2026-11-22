@@ -8,6 +8,7 @@ import { AppearanceSettings } from "@/features/settings/AppearanceSettings";
 import { DataSettings } from "@/features/settings/DataSettings";
 import { GlobalNoteSettings } from "@/features/settings/GlobalNoteSettings";
 import { MemorySettings } from "@/features/settings/MemorySettings";
+import { BudgetSettings } from "@/features/settings/BudgetSettings";
 import { NarrationSettings } from "@/features/settings/NarrationSettings";
 import { OllamaModelsPage } from "@/features/settings/OllamaModels";
 import { cn } from "@/lib/util";
@@ -26,6 +27,10 @@ function settingsTabs() {
   {
     id: `ollama`,
     label: msg("Ollama models"),
+  },
+  {
+    id: `budget`,
+    label: msg("Budget"),
   },
   {
     id: `generation`,
@@ -88,6 +93,7 @@ export function SettingsPage({ tab }) {
         {tab === `ollama` && <OllamaModelsPage />}
         {tab === `generation` && <NarrationSettings />}
         {tab === `memory` && <MemorySettings />}
+        {tab === `budget` && <BudgetSettings />}
         {tab === `notes` && <GlobalNoteSettings />}
         {tab === `appearance` && <AppearanceSettings />}
         {tab === `phone` && <PhonePanel />}

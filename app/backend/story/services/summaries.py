@@ -431,8 +431,11 @@ async def catch_up(ctx: AppContext, story_id: str, branch_id: str | None = None,
                 branch = story_tree.get_branch(db, story, branch_id)
                 try:
                     resolved = ctx.resolve(db, ctx.story_profile_id(db, story))
+                    from .usage import check_budget; check_budget(db, story, resolved.adapter)  # v0.6.2 spending cap
                 except (NoModelConfigured, ConsentRequired) as e:
                     return {"status": "no_model", "written": written, "merged": merged, "error": str(e)}
+                except ProviderError as e:  # the spending cap
+                    return {"status": "budget", "written": written, "merged": merged, "error": e.message}
                 name = protagonist(db, story)
                 system = RULES.format(name=name)
                 part = next_chunk(db, story, branch, force=force)
@@ -485,8 +488,11 @@ async def catch_up(ctx: AppContext, story_id: str, branch_id: str | None = None,
                     break
                 try:
                     resolved = ctx.resolve(db, ctx.story_profile_id(db, story))
+                    from .usage import check_budget; check_budget(db, story, resolved.adapter)  # v0.6.2 spending cap
                 except (NoModelConfigured, ConsentRequired) as e:
                     return {"status": "no_model", "written": written, "merged": merged, "error": str(e)}
+                except ProviderError as e:  # the spending cap
+                    return {"status": "budget", "written": written, "merged": merged, "error": e.message}
                 level, parts = due
                 system = MERGE_RULES[level].format(name=protagonist(db, story))
                 prompt = "\n\n".join(
@@ -572,6 +578,7 @@ async def player_recap(ctx: AppContext, story_id: str, refresh: bool = False) ->
         recent.reverse()
         name = protagonist(db, story)
         resolved = ctx.resolve(db, ctx.story_profile_id(db, story))
+        from .usage import check_budget; check_budget(db, story, resolved.adapter)  # v0.6.2 spending cap
         system = PLAYER_RULES.format(language=LANGUAGES[code], name=name, pending=PENDING.get(code, PENDING["en"]),
                                      address=', with "vous"' if code == "fr" else "")
         prompt = "\n\n".join(x for x in [
