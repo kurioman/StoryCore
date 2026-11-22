@@ -2278,5 +2278,9 @@
  "Shown softly behind the story text while the scene is in this place (landscape format works best).": "Affichée en douceur derrière le texte de l’histoire tant que la scène se passe dans ce lieu (le format paysage convient le mieux).",
  "Place backgrounds": "Décors des lieux",
  "The picture of the scene's place, softly behind the story text (when the world has one).": "L’image du lieu de la scène, en douceur derrière le texte de l’histoire (quand le monde en a une).",
- "Shown (default)": "Affichés (par défaut)"
+ "Shown (default)": "Affichés (par défaut)",
+ "Gallery": "Galerie",
+ "Give the event a title to add its picture.": "Donnez un titre à l’événement pour ajouter son image.",
+ "Gallery picture": "Image de la galerie",
+ "Unlocked in the Codex gallery once the event has been played (landscape format works best).": "Débloquée dans la galerie du Codex une fois l’événement joué (le format paysage convient le mieux)."
 }

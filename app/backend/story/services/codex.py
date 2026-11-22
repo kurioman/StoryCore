@@ -140,5 +140,24 @@ def build(db: Session, story: Story, branch: MessageBranch, index: EntityIndex) 
     def count(items: list[dict[str, Any]]) -> dict[str, int]:
         return {"found": sum(1 for i in items if i["status"] != "locked"), "total": len(items)}
 
-    return {"enabled": True, "characters": characters, "places": places,
-            "counts": {"characters": count(characters), "places": count(places)}}
+    # ---- v0.6.2 gallery: the picture of each planned event that has one, unlocked once the event was played here
+    gallery = []
+    shots = place_files(images_dir(world), "events")
+    if shots:
+        from . import story_events, world_pack
+        pack = world_pack.of(db, world.id)
+        done = story_events.progress(pack, path)["done"]
+        for ev in story_events.events_of(pack):
+            if ev["id"] not in shots:
+                continue
+            if ev["id"] in done:
+                gallery.append({"id": ev["id"], "status": "unlocked", "turn": done[ev["id"]],
+                                "title": {k: story_events.text_of(ev.get("title"), k) for k in ("en", "fr")},
+                                "image": f"/api/worlds/{world.id}/events/{ev['id']}/image"})
+            else:
+                gallery.append({"status": "locked"})
+        gallery = sorted((g for g in gallery if g["status"] == "unlocked"), key=lambda g: g["turn"]) + \
+            [g for g in gallery if g["status"] == "locked"]
+
+    return {"enabled": True, "characters": characters, "places": places, "gallery": gallery,
+            "counts": {"characters": count(characters), "places": count(places), "gallery": count(gallery)}}

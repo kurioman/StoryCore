@@ -329,13 +329,18 @@ factions/factions.json          {"factions": [...]}   (every kind of group)
 story/glossary.json             {"terms": [{"id", "term", "definition"}]}
 images/                         cover.webp is at the root; portraits <character id>_<1..6>.webp (converted to WebP)
 images/places/                  place backgrounds <place id>.webp (v0.6.2, at most 1920 px)
+images/events/                  gallery pictures <planned event id>.webp (v0.6.2)
 ```
 
 **Place backgrounds (v0.6.2).** A picture in `<images folder>/places/<place id>.webp` (`.png`, `.jpg` also read) is
 shown softly behind the story text while the scene is in that place, and in the Codex once the place is visited. The
 scene's place is matched to the place itself, or to the most precise lore place named in it ("the dormitory of the
 academy" uses the dormitory's picture if it has one, else the academy's). Landscape pictures work best. The player can
-hide them (Settings > Appearance). Files in `places/` are never read as portraits.
+hide them (Settings > Appearance). Files in `places/` and `events/` are never read as portraits.
+
+**Gallery (v0.6.2).** A picture in `<images folder>/events/<planned event id>.webp` appears in the Codex "Gallery" tab:
+as a locked card ("???") until the event has been played in the story, then with its picture and title. The world
+creator has a "Gallery picture" slot on each planned event.
 
 The creator only edits packs whose `pack.json` has a `"_creator"` object (it adds it). Other packs (the bundled ones,
 packs written by hand) are copied first: their records are sorted into the files above with the importer's own rules,

@@ -174,6 +174,7 @@ def read(project_root: Path, pid: str) -> dict[str, Any]:
     doc["portrait_files"] = portrait_files(folder, images)
     from .backdrops import place_files
     doc["place_files"] = {k: v.relative_to(folder).as_posix() for k, v in place_files(images).items()}
+    doc["event_files"] = {k: v.relative_to(folder).as_posix() for k, v in place_files(images, "events").items()}
     managed = {pack_manifest.MANIFEST, PREMISE, NARRATOR, *(rel for rel, _ in LISTS.values())}
     doc["other_files"] = sorted(p.relative_to(folder).as_posix() for p in folder.rglob("*")
                                 if p.is_file() and p.suffix.lower() in (".json", ".md")
@@ -193,7 +194,7 @@ def _portrait_slots(images: Path) -> list[tuple[str, int, Path]]:
     out = []
     if images.is_dir():
         for p in sorted(images.rglob("*")):
-            if p.is_file() and p.suffix.lower() in IMAGE_EXTS and p.parent.name.casefold() != "places":
+            if p.is_file() and p.suffix.lower() in IMAGE_EXTS and p.parent.name.casefold() not in ("places", "events"):
                 slug, num = parse_name(p.relative_to(images).as_posix())
                 if slug and num in EXPRESSIONS:
                     out.append((slug, num, p))
@@ -541,12 +542,13 @@ def set_cover(project_root: Path, pid: str, data: bytes | None, now: str) -> Non
     _write_json(folder / pack_manifest.MANIFEST, _ordered(raw))
 
 
-def set_place_image(project_root: Path, pid: str, place_id: str, data: bytes | None) -> None:
-    """v0.6.2: the background picture of a place (images/places/<place id>.webp); ``None`` removes it."""
-    if not RECORD_ID_RE.match(place_id):
-        raise EditorError("Unknown place.")
+def set_place_image(project_root: Path, pid: str, place_id: str, data: bytes | None, kind: str = "places") -> None:
+    """v0.6.2: the background picture of a place (images/places/<place id>.webp) or the gallery picture of a planned
+    event (images/events/<event id>.webp); ``None`` removes it."""
+    if not RECORD_ID_RE.match(place_id) or kind not in ("places", "events"):
+        raise EditorError("Unknown place or event.")
     folder, raw = _editable_folder(project_root, pid)
-    places = _images_dir(folder, raw) / "places"
+    places = _images_dir(folder, raw) / kind
     for old in places.glob(f"{place_id}.*") if places.is_dir() else []:
         old.unlink()
     if data is not None:

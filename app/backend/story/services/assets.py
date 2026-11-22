@@ -79,8 +79,8 @@ def scan_root(db: Session, root: AssetRoot, index: EntityIndex) -> dict[str, Any
         if not f.is_file() or f.suffix.lower() not in IMAGE_EXTS:
             continue
         rel = f.relative_to(base).as_posix()
-        if rel.casefold().startswith("places/"):
-            continue  # v0.6.2: place backgrounds (services/backdrops.py), not portraits
+        if rel.casefold().startswith(("places/", "events/")):
+            continue  # v0.6.2: place backgrounds and gallery pictures (services/backdrops.py), not portraits
         present.add(rel)
         e = existing.get(rel) or AssetManifestEntry(root_id=root.id, rel_path=rel)
         e.ext, e.file_size, e.scanned_at = f.suffix.lower().lstrip("."), f.stat().st_size, now_iso()

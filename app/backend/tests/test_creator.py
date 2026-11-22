@@ -154,6 +154,26 @@ class CreatorTest(unittest.TestCase):
         self.call("GET", f"/worlds/{w['id']}/places/grand_phare/image", expect=404)
         self.call("DELETE", f"/creator/worlds/{pid}/places/le_port/image")
         self.assertEqual(self.call("GET", f"/creator/worlds/{pid}")["place_files"], {})
+
+        # the gallery: an event's picture is in the Codex, locked ("???") until the event is played
+        self.call("PUT", f"/creator/worlds/{pid}", json={
+            "events": [{"id": "ceremonie", "title": {"en": "Ceremony", "fr": "Cérémonie"}, "brief": "The welcome speech."}]})
+        self.call("POST", f"/creator/worlds/{pid}/events/ceremonie/image", files={"file": ("e.png", png(), "image/png")})
+        doc = self.call("GET", f"/creator/worlds/{pid}")
+        self.assertEqual(doc["event_files"], {"ceremonie": "images/events/ceremonie.webp"})
+        self.assertEqual(doc["portraits"], {"mara_vent": [1]})
+        self.assertEqual(self.call("GET", f"/stories/{story['id']}/codex")["gallery"], [{"status": "locked"}])
+        from story.models import Message
+        with ctx.db.session() as db:
+            st = story_tree.get_story(db, story["id"])
+            m = story_tree.append_message(db, st, story_tree.get_branch(db, st), role="assistant", content="La cérémonie.",
+                                          kind="story")
+            m.status, m.generation_metadata_json = "complete", {"event_tags": ["ceremonie"]}
+            b = story_tree.get_branch(db, st)
+            b.head_message_id = m.id
+        g = self.call("GET", f"/stories/{story['id']}/codex")["gallery"]
+        self.assertEqual([(x["id"], x["title"]["fr"]) for x in g], [("ceremonie", "Cérémonie")])
+        self.call("GET", g[0]["image"].removeprefix("/api"))
         self.call("DELETE", f"/stories/{story['id']}", params={"confirm": "true"})
         self.call("DELETE", f"/creator/worlds/{pid}")
 

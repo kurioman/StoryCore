@@ -6,7 +6,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import * as Icon from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiGet } from "@/api/legacy";
-import { msg } from "@/i18n";
+import { currentLanguage, msg } from "@/i18n";
 import { ErrorCallout, Portrait, Spinner } from "@/components/ui";
 import { cn } from "@/lib/util";
 
@@ -63,6 +63,12 @@ export function CodexButton({ storyId, compact }) {
   );
 }
 
+// v0.6.2: a gallery picture's title, given per language by the pack
+function titleOf(t) {
+  if (!t || typeof t === `string`) return t ?? ``;
+  return t[currentLanguage()] || t.en || Object.values(t)[0] || ``;
+}
+
 export function CodexDialog({ storyId, onClose }) {
   let query = useQuery({
       queryKey: [`codex`, storyId],
@@ -72,7 +78,13 @@ export function CodexDialog({ storyId, onClose }) {
     [tab, setTab] = React.useState(`characters`),
     [selected, setSelected] = React.useState(null),
     data = query.data,
-    items = data ? (tab === `characters` ? data.characters : data.places) : [],
+    items = !data
+      ? []
+      : tab === `characters`
+        ? data.characters
+        : tab === `places`
+          ? data.places
+          : (data.gallery ?? []).map((g) => (g.status === `locked` ? g : { ...g, name: titleOf(g.title) })),
     current = items.find((i) => i.id && i.id === selected) ?? null;
   React.useEffect(() => {
     // open on the first discovered entry of the tab
@@ -93,6 +105,7 @@ export function CodexDialog({ storyId, onClose }) {
               {[
                 [`characters`, msg("Characters"), Icon.Users],
                 [`places`, msg("Places"), Icon.MapPinned],
+                ...(data?.gallery?.length ? [[`gallery`, msg("Gallery"), Icon.Images]] : []),
               ].map(([id, label, TabIcon]) => {
                 let c = data?.counts?.[id];
                 return (
@@ -141,7 +154,13 @@ export function CodexDialog({ storyId, onClose }) {
                     it.status === `locked` ? (
                       <div key={`l${i}`} className="sc-cx-card sc-cx-locked" aria-label={msg("Not discovered yet")}>
                         <div className="sc-cx-thumb flex items-center justify-center">
-                          {tab === `characters` ? <Icon.User className="size-10 opacity-40" /> : <Icon.MapPin className="size-9 opacity-40" />}
+                          {tab === `characters` ? (
+                            <Icon.User className="size-10 opacity-40" />
+                          ) : tab === `gallery` ? (
+                            <Icon.Image className="size-9 opacity-40" />
+                          ) : (
+                            <Icon.MapPin className="size-9 opacity-40" />
+                          )}
                         </div>
                         <p className="sc-cx-name">???</p>
                       </div>
@@ -154,6 +173,8 @@ export function CodexDialog({ storyId, onClose }) {
                         <div className="sc-cx-thumb">
                           {tab === `characters` && it.portrait ? (
                             <Portrait assetId={it.portrait} name={it.name} className="size-full" rounded="rounded-none" />
+                          ) : tab !== `characters` && it.image ? (
+                            <img src={it.image} alt="" className="size-full object-cover" />
                           ) : (
                             <div className="flex size-full items-center justify-center">
                               {tab === `characters` ? <Icon.UserRound className="size-10 opacity-60" /> : <Icon.MapPin className="size-9 opacity-70" />}
@@ -212,7 +233,7 @@ function Detail({ item, kind }) {
           )}
         </div>
       )}
-      {kind === `places` && item.image && (
+      {kind !== `characters` && item.image && (
         <img src={item.image} alt="" className="mb-4 aspect-video w-full rounded-xl object-cover" />
       )}
       <h3 className="sc-brand text-2xl leading-tight text-[#f3dca0]">{item.name}</h3>

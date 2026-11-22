@@ -34,9 +34,9 @@ def images_dir(world: Any) -> Path | None:
     return hits[0] if len(hits) == 1 else None
 
 
-def place_files(images: Path | None) -> dict[str, Path]:
-    """{place id: picture file}."""
-    folder = images / "places" if images else None
+def place_files(images: Path | None, kind: str = "places") -> dict[str, Path]:
+    """{place id: picture file} (``kind="events"``: {planned event id: gallery picture}, v0.6.2)."""
+    folder = images / kind if images else None
     out: dict[str, Path] = {}
     if folder and folder.is_dir():
         for p in sorted(folder.iterdir()):

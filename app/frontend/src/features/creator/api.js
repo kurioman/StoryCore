@@ -21,9 +21,11 @@ export const creatorApi = {
     api.upload(`/creator/worlds/${id}/portraits/${encodeURIComponent(characterId)}/${n}`, form(file)),
   removePortraits: (id, characterId, n = 0) =>
     api.del(`/creator/worlds/${id}/portraits/${encodeURIComponent(characterId)}${n ? `?n=${n}` : ``}`),
-  uploadPlaceImage: (id, placeId, file) =>
-    api.upload(`/creator/worlds/${id}/places/${encodeURIComponent(placeId)}/image`, form(file)),
-  removePlaceImage: (id, placeId) => api.del(`/creator/worlds/${id}/places/${encodeURIComponent(placeId)}/image`),
+  // kind: "places" (background of a place) or "events" (gallery picture of a planned event), v0.6.2
+  uploadPlaceImage: (id, placeId, file, kind = `places`) =>
+    api.upload(`/creator/worlds/${id}/${kind}/${encodeURIComponent(placeId)}/image`, form(file)),
+  removePlaceImage: (id, placeId, kind = `places`) =>
+    api.del(`/creator/worlds/${id}/${kind}/${encodeURIComponent(placeId)}/image`),
   importZip: (file) => api.upload(`/creator/import`, form(file)),
   imageUrl: (id, path, version = 0) =>
     `/api/creator/worlds/${id}/image?path=${encodeURIComponent(path)}&v=${version}`,

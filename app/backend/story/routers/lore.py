@@ -51,12 +51,15 @@ def world_cover(wid: str, db: Session = Depends(get_db)):
     return FileResponse(f, headers={"Cache-Control": "no-cache"})
 
 
-@router.get("/worlds/{wid}/places/{pid}/image")
-def place_image(wid: str, pid: str, db: Session = Depends(get_db)):
-    """v0.6.2: the background picture of a place (services/backdrops.py)."""
+@router.get("/worlds/{wid}/{kind}/{pid}/image")
+def place_image(wid: str, kind: str, pid: str, db: Session = Depends(get_db)):
+    """v0.6.2: the background picture of a place, or the gallery picture of a planned event (services/backdrops.py).
+    The Codex only links an event picture once the event was played (the file itself ships with the pack)."""
     from fastapi.responses import FileResponse
     from ..services.backdrops import images_dir, place_files
-    f = place_files(images_dir(db.get(World, wid))).get(pid)
+    if kind not in ("places", "events"):
+        raise HTTPException(404, "Not found")
+    f = place_files(images_dir(db.get(World, wid)), kind).get(pid)
     if f is None:
         raise HTTPException(404, "No picture for this place")
     return FileResponse(f, headers={"Cache-Control": "no-cache"})

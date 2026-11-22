@@ -252,7 +252,7 @@ export function WorldEditor({ worldId }) {
           </TabPanel>
         ))}
         <TabPanel value="events" className="p-4">
-          <EventsTab doc={doc} change={change} common={common} kinds={kinds} />
+          <EventsTab doc={doc} change={change} common={common} kinds={kinds} images={images} />
         </TabPanel>
         <TabPanel value="player" className="p-4">
           <CardList {...common} kind={kinds.stats} items={doc.stats} onChange={(v) => change(`stats`, v)} intro={intros().stats} />
@@ -270,7 +270,7 @@ export function WorldEditor({ worldId }) {
 
 /** v0.6: planned events (scenes decided in advance, played by the narrator its own way) and the player choices they
  * depend on (e.g. the academy wing). */
-function EventsTab({ doc, change, common, kinds }) {
+function EventsTab({ doc, change, common, kinds, images }) {
   let refs = { events: doc.events ?? [], choices: doc.choices ?? [] };
   return (
     <div className="flex flex-col">
@@ -278,7 +278,17 @@ function EventsTab({ doc, change, common, kinds }) {
         title={msg("Planned events")}
         help={msg("Scenes you decide in advance: a ceremony, an exam, a tournament… The app reminds the narrator at the right moment (one event at a time) and the narrator plays it its own way. The player only sees them in the Journal once they have happened.")}
       >
-        <CardList {...common} refs={refs} kind={kinds.events} items={doc.events} onChange={(v) => change(`events`, v)} />
+        <CardList
+          {...common}
+          refs={refs}
+          kind={kinds.events}
+          items={doc.events}
+          onChange={(v) => change(`events`, v)}
+          extra={(ev) => <PlaceImageSlot doc={doc} place={ev} images={images} kind="events" />}
+          onRemove={(ev) =>
+            ev.id && doc.event_files?.[ev.id] && creatorApi.removePlaceImage(doc.id, ev.id, `events`).then(images.refresh)
+          }
+        />
       </Section>
       <Section
         title={msg("Player choices")}
@@ -429,17 +439,22 @@ function expressionNames() {
 }
 
 // v0.6.2: the background picture of a place, shown behind the story text while the scene is there
-function PlaceImageSlot({ doc, place, images }) {
+function PlaceImageSlot({ doc, place, images, kind = `places` }) {
   let { toast } = useUi(),
-    path = doc.place_files?.[place.id],
+    path = (kind === `events` ? doc.event_files : doc.place_files)?.[place.id],
     [busy, setBusy] = React.useState(false),
     input = React.useRef(null);
-  if (!place.id) return <p className="mb-4 text-xs text-faint">{msg("Give the place a name to add its picture.")}</p>;
+  if (!place.id)
+    return (
+      <p className="mb-4 text-xs text-faint">
+        {kind === `events` ? msg("Give the event a title to add its picture.") : msg("Give the place a name to add its picture.")}
+      </p>
+    );
   async function upload(file) {
     if (!file) return;
     setBusy(true);
     try {
-      await creatorApi.uploadPlaceImage(doc.id, place.id, file);
+      await creatorApi.uploadPlaceImage(doc.id, place.id, file, kind);
       images.bump();
       await images.refresh();
     } catch (e) {
@@ -450,9 +465,13 @@ function PlaceImageSlot({ doc, place, images }) {
   }
   return (
     <div className="mb-5">
-      <p className="text-xs font-medium text-muted">{msg("Background picture")}</p>
+      <p className="text-xs font-medium text-muted">
+        {kind === `events` ? msg("Gallery picture") : msg("Background picture")}
+      </p>
       <p className="mb-2 text-xs text-faint">
-        {msg("Shown softly behind the story text while the scene is in this place (landscape format works best).")}
+        {kind === `events`
+          ? msg("Unlocked in the Codex gallery once the event has been played (landscape format works best).")
+          : msg("Shown softly behind the story text while the scene is in this place (landscape format works best).")}
       </p>
       <div className="flex items-end gap-2">
         <button
@@ -474,7 +493,7 @@ function PlaceImageSlot({ doc, place, images }) {
         {path && (
           <button
             className="text-xs text-faint hover:text-danger"
-            onClick={() => creatorApi.removePlaceImage(doc.id, place.id).then(images.refresh)}
+            onClick={() => creatorApi.removePlaceImage(doc.id, place.id, kind).then(images.refresh)}
           >
             {msg("Remove")}
           </button>
