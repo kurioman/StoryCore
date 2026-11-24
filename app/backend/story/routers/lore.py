@@ -157,8 +157,9 @@ def import_runs(db: Session = Depends(get_db)) -> dict[str, Any]:
 @router.get("/worlds/{wid}/entities")
 def entities(wid: str, category: str = "", q: str = "", confidence: str = "", db: Session = Depends(get_db)) -> dict[str, Any]:
     query = select(LoreEntity).where(LoreEntity.world_id == wid)
-    if category:
-        query = query.where(LoreEntity.category == category)
+    if category:  # one category, or several separated by commas (a family of the Lore page)
+        cats = [c.strip() for c in category.split(",") if c.strip()]
+        query = query.where(LoreEntity.category.in_(cats))
     if confidence:
         query = query.where(LoreEntity.confidence == confidence)
     rows = list(db.scalars(query.order_by(LoreEntity.category, LoreEntity.name)))

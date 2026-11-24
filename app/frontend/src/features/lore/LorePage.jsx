@@ -24,23 +24,16 @@ import { cn } from "@/lib/util";
 import { countOf, loreEntitiesSchema, loreEntityDetailSchema, loreWorldSummarySchema } from "@/features/lore/schemas";
 import { portraitSlot, usePortraitMap } from "@/lib/portraits";
 
-var LORE_CATEGORIES = [
-    `character`,
-    `faction`,
-    `location`,
-    `power_system`,
-    `academy`,
-    `department`,
-    `organization`,
-    `polity`,
-    `region`,
-    `world`,
-    `scenario`,
-    `plot_hook`,
-    `glossary`,
-    `calendar`,
-    `source`,
+// Kurio (24/11): the importer's categories gathered into 5 families (sub-filters inside each); "source" (where the
+// lore was researched) is not shown, and any category a pack adds that is not listed here goes to "Other"
+var LORE_FAMILIES = [
+    { id: `characters`, label: `Characters`, cats: [`character`] },
+    { id: `places`, label: `Places`, cats: [`location`, `region`] },
+    { id: `groups`, label: `Groups`, cats: [`faction`, `organization`, `polity`, `department`] },
+    { id: `world`, label: `World & rules`, cats: [`world`, `power_system`, `academy`, `glossary`, `calendar`] },
+    { id: `story`, label: `Story`, cats: [`plot_hook`, `scenario`] },
   ],
+  LORE_HIDDEN_CATEGORIES = new Set([`source`]),
   LORE_HIDDEN_KEYS = new Set([`id`, `name`, `source_ids`, `confidence`, `canon_status`, `aliases`, `type`]),
   humanizeKey = (e) => msg(String(e ?? ``).replace(/_/g, ` `)); // data keys (categories, fields) shown translated when known
 
@@ -48,7 +41,8 @@ export function LorePage() {
   let worlds = useWorlds(),
     [t, n] = React.useState(``),
     r = worlds.data?.find((e) => e.id === t) ?? worlds.data?.[0],
-    [i, a] = React.useState(`character`),
+    [i, a] = React.useState(`characters`),
+    [sub, setSub] = React.useState(``),
     [o, s] = React.useState(``),
     [u, d] = React.useState(null),
     portraitMap = usePortraitMap(r?.id),
@@ -56,20 +50,32 @@ export function LorePage() {
     { toast } = useUi(),
     v = React.useRef(null),
     y = o.trim(),
-    query = useQuery({
-      queryKey: [`lore`, r?.id, i, y],
-      enabled: !!r,
-      queryFn: () =>
-        apiGet(
-          `/worlds/${r.id}/entities?category=${y ? `` : i}&q=${encodeURIComponent(y)}`,
-          loreEntitiesSchema,
-        ).then((e) => e.entities),
-      placeholderData: (e) => e,
-    }),
     x = useQuery({
       queryKey: [`world`, r?.id],
       enabled: !!r,
       queryFn: () => apiGet(`/worlds/${r.id}`, loreWorldSummarySchema),
+    }),
+    C = React.useMemo(() => {
+      let counts = x.data?.categories ?? {},
+        known = new Set(LORE_FAMILIES.flatMap((f) => f.cats)),
+        fams = LORE_FAMILIES.map((f) => ({ ...f, cats: f.cats.filter((c) => counts[c]) })),
+        other = Object.keys(counts).filter((c) => counts[c] && !known.has(c) && !LORE_HIDDEN_CATEGORIES.has(c));
+      if (other.length) fams.push({ id: `other`, label: `Other`, cats: other });
+      return fams
+        .filter((f) => f.cats.length)
+        .map((f) => ({ ...f, count: f.cats.reduce((n, c) => n + counts[c], 0) }));
+    }, [x.data]),
+    fam = C.find((f) => f.id === i) ?? C[0],
+    catParam = sub && fam?.cats.includes(sub) ? sub : (fam?.cats ?? []).join(`,`),
+    query = useQuery({
+      queryKey: [`lore`, r?.id, catParam, y],
+      enabled: !!r && (!!y || !!fam || x.isError),
+      queryFn: () =>
+        apiGet(
+          `/worlds/${r.id}/entities?category=${y ? `` : encodeURIComponent(catParam)}&q=${encodeURIComponent(y)}`,
+          loreEntitiesSchema,
+        ).then((e) => e.entities),
+      placeholderData: (e) => e,
     }),
     mutation = useMutation({
       mutationFn: () => apiPost(`/worlds/${r.id}/reimport`),
@@ -91,8 +97,7 @@ export function LorePage() {
           ));
       },
       onError: (e) => toast(errorMessage(e), `danger`),
-    }),
-    C = React.useMemo(() => LORE_CATEGORIES.filter((e) => x.data?.categories[e]), [x.data]);
+    });
   if (worlds.isLoading)
     return (
       <div className="p-6">
@@ -194,23 +199,45 @@ export function LorePage() {
               </button>
             </p>
           ) : (
-            <div className="flex flex-wrap gap-1" role="tablist" aria-label={msg("Lore categories")}>
-              {C.map((e) => (
-                <button
-                  role="tab"
-                  aria-selected={i === e && !y}
-                  onClick={() => {
-                    (a(e), s(``));
-                  }}
-                  className={cn(
-                    `rounded px-1.5 py-0.5 text-[11px]`,
-                    i === e && !y ? `bg-accent-soft text-accent` : `bg-panel-2 text-muted hover:text-fg`,
-                  )}
-                  key={e}
-                >
-                  {humanizeKey(e)} {x.data?.categories[e]}
-                </button>
-              ))}
+            <div className="space-y-1">
+              <div className="flex flex-wrap gap-1" role="tablist" aria-label={msg("Lore families")}>
+                {C.map((f) => (
+                  <button
+                    role="tab"
+                    aria-selected={fam?.id === f.id && !y}
+                    onClick={() => {
+                      (a(f.id), setSub(``), s(``));
+                    }}
+                    className={cn(
+                      `rounded px-2 py-0.5 text-xs`,
+                      fam?.id === f.id && !y ? `bg-accent-soft text-accent` : `bg-panel-2 text-muted hover:text-fg`,
+                    )}
+                    key={f.id}
+                  >
+                    {msg(f.label)} {f.count}
+                  </button>
+                ))}
+              </div>
+              {fam && fam.cats.length > 1 && !y && (
+                <div className="flex flex-wrap gap-1" role="tablist" aria-label={msg("Lore categories")}>
+                  {[``, ...fam.cats].map((e) => (
+                    <button
+                      role="tab"
+                      aria-selected={catParam === (e || fam.cats.join(`,`))}
+                      onClick={() => setSub(e)}
+                      className={cn(
+                        `rounded px-1.5 py-0.5 text-[11px]`,
+                        (sub && fam.cats.includes(sub) ? sub : ``) === e
+                          ? `bg-panel-2 text-fg ring-1 ring-line`
+                          : `text-muted hover:text-fg`,
+                      )}
+                      key={e || `all`}
+                    >
+                      {e ? `${humanizeKey(e)} ${x.data?.categories[e]}` : msg("All")}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
