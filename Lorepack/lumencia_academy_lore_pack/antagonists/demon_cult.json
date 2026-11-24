@@ -13,30 +13,32 @@
     {
       "id": "nemesis",
       "name": "Nemesis",
-      "gender": "female",
       "aliases": [],
       "type": "apostle",
-      "aspect": "Despair",
+      "gender": "female",
+      "appearance": {},
       "power": {
         "system": "miasma",
-        "approximate_equivalence": "9-Circle level"
+        "rank": "9-Circle level",
+        "abilities": [
+          "Miasma is described as creating suffocating stillness and eroding hope."
+        ]
       },
+      "role": "Apostle of the demon god cult (aspect: Despair)",
       "personality_traits": [
         "cold",
         "fatalistic",
         "calm",
         "convinced resistance is futile"
       ],
-      "narrative_role": "A top-level, rare antagonist whose presence should signal a major escalation.",
-      "confidence": "medium",
-      "canon_status": "public_adaptation_detail",
-      "source_ids": [
-        "dreamrunner_zeph_lumencia"
+      "motivation": "",
+      "story_functions": [
+        "A top-level, rare antagonist whose presence should signal a major escalation."
       ],
-      "ability_notes": [
-        "Miasma is described as creating suffocating stillness and eroding hope."
+      "faction_ids": [
+        "demon_god_cult"
       ],
-      "behaviour_notes": [
+      "notes": [
         "Rarely appears in person.",
         "A direct appearance signals a decisive cult operation.",
         "Does not typically threaten or prolong a confrontation."
@@ -44,257 +46,315 @@
       "relationships": [
         {
           "target_id": "veradin",
-          "type": "mutual respect",
-          "confidence": "medium"
+          "type": "mutual respect"
         },
         {
           "target_id": "kartia",
-          "type": "finds her theatrics distracting",
-          "confidence": "medium"
+          "type": "finds her theatrics distracting"
         },
         {
           "target_id": "arien",
-          "type": "finds her emotionality distracting but recognizes her danger",
-          "confidence": "medium"
+          "type": "finds her emotionality distracting but recognizes her danger"
         }
-      ]
+      ],
+      "hidden": [],
+      "never": []
     },
     {
       "id": "veradin",
       "name": "Veradin",
-      "gender": "female",
       "aliases": [],
       "type": "apostle",
-      "aspect": "Void",
+      "gender": "female",
+      "appearance": {},
       "power": {
         "system": "miasma",
-        "approximate_equivalence": "Master Apex level"
+        "rank": "Master Apex level",
+        "abilities": [
+          "Can suppress or conceal a distinctive Miasma signature in the public adaptation.",
+          "Uses spatial manipulation or dimensional severing to disrupt positions, trajectories and defensive formations."
+        ]
       },
+      "role": "Apostle of the demon god cult (aspect: Void)",
       "personality_traits": [
         "cynical",
         "logical",
         "methodical",
         "strategic"
       ],
-      "narrative_role": "Strategic threat associated with the Void aspect; detailed abilities beyond this are not fixed here.",
-      "confidence": "medium",
-      "canon_status": "public_adaptation_detail",
-      "source_ids": [
-        "dreamrunner_zeph_lumencia"
+      "motivation": "",
+      "story_functions": [
+        "Strategic threat associated with the Void aspect; detailed abilities beyond this are not fixed here."
       ],
-      "ability_notes": [
-        "Can suppress or conceal a distinctive Miasma signature in the public adaptation.",
-        "Uses spatial manipulation or dimensional severing to disrupt positions, trajectories and defensive formations."
+      "faction_ids": [
+        "demon_god_cult"
       ],
-      "behaviour_notes": [
+      "notes": [
         "Most likely Apostle to work inside ordinary society without being identified.",
         "Treats Delphirem's return as a conclusion rather than an act of religious devotion."
       ],
       "relationships": [
         {
           "target_id": "nemesis",
-          "type": "mutual intellectual respect",
-          "confidence": "medium"
+          "type": "mutual intellectual respect"
         }
-      ]
+      ],
+      "hidden": [],
+      "never": []
     },
     {
       "id": "kartia",
       "name": "Kartia",
-      "gender": "female",
       "aliases": [],
       "type": "apostle",
-      "aspect": "Desire",
+      "gender": "female",
+      "appearance": {},
       "power": {
         "system": "miasma",
-        "approximate_equivalence": "8-Circle level"
+        "rank": "8-Circle level",
+        "abilities": [
+          "Miasma amplifies latent desires rather than directly controlling minds.",
+          "Can shape Miasma constructs around the desires or vulnerabilities of opponents."
+        ]
       },
+      "role": "Apostle of the demon god cult (aspect: Desire)",
       "personality_traits": [
         "seductive",
         "proud",
         "dominant",
         "amused by contradiction"
       ],
-      "narrative_role": "Temptation, control and desire; use only when the campaign has built sufficient foreshadowing.",
-      "confidence": "medium",
-      "canon_status": "public_adaptation_detail",
-      "source_ids": [
-        "dreamrunner_zeph_lumencia"
+      "motivation": "",
+      "story_functions": [
+        "Temptation, control and desire; use only when the campaign has built sufficient foreshadowing."
       ],
-      "ability_notes": [
-        "Miasma amplifies latent desires rather than directly controlling minds.",
-        "Can shape Miasma constructs around the desires or vulnerabilities of opponents."
+      "faction_ids": [
+        "demon_god_cult"
       ],
-      "behaviour_notes": [
+      "notes": [
         "May approach targets directly to offer pacts, alliances or conversation.",
         "Frames temptation as revealing what a person already wants."
       ],
       "relationships": [
         {
           "target_id": "arien",
-          "type": "complex attachment; sees beauty in her grief",
-          "confidence": "medium"
+          "type": "complex attachment; sees beauty in her grief"
         }
-      ]
+      ],
+      "hidden": [],
+      "never": []
     },
     {
       "id": "arien",
       "name": "Arien",
-      "gender": "female",
       "aliases": [],
       "type": "apostle",
-      "aspect": "Grief",
+      "gender": "female",
+      "appearance": {},
       "power": {
         "system": "miasma",
-        "approximate_equivalence": "8-Circle level"
+        "rank": "8-Circle level",
+        "abilities": [
+          "Miasma can manifest as phantom sensations and vivid memories associated with loss.",
+          "May overwhelm targets with nostalgia or longing, blurring present and past."
+        ]
       },
+      "role": "Apostle of the demon god cult (aspect: Grief)",
       "personality_traits": [
         "emotional",
         "obsessive",
         "volatile",
         "intensely attached to lost things"
       ],
-      "narrative_role": "A personal and psychological antagonist associated with loss and grief.",
-      "confidence": "medium",
-      "canon_status": "public_adaptation_detail",
-      "source_ids": [
-        "dreamrunner_zeph_lumencia"
+      "motivation": "",
+      "story_functions": [
+        "A personal and psychological antagonist associated with loss and grief."
       ],
-      "ability_notes": [
-        "Miasma can manifest as phantom sensations and vivid memories associated with loss.",
-        "May overwhelm targets with nostalgia or longing, blurring present and past."
+      "faction_ids": [
+        "demon_god_cult"
       ],
-      "behaviour_notes": [
+      "notes": [
         "Her shifts between tenderness and violence are described as emotional volatility rather than calculated deception.",
         "The person or thing she lost is explicitly unresolved in the public adaptation."
       ],
       "relationships": [
         {
           "target_id": "kartia",
-          "type": "mutual fixation or attachment; exact nature left ambiguous",
-          "confidence": "medium"
+          "type": "mutual fixation or attachment; exact nature left ambiguous"
         }
-      ]
+      ],
+      "hidden": [],
+      "never": []
     },
     {
       "id": "pria",
       "name": "Pria",
-      "gender": "female",
       "aliases": [],
       "type": "sin_bishop",
-      "sin": "Pride",
+      "gender": "female",
+      "appearance": {},
       "power": {
         "system": "miasma",
-        "approximate_equivalence": "7-Circle level through pact; source-reported"
+        "rank": "7-Circle level through pact; source-reported",
+        "abilities": []
       },
-      "confidence": "medium",
-      "canon_status": "recurring_reference",
-      "source_ids": [
-        "reddit_character_profiles"
+      "role": "Sin Bishop of Pride of the demon god cult",
+      "personality_traits": [],
+      "motivation": "",
+      "story_functions": [],
+      "faction_ids": [
+        "demon_god_cult"
       ],
-      "notes": "Personality details are inconsistent and should be treated as optional unless established in play."
+      "notes": [
+        "Personality details are inconsistent and should be treated as optional unless established in play."
+      ],
+      "relationships": [],
+      "hidden": [],
+      "never": []
     },
     {
       "id": "sloth",
       "name": "Sloth",
-      "gender": "female",
       "aliases": [],
       "type": "sin_bishop",
-      "sin": "Sloth",
+      "gender": "female",
+      "appearance": {},
       "power": {
         "system": "miasma",
-        "approximate_equivalence": "7-Circle level through pact; source-reported"
+        "rank": "7-Circle level through pact; source-reported",
+        "abilities": []
       },
-      "confidence": "medium",
-      "canon_status": "recurring_reference",
-      "source_ids": [
-        "reddit_character_profiles"
-      ]
+      "role": "Sin Bishop of Sloth of the demon god cult",
+      "personality_traits": [],
+      "motivation": "",
+      "story_functions": [],
+      "faction_ids": [
+        "demon_god_cult"
+      ],
+      "notes": [],
+      "relationships": [],
+      "hidden": [],
+      "never": []
     },
     {
       "id": "aris",
       "name": "Aris",
-      "gender": "female",
       "aliases": [],
       "type": "sin_bishop",
-      "sin": "Greed",
+      "gender": "female",
+      "appearance": {},
       "power": {
         "system": "miasma",
-        "approximate_equivalence": "7-Circle level through pact; source-reported"
+        "rank": "7-Circle level through pact; source-reported",
+        "abilities": []
       },
-      "confidence": "medium",
-      "canon_status": "recurring_reference",
-      "source_ids": [
-        "reddit_character_profiles"
-      ]
+      "role": "Sin Bishop of Greed of the demon god cult",
+      "personality_traits": [],
+      "motivation": "",
+      "story_functions": [],
+      "faction_ids": [
+        "demon_god_cult"
+      ],
+      "notes": [],
+      "relationships": [],
+      "hidden": [],
+      "never": []
     },
     {
       "id": "beelzebub",
       "name": "Beelzebub",
-      "gender": "female",
       "aliases": [],
       "type": "sin_bishop",
-      "sin": "Gluttony",
+      "gender": "female",
+      "appearance": {},
       "power": {
         "system": "miasma",
-        "approximate_equivalence": "7-Circle level through pact; source-reported"
+        "rank": "7-Circle level through pact; source-reported",
+        "abilities": []
       },
-      "confidence": "medium",
-      "canon_status": "recurring_reference",
-      "source_ids": [
-        "reddit_character_profiles"
-      ]
+      "role": "Sin Bishop of Gluttony of the demon god cult",
+      "personality_traits": [],
+      "motivation": "",
+      "story_functions": [],
+      "faction_ids": [
+        "demon_god_cult"
+      ],
+      "notes": [],
+      "relationships": [],
+      "hidden": [],
+      "never": []
     },
     {
       "id": "asmo",
       "name": "Asmo",
-      "gender": "female",
       "aliases": [],
       "type": "sin_bishop",
-      "sin": "Lust",
+      "gender": "female",
+      "appearance": {},
       "power": {
         "system": "miasma",
-        "approximate_equivalence": "7-Circle level through pact; source-reported"
+        "rank": "7-Circle level through pact; source-reported",
+        "abilities": []
       },
-      "confidence": "medium",
-      "canon_status": "recurring_reference",
-      "source_ids": [
-        "reddit_character_profiles"
-      ]
+      "role": "Sin Bishop of Lust of the demon god cult",
+      "personality_traits": [],
+      "motivation": "",
+      "story_functions": [],
+      "faction_ids": [
+        "demon_god_cult"
+      ],
+      "notes": [],
+      "relationships": [],
+      "hidden": [],
+      "never": []
     },
     {
       "id": "leviane",
       "name": "Leviane",
-      "gender": "female",
       "aliases": [],
       "type": "sin_bishop",
-      "sin": "Envy",
+      "gender": "female",
+      "appearance": {},
       "power": {
         "system": "miasma",
-        "approximate_equivalence": "7-Circle level through pact; source-reported"
+        "rank": "7-Circle level through pact; source-reported",
+        "abilities": []
       },
-      "confidence": "medium",
-      "canon_status": "recurring_reference",
-      "source_ids": [
-        "reddit_character_profiles"
-      ]
+      "role": "Sin Bishop of Envy of the demon god cult",
+      "personality_traits": [],
+      "motivation": "",
+      "story_functions": [],
+      "faction_ids": [
+        "demon_god_cult"
+      ],
+      "notes": [],
+      "relationships": [],
+      "hidden": [],
+      "never": []
     },
     {
       "id": "belian",
       "name": "Belian",
-      "gender": "female",
       "aliases": [],
       "type": "sin_bishop",
-      "sin": "Wrath",
+      "gender": "female",
+      "appearance": {},
       "power": {
         "system": "miasma",
-        "approximate_equivalence": "7-Circle level through pact; source-reported"
+        "rank": "7-Circle level through pact; source-reported",
+        "abilities": []
       },
-      "confidence": "medium",
-      "canon_status": "recurring_reference",
-      "source_ids": [
-        "reddit_character_profiles"
-      ]
+      "role": "Sin Bishop of Wrath of the demon god cult",
+      "personality_traits": [],
+      "motivation": "",
+      "story_functions": [],
+      "faction_ids": [
+        "demon_god_cult"
+      ],
+      "notes": [],
+      "relationships": [],
+      "hidden": [],
+      "never": []
     }
   ],
   "operational_guidance": [

@@ -166,8 +166,10 @@ def render_state(st: dict[str, Any], index: EntityIndex, year_label: str = "Year
 
 # Phase 2 (step 3): lore records are sent without their bookkeeping (confidence, sources, ids...): it told the model
 # that the lore was uncertain, and cost tokens without helping to write.
-META_KEYS = re.compile(r"^\s*-?\s*(?:id|_index_type|confidence|canon_status|source_ids|story_functions|faction_ids|"
-                       r"relationship_notes|target_id|notes|term|schema_version|aliases)\s*:", re.I)
+# Kurio (24/11): story functions, factions, notes and relationships are written for the narrator (when and how to use a
+# character, who she is tied to): they are sent now; only the bookkeeping is left out
+META_KEYS = re.compile(r"^\s*-?\s*(?:id|_index_type|confidence|canon_status|source_ids|term|schema_version|aliases)"
+                       r"\s*:", re.I)
 
 
 def compact_record(body: str) -> str:
@@ -195,7 +197,7 @@ def character_card(le, post: str | None = None) -> str:
     """Phase 2 (step 3): one compact line per character: name (gender; role): traits; looks."""
     d = le.data_json or {}
     gender = ", ".join(x for x in (str(d.get("gender") or "").strip(), str(d.get("pronouns") or "").strip()) if x)
-    role = post or ""
+    role = post or str(d.get("role") or "").strip()  # the pack's own words first (Kurio's 12-category records)
     if not role:
         dept = DEPARTMENTS.get(str(d.get("department_id") or ""), str(d.get("department_id") or "").replace("_", " "))
         year = d.get("year")

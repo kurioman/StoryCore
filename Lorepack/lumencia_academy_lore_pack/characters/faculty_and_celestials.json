@@ -4,19 +4,19 @@
     {
       "id": "artemis",
       "name": "Artemis",
-      "gender": "female",
       "aliases": [],
       "type": "faculty",
-      "role": "Head Professor of the Knight Department",
-      "social_status": "Commoner",
-      "power": {
-        "system": "martial_aura",
-        "rank": "Master Adept"
-      },
+      "gender": "female",
       "appearance": {
         "hair": "white",
         "eyes": "red"
       },
+      "power": {
+        "system": "martial_aura",
+        "rank": "Master Adept",
+        "abilities": []
+      },
+      "role": "Head Professor of the Knight Department; Commoner",
       "personality_traits": [
         "principled",
         "upright",
@@ -24,34 +24,36 @@
         "disciplined",
         "firm"
       ],
-      "voice_notes": "Concise, firm and military in manner.",
+      "motivation": "",
+      "story_functions": [],
       "faction_ids": [
         "lumencia_academy"
       ],
-      "confidence": "high",
-      "canon_status": "recurring_reference",
-      "source_ids": [
-        "reddit_character_profiles"
-      ]
+      "notes": [
+        "Concise, firm and military in manner."
+      ],
+      "relationships": [],
+      "hidden": [],
+      "never": []
     },
     {
       "id": "elena_caldwin",
       "name": "Elena Caldwin",
-      "gender": "female",
       "aliases": [
         "Elena"
       ],
       "type": "faculty",
-      "role": "Head Professor of the Magic Department",
-      "social_status": "Member of a Caldwin branch; distant from the main house",
-      "power": {
-        "system": "mana_and_magic_circles",
-        "rank": "8-Circle"
-      },
+      "gender": "female",
       "appearance": {
         "hair": "blue",
         "eyes": "gold"
       },
+      "power": {
+        "system": "mana_and_magic_circles",
+        "rank": "8-Circle",
+        "abilities": []
+      },
+      "role": "Head Professor of the Magic Department; Member of a Caldwin branch; distant from the main house",
       "personality_traits": [
         "playful",
         "relaxed",
@@ -59,35 +61,35 @@
         "intellectual",
         "curious"
       ],
-      "voice_notes": "Witty and relaxed; the source material notes a lively, teasing manner.",
+      "motivation": "",
+      "story_functions": [],
       "faction_ids": [
         "caldwin_duchy",
         "lumencia_academy"
       ],
-      "confidence": "high",
-      "canon_status": "recurring_reference",
-      "source_ids": [
-        "reddit_character_profiles",
-        "reddit_constant_data"
-      ]
+      "notes": [
+        "Witty and relaxed; the source material notes a lively, teasing manner."
+      ],
+      "relationships": [],
+      "hidden": [],
+      "never": []
     },
     {
       "id": "emily",
       "name": "Emily",
-      "gender": "female",
       "aliases": [],
       "type": "faculty_and_celestial",
-      "role": "Headmaster of Lumencia Academy; one of the Four Celestials",
-      "social_status": "Commoner",
-      "power": {
-        "system": "hybrid_martial_and_magic",
-        "martial_rank": "Master Adept",
-        "magic_rank": "8-Circle"
-      },
+      "gender": "female",
       "appearance": {
         "hair": "silver",
         "eyes": "blue"
       },
+      "power": {
+        "system": "hybrid_martial_and_magic",
+        "rank": "Master Adept (martial) / 8-Circle (magic)",
+        "abilities": []
+      },
+      "role": "Headmaster of Lumencia Academy; one of the Four Celestials; Commoner",
       "personality_traits": [
         "playful",
         "apparently innocent",
@@ -96,34 +98,34 @@
         "serious when needed"
       ],
       "motivation": "Maintain her duties as headmaster; deeper private agenda is not established in the sources.",
-      "notes": "The public adaptation describes her as in her thirties despite a youthful appearance and says she loves sweets.",
+      "story_functions": [],
       "faction_ids": [
         "lumencia_academy",
         "four_celestials"
       ],
-      "confidence": "high",
-      "canon_status": "recurring_reference",
-      "source_ids": [
-        "reddit_character_profiles",
-        "dreamrunner_zeph_lumencia"
-      ]
+      "notes": [
+        "The public adaptation describes her as in her thirties despite a youthful appearance and says she loves sweets."
+      ],
+      "relationships": [],
+      "hidden": [],
+      "never": []
     },
     {
       "id": "ethera",
       "name": "Ethera",
-      "gender": "female",
       "aliases": [],
       "type": "faculty_and_celestial",
-      "role": "Tower Master; one of the Four Celestials",
-      "social_status": "Commoner",
-      "power": {
-        "system": "mana_and_magic_circles",
-        "rank": "9-Circle"
-      },
+      "gender": "female",
       "appearance": {
         "hair": "white",
         "eyes": "purple"
       },
+      "power": {
+        "system": "mana_and_magic_circles",
+        "rank": "9-Circle",
+        "abilities": []
+      },
+      "role": "Tower Master; one of the Four Celestials; Commoner",
       "personality_traits": [
         "intellectual",
         "arrogant",
@@ -131,40 +133,40 @@
         "unconventional"
       ],
       "motivation": "Follows whatever knowledge or phenomenon catches her interest; exact loyalties are not fully established.",
-      "voice_notes": "Often described as speaking as though she can read or anticipate people's thoughts; do not treat literal mind-reading as confirmed unless the current story establishes it.",
+      "story_functions": [],
       "faction_ids": [
         "four_celestials"
       ],
-      "relationship_notes": [
+      "notes": [
+        "Often described as speaking as though she can read or anticipate people's thoughts; do not treat literal mind-reading as confirmed unless the current story establishes it."
+      ],
+      "relationships": [
         {
           "target_id": "rena",
-          "type": "mentor_or_apprentice_master_relationship",
-          "confidence": "high"
+          "type": "mentor or apprentice master relationship"
         }
       ],
-      "confidence": "high",
-      "canon_status": "recurring_reference",
-      "source_ids": [
-        "reddit_character_profiles",
-        "dreamrunner_zeph_lumencia"
-      ]
+      "hidden": [],
+      "never": []
     },
     {
       "id": "carne",
       "name": "Carne",
-      "gender": "female",
       "aliases": [],
       "type": "celestial",
-      "role": "Commander of the Imperial Guard; one of the Four Celestials",
-      "social_status": "Adopted into the Valenheart family",
-      "power": {
-        "system": "martial_aura",
-        "rank": "Master Apex"
-      },
+      "gender": "female",
       "appearance": {
         "hair": "silver",
         "eyes": "gold"
       },
+      "power": {
+        "system": "martial_aura",
+        "rank": "Master Apex",
+        "abilities": [
+          "Ridel (sentient sword)"
+        ]
+      },
+      "role": "Commander of the Imperial Guard; one of the Four Celestials; Adopted into the Valenheart family",
       "personality_traits": [
         "detached",
         "sardonic",
@@ -172,64 +174,57 @@
         "manic",
         "inscrutable"
       ],
-      "equipment": [
-        {
-          "name": "Ridel",
-          "type": "sentient sword"
-        }
+      "motivation": "",
+      "story_functions": [
+        "Her presence and activities are not required in every campaign; encounters should be significant."
       ],
-      "voice_notes": "Murmurs in an indifferent manner; the reference describes her as treating killing as an art.",
       "faction_ids": [
         "lumencia_empire",
         "valenheart_duchy",
         "four_celestials"
       ],
-      "notes": "Her presence and activities are not required in every campaign; encounters should be significant.",
-      "confidence": "high",
-      "canon_status": "recurring_reference",
-      "source_ids": [
-        "reddit_character_profiles",
-        "reddit_constant_data"
-      ]
+      "notes": [
+        "Murmurs in an indifferent manner; the reference describes her as treating killing as an art."
+      ],
+      "relationships": [],
+      "hidden": [],
+      "never": []
     },
     {
       "id": "seriel",
       "name": "Seriel",
-      "gender": "female",
       "aliases": [],
       "type": "celestial",
-      "role": "Wandering archer known as the Dawn of the Empire; one of the Four Celestials",
-      "social_status": "Wanderer",
-      "power": {
-        "system": "martial_aura",
-        "rank": "Master Apex"
-      },
+      "gender": "female",
       "appearance": {
         "hair": "blonde",
         "eyes": "green"
       },
+      "power": {
+        "system": "martial_aura",
+        "rank": "Master Apex",
+        "abilities": [
+          "Lactiel (bow): A bow formed from condensed pure mana."
+        ]
+      },
+      "role": "Wandering archer known as the Dawn of the Empire; one of the Four Celestials; Wanderer",
       "personality_traits": [
         "cold",
         "intellectual",
         "confident",
         "analytical"
       ],
-      "equipment": [
-        {
-          "name": "Lactiel",
-          "type": "bow",
-          "description": "A bow formed from condensed pure mana."
-        }
+      "motivation": "",
+      "story_functions": [
+        "The character may be rarely encountered in ordinary academy-focused play."
       ],
-      "notes": "The character may be rarely encountered in ordinary academy-focused play.",
       "faction_ids": [
         "four_celestials"
       ],
-      "confidence": "high",
-      "canon_status": "recurring_reference",
-      "source_ids": [
-        "reddit_character_profiles"
-      ]
+      "notes": [],
+      "relationships": [],
+      "hidden": [],
+      "never": []
     }
   ]
 }

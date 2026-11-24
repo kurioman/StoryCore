@@ -176,16 +176,20 @@ def render_value(v: Any, indent: int = 0) -> list[str]:
 # v0.6 (phase 9): top-level keys the narrator does not need in a lore record: the chunk title already gives the name,
 # the id and the import bookkeeping are noise (fewer tokens for the same information)
 RECORD_SKIP = {"id", "name", "confidence", "canon_status", "_index_type", "source_ids", "schema_version"}
+# Kurio (24/11): a character's record says it all in words ("role": "1st-year Knight student; ..."); the app's own
+# fields (department, year, type) stay in the data for rosters and encounters but are not sent to the narrator
+CHARACTER_SKIP = {"department_id", "year", "type", "group", "file"}
 SURE = {None, "", "high", "canon", "confirmed"}
 
 
-def record_text(rec: dict[str, Any]) -> str:
+def record_text(rec: dict[str, Any], category: str = "") -> str:
     """A lore record as the narrator reads it. Its reliability is only stated when it is not certain."""
     head = []
     if rec.get("confidence") not in SURE:
         status = f" | status: {rec['canon_status']}" if rec.get("canon_status") else ""
         head.append(f"[confidence: {rec.get('confidence')}{status}]")
-    return "\n".join(head + render_value({k: v for k, v in rec.items() if k not in RECORD_SKIP}))
+    skip = RECORD_SKIP | (CHARACTER_SKIP if category == "character" else set())
+    return "\n".join(head + render_value({k: v for k, v in rec.items() if k not in skip}))
 
 
 def summary_of(rec: dict[str, Any]) -> str:
@@ -406,7 +410,7 @@ def import_pack(db: Session, pack_dir: Path, world_slug: str | None = None) -> d
         if cat in NOT_LORE_CATEGORIES:
             continue  # kept as a record (the wizard's openings), never retrieved as lore in a story
         db.add(LoreChunk(world_id=world.id, entity_row_id=le.id, entity_id=eid, category=cat, title=name,
-                         content=record_text(rec), confidence=rec.get("confidence"), canon_status=rec.get("canon_status")))
+                         content=record_text(rec, cat), confidence=rec.get("confidence"), canon_status=rec.get("canon_status")))
         report["entities_by_category"][cat] = report["entities_by_category"].get(cat, 0) + 1
 
     pack_files = (manifest or {}).get("files") or pack_manifest.DEFAULT_FILES

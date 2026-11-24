@@ -180,9 +180,11 @@ def lore_relationships(db: Session, world_id: str | None, character_ids: set[str
         except ValueError:
             pass  # the import report already lists unreadable files
     for cid, e in chars.items():
-        for n in (e.data_json or {}).get("relationship_notes") or []:
+        d = e.data_json or {}
+        for n in (d.get("relationship_notes") or []) + (d.get("relationships") or []):
             if isinstance(n, dict):
-                add(cid, n.get("target_id"), n.get("type"), n.get("confidence"), f"{e.file} relationship_notes")
+                kind = " — ".join(str(x) for x in (n.get("type"), n.get("note")) if x)
+                add(cid, n.get("target_id"), kind, n.get("confidence"), f"{e.file} relationships")
     rows = list(out.values())
     if character_ids is not None:
         rows = [r for r in rows if r["source_id"] in character_ids or r["target_id"] in character_ids]

@@ -7,9 +7,7 @@
       "gender": "female",
       "type": "student",
       "group": "students",
-      "file": "characters/students.json",
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      "file": "characters/students.json"
     },
     {
       "id": "isabel",
@@ -17,9 +15,7 @@
       "gender": "female",
       "type": "student",
       "group": "students",
-      "file": "characters/students.json",
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      "file": "characters/students.json"
     },
     {
       "id": "sera",
@@ -27,9 +23,7 @@
       "gender": "female",
       "type": "student",
       "group": "students",
-      "file": "characters/students.json",
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      "file": "characters/students.json"
     },
     {
       "id": "laris",
@@ -37,9 +31,7 @@
       "gender": "female",
       "type": "student",
       "group": "students",
-      "file": "characters/students.json",
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      "file": "characters/students.json"
     },
     {
       "id": "anastasia",
@@ -47,9 +39,7 @@
       "gender": "female",
       "type": "student",
       "group": "students",
-      "file": "characters/students.json",
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      "file": "characters/students.json"
     },
     {
       "id": "rena",
@@ -57,9 +47,7 @@
       "gender": "female",
       "type": "student",
       "group": "students",
-      "file": "characters/students.json",
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      "file": "characters/students.json"
     },
     {
       "id": "sia",
@@ -67,9 +55,7 @@
       "gender": "female",
       "type": "student",
       "group": "students",
-      "file": "characters/students.json",
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      "file": "characters/students.json"
     },
     {
       "id": "serena_caldwin",
@@ -77,9 +63,7 @@
       "gender": "female",
       "type": "student",
       "group": "students",
-      "file": "characters/students.json",
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      "file": "characters/students.json"
     },
     {
       "id": "chloe_brightwell",
@@ -87,9 +71,7 @@
       "gender": "female",
       "type": "student",
       "group": "students",
-      "file": "characters/students.json",
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      "file": "characters/students.json"
     },
     {
       "id": "lucia_caldwin",
@@ -97,9 +79,7 @@
       "gender": "female",
       "type": "student",
       "group": "students",
-      "file": "characters/students.json",
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      "file": "characters/students.json"
     },
     {
       "id": "elise_reihart",
@@ -107,9 +87,7 @@
       "gender": "female",
       "type": "student",
       "group": "students",
-      "file": "characters/students.json",
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      "file": "characters/students.json"
     },
     {
       "id": "aria",
@@ -117,9 +95,7 @@
       "gender": "female",
       "type": "student",
       "group": "students",
-      "file": "characters/students.json",
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      "file": "characters/students.json"
     },
     {
       "id": "mirabel",
@@ -127,9 +103,7 @@
       "gender": "female",
       "type": "student",
       "group": "students",
-      "file": "characters/students.json",
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      "file": "characters/students.json"
     },
     {
       "id": "artemis",
@@ -137,9 +111,7 @@
       "gender": "female",
       "type": "faculty",
       "group": "faculty_and_celestials",
-      "file": "characters/faculty_and_celestials.json",
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      "file": "characters/faculty_and_celestials.json"
     },
     {
       "id": "elena_caldwin",
@@ -147,9 +119,7 @@
       "gender": "female",
       "type": "faculty",
       "group": "faculty_and_celestials",
-      "file": "characters/faculty_and_celestials.json",
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      "file": "characters/faculty_and_celestials.json"
     },
     {
       "id": "emily",
@@ -157,9 +127,7 @@
       "gender": "female",
       "type": "faculty_and_celestial",
       "group": "faculty_and_celestials",
-      "file": "characters/faculty_and_celestials.json",
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      "file": "characters/faculty_and_celestials.json"
     },
     {
       "id": "ethera",
@@ -167,9 +135,7 @@
       "gender": "female",
       "type": "faculty_and_celestial",
       "group": "faculty_and_celestials",
-      "file": "characters/faculty_and_celestials.json",
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      "file": "characters/faculty_and_celestials.json"
     },
     {
       "id": "carne",
@@ -177,9 +143,7 @@
       "gender": "female",
       "type": "celestial",
       "group": "faculty_and_celestials",
-      "file": "characters/faculty_and_celestials.json",
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      "file": "characters/faculty_and_celestials.json"
     },
     {
       "id": "seriel",
@@ -187,9 +151,7 @@
       "gender": "female",
       "type": "celestial",
       "group": "faculty_and_celestials",
-      "file": "characters/faculty_and_celestials.json",
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      "file": "characters/faculty_and_celestials.json"
     },
     {
       "id": "nemesis",
@@ -197,9 +159,7 @@
       "gender": "female",
       "type": "apostle",
       "group": "demon_cult_members",
-      "file": "antagonists/demon_cult.json",
-      "confidence": "medium",
-      "canon_status": "public_adaptation_detail"
+      "file": "antagonists/demon_cult.json"
     },
     {
       "id": "veradin",
@@ -207,9 +167,7 @@
       "gender": "female",
       "type": "apostle",
       "group": "demon_cult_members",
-      "file": "antagonists/demon_cult.json",
-      "confidence": "medium",
-      "canon_status": "public_adaptation_detail"
+      "file": "antagonists/demon_cult.json"
     },
     {
       "id": "kartia",
@@ -217,9 +175,7 @@
       "gender": "female",
       "type": "apostle",
       "group": "demon_cult_members",
-      "file": "antagonists/demon_cult.json",
-      "confidence": "medium",
-      "canon_status": "public_adaptation_detail"
+      "file": "antagonists/demon_cult.json"
     },
     {
       "id": "arien",
@@ -227,9 +183,7 @@
       "gender": "female",
       "type": "apostle",
       "group": "demon_cult_members",
-      "file": "antagonists/demon_cult.json",
-      "confidence": "medium",
-      "canon_status": "public_adaptation_detail"
+      "file": "antagonists/demon_cult.json"
     },
     {
       "id": "pria",
@@ -237,9 +191,7 @@
       "gender": "female",
       "type": "sin_bishop",
       "group": "demon_cult_members",
-      "file": "antagonists/demon_cult.json",
-      "confidence": "medium",
-      "canon_status": "recurring_reference"
+      "file": "antagonists/demon_cult.json"
     },
     {
       "id": "sloth",
@@ -247,9 +199,7 @@
       "gender": "female",
       "type": "sin_bishop",
       "group": "demon_cult_members",
-      "file": "antagonists/demon_cult.json",
-      "confidence": "medium",
-      "canon_status": "recurring_reference"
+      "file": "antagonists/demon_cult.json"
     },
     {
       "id": "aris",
@@ -257,9 +207,7 @@
       "gender": "female",
       "type": "sin_bishop",
       "group": "demon_cult_members",
-      "file": "antagonists/demon_cult.json",
-      "confidence": "medium",
-      "canon_status": "recurring_reference"
+      "file": "antagonists/demon_cult.json"
     },
     {
       "id": "beelzebub",
@@ -267,9 +215,7 @@
       "gender": "female",
       "type": "sin_bishop",
       "group": "demon_cult_members",
-      "file": "antagonists/demon_cult.json",
-      "confidence": "medium",
-      "canon_status": "recurring_reference"
+      "file": "antagonists/demon_cult.json"
     },
     {
       "id": "asmo",
@@ -277,9 +223,7 @@
       "gender": "female",
       "type": "sin_bishop",
       "group": "demon_cult_members",
-      "file": "antagonists/demon_cult.json",
-      "confidence": "medium",
-      "canon_status": "recurring_reference"
+      "file": "antagonists/demon_cult.json"
     },
     {
       "id": "leviane",
@@ -287,9 +231,7 @@
       "gender": "female",
       "type": "sin_bishop",
       "group": "demon_cult_members",
-      "file": "antagonists/demon_cult.json",
-      "confidence": "medium",
-      "canon_status": "recurring_reference"
+      "file": "antagonists/demon_cult.json"
     },
     {
       "id": "belian",
@@ -297,9 +239,7 @@
       "gender": "female",
       "type": "sin_bishop",
       "group": "demon_cult_members",
-      "file": "antagonists/demon_cult.json",
-      "confidence": "medium",
-      "canon_status": "recurring_reference"
+      "file": "antagonists/demon_cult.json"
     },
     {
       "id": "lily",
@@ -307,9 +247,7 @@
       "gender": "female",
       "type": "celestial_deity",
       "group": "deities",
-      "file": "antagonists/deities.json",
-      "confidence": "medium",
-      "canon_status": "public_adaptation_detail"
+      "file": "antagonists/deities.json"
     },
     {
       "id": "delphirem",
@@ -317,9 +255,7 @@
       "gender": "female",
       "type": "demon_god",
       "group": "deities",
-      "file": "antagonists/deities.json",
-      "confidence": "medium",
-      "canon_status": "public_adaptation_detail"
+      "file": "antagonists/deities.json"
     }
   ]
 }

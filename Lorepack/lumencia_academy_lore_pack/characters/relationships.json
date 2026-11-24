@@ -2,88 +2,24 @@
   "schema_version": "1.0.0",
   "relationships": [
     {
-      "from": "anastasia",
-      "to": "isabel",
-      "type": "succession_rivalry",
-      "confidence": "high",
-      "source_ids": [
-        "reddit_character_profiles"
-      ]
-    },
-    {
-      "from": "lucia_caldwin",
-      "to": "serena_caldwin",
-      "type": "older_sister_and_younger_sister; older sister is dismissive; younger feels overshadowed",
-      "confidence": "high",
-      "source_ids": [
-        "reddit_character_profiles",
-        "reddit_constant_data"
-      ]
-    },
-    {
-      "from": "lilia_valenheart",
-      "to": "laris",
-      "type": "relative_and_competitive_tension",
-      "confidence": "medium",
-      "source_ids": [
-        "reddit_character_profiles",
-        "reddit_constant_data"
-      ]
-    },
-    {
-      "from": "rena",
-      "to": "ethera",
-      "type": "apprentice_and_tower_master",
-      "confidence": "high",
-      "source_ids": [
-        "reddit_character_profiles"
-      ]
-    },
-    {
-      "from": "lucia_caldwin",
-      "to": "anastasia",
-      "type": "political_competition; precise personal relationship is context-dependent",
-      "confidence": "medium",
-      "source_ids": [
-        "reddit_character_profiles"
-      ]
-    },
-    {
       "from": "elise_reihart",
       "to": "white_rose_society",
-      "type": "vice_president_and_social_information_hub",
-      "confidence": "high",
-      "source_ids": [
-        "reddit_character_profiles"
-      ]
+      "type": "vice_president_and_social_information_hub"
     },
     {
       "from": "chloe_brightwell",
       "to": "brightwell_county",
-      "type": "family_member_and_commercial_networker",
-      "confidence": "high",
-      "source_ids": [
-        "reddit_wiki_thread",
-        "reddit_character_profiles"
-      ]
+      "type": "family_member_and_commercial_networker"
     },
     {
       "from": "aria",
       "to": "dominus_holy_kingdom",
-      "type": "religious representative / Saintess",
-      "confidence": "high",
-      "source_ids": [
-        "reddit_character_profiles"
-      ]
+      "type": "religious representative / Saintess"
     },
     {
       "from": "mirabel",
       "to": "dominus_holy_kingdom",
-      "type": "student and aspiring holy knight/inquisitor",
-      "confidence": "high",
-      "source_ids": [
-        "reddit_character_profiles"
-      ]
+      "type": "student and aspiring holy knight/inquisitor"
     }
   ]
 }

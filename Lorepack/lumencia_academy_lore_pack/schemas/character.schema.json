@@ -1,106 +1,47 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.invalid/lumencia/character.schema.json",
-  "title": "Lumencia Character Record",
+  "title": "Lumencia Character Record (12 categories)",
+  "description": "Same categories for every character of the pack. department_id, year and type are used by the app (rosters, encounters, closed groups) and are not sent to the narrator; 'hidden' is narrator-only and never shown to the player.",
   "type": "object",
-  "required": [
-    "id",
-    "name",
-    "type",
-    "confidence",
-    "canon_status",
-    "source_ids"
-  ],
+  "required": ["id", "name", "type", "gender", "appearance", "power", "role", "personality_traits", "motivation",
+               "story_functions", "faction_ids", "notes", "relationships", "hidden", "never"],
   "properties": {
-    "id": {
-      "type": "string",
-      "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"
-    },
-    "name": {
-      "type": "string",
-      "minLength": 1
-    },
-    "aliases": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "type": {
-      "type": "string"
-    },
-    "department_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "year": {
-      "type": [
-        "integer",
-        "null"
-      ],
-      "minimum": 1
-    },
-    "social_status": {
-      "type": "string"
-    },
+    "id": {"type": "string", "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"},
+    "name": {"type": "string", "minLength": 1},
+    "aliases": {"type": "array", "items": {"type": "string"}},
+    "type": {"type": "string"},
+    "department_id": {"type": ["string", "null"]},
+    "year": {"type": ["integer", "null"], "minimum": 1},
+    "gender": {"type": "string", "description": "1) Gender"},
+    "appearance": {"type": "object", "additionalProperties": {"type": "string"}, "description": "2) Appearance"},
     "power": {
       "type": "object",
+      "description": "3) Power: system, rank, and what she can really do (and its limits)",
+      "properties": {
+        "system": {"type": "string"},
+        "rank": {"type": "string"},
+        "abilities": {"type": "array", "items": {"type": "string"}}
+      },
       "additionalProperties": true
     },
-    "appearance": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
-    "personality_traits": {
+    "role": {"type": "string", "description": "4) Role in the story (year and wing for students, posts, titles, status)"},
+    "personality_traits": {"type": "array", "items": {"type": "string"}, "description": "5) Personality traits"},
+    "motivation": {"type": "string", "description": "6) Motivation"},
+    "story_functions": {"type": "array", "items": {"type": "string"}, "description": "7) How and how often the story uses her"},
+    "faction_ids": {"type": "array", "items": {"type": "string"}, "description": "8) Factions"},
+    "notes": {"type": "array", "items": {"type": "string"}, "description": "9) Notes: way of speaking, verbal tics, anything else"},
+    "relationships": {
       "type": "array",
+      "description": "10) Relationships with other characters",
       "items": {
-        "type": "string"
+        "type": "object",
+        "required": ["target_id", "type"],
+        "properties": {"target_id": {"type": "string"}, "type": {"type": "string"}, "note": {"type": "string"}}
       }
     },
-    "motivation": {
-      "type": "string"
-    },
-    "story_functions": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "faction_ids": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "relationship_notes": {
-      "type": "array",
-      "items": {
-        "type": "object"
-      }
-    },
-    "notes": {
-      "type": "string"
-    },
-    "confidence": {
-      "enum": [
-        "high",
-        "medium",
-        "low"
-      ]
-    },
-    "canon_status": {
-      "type": "string"
-    },
-    "source_ids": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    }
+    "hidden": {"type": "array", "items": {"type": "string"}, "description": "11) Secrets: known to the narrator, never shown to the player"},
+    "never": {"type": "array", "items": {"type": "string"}, "description": "12) Things she never does"}
   },
-  "additionalProperties": true
+  "additionalProperties": false
 }

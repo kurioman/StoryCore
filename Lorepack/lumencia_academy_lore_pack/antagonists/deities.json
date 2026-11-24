@@ -4,55 +4,65 @@
     {
       "id": "lily",
       "name": "Lily",
-      "gender": "female",
       "aliases": [],
       "type": "celestial_deity",
-      "worshipped_by": [
+      "gender": "female",
+      "appearance": {},
+      "power": {
+        "system": "divinity",
+        "rank": "",
+        "abilities": []
+      },
+      "role": "Celestial deity; A protective celestial deity associated with healing and holy power",
+      "personality_traits": [],
+      "motivation": "",
+      "story_functions": [],
+      "faction_ids": [
         "dominus_holy_kingdom"
       ],
-      "associated_power": "divinity",
-      "public_image": "A protective celestial deity associated with healing and holy power.",
-      "personality_notes": "A detailed public character reference depicts Lily as ancient, duty-driven, distant and cynical rather than warmly affectionate.",
-      "confidence": "medium",
-      "canon_status": "public_adaptation_detail",
-      "source_ids": [
-        "reddit_character_profiles",
-        "reddit_calendar_power"
+      "notes": [
+        "A detailed public character reference depicts Lily as ancient, duty-driven, distant and cynical rather than warmly affectionate.",
+        "The exact scope of Lily's intervention and her metaphysical nature are not fully established.",
+        "Reported nature: Ancient and duty-bound, emotionally distant rather than warmly nurturing.",
+        "Intervention style: Rarely direct; may influence events subtly through omens, dreams or small changes in circumstance.",
+        "Limits: This is from the public adaptation; do not force this interpretation into a campaign if the active OOC version differs."
       ],
-      "note": "The exact scope of Lily's intervention and her metaphysical nature are not fully established.",
-      "detailed_public_adaptation_profile": {
-        "reported_nature": "Ancient and duty-bound, emotionally distant rather than warmly nurturing.",
-        "intervention_style": "Rarely direct; may influence events subtly through omens, dreams or small changes in circumstance.",
-        "limits": "This is from the public adaptation; do not force this interpretation into a campaign if the active OOC version differs."
-      }
+      "relationships": [],
+      "hidden": [],
+      "never": []
     },
     {
       "id": "delphirem",
       "name": "Delphirem",
-      "gender": "female",
       "aliases": [
         "Delpirem"
       ],
       "type": "demon_god",
-      "worshipped_by": [
+      "gender": "female",
+      "appearance": {},
+      "power": {
+        "system": "miasma",
+        "rank": "",
+        "abilities": []
+      },
+      "role": "Demon god",
+      "personality_traits": [],
+      "motivation": "The cult seeks to resurrect or return Delphirem; the exact mechanism is not fixed in this pack.",
+      "story_functions": [],
+      "faction_ids": [
         "demon_god_cult"
       ],
-      "associated_power": "miasma",
-      "goal": "The cult seeks to resurrect or return Delphirem; the exact mechanism is not fixed in this pack.",
-      "personality_notes": "The public adaptation describes a playful or curious nature, but divine motives should remain uncertain unless established in the campaign.",
-      "confidence": "medium",
-      "canon_status": "public_adaptation_detail",
-      "source_ids": [
-        "dreamrunner_zeph_lumencia",
-        "reddit_character_profiles"
+      "notes": [
+        "The public adaptation describes a playful or curious nature, but divine motives should remain uncertain unless established in the campaign.",
+        "The spelling varies between sources; use Delphirem as the primary name and Delpirem as an alias.",
+        "Reported nature: Playful and fascinated by mortal urgency, but lacking a human moral frame in the public adaptation.",
+        "Seal and abyss: Described as sealed for ages, with the Abyss Zone functioning as a prison and a source of leaking Miasma.",
+        "Cult motivation: The cult attempts to weaken the seal, though the exact ritual or mechanism remains campaign-dependent.",
+        "Limits: This characterization belongs to the public adaptation; preserve ambiguity until confirmed in the active story."
       ],
-      "note": "The spelling varies between sources; use Delphirem as the primary name and Delpirem as an alias.",
-      "detailed_public_adaptation_profile": {
-        "reported_nature": "Playful and fascinated by mortal urgency, but lacking a human moral frame in the public adaptation.",
-        "seal_and_abyss": "Described as sealed for ages, with the Abyss Zone functioning as a prison and a source of leaking Miasma.",
-        "cult_motivation": "The cult attempts to weaken the seal, though the exact ritual or mechanism remains campaign-dependent.",
-        "limits": "This characterization belongs to the public adaptation; preserve ambiguity until confirmed in the active story."
-      }
+      "relationships": [],
+      "hidden": [],
+      "never": []
     }
   ]
 }

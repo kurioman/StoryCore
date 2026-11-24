@@ -24,7 +24,7 @@ CHAR_RANK = {"locked": 0, "rumored": 1, "encountered": 2, "known": 3}
 PLACE_RANK = {"locked": 0, "rumored": 1, "visited": 2}
 # public lore fields shown per level (the summary is shown from "encountered" / "visited")
 CHAR_BASIC = ("type", "title", "race")
-CHAR_MET = ("affiliation", "rank", "occupation", "department", "year", "age", "appearance")
+CHAR_MET = ("role", "affiliation", "rank", "occupation", "department", "year", "age", "appearance")
 CHAR_KNOWN = ("personality_traits", "speech", "likes", "dislikes", "hobbies")
 PLACE_FIELDS = ("type", "location", "region", "map_hint")
 
