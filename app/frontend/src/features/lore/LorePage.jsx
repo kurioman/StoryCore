@@ -23,6 +23,7 @@ import {
 import { cn } from "@/lib/util";
 import { countOf, loreEntitiesSchema, loreEntityDetailSchema, loreWorldSummarySchema } from "@/features/lore/schemas";
 import { portraitSlot, usePortraitMap } from "@/lib/portraits";
+import { AddRecordCard, EditableRecord } from "@/features/lore/editing";
 
 // Kurio (24/11): the importer's categories gathered into 5 families (sub-filters inside each); "source" (where the
 // lore was researched) is not shown, and any category a pack adds that is not listed here goes to "Other"
@@ -317,6 +318,15 @@ export function LorePage() {
               </button>
             );
           })}
+          {/* Kurio (24/11): add a record the pack does not have yet (computer and phone) */}
+          {!y && !todo && fam && query.data && (
+            <AddRecordCard
+              worldId={r.id}
+              cats={sub && fam.cats.includes(sub) ? [sub] : fam.cats}
+              onWorldChange={(id) => n(id)}
+              onAdded={(res) => d({ entityId: res.id, category: res.category })}
+            />
+          )}
         </div>
       </div>
       <div className={cn(`min-w-0 flex-1 overflow-y-auto p-4 md:block md:p-6`, u ? `block` : `hidden`)}>
@@ -327,10 +337,9 @@ export function LorePage() {
         )}
         {!u && (
           <div className="mx-auto max-w-2xl space-y-4">
-            <Callout tone="info" title={msg("Baseline lore is read-only")}>
-              {r.data_json?.canon_note}{" "}
+            <Callout tone="info" title={msg("Edit the pack here")}>
               {msg(
-                "To change something for your campaign, use “Copy to local canon” on an entry or /addlore in a story.",
+                "Click a record's name or any of its fields to change it, and “Add” at the end of a list to create one. The first change to an original pack creates a renamed copy of it: the original is never changed.",
               )}
             </Callout>
             {w && (
@@ -370,7 +379,7 @@ export function LorePage() {
         )}
         {u && (
           <ErrorBoundary area={msg("This lore record")} resetKey={`${u.category}:${u.entityId}`} compact>
-            <LoreRecordPanel worldId={r.id} sel={u} assetId={portraitSlot(portraitMap.data?.[u.entityId])} />
+            <LoreRecordPanel worldId={r.id} sel={u} assetId={portraitSlot(portraitMap.data?.[u.entityId])} onWorldChange={(id) => n(id)} />
           </ErrorBoundary>
         )}
       </div>
@@ -378,7 +387,7 @@ export function LorePage() {
   );
 }
 
-function LoreRecordPanel({ worldId, sel, assetId }) {
+function LoreRecordPanel({ worldId, sel, assetId, onWorldChange }) {
   let query = useQuery({
     queryKey: [`lore-entity`, worldId, sel.category, sel.entityId],
     queryFn: () =>
@@ -392,7 +401,7 @@ function LoreRecordPanel({ worldId, sel, assetId }) {
   ) : query.isError ? (
     <ErrorCallout error={query.error} onRetry={() => query.refetch()} />
   ) : query.data ? (
-    <LoreRecordDetail d={query.data} worldId={worldId} assetId={assetId} />
+    <LoreRecordDetail d={query.data} worldId={worldId} assetId={assetId} sel={sel} onWorldChange={onWorldChange} />
   ) : (
     <EmptyState title={msg("This record is unavailable")} />
   );
@@ -435,194 +444,44 @@ function ImportReport({ r: e }) {
   );
 }
 
-function LoreRecordDetail({ d, worldId, assetId }) {
-  let { toast } = useUi(),
-    queryClient = useQueryClient(),
-    a = d.entity,
-    o = Object.entries(a.data).filter(([e]) => !LORE_HIDDEN_KEYS.has(e));
+function LoreRecordDetail({ d, worldId, assetId, sel, onWorldChange }) {
+  let a = d.entity;
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="mb-4 flex gap-4">
-        {a.category === `character` && (
-          <Portrait assetId={assetId} name={a.name} variant="card" className="h-44 w-33 shrink-0" />
+      <EditableRecord
+        worldId={worldId}
+        sel={sel}
+        onWorldChange={onWorldChange}
+        header={({ name, aliases, file }) => (
+          <div className="mb-4 flex gap-4">
+            {a.category === `character` && (
+              <Portrait assetId={assetId} name={a.name} variant="card" className="h-44 w-33 shrink-0" />
+            )}
+            <div className="min-w-0 flex-1 space-y-1">
+              {name}
+              <p className="text-sm text-muted">
+                {humanizeKey(a.type || a.category)}
+                {" · "}
+                <span className="font-mono text-xs">{a.entity_id}</span>
+              </p>
+              <div className="flex flex-wrap gap-1">
+                {file && <Badge>{file}</Badge>}
+                {a.completeness && (
+                  <Badge tone={a.completeness.filled >= a.completeness.total ? `ok` : `warn`}>
+                    {a.completeness.filled}/{a.completeness.total} {msg("categories")}
+                  </Badge>
+                )}
+              </div>
+              {a.completeness?.missing.length > 0 && (
+                <p className="text-xs text-warn">
+                  {msg("Missing:")} {a.completeness.missing.map((m) => msg(m)).join(`, `)}
+                </p>
+              )}
+              {aliases}
+            </div>
+          </div>
         )}
-        <div className="min-w-0">
-          <h2 className="text-xl font-semibold">{a.name}</h2>
-          <p className="text-sm text-muted">
-            {humanizeKey(a.type || a.category)}
-            {" · "}
-            <span className="font-mono text-xs">{a.entity_id}</span>
-          </p>
-          {a.aliases.length > 0 && (
-            <p className="text-xs text-faint">
-              {msg("Also:")} {a.aliases.join(`, `)}
-            </p>
-          )}
-          <div className="mt-2 flex flex-wrap gap-1">
-            {a.file && <Badge>{a.file}</Badge>}
-            {a.completeness && (
-              <Badge tone={a.completeness.filled >= a.completeness.total ? `ok` : `warn`}>
-                {a.completeness.filled}/{a.completeness.total} {msg("categories")}
-              </Badge>
-            )}
-            {a.completeness?.has_secret && <Badge>{msg("Has a secret")}</Badge>}
-          </div>
-          {a.completeness?.missing.length > 0 && (
-            <p className="mt-1 text-xs text-warn">
-              {msg("Missing:")} {a.completeness.missing.map((m) => msg(m)).join(`, `)}
-            </p>
-          )}
-          <Button
-            size="sm"
-            className="mt-3 h-auto! min-h-7 max-w-full whitespace-normal! py-1 text-left"
-            onClick={async () => {
-              try {
-                (await apiPost(`/lore/copy-to-canon`, {
-                  world_id: worldId,
-                  entity_id: a.entity_id,
-                }),
-                  queryClient.invalidateQueries({
-                    queryKey: [`lore-entity`],
-                  }),
-                  toast(msg("Copied to local canon as a pending override — edit and approve it below.")));
-              } catch (e) {
-                toast(errorMessage(e), `danger`);
-              }
-            }}
-          >
-            <Icon.Copy className="size-3.5" /> {msg("Copy to local canon (create override)")}
-          </Button>
-        </div>
-      </div>
-      <div className="space-y-3">
-        {o.length === 0 && <p className="text-sm text-faint">{msg("No further details recorded for this entry.")}</p>}
-        {o.map(([e, t]) => (
-          <div key={e}>
-            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-faint">{humanizeKey(e)}</h3>
-            <LoreValue v={t} />
-          </div>
-        ))}
-      </div>
-      {d.local_canon.length > 0 && (
-        <section className="mt-6">
-          <SectionTitle>{msg("Local canon overrides")}</SectionTitle>
-          {d.local_canon.map((e) => (
-            <LocalCanonCard c={e} key={e.id} />
-          ))}
-        </section>
-      )}
-      <section className="mt-6">
-        <SectionTitle>{msg("Sources")}</SectionTitle>
-        {d.sources.length === 0 && <p className="text-xs text-faint">{msg("No sources listed.")}</p>}
-        {d.sources.map((e) => (
-          <p className="text-xs text-muted" key={e.id}>
-            <b>{e.title || e.id}</b>{" "}
-            {e.reliability && (
-              <span className="text-faint">
-                {"— "}
-                {e.reliability}
-              </span>
-            )}{" "}
-            {e.url && (
-              <a href={e.url} target="_blank" rel="noreferrer noopener" className="text-accent underline">
-                {msg("link")}
-              </a>
-            )}
-          </p>
-        ))}
-      </section>
-    </div>
-  );
-}
-
-function LocalCanonCard({ c }) {
-  let [t, n] = React.useState(c.content),
-    queryClient = useQueryClient(),
-    { toast } = useUi(),
-    a = async (n) => {
-      try {
-        (await apiPatch(`/local-canon/${c.id}`, {
-          content: t,
-          ...(n
-            ? {
-                status: n,
-              }
-            : {}),
-        }),
-          queryClient.invalidateQueries({
-            queryKey: [`lore-entity`],
-          }));
-      } catch (e) {
-        toast(errorMessage(e), `danger`);
-      }
-    };
-  return (
-    <div className="mb-2 rounded-md border border-line p-3">
-      <div className="mb-1 flex items-center gap-2 text-sm">
-        <span className="font-medium">{c.title}</span>
-        <Badge tone={c.status === `approved` ? `ok` : c.status === `rejected` ? `neutral` : `warn`}>
-          {msgKey(c.status)}
-        </Badge>
-      </div>
-      <textarea
-        value={t}
-        onChange={(e) => n(e.target.value)}
-        className="min-h-24 w-full rounded-md border border-line bg-panel-2 p-2 text-xs"
-        aria-label={msg("Override text")}
       />
-
-      <div className="mt-1 flex gap-1">
-        <Button size="sm" onClick={() => a()}>
-          {msg("Save")}
-        </Button>
-        <Button size="sm" variant="primary" onClick={() => a(`approved`)}>
-          {msg("Approve")}
-        </Button>
-        <Button size="sm" variant="ghost" onClick={() => a(`rejected`)}>
-          {msg("Reject")}
-        </Button>
-      </div>
     </div>
-  );
-}
-
-var fmtValue = (e) => (e == null ? `—` : typeof e == `object` ? JSON.stringify(e) : String(e));
-
-function LoreValue({ v }) {
-  return v == null || v === `` ? (
-    <p className="text-sm text-faint">—</p>
-  ) : typeof v == `object` ? (
-    Array.isArray(v) ? (
-      v.length === 0 ? (
-        <p className="text-sm text-faint">—</p>
-      ) : v.every((e) => typeof e != `object` || !e) ? (
-        <p className="text-sm text-fg/90">{v.map(fmtValue).join(` · `)}</p>
-      ) : (
-        <ul className="space-y-1">
-          {v.map((e, t) => (
-            <li className="rounded border border-line px-2 py-1 text-xs text-muted" key={t}>
-              {typeof e == `object` && e && !Array.isArray(e)
-                ? Object.entries(e).map(([e, t]) => (
-                    <span className="mr-2" key={e}>
-                      <span className="text-faint">{e}:</span> {fmtValue(t)}
-                    </span>
-                  ))
-                : fmtValue(e)}
-            </li>
-          ))}
-        </ul>
-      )
-    ) : (
-      <dl className="grid grid-cols-[10rem_1fr] gap-x-2 text-sm">
-        {Object.entries(v).map(([e, t]) => (
-          <div className="contents" key={e}>
-            <dt className="text-faint">{humanizeKey(e)}</dt>
-            <dd className="text-fg/90">{Array.isArray(t) ? t.map(fmtValue).join(`, `) : fmtValue(t)}</dd>
-          </div>
-        ))}
-      </dl>
-    )
-  ) : (
-    <p className="text-sm text-fg/90">{String(v)}</p>
   );
 }
