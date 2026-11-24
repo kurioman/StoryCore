@@ -396,6 +396,11 @@ NARRATION_RULES_V6 = (
     "- A length target is a maximum, not a quota. Never repeat or paraphrase earlier replies: continue from the exact "
     "point where the last one ended.\n"
     "- Never invent a shared past between {name} and anyone unless the story or {name}'s profile established it.\n"
+    # Kurio (24/11/2026): DeepSeek "invents quite a lot of lore"; the cards and lore are the canon, the rest stays open
+    "- The lore and the character cards are the canon. Never invent an important fact about an established character, "
+    "place, group or the world's history (family, past, powers, titles, secrets, relationships, events): only small "
+    "details (gestures, sounds, food, weather, unnamed extras). When something is not established, keep it vague or "
+    "let the character not know, dodge or keep it to herself.\n"
     "- Write story only: no title or header line, no code block, no note to the player, no list of options and no "
     "question such as 'What do you do?'.\n"
     "- When sources disagree: fixed truths and canon facts first, then the player's corrections, the scene now, the "
