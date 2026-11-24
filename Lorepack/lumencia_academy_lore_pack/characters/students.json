@@ -199,26 +199,32 @@
         "rank": "Master Low",
         "abilities": []
       },
-      "role": "3rd-year Knight student; First imperial princess; Student Council President",
+      "role": "3rd-year Knight student; First imperial princess; Student Council President; Key member of the Blue Knights",
       "personality_traits": [
         "dignified",
         "charismatic",
         "ambitious",
         "authoritative",
-        "concise"
+        "concise",
+        "haughty"
       ],
-      "motivation": "Consolidate power and build a loyal network ahead of the imperial succession struggle.",
+      "motivation": "Consolidate relations among capable academy students and pursue a claim to the throne.",
       "story_functions": [
         "high-level political patron",
         "imperial authority",
-        "potential antagonist or ally"
+        "potential antagonist or ally",
+        "Examiner or judge during the exams and tournaments of the Knight Department"
       ],
       "faction_ids": [
         "imperial_family",
         "lumencia_academy",
         "student_council"
       ],
-      "notes": [],
+      "notes": [
+        "Strongest student of the Knight Department.",
+        "Regularly and silently observes Knight Department classes to spot promising students.",
+        "Openly despises and criticizes Isabel whenever they interact."
+      ],
       "relationships": [
         {
           "target_id": "isabel",
