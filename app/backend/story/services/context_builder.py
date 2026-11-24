@@ -197,7 +197,9 @@ def character_card(le, post: str | None = None) -> str:
     """Phase 2 (step 3): one compact line per character: name (gender; role): traits; looks."""
     d = le.data_json or {}
     gender = ", ".join(x for x in (str(d.get("gender") or "").strip(), str(d.get("pronouns") or "").strip()) if x)
-    role = post or str(d.get("role") or "").strip()  # the pack's own words first (Kurio's 12-category records)
+    own = str(d.get("role") or "").strip()  # the pack's own words first (Kurio's 12-category records)
+    # Kurio (24/11): the post alone ("First imperial princess") hid the rest of the role (year, wing, council...)
+    role = own if own and (not post or post.casefold() in own.casefold()) else "; ".join(x for x in (post, own) if x)
     if not role:
         dept = DEPARTMENTS.get(str(d.get("department_id") or ""), str(d.get("department_id") or "").replace("_", " "))
         year = d.get("year")
@@ -208,9 +210,51 @@ def character_card(le, post: str | None = None) -> str:
             role = str(d.get("role") or d.get("occupation") or le.entity_type or "").replace("_", " ")
     status = str(d.get("social_status") or "").split(";")[0].strip()
     head = "; ".join(x for x in (gender, role, status) if x)
-    traits = ", ".join((d.get("personality_traits") or [])[:4]) or (le.summary or "")[:120]
+    traits = ", ".join((d.get("personality_traits") or [])[:6]) or (le.summary or "")[:120]
     looks = looks_of(d)
     return f"- {le.name}" + (f" ({head})" if head else "") + (f": {traits}" if traits else "") + (f"; looks: {looks}" if looks else "")
+
+
+def _words(v: Any) -> str:
+    """A lore value as one short line ("imperial_family" reads "imperial family")."""
+    if isinstance(v, list):
+        items = [_words(x) for x in v if x not in (None, "", [], {})]
+        return " ".join(items) if all(i.endswith((".", "!", "?")) for i in items) else "; ".join(items)
+    if isinstance(v, dict):
+        return "; ".join(f"{k.replace('_', ' ')}: {_words(x)}" for k, x in v.items() if x not in (None, "", [], {}))
+    s = str(v).strip()
+    return s.replace("_", " ") if re.fullmatch(r"[a-z0-9_]+", s) else s
+
+
+def character_play_card(le, post: str | None = None, names: dict[str, str] | None = None) -> str:
+    """Kurio (24/11/2026): for a character in the scene, her whole record in a few lines (the 12 categories of the
+    pack model), so the narrator plays her with her own voice, aims and limits. Until then only the one-line card
+    above reached the model, and motivation, notes, story functions, "never" and relationships were never sent."""
+    d = le.data_json or {}
+    lines = [character_card(le, post)]
+    ap = d.get("appearance")
+    if isinstance(ap, dict):
+        extra = {k: v for k, v in ap.items() if k not in ("hair", "eyes") and v}
+        if extra:
+            lines.append("  Looks: " + _words(extra))
+    pw = d.get("power")
+    if isinstance(pw, dict) and any(pw.values()):
+        lines.append("  Power: " + _words(pw))
+    for key, label in (("motivation", "Motivation"), ("notes", "Voice & notes"), ("story_functions", "In the story"),
+                       ("never", "Never")):
+        text = _words(d.get(key)) if d.get(key) not in (None, "", [], {}) else ""
+        if text:
+            lines.append(f"  {label}: {text}")
+    ties = []
+    for r in (d.get("relationships") or []) + (d.get("relationship_notes") or []):
+        if isinstance(r, dict) and r.get("target_id"):
+            who = (names or {}).get(r["target_id"], str(r["target_id"]).replace("_", " "))
+            ties.append(f"{who} ({_words(r.get('type') or '')}" + (f", {r['note']}" if r.get("note") else "") + ")")
+    if ties:
+        lines.append("  Ties: " + "; ".join(ties))
+    if d.get("faction_ids"):
+        lines.append("  Factions: " + _words(d["faction_ids"]))
+    return "\n".join(lines)
 
 
 def looks_of(data: dict[str, Any] | None) -> str:
@@ -567,18 +611,27 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
     for r in registry["roles"]:
         post_of.setdefault(r["character_id"], r["title"])
     carded: set[str] = set()
-    for cid in dict.fromkeys([*focus_entities[:8], *classmates]):
+    # Kurio (24/11): the characters in the scene get their whole record (play card); those only named, the one line.
+    # Without a "present" list yet, the ones named in the last exchange count as present. At most 5 play cards.
+    on_stage = [c for c in present if c in index.entities] or \
+        index.find_mentions(" ".join(m.content for m in convo[-2:]))
+    on_stage = [c for c in dict.fromkeys(on_stage) if index.entities[c].category == "character"][:5]
+    char_names = {cid: e.name for cid, e in index.entities.items() if e.category == "character"}
+    for cid in dict.fromkeys([*on_stage, *focus_entities[:8], *classmates]):
         le = db.scalar(select(LoreEntity).where(LoreEntity.world_id == story.world_id, LoreEntity.entity_id == cid)) if story.world_id else None
         if le and le.category == "character":
-            cast_lines.append(character_card(le, post_of.get(cid)))
+            cast_lines.append(character_play_card(le, post_of.get(cid), char_names) if cid in on_stage
+                              else character_card(le, post_of.get(cid)))
             carded.add(cid)
     # lore background between the characters in focus (v1.4): initial relationships, below the story-evolved values
     from .relationships import lore_relationships
     focus_set = set(focus_entities[:8])
     lore_rel = [f"- {r['source_name']} → {r['target_name']}: {r['type']}" for r in lore_relationships(db, story.world_id, focus_set)
-                if r["source_id"] in focus_set and r["target_id"] in focus_set][:8]
+                if r["source_id"] in focus_set and r["target_id"] in focus_set
+               and r["source_id"] not in on_stage][:8]  # a play card already lists its ties
     sc_text = "\n".join(x for x in [scene_text, ("Characters here or named (cards are canon: keep each one's gender, "
-                                                 "role and looks):\n" + "\n".join(cast_lines)) if cast_lines else "",
+                                                 "role and looks; play each one by her card: her voice, aims, ties "
+                                                 "and what she never does):\n" + "\n".join(cast_lines)) if cast_lines else "",
                                     ("Lore background between these characters (initial; story-evolved values above take "
                                      "precedence):\n" + "\n".join(lore_rel)) if lore_rel else ""] if x)
     if sc_text:
