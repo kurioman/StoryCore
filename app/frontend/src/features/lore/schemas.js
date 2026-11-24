@@ -34,6 +34,16 @@ export var zText = z
       .transform((e) => e ?? null),
     source_ids: zStringList,
     file: zText,
+    // Kurio (24/11): how much of the record follows its pack model (characters: 11 categories + optional secrets)
+    completeness: z
+      .object({
+        filled: z.number(),
+        total: z.number(),
+        missing: zStringList,
+        has_secret: z.boolean().nullish(),
+      })
+      .nullish()
+      .transform((e) => e ?? null),
   }),
   loreEntitiesSchema = z.object({
     entities: z

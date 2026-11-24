@@ -43,6 +43,7 @@ export function LorePage() {
     r = worlds.data?.find((e) => e.id === t) ?? worlds.data?.[0],
     [i, a] = React.useState(`characters`),
     [sub, setSub] = React.useState(``),
+    [todo, setTodo] = React.useState(false),
     [o, s] = React.useState(``),
     [u, d] = React.useState(null),
     portraitMap = usePortraitMap(r?.id),
@@ -129,7 +130,8 @@ export function LorePage() {
       </div>
     );
 
-  let w = x.data?.last_import?.report_json;
+  let w = x.data?.last_import?.report_json,
+    shown = (query.data ?? []).filter((e) => !todo || (e.completeness && e.completeness.filled < e.completeness.total));
   return (
     <div className="flex h-full min-h-0">
       <div
@@ -217,6 +219,18 @@ export function LorePage() {
                     {msg(f.label)} {f.count}
                   </button>
                 ))}
+                <button
+                  onClick={() => setTodo(!todo)}
+                  aria-pressed={todo}
+                  title={msg("Show only the records that miss some categories of their model")}
+                  className={cn(
+                    `ml-auto rounded px-2 py-0.5 text-xs`,
+                    todo ? `bg-warn-soft text-warn` : `bg-panel-2 text-muted hover:text-fg`,
+                  )}
+                >
+                  <Icon.ListTodo className="mr-1 inline size-3" />
+                  {msg("To complete")}
+                </button>
               </div>
               {fam && fam.cats.length > 1 && !y && (
                 <div className="flex flex-wrap gap-1" role="tablist" aria-label={msg("Lore categories")}>
@@ -244,6 +258,9 @@ export function LorePage() {
         <div className="min-h-0 flex-1 overflow-y-auto p-2" aria-busy={query.isFetching}>
           {query.isLoading && <Spinner />}
           {query.isError && <ErrorCallout error={query.error} onRetry={() => query.refetch()} />}
+          {todo && query.data && shown.length === 0 && query.data.length > 0 && (
+            <EmptyState title={msg("Every record here follows its model")} />
+          )}
           {query.data?.length === 0 && (
             <EmptyState
               title={
@@ -255,7 +272,7 @@ export function LorePage() {
               }
             />
           )}
-          {query.data?.map((e) => {
+          {shown.map((e) => {
             let t = u?.entityId === e.entity_id && u.category === e.category;
             return (
               <button
@@ -283,6 +300,14 @@ export function LorePage() {
                   <span className="flex items-center gap-1.5">
                     <span className="truncate text-[13px] font-medium">{e.name}</span>
                     {y && <Badge>{humanizeKey(e.category)}</Badge>}
+                    {e.completeness && (
+                      <Badge
+                        tone={e.completeness.filled >= e.completeness.total ? `ok` : `warn`}
+                        title={e.completeness.missing.length ? `${msg("Missing:")} ${e.completeness.missing.map((m) => msg(m)).join(`, `)}` : undefined}
+                      >
+                        {e.completeness.filled}/{e.completeness.total}
+                      </Badge>
+                    )}
                   </span>
                   <span className="line-clamp-2 text-[11px] text-faint">
                     {e.type && e.type !== e.category ? `${humanizeKey(e.type)} · ` : ``}
@@ -435,7 +460,18 @@ function LoreRecordDetail({ d, worldId, assetId }) {
           )}
           <div className="mt-2 flex flex-wrap gap-1">
             {a.file && <Badge>{a.file}</Badge>}
+            {a.completeness && (
+              <Badge tone={a.completeness.filled >= a.completeness.total ? `ok` : `warn`}>
+                {a.completeness.filled}/{a.completeness.total} {msg("categories")}
+              </Badge>
+            )}
+            {a.completeness?.has_secret && <Badge>{msg("Has a secret")}</Badge>}
           </div>
+          {a.completeness?.missing.length > 0 && (
+            <p className="mt-1 text-xs text-warn">
+              {msg("Missing:")} {a.completeness.missing.map((m) => msg(m)).join(`, `)}
+            </p>
+          )}
           <Button
             size="sm"
             className="mt-3 h-auto! min-h-7 max-w-full whitespace-normal! py-1 text-left"

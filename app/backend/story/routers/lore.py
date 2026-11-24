@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from ..deps import get_ctx, get_db
 from ..models import ImportRun, LocalCanon, LoreChunk, LoreEntity, World, now_iso
-from ..services import context_builder, lore_import
+from ..services import context_builder, lore_import, lore_templates
 from ..services.runtime import AppContext
 
 router = APIRouter(tags=["lore"])
@@ -172,7 +172,15 @@ def entities(wid: str, category: str = "", q: str = "", confidence: str = "", db
             pass
         ql = q.lower()
         rows = [r for r in rows if r.entity_id in ids or ql in r.name.lower() or any(ql in a.lower() for a in r.aliases_json or [])]
-    return {"entities": [entity_summary(r) for r in rows]}
+    secrets = _secret_keys(db, wid)
+    return {"entities": [{**entity_summary(r), "completeness": lore_templates.completeness(
+        r.category, r.data_json, f"{r.category}:{r.entity_id}" in secrets)} for r in rows]}
+
+
+def _secret_keys(db: Session, wid: str) -> set[str]:
+    """Records that have narrator-only notes ("character:emily"): the notes are removed from the records at import."""
+    world = db.get(World, wid)
+    return set(((world.data_json or {}).get("hidden") or {}).keys()) if world else set()
 
 
 def entity_summary(r: LoreEntity) -> dict[str, Any]:
@@ -199,7 +207,9 @@ def entity(wid: str, entity_id: str, category: str = "", db: Session = Depends(g
     for sid in entity_summary(r)["source_ids"]:
         s = sources.get(sid) or {}
         src_out.append({"id": sid, "title": s.get("title") or sid, "url": s.get("url"), "reliability": s.get("reliability")})
+    has_secret = f"{r.category}:{r.entity_id}" in _secret_keys(db, wid)
     return {"entity": {**entity_summary(r), "data": r.data_json if isinstance(r.data_json, dict) else {},
+                       "completeness": lore_templates.completeness(r.category, r.data_json, has_secret),
                        "chunk_id": chunk.id if chunk else None},
             "sources": src_out,
             "local_canon": [{"id": c.id, "title": c.title, "content": c.content, "status": c.status} for c in canon],
