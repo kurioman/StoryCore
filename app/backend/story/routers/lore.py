@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from ..deps import get_ctx, get_db
 from ..models import ImportRun, LocalCanon, LoreChunk, LoreEntity, World, now_iso
-from ..services import context_builder, lore_import, lore_templates
+from ..services import context_builder, lore_import, lore_records, lore_templates
 from ..services.runtime import AppContext
 
 router = APIRouter(tags=["lore"])
@@ -132,6 +132,81 @@ def reimport(wid: str, ctx: AppContext = Depends(get_ctx), db: Session = Depends
     if not Path(w.source_path).is_dir():
         raise ValueError(f"Source folder no longer exists: {w.source_path}")
     return lore_import.import_pack(db, Path(w.source_path))
+
+
+class RecordChangeIn(BaseModel):
+    field: str
+    value: Any = None
+    new_name: str = ""  # first change to an original pack: the name of the copy that receives it
+
+
+class NewRecordIn(BaseModel):
+    category: str = "character"
+    name: str
+    file: str = ""
+    type: str = ""
+    new_name: str = ""
+
+
+def _after_edit(db: Session, ctx: AppContext, world: World, pdir: Path, **extra: Any) -> dict[str, Any]:
+    """Re-import the pack that was written (lore and portraits, as at start-up) and say which world shows it."""
+    from .. import bundled
+    from ..services import pack_manifest
+
+    db.commit()
+    done = bundled._sync_pack(ctx, pdir.resolve(), {})
+    manifest, _ = pack_manifest.load(pdir)
+    db.expire_all()
+    w = db.scalar(select(World).where(World.slug == (manifest or {}).get("id"))) or world
+    return {"world_id": w.id, "world_name": w.name, "copied": w.id != world.id, "sync": done, **extra}
+
+
+def _world(db: Session, wid: str) -> World:
+    w = db.get(World, wid)
+    if w is None:
+        raise HTTPException(404, "World not found")
+    return w
+
+
+@router.get("/worlds/{wid}/pack-edit")
+def pack_edit_status(wid: str, db: Session = Depends(get_db)) -> dict[str, Any]:
+    return lore_records.status(db, _world(db, wid))
+
+
+@router.get("/worlds/{wid}/records/{category}/{rid}/raw")
+def record_raw(wid: str, category: str, rid: str, db: Session = Depends(get_db)) -> dict[str, Any]:
+    try:
+        return lore_records.raw(db, _world(db, wid), category, rid)
+    except LookupError as e:
+        raise HTTPException(404, str(e))
+
+
+@router.patch("/worlds/{wid}/records/{category}/{rid}")
+def record_change(wid: str, category: str, rid: str, body: RecordChangeIn, ctx: AppContext = Depends(get_ctx),
+                  db: Session = Depends(get_db)) -> dict[str, Any]:
+    """Kurio (24/11): "Modify" on the Lore page, on the computer or a paired phone. The first change to an original
+    pack goes into a renamed copy (409 until a name is given): the original stays untouched as the backup."""
+    w = _world(db, wid)
+    try:
+        pdir = lore_records.update(db, w, ctx.settings.project_root, category, rid, body.field, body.value,
+                                   body.new_name)
+    except lore_records.NeedsName:
+        raise HTTPException(409, "First change to this pack: choose a name for the modified copy.")
+    except LookupError as e:
+        raise HTTPException(404, str(e))
+    return _after_edit(db, ctx, w, pdir, id=rid)
+
+
+@router.post("/worlds/{wid}/records")
+def record_new(wid: str, body: NewRecordIn, ctx: AppContext = Depends(get_ctx), db: Session = Depends(get_db)) -> dict[str, Any]:
+    """Kurio (24/11): "Add" at the end of a Lore list: an empty record (a character follows the 12-category model)."""
+    w = _world(db, wid)
+    try:
+        pdir, rid = lore_records.create(db, w, ctx.settings.project_root, body.category, body.name, body.file,
+                                        body.type, body.new_name)
+    except lore_records.NeedsName:
+        raise HTTPException(409, "First change to this pack: choose a name for the modified copy.")
+    return _after_edit(db, ctx, w, pdir, id=rid, category=body.category)
 
 
 @router.get("/lore/packs/check")
