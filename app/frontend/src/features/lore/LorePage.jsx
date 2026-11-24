@@ -50,7 +50,6 @@ export function LorePage() {
     r = worlds.data?.find((e) => e.id === t) ?? worlds.data?.[0],
     [i, a] = React.useState(`character`),
     [o, s] = React.useState(``),
-    [c, l] = React.useState(``),
     [u, d] = React.useState(null),
     portraitMap = usePortraitMap(r?.id),
     queryClient = useQueryClient(),
@@ -58,11 +57,11 @@ export function LorePage() {
     v = React.useRef(null),
     y = o.trim(),
     query = useQuery({
-      queryKey: [`lore`, r?.id, i, y, c],
+      queryKey: [`lore`, r?.id, i, y],
       enabled: !!r,
       queryFn: () =>
         apiGet(
-          `/worlds/${r.id}/entities?category=${y ? `` : i}&q=${encodeURIComponent(y)}&confidence=${c}`,
+          `/worlds/${r.id}/entities?category=${y ? `` : i}&q=${encodeURIComponent(y)}`,
           loreEntitiesSchema,
         ).then((e) => e.entities),
       placeholderData: (e) => e,
@@ -214,17 +213,6 @@ export function LorePage() {
               ))}
             </div>
           )}
-          <Select
-            value={c}
-            onChange={(e) => l(e.target.value)}
-            className="h-7 text-xs"
-            aria-label={msg("Confidence filter")}
-          >
-            <option value="">{msg("Any source confidence")}</option>
-            <option value="high">{msg("High confidence")}</option>
-            <option value="medium">{msg("Medium confidence")}</option>
-            <option value="low">{msg("Low confidence")}</option>
-          </Select>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto p-2" aria-busy={query.isFetching}>
           {query.isLoading && <Spinner />}
@@ -268,7 +256,6 @@ export function LorePage() {
                   <span className="flex items-center gap-1.5">
                     <span className="truncate text-[13px] font-medium">{e.name}</span>
                     {y && <Badge>{humanizeKey(e.category)}</Badge>}
-                    {e.confidence && e.confidence !== `high` && <Badge tone="warn">{e.confidence}</Badge>}
                   </span>
                   <span className="line-clamp-2 text-[11px] text-faint">
                     {e.type && e.type !== e.category ? `${humanizeKey(e.type)} · ` : ``}
@@ -420,16 +407,6 @@ function LoreRecordDetail({ d, worldId, assetId }) {
             </p>
           )}
           <div className="mt-2 flex flex-wrap gap-1">
-            {a.confidence && (
-              <Badge tone={a.confidence === `high` ? `ok` : `warn`}>
-                {msg("{{v0}} confidence", { v0: msgKey(a.confidence) })}
-              </Badge>
-            )}
-            {a.canon_status && (
-              <Badge tone={a.canon_status === `recurring_reference` ? `neutral` : `warn`}>
-                {humanizeKey(a.canon_status)}
-              </Badge>
-            )}
             {a.file && <Badge>{a.file}</Badge>}
           </div>
           <Button
