@@ -16,6 +16,7 @@ import { navigate } from "@/lib/router";
 import { useUi } from "@/components/ui";
 import { PhonePanel } from "@/features/mobile/PhonePanel";
 import { IS_ANDROID_APP, IS_REMOTE } from "@/lib/remote";
+import { usePhoneLayout } from "@/lib/layout";
 
 // built when shown (msg() needs the chosen language); a paired phone only gets its own preferences (v0.5)
 function settingsTabs() {
@@ -68,10 +69,15 @@ var COMPUTER_ONLY_TABS = [`ollama`, `phone`];
 export function SettingsPage({ tab }) {
   let SETTINGS_TABS = settingsTabs();
   if (!SETTINGS_TABS.some((t) => t.id === tab)) tab = SETTINGS_TABS[0].id;
+  // StoryCore mobile (Phase 4): on a phone every section stays in sight (wrapped), none hidden off screen
+  let phone = usePhoneLayout();
   return (
     <div className="flex h-full min-h-0 flex-col md:flex-row">
       <nav
-        className="flex shrink-0 gap-1 overflow-x-auto border-b border-line p-2 md:w-52 md:flex-col md:border-b-0 md:border-r md:p-3"
+        className={cn(
+          `flex shrink-0 gap-1 border-b border-line p-2 md:w-52 md:flex-col md:border-b-0 md:border-r md:p-3`,
+          phone ? `flex-wrap` : `overflow-x-auto`,
+        )}
         aria-label={msg("Settings sections")}
       >
         <h1 className="hidden px-2 pb-2 text-sm font-semibold md:block">{msg("Settings")}</h1>
