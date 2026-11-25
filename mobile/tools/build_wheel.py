@@ -68,6 +68,8 @@ def main() -> int:
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--work", type=Path, default=Path(".wheel-build"))
     a = ap.parse_args()
+    a.work = a.work.resolve()  # maturin runs inside the source folder: every path it gets must be absolute
+    a.out = a.out.resolve()
 
     triple = TRIPLES[a.abi]
     ndk = os.environ.get("ANDROID_NDK_ROOT") or os.environ.get("ANDROID_NDK_HOME")
