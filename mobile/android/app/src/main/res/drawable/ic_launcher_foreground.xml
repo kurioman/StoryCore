@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- StoryCore logo: a star born from an open book (same drawing as components/BrandLogo.tsx). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <group android:scaleX="0.652" android:scaleY="0.652" android:translateX="14.88" android:translateY="16.18">
+        <path android:pathData="M60,12 L65.5,33.5 L87,39 L65.5,44.5 L60,66 L54.5,44.5 L33,39 L54.5,33.5 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="linear" android:startX="33" android:startY="12" android:endX="87" android:endY="66">
+                    <item android:offset="0" android:color="#FFFBE4A3" />
+                    <item android:offset="0.5" android:color="#FFE2BD72" />
+                    <item android:offset="1" android:color="#FFB48A43" />
+                </gradient>
+            </aapt:attr>
+        </path>
+        <path android:fillColor="#FF0B1030" android:pathData="M57,39 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+        <path android:pathData="M60,104 C48,95 32,92 14,94 L14,70 C32,68 48,70 60,79 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="linear" android:startX="14" android:startY="68" android:endX="60" android:endY="104">
+                    <item android:offset="0" android:color="#FFFBE4A3" />
+                    <item android:offset="0.5" android:color="#FFE2BD72" />
+                    <item android:offset="1" android:color="#FFB48A43" />
+                </gradient>
+            </aapt:attr>
+        </path>
+        <path android:pathData="M60,104 C72,95 88,92 106,94 L106,70 C88,68 72,70 60,79 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="linear" android:startX="60" android:startY="68" android:endX="106" android:endY="104">
+                    <item android:offset="0" android:color="#FFFBE4A3" />
+                    <item android:offset="0.5" android:color="#FFE2BD72" />
+                    <item android:offset="1" android:color="#FFB48A43" />
+                </gradient>
+            </aapt:attr>
+        </path>
+        <path android:strokeColor="#FF0B1030" android:strokeWidth="4" android:pathData="M60,79 L60,104" />
+    </group>
+</vector>

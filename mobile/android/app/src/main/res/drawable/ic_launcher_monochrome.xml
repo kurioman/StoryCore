@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Themed icon (Android 13+): one colour, chosen by the system. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <group android:scaleX="0.652" android:scaleY="0.652" android:translateX="14.88" android:translateY="16.18">
+        <path android:fillColor="#FF000000" android:pathData="M60,12 L65.5,33.5 L87,39 L65.5,44.5 L60,66 L54.5,44.5 L33,39 L54.5,33.5 Z" />
+        <path android:fillColor="#FF000000" android:pathData="M60,104 C48,95 32,92 14,94 L14,70 C32,68 48,70 60,79 Z" />
+        <path android:fillColor="#FF000000" android:pathData="M60,104 C72,95 88,92 106,94 L106,70 C88,68 72,70 60,79 Z" />
+    </group>
+</vector>

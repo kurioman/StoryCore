@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Night blue from the first frame: no white flash while the engine starts. -->
+    <style name="StoryCore" parent="@android:style/Theme.DeviceDefault.NoActionBar">
+        <item name="android:windowBackground">@color/night_blue</item>
+        <item name="android:statusBarColor">@color/night_blue</item>
+        <item name="android:navigationBarColor">@color/night_blue</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

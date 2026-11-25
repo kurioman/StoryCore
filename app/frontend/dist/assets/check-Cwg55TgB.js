@@ -1,0 +1,1 @@
+import{Z as e}from"./ui-CmYyXS5P.js";var t=typeof window<`u`&&!new Set([`127.0.0.1`,`localhost`,`[::1]`,`::1`]).has(window.location.hostname),n=typeof navigator<`u`&&/\bStoryCoreAndroid\//.test(navigator.userAgent),r=n||t,i={name:`check`,size:24,node:[[`path`,{d:`M20 6 9 17l-5-5`,key:`1gmf2c`}]]};i.node;var a=e(i);export{t as i,n,r,a as t};
