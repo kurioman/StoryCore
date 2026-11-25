@@ -2141,5 +2141,6 @@
   "Message actions": "Message actions",
   "Hide actions": "Hide actions",
   "Show {{v0}}'s portrait": "Show {{v0}}'s portrait",
-  "Back to the list": "Back to the list"
+  "Back to the list": "Back to the list",
+  "Only the built-in offline demo narrator is set up. Connect an online AI (OpenRouter, DeepSeek…) to write real stories.": "Only the built-in offline demo narrator is set up. Connect an online AI (OpenRouter, DeepSeek…) to write real stories."
 }

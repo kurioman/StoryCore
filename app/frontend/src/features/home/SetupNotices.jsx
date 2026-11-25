@@ -9,7 +9,7 @@ import * as Icon from "lucide-react";
 import { msg, msgKey } from "@/i18n";
 import { Badge, Button, Callout } from "@/components/ui";
 import { navigate } from "@/lib/router";
-import { IS_REMOTE } from "@/lib/remote";
+import { IS_ANDROID_APP, IS_REMOTE } from "@/lib/remote";
 
 export function SetupNotices() {
   let query = useQuery({
@@ -116,9 +116,11 @@ export function SetupNotices() {
                 <div className="min-w-[12rem] flex-1">
                   <p className="text-sm font-medium">{msg("Connect a model")}</p>
                   <p className="text-xs text-faint">
-                    {msg(
-                      "Only the built-in offline mock provider is set up. Add local Ollama or a cloud API to write real stories.",
-                    )}
+                    {IS_ANDROID_APP
+                      ? msg("Only the built-in offline demo narrator is set up. Connect an online AI (OpenRouter, DeepSeek…) to write real stories.")
+                      : msg(
+                          "Only the built-in offline mock provider is set up. Add local Ollama or a cloud API to write real stories.",
+                        )}
                   </p>
                 </div>
                 <Button onClick={() => navigate(`/setup`)}>{msg("Open the first-run assistant")}</Button>

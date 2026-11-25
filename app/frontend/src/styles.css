@@ -370,3 +370,7 @@ html[data-platform] .sc-modal{left:0;right:0;top:auto;bottom:0;--tw-translate-x:
 html[data-platform] .sc-modal-close{width:2.5rem;height:2.5rem}
 html[data-platform] .sc-modal-close svg{width:1.25rem;height:1.25rem}
 }
+@media (max-width:767px){
+/* settings rows "label | value" (Providers): label above its value on a phone */
+html[data-platform] .sc-kv{grid-template-columns:minmax(0,1fr);gap:.2rem}
+}
