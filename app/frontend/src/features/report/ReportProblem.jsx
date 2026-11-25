@@ -5,7 +5,7 @@ import { IS_REMOTE } from "@/lib/remote";
 import * as Icon from "lucide-react";
 import { msg } from "@/i18n";
 import { Button, Modal, Textarea, useUi } from "@/components/ui";
-import { cn } from "@/lib/util";
+import { cn, saveBlob } from "@/lib/util";
 
 /** Downloads the bug report zip. Resolves when the file has been handed to the browser. */
 export async function downloadBugReport({ description, storyId } = {}) {
@@ -21,14 +21,7 @@ export async function downloadBugReport({ description, storyId } = {}) {
   if (!res.ok) throw Error(msg("The bug report could not be made (error {{v0}}).", { v0: res.status }));
   let name =
     /filename="([^"]+)"/.exec(res.headers.get(`content-disposition`) ?? ``)?.[1] ?? `StoryCore_bug_report.zip`;
-  let url = URL.createObjectURL(await res.blob()),
-    link = document.createElement(`a`);
-  link.href = url;
-  link.download = name;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+  saveBlob(name, await res.blob());
   return name;
 }
 

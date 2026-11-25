@@ -36,11 +36,27 @@ export function fmtBytes(e) {
 }
 
 export function downloadJson(e, t) {
-  let n = new Blob([JSON.stringify(t, null, 2)], {
-      type: `application/json`,
-    }),
-    r = document.createElement(`a`);
-  ((r.href = URL.createObjectURL(n)), (r.download = e), r.click(), setTimeout(() => URL.revokeObjectURL(r.href), 1e3));
+  saveBlob(e, new Blob([JSON.stringify(t, null, 2)], { type: `application/json` }));
+}
+
+// Saves a file made by the interface. In the Android app (mobile/android) a WebView cannot download a blob: the
+// file goes to the app through its bridge (window.StoryCoreAndroid), which asks the player where to save it.
+export function saveBlob(name, blob) {
+  let bridge = typeof window !== `undefined` ? window.StoryCoreAndroid : undefined;
+  if (bridge?.saveFile) {
+    let reader = new FileReader();
+    reader.onload = () => bridge.saveFile(name, blob.type || `application/octet-stream`, String(reader.result).split(`,`)[1] ?? ``);
+    reader.readAsDataURL(blob);
+    return;
+  }
+  let url = URL.createObjectURL(blob),
+    link = document.createElement(`a`);
+  link.href = url;
+  link.download = name;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
 }
 
 export function readFileText(e) {
