@@ -38,5 +38,9 @@ Points d'attention
   pydantic, changer aussi pydantic-core dans requirements-mobile.txt ET PYDANTIC_CORE dans mobile-apk.yml.
 - Le moteur ne doit jamais dépendre de Windows sans garde-fou (comme hardware.py, installer.py, keyring).
 - Téléphones pris en charge : Android 7.0+ en 64 bits (arm64-v8a). Python 3.13 n'existe pas en 32 bits sur Android.
-- APK de test = signature "debug" : pour installer une nouvelle version de test il peut falloir
-  désinstaller l'ancienne (les parties sont alors perdues). Une signature fixe viendra avec la vraie version.
+- APK de test : signée avec une clé de TEST fixe (mobile/android/app/test-debug.keystore, publique) ;
+  chaque nouvelle APK de test s'installe par-dessus l'ancienne sans perdre les parties.
+  La première APK (test n°1) avait une autre clé : il a fallu la désinstaller une fois.
+  La vraie version publique aura sa propre clé secrète.
+- Images : le Pillow Android de Chaquopy ne lit pas le WebP. android_webp.py branche le décodeur WebP
+  d'Android dans Pillow (lecture, vignettes, enregistrement) ; le moteur partagé n'en sait rien.

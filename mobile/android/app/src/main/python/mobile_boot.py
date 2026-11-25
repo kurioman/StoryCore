@@ -83,6 +83,8 @@ def start(home: str, web_dir: str) -> str:
             _note(f"Python {sys.version.split()[0]} on {platform.machine()} ({platform.platform()})")
             if not check_libraries():
                 raise RuntimeError("A library is missing (see the lines marked FAIL).")
+            import android_webp  # Lore pack pictures are WebP: Chaquopy's Pillow needs Android's decoder for them
+            _note("WebP: Android decoder" if android_webp.install() else "WebP: Pillow's own decoder")
 
             home_p = Path(home)
             # Same switches as the installed PC app (scripts/serve.py); must be set before story.config is imported.

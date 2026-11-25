@@ -29,6 +29,17 @@ android {
         }
     }
 
+    signingConfigs {
+        getByName("debug") {
+            // Fixed TEST key (public, in git): every test APK can be installed over the previous one without losing
+            // the games. Never used for a public release: that one will get its own secret key.
+            storeFile = file("test-debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
