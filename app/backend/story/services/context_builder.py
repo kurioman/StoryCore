@@ -190,6 +190,12 @@ def compact_record(body: str) -> str:
     return "\n".join(out)
 
 
+SCHEDULE_WORDS = re.compile(
+    r"\b(?:exams?|evaluations?|tests?|tournaments?|ceremon(?:y|ies)|festivals?|holidays?|vacations?|breaks?|schedules?|"
+    r"timetables?|calendar|semesters?|terms?|deadlines?|galas?|graduation|enrol(?:l)?ment|dates?|months?|"
+    r"january|february|march|april|june|july|august|september|october|november|december)\b", re.I)
+
+
 DEPARTMENTS = {"knight_department": "Knight", "magic_department": "Magic", "theology_department": "Theology"}
 
 
@@ -768,10 +774,22 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
         # named in the recent messages before this exchange) the cast notes above (traits, looks) are their short card
         short_cards = cfg.get("lore_short_cards", True) is not False
         staying = set(index.find_mentions(" ".join(m.content for m in convo[-12:-2]))) if short_cards else set()
+        # Kurio (24/11/2026): less noise. One record per name (a pack can describe the same thing as a faction, a club
+        # and a glossary term: the Blue Knights came three times), and calendar dates only when the last exchange
+        # is about dates, exams or events (a word match sent "final evaluations" to a greeting in a hallway).
+        titles: set[str] = set()
+        about_dates = bool(SCHEDULE_WORDS.search(" ".join(m.content for m in convo[-2:])))
         for c in chunks:
             if c.id in seen or f"lore:{c.id}" in exclusions:
                 continue
             seen.add(c.id)
+            if c.id not in pins and c.title.casefold() in titles:
+                lore_items.append({"type": "lore", "id": c.id, "label": c.title, "included": False, "reason": "same name"})
+                continue
+            if c.id not in pins and c.category == "calendar" and not about_dates:
+                lore_items.append({"type": "lore", "id": c.id, "label": c.title, "included": False,
+                                   "reason": "calendar, not about dates"})
+                continue
             if c.entity_id in carded and c.id not in pins and (short_cards or c.entity_id in staying):
                 lore_items.append({"type": "lore", "id": c.id, "label": c.title, "included": False,
                                    "reason": "short card"})
@@ -785,6 +803,7 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
                 lore_items.append({"type": "lore", "id": c.id, "label": c.title, "included": False, "reason": "lore budget"})
                 continue
             lore_lines.append(f"## {c.title}\n{body}")
+            titles.add(c.title.casefold())
             lore_items.append({"type": "lore", "id": c.id, "label": c.title, "confidence": c.confidence, "canon_status": c.canon_status})
             used += t
         for lc in canon_rows:
