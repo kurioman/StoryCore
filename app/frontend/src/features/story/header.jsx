@@ -23,6 +23,7 @@ import { CodexButton } from "@/features/codex/CodexDialog";
 import { cn, isCloudModelId } from "@/lib/util";
 import { navigate } from "@/lib/router";
 import { presetName } from "@/lib/presets";
+import { openHelp, openLibrary, usePhoneLayout } from "@/lib/layout";
 
 var WIDE_HEADER = 960;
 
@@ -64,7 +65,27 @@ export function StoryHeader({
         }),
       onSuccess: () => invalidateStory(story.id),
     }),
-    [v, y] = useIsWide();
+    [v, y] = useIsWide(),
+    phone = usePhoneLayout();
+  if (phone)
+    return (
+      <PhoneStoryHeader
+        story={story}
+        branches={branches}
+        view={view}
+        setView={setView}
+        rightOpen={rightOpen}
+        setRightOpen={setRightOpen}
+        reviewCount={reviewCount}
+        generating={generating}
+        onOpen={onOpen}
+        title={u}
+        setTitle={d}
+        editing={f}
+        setEditing={p}
+        saveTitle={() => mutation.mutate()}
+      />
+    );
   return (
     <header ref={v} className="flex h-12 shrink-0 items-center gap-1 border-b border-line px-2 sm:px-3">
       {f ? (
@@ -150,6 +171,83 @@ export function StoryHeader({
 // v0.6 (test report "30 tours", B11): inside the "⋯" menu (narrow window) these switches were popovers inside a
 // popover: a click in the inner one counted as a click outside the menu, so the menu closed under it and the inner
 // panel was left at the top-left corner of the screen, out of reach. Inside the menu they now open in place.
+// StoryCore mobile (Phase 2): the play screen's only top bar on a phone. The app shell's bar is hidden there (App.jsx);
+// ☰ opens the library, the title renames the story, then Codex, Journal, Status panel and the "⋯" menu (switches,
+// notes, savepoints, context, help). Big touch targets, nothing behind a mouse hover.
+function PhoneStoryHeader({
+  story,
+  branches,
+  view,
+  setView,
+  rightOpen,
+  setRightOpen,
+  reviewCount,
+  generating,
+  onOpen,
+  title,
+  setTitle,
+  editing,
+  setEditing,
+  saveTitle,
+}) {
+  let journal = view === `journal`;
+  return (
+    <header className="flex h-12 shrink-0 items-center gap-0.5 border-b border-line px-1">
+      <IconButton label={msg("Open library")} onClick={openLibrary} className="size-10">
+        <Icon.Menu className="size-5" />
+      </IconButton>
+      {editing ? (
+        <form
+          className="min-w-0 flex-1"
+          onSubmit={(e) => {
+            (e.preventDefault(), saveTitle(), setEditing(false));
+          }}
+        >
+          <Input
+            autoFocus
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onBlur={() => setEditing(false)}
+            className="h-8 w-full"
+            aria-label={msg("Story title")}
+          />
+        </form>
+      ) : (
+        <button
+          onClick={() => setEditing(true)}
+          className="min-w-0 flex-1 truncate rounded px-1 py-1 text-left text-[15px] font-semibold"
+          title={msg("Rename story")}
+        >
+          {story.title}
+        </button>
+      )}
+      <BranchMenu story={story} branches={branches} disabled={generating} />
+      <UsageMeter storyId={story.id} refreshKey={`${generating ? 1 : 0}:${story.updated_at ?? ``}`} />
+      <CodexButton storyId={story.id} compact />
+      <IconButton
+        label={journal ? msg("Story") : msg("Journal & Memory")}
+        active={journal}
+        onClick={() => setView(journal ? `story` : `journal`)}
+        className="relative size-10"
+      >
+        {journal ? <Icon.MessageSquareText className="size-5" /> : <Icon.BookBookmark className="size-5" />}
+        {!journal && reviewCount > 0 && (
+          <span className="absolute right-1 top-1 size-2 rounded-full bg-accent" aria-hidden />
+        )}
+      </IconButton>
+      <IconButton
+        label={rightOpen ? msg("Hide status panel") : msg("Show status panel")}
+        active={rightOpen}
+        onClick={() => setRightOpen(!rightOpen)}
+        className="size-10"
+      >
+        <Icon.PanelRight className="size-5" />
+      </IconButton>
+      <MoreToolsMenu story={story} onOpen={onOpen} compact phone />
+    </header>
+  );
+}
+
 function MaybePopover({ inline, trigger, className, align, children }) {
   let [open, setOpen] = React.useState(false);
   if (!inline)
@@ -173,7 +271,7 @@ function MaybePopover({ inline, trigger, className, align, children }) {
   );
 }
 
-function MoreToolsMenu({ story, onOpen, compact }) {
+function MoreToolsMenu({ story, onOpen, compact, phone = false }) {
   let [r, i] = React.useState(false),
     a = `flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-muted hover:bg-panel-2 hover:text-fg`,
     o = (e) => {
@@ -182,8 +280,8 @@ function MoreToolsMenu({ story, onOpen, compact }) {
   return (
     <Popover open={r} onOpenChange={i}>
       <PopoverTrigger asChild>
-        <IconButton label={msg("More story tools")}>
-          <Icon.Ellipsis className="size-4" />
+        <IconButton label={msg("More story tools")} className={phone ? `size-10` : undefined}>
+          <Icon.Ellipsis className={phone ? `size-5` : `size-4`} />
         </IconButton>
       </PopoverTrigger>
       <PopoverContent className={cn(`p-1`, compact ? `max-h-[80vh] w-80 overflow-y-auto` : `w-60`)} align="end">
@@ -200,6 +298,21 @@ function MoreToolsMenu({ story, onOpen, compact }) {
         <button className={a} onClick={() => o(`savepoints`)}>
           <Icon.Save className="size-3.5" /> {msg("Savepoints")}
         </button>
+        {phone && (
+          <>
+            <button className={a} onClick={() => o(`context`)}>
+              <Icon.Gauge className="size-3.5" /> {msg("Context sent to the model")}
+            </button>
+            <button
+              className={a}
+              onClick={() => {
+                (i(false), openHelp());
+              }}
+            >
+              <Icon.CircleQuestionMark className="size-3.5" /> {msg("Help and tour")}
+            </button>
+          </>
+        )}
       </PopoverContent>
     </Popover>
   );

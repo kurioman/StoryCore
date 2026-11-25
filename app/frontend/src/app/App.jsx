@@ -13,6 +13,7 @@ import { Sidebar } from "@/features/sidebar/Sidebar";
 import { cn } from "@/lib/util";
 import { matchRoute, useHashPath } from "@/lib/router";
 import { useLocalState, useMediaQuery } from "@/lib/hooks";
+import { usePhoneLayout, useShellRequests } from "@/lib/layout";
 import { Spinner } from "@/components/ui";
 
 // v0.5: every page is its own file, downloaded the first time it is opened (the welcome page and the sidebar are in the
@@ -53,7 +54,13 @@ function App() {
     mediaQuery = useMediaQuery(`(min-width: 1024px)`),
     [r, i] = useLocalState(`sidebar-collapsed`, false),
     [a, o] = React.useState(false),
-    [s, c] = React.useState(false);
+    [s, c] = React.useState(false),
+    phone = usePhoneLayout();
+  // the phone play screen has its own single top bar, with the ☰ and "?" buttons (lib/layout.js)
+  useShellRequests(
+    React.useCallback(() => o(true), []),
+    React.useCallback(() => c(true), []),
+  );
   (React.useEffect(() => {
     let e = settings.data?.theme ?? `dark`;
     document.documentElement.dataset.theme = e;
@@ -148,7 +155,7 @@ function App() {
         </>
       )}
       <main className="relative flex min-w-0 flex-1 flex-col">
-        {!mediaQuery && (
+        {!mediaQuery && !(phone && d) && (
           <div className="flex h-11 shrink-0 items-center gap-2 border-b border-line px-2">
             <IconButton label={msg("Open library")} onClick={() => o(true)}>
               <Icon.Menu className="size-4" />
