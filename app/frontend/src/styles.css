@@ -331,3 +331,32 @@ select.sc-ns-input option{background:#0e1438;color:#f3ecd8}
 .sc-backdrop{position:absolute;inset:0;z-index:-1;pointer-events:none;background-size:cover;background-position:center;opacity:.22;filter:blur(1.5px) saturate(.85);animation:sc-backdrop-in .9s ease}
 .sc-backdrop::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,var(--c-bg) 0%,transparent 18%,transparent 70%,var(--c-bg) 100%)}
 @keyframes sc-backdrop-in{from{opacity:0}to{opacity:.22}}
+
+/* StoryCore mobile (Phase 2): the play screen on a phone (Android app or paired phone, lib/layout.js) */
+@media (max-width:767px){
+html[data-platform] .sc-msg-phone .story-chrono{font-size:10.5px;margin-bottom:.35rem;padding-bottom:.15rem}
+html[data-platform] .sc-msg-tapped{outline:1px solid var(--c-line);outline-offset:4px;border-radius:.5rem}
+html[data-platform] .sc-msg-actions button{width:2.25rem;height:2.25rem}
+html[data-platform] .sc-next{padding:.4rem .5rem;margin-bottom:.5rem}
+html[data-platform] .sc-next-hint{display:none}
+html[data-platform] .story-suggestions{display:flex;grid-template-columns:none;overflow-x:auto;gap:.4rem;scroll-snap-type:x mandatory;padding-bottom:.2rem}
+html[data-platform] .story-suggestions>li,html[data-platform] .story-suggestions>div{flex:0 0 80%;scroll-snap-align:start}
+}
+@media (max-width:767px){
+/* touched message: its actions as a list of named buttons on their own line (no hover tooltips on a phone) */
+html[data-platform] .sc-msg-tapped .sc-msg-meta{flex-wrap:wrap}
+html[data-platform] .sc-msg-tapped .sc-msg-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));flex-basis:100%;margin:.35rem 0 0;gap:.35rem}
+html[data-platform] .sc-msg-tapped .sc-msg-actions>button{width:auto;height:auto;min-height:2.5rem;justify-content:flex-start;gap:.5rem;padding:.4rem .6rem;border:1px solid var(--c-line-strong,var(--c-line));background:var(--c-panel);border-radius:.5rem;color:var(--c-muted);font-size:12px;text-align:left;line-height:1.2}
+html[data-platform] .sc-msg-tapped .sc-msg-actions>button::after{content:attr(aria-label)}
+html[data-platform] .sc-msg-tapped .sc-msg-actions>button>svg{flex-shrink:0}
+}
+@keyframes sc-sheet-up{from{transform:translateY(100%)}to{transform:none}}
+.sc-sheet{animation:sc-sheet-up .22s ease-out}
+@media (max-width:767px){
+/* portraits beside the story text: small cards in a row, a touch opens the full portrait */
+html[data-platform] .story-beats,html[data-platform] .story-beats-multi{display:flex;flex-wrap:wrap;gap:.5rem;max-width:100%;margin:.3em 0 .6em}
+html[data-platform] .sc-beat-phone{width:min(11rem,46%)}
+html[data-platform] .sc-beat-thumb{display:block;width:100%;aspect-ratio:1644/1125;overflow:hidden;border-radius:.4rem;border-width:1.5px;background:var(--c-panel-2)}
+html[data-platform] .sc-beat-thumb img{width:100%;height:100%;object-fit:cover}
+html[data-platform] .sc-beat-name{margin-top:.15rem;font-family:var(--font-sans);font-size:11px;color:var(--c-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}

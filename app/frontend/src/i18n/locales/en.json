@@ -2137,5 +2137,8 @@
   "Without an avatar, you describe yourself in play.": "Without an avatar, you describe yourself in play.",
   "Your avatar is the character you play: name, look, personality. You create it once and take it from one story to the next, so you never have to describe the same character again.": "Your avatar is the character you play: name, look, personality. You create it once and take it from one story to the next, so you never have to describe the same character again.",
   "“{{v0}}” is saved. You can add a portrait now or later.": "“{{v0}}” is saved. You can add a portrait now or later.",
-  "Begin": "Begin"
+  "Begin": "Begin",
+  "Message actions": "Message actions",
+  "Hide actions": "Hide actions",
+  "Show {{v0}}'s portrait": "Show {{v0}}'s portrait"
 }

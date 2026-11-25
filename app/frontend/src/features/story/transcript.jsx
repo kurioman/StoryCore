@@ -11,6 +11,7 @@ import { ContextManifest } from "@/features/story/composer";
 import { StoryMarkdown } from "@/features/story/prose";
 import { cn, timeAgo } from "@/lib/util";
 import { sceneKeys } from "@/features/story/api";
+import { usePhoneLayout } from "@/lib/layout";
 
 function speakerColorIndex(e) {
   let t = 0;
@@ -20,7 +21,32 @@ function speakerColorIndex(e) {
 
 function BeatPortrait({ b }) {
   let t = EXPRESSIONS()[b.expression - 1],
-    n = b.beat === `speaking`;
+    n = b.beat === `speaking`,
+    // StoryCore mobile (Phase 2): on a phone the portrait is a small card beside the text; a touch shows it in full
+    phone = usePhoneLayout(),
+    [zoom, setZoom] = React.useState(false);
+  if (phone)
+    return (
+      <figure className="story-beat sc-beat-phone" aria-label={`${b.name}, ${t?.short ?? msg("Neutral", {})}`}>
+        <button
+          type="button"
+          onClick={() => setZoom(true)}
+          aria-label={msg("Show {{v0}}'s portrait", { v0: b.name })}
+          className={cn(`sc-beat-thumb`, n ? `border-accent/70` : `border-line-strong`)}
+        >
+          <Portrait assetId={b.asset_id} name={b.name} variant="full" rounded="rounded-md" className="size-full" />
+        </button>
+        <figcaption className="sc-beat-name">
+          {b.name}
+          {t?.short ? ` · ${t.short}` : ``}
+        </figcaption>
+        {zoom && (
+          <Modal open onOpenChange={(o) => !o && setZoom(false)} title={b.name} description={t?.short} size="md">
+            <Portrait assetId={b.asset_id} name={b.name} variant="full" rounded="rounded-lg" className="mx-auto max-h-[70dvh] w-full object-contain" />
+          </Modal>
+        )}
+      </figure>
+    );
   return (
     <figure
       className="story-beat"
@@ -209,6 +235,9 @@ export function MessageItem({
     [O, ee] = React.useState(false),
     [te, ne] = React.useState(false),
     [rewriting, setRewriting] = React.useState(false),
+    // StoryCore mobile (Phase 2): no mouse hover on a phone. Touching a message (or its "⋯" button) shows its actions.
+    phone = usePhoneLayout(),
+    [tapped, setTapped] = React.useState(false),
     re = settings.data?.dialogue_style ?? `cinematic`,
     ie = isPlayerStory(e) && !!e.immersive_reply_id,
     ae = liveStatus ?? e.status,
@@ -277,8 +306,20 @@ export function MessageItem({
   return (
     <article
       id={`msg-${e.id}`}
+      onClick={
+        phone
+          ? (ev) => {
+              // a touch on a button, link or field keeps its own meaning; selecting text does not toggle either
+              if (ev.target.closest?.(`button,a,input,textarea,select,label,[role=button],[role=dialog]`)) return;
+              if (window.getSelection?.()?.toString()) return;
+              setTapped(!tapped);
+            }
+          : undefined
+      }
       className={cn(
-        `story-column group relative mx-auto w-full scroll-mt-24 py-3`,
+        `story-column group relative mx-auto w-full scroll-mt-24`,
+        phone ? `sc-msg-phone py-2` : `py-3`,
+        phone && tapped && `sc-msg-tapped`,
         ue && `opacity-50`,
         highlight && `rounded-md ring-2 ring-accent/60`,
       )}
@@ -426,7 +467,7 @@ export function MessageItem({
           )}
         </div>
       )}
-      <div className={cn(`mt-1 flex min-h-6 items-center gap-1 text-[11px] text-faint`, se && `justify-end`)}>
+      <div className={cn(`sc-msg-meta mt-1 flex min-h-6 items-center gap-1 text-[11px] text-faint`, se && `justify-end`)}>
         {ve && ve.ids.length > 1 && (
           <span className="mr-1 flex items-center gap-0.5" aria-label={msg("Alternative replies")}>
             <IconButton
@@ -451,7 +492,7 @@ export function MessageItem({
         {!se && de.model_id ? <span title={`${de.provider_name ?? ``}`}>{String(de.model_id)}</span> : null}
         {!se && typeof pe == `number` ? (
           <span
-            className="opacity-0 group-hover:opacity-100"
+            className={phone ? (tapped ? `` : `hidden`) : `opacity-0 group-hover:opacity-100`}
             title={msg(
               "Cost of this reply as reported by OpenRouter. Scene analysis and memory capture are separate requests.",
             )}
@@ -460,14 +501,26 @@ export function MessageItem({
           </span>
         ) : null}
         {e.edited_at && <span>{msg("· edited")}</span>}
-        <span className="opacity-0 group-hover:opacity-100">
+        <span className={phone ? (tapped ? `` : `hidden`) : `opacity-0 group-hover:opacity-100`}>
           · #{e.seq}
           {" · "}
           {timeAgo(e.created_at)}
         </span>
+        {phone && !tapped && (
+          <button
+            type="button"
+            onClick={() => setTapped(true)}
+            aria-label={msg("Message actions")}
+            className={cn(`flex size-8 items-center justify-center rounded-md text-faint`, !se && `ml-auto`)}
+          >
+            <Icon.Ellipsis className="size-4" />
+          </button>
+        )}
         <div
           className={cn(
-            `flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100`,
+            phone
+              ? cn(`sc-msg-actions flex-wrap items-center gap-0.5`, tapped ? `flex` : `hidden`)
+              : `flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100`,
             !se && `ml-auto`,
           )}
         >
@@ -543,6 +596,11 @@ export function MessageItem({
                 <Icon.Trash className="size-3.5" />
               </IconButton>
             </>
+          )}
+          {phone && (
+            <IconButton label={msg("Hide actions")} onClick={() => setTapped(false)}>
+              <Icon.X className="size-3.5" />
+            </IconButton>
           )}
         </div>
       </div>
@@ -1013,11 +1071,11 @@ export function TurnAnalysisBar({ storyId, scene, busy, onAct, onSuggest }) {
   return (
     <section
       aria-label={msg("Next action")}
-      className="story-column mx-auto mb-4 mt-1 rounded-lg border border-line bg-panel/50 p-2.5"
+      className="sc-next story-column mx-auto mb-4 mt-1 rounded-lg border border-line bg-panel/50 p-2.5"
     >
       <div className="mb-1.5 flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-faint">
         <Icon.Sparkles className="size-3" /> {msg("What do you do next?")}
-        <span className="normal-case tracking-normal">
+        <span className="sc-next-hint normal-case tracking-normal">
           {msg("Pick one to edit it; nothing is sent until you press Send.")}
         </span>
       </div>
