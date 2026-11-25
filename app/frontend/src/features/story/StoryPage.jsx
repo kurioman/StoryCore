@@ -572,10 +572,16 @@ export function StoryPage({ storyId }) {
             <>
               <div className="fixed inset-0 z-30 bg-black/40" onClick={() => C(false)} />
               <aside
-                className="fixed inset-y-0 right-0 z-40 w-[min(360px,92vw)] border-l border-line bg-panel shadow-2xl"
+                className="fixed inset-y-0 right-0 z-40 flex w-[min(360px,92vw)] flex-col border-l border-line bg-panel shadow-2xl"
                 aria-label={msg("Player status and cast")}
               >
-                {Oe}
+                {/* StoryCore mobile: a visible close button (touch only, no Back key needed) */}
+                <div className="flex shrink-0 items-center justify-end border-b border-line px-2 py-1">
+                  <IconButton label={msg("Close")} onClick={() => C(false)}>
+                    <Icon.X className="size-4" />
+                  </IconButton>
+                </div>
+                <div className="min-h-0 flex-1">{Oe}</div>
               </aside>
             </>
           ))}
