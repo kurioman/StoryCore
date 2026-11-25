@@ -1,0 +1,109 @@
+# StoryCore mobile: builds the Android APK (shared engine app/backend + interface + Lore packs).
+#
+# Start it by hand: GitHub > Actions > "Mobile APK" > Run workflow.
+# It also runs for a tag such as mobile-v0.7.0. The APK is then under the run's "Artifacts".
+name: Mobile APK
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["mobile-v*"]
+
+env:
+  PYDANTIC_CORE: "2.50.2"   # must match requirements-mobile.txt
+  ABI: arm64-v8a
+
+jobs:
+  pydantic-core:
+    name: pydantic-core for Android
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      # The compiled wheel only changes with its version or with the build script: reuse it otherwise.
+      - name: Reuse an earlier build
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: wheels
+          key: pydantic-core-${{ env.PYDANTIC_CORE }}-cp313-${{ env.ABI }}-${{ hashFiles('mobile/tools/build_wheel.py') }}
+
+      - name: Python 3.13
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Android NDK
+        if: steps.cache.outputs.cache-hit != 'true'
+        id: ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r27c
+
+      - name: Rust
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android
+
+      - name: Compile
+        if: steps.cache.outputs.cache-hit != 'true'
+        env:
+          ANDROID_NDK_ROOT: ${{ steps.ndk.outputs.ndk-path }}
+        run: |
+          python -m pip install "maturin>=1.13.3"
+          python mobile/tools/build_wheel.py --abi "$ABI" --version "$PYDANTIC_CORE" --out wheels
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels
+          path: wheels/*.whl
+          if-no-files-found: error
+
+  apk:
+    name: APK
+    needs: pydantic-core
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheels
+          path: mobile/android/wheels
+
+      - name: Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Python 3.13 (Chaquopy uses it to prepare the engine)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+
+      - name: Build the APK
+        working-directory: mobile/android
+        run: gradle assembleDebug --stacktrace
+
+      - name: Name the APK
+        run: |
+          VERSION=$(grep -oP 'APP_VERSION = "\K[^"]+' app/backend/story/config.py)
+          mkdir -p out
+          cp mobile/android/app/build/outputs/apk/debug/app-debug.apk "out/StoryCore-mobile-$VERSION-test${{ github.run_number }}.apk"
+          ls -la out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: StoryCore-mobile-apk
+          path: out/*.apk
+          if-no-files-found: error
