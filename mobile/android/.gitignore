@@ -1,0 +1,7 @@
+.gradle/
+build/
+app/build/
+local.properties
+# pydantic-core for Android: compiled by GitHub Actions (mobile/tools/build_wheel.py), not stored in git
+wheels/
+*.apk

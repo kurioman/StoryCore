@@ -1,0 +1,42 @@
+STORYCORE MOBILE (Android, APK autonome)
+========================================
+
+Principe : UN SEUL CERVEAU
+--------------------------
+L'APK embarque le même moteur Python que le PC (app/backend), sans copie à la main.
+Python tourne dans l'application grâce à Chaquopy (https://chaquo.com/chaquopy/).
+Au démarrage, le moteur écoute sur http://127.0.0.1:8765 (sur le téléphone lui-même),
+et une WebView plein écran affiche l'interface.
+=> Toute modification de app/backend ou de Lorepack/ touche le PC ET le mobile.
+
+Où est quoi
+-----------
+mobile/android/                      projet Android (coquille)
+  app/build.gradle.kts               réglages : version de Python, bibliothèques, ce qui entre dans l'APK
+  app/requirements-mobile.txt        bibliothèques du moteur pour Android (mêmes versions que le PC, sauf Pillow)
+  app/src/main/python/mobile_boot.py démarre le moteur (équivalent de scripts/serve.py)
+  app/src/main/java/.../MainActivity.kt   écran de l'app : démarrage, WebView, page d'erreur
+  app/src/main/java/.../AssetSync.kt      copie interface + Lore packs + musique sur le téléphone
+mobile/tools/build_wheel.py          compile pydantic-core pour Android
+.github/workflows/mobile-apk.yml     compilation automatique sur GitHub
+
+Sur le téléphone (stockage privé de l'app)
+------------------------------------------
+files/storycore/Lorepack, Music, web   recopiés depuis l'APK au 1er lancement et après chaque mise à jour
+files/storycore/data                    base, sauvegardes, clés API (data/secrets.json) : jamais touché par une mise à jour
+
+Compiler l'APK
+--------------
+1. Pousser sur GitHub (DEVONLY\Push vers GitHub.bat).
+2. GitHub > dépôt StoryCore > onglet Actions > "Mobile APK" > bouton "Run workflow".
+3. Attendre (1re fois ~20-30 min car pydantic-core est compilé ; ensuite il est réutilisé, ~5-10 min).
+4. Ouvrir l'exécution terminée > "Artifacts" > StoryCore-mobile-apk (un .zip qui contient l'APK).
+
+Points d'attention
+------------------
+- pydantic-core n'existe pas en version Android : build_wheel.py le compile. Si on change la version de
+  pydantic, changer aussi pydantic-core dans requirements-mobile.txt ET PYDANTIC_CORE dans mobile-apk.yml.
+- Le moteur ne doit jamais dépendre de Windows sans garde-fou (comme hardware.py, installer.py, keyring).
+- Téléphones pris en charge : Android 7.0+ en 64 bits (arm64-v8a). Python 3.13 n'existe pas en 32 bits sur Android.
+- APK de test = signature "debug" : pour installer une nouvelle version de test il peut falloir
+  désinstaller l'ancienne (les parties sont alors perdues). Une signature fixe viendra avec la vraie version.

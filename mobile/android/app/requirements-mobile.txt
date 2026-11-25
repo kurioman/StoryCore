@@ -1,0 +1,12 @@
+# Libraries of the shared engine (app/backend) for the Android app.
+# Same versions as the PC copy (app/python) except Pillow (11.0.0: the newest Android build in Chaquopy's index)
+# and pydantic-core, compiled for Android by .github/workflows/mobile-apk.yml (mobile/tools/build_wheel.py).
+fastapi==0.162.0
+pydantic==2.14.2
+pydantic-core==2.50.2
+uvicorn==0.54.0
+httpx==0.28.1
+sqlalchemy==2.1.6
+alembic==1.20.1
+python-multipart==0.0.32
+pillow==11.0.0
