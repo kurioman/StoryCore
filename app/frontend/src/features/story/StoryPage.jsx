@@ -27,6 +27,7 @@ import { MusicPlayer } from "@/features/music/MusicPlayer";
 import { StoryHeader } from "@/features/story/header";
 import { cn, isCloudModelId } from "@/lib/util";
 import { useLocalState, useMediaQuery } from "@/lib/hooks";
+import { usePhoneLayout } from "@/lib/layout";
 import { useScene } from "@/features/story/api";
 import { usePreloadPortraits } from "@/lib/portraits";
 
@@ -186,6 +187,7 @@ export function StoryPage({ storyId }) {
     invalidateStory = useInvalidateStory(),
     { toast, confirm } = useUi(),
     mediaQuery = useMediaQuery(`(min-width: 1280px)`),
+    phone = usePhoneLayout(),
     [v, y] = useLocalState(`right-panel`, true),
     [b, x] = React.useState(false),
     S = mediaQuery ? v : b,
@@ -572,13 +574,20 @@ export function StoryPage({ storyId }) {
             <>
               <div className="fixed inset-0 z-30 bg-black/40" onClick={() => C(false)} />
               <aside
-                className="fixed inset-y-0 right-0 z-40 flex w-[min(360px,92vw)] flex-col border-l border-line bg-panel shadow-2xl"
+                className={cn(
+                  `fixed z-40 flex flex-col bg-panel shadow-2xl`,
+                  // StoryCore mobile (Phase 2): on a phone the panel is a sheet rising from the bottom
+                  phone
+                    ? `sc-sheet inset-x-0 bottom-0 h-[86dvh] rounded-t-2xl border-t border-line`
+                    : `inset-y-0 right-0 w-[min(360px,92vw)] border-l border-line`,
+                )}
                 aria-label={msg("Player status and cast")}
               >
                 {/* StoryCore mobile: a visible close button (touch only, no Back key needed) */}
-                <div className="flex shrink-0 items-center justify-end border-b border-line px-2 py-1">
-                  <IconButton label={msg("Close")} onClick={() => C(false)}>
-                    <Icon.X className="size-4" />
+                <div className="flex shrink-0 items-center border-b border-line px-2 py-1">
+                  {phone && <span className="ml-2 text-sm font-semibold text-muted">{msg("Player status and cast")}</span>}
+                  <IconButton label={msg("Close")} onClick={() => C(false)} className={cn(`ml-auto`, phone && `size-10`)}>
+                    <Icon.X className={phone ? `size-5` : `size-4`} />
                   </IconButton>
                 </div>
                 <div className="min-h-0 flex-1">{Oe}</div>
