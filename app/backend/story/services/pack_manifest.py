@@ -360,6 +360,8 @@ def _starters(v: Any, rep: _Report) -> list[dict[str, Any]] | None:
                 "purpose": _pick(purposes)}
         if len(names) > 1 or len(purposes) > 1:
             item["i18n"] = {"name": names, "purpose": purposes}
+        if s.get("choose_location") is True:  # v1.8: the new-game window lets the player pick the starting location
+            item["choose_location"] = True
         if "scene" in s:  # optional starting scene (place, time, date, who is present); checked when a story starts
             if isinstance(s["scene"], dict):
                 item["scene"] = s["scene"]

@@ -28,25 +28,23 @@ TIMEOUT_SECONDS = 10.0
 _last_attempt: dict[str, float] = {}
 
 CANDIDATES: list[dict[str, Any]] = [
-    {"slug": "z-ai/glm-5", "role": "Balanced", "label": "Tested with StoryCore", "tested": True,
-     "pros": ["Used by this project's owner over hundreds of story turns",
-              "Checked here for canon, structured scene analysis and dialogue",
-              "Strong hosted model without needing a powerful PC"],
-     "cons": ["Not perfect: time and weather can drift, and long sessions need watching",
-              "Reasoning and output limits can affect replies"]},
-    {"slug": "deepseek/deepseek-v3.2", "role": "Budget", "label": "Budget candidate", "tested": False,
-     "pros": ["Low listed token price", "Large context window"],
-     "cons": ["Not yet tested in StoryCore: tone, formatting and scene analysis may differ",
-              "Availability and routing can change"]},
-    {"slug": "qwen/qwen3.5-flash-02-23", "role": "Low cost", "label": "Low-cost candidate", "tested": False,
-     "pros": ["Very low listed token price", "Useful for cheap experiments"],
-     "cons": ["Not yet tested in StoryCore for long roleplay",
-              "Endpoint availability can depend on your region"]},
-    {"slug": "anthropic/claude-sonnet-4.5", "role": "Premium", "label": "Premium comparison", "tested": False,
-     "pros": ["A premium option for people who value it over price"],
-     "cons": ["Much more expensive per token", "Not verified as better for StoryCore storytelling"]},
+    {"slug": "~deepseek/deepseek-v4-flash-latest", "role": "Recommended", "label": "Recommended", "tested": True,
+     "pros": ["Very, very low price for high quality", "Tested and recommended with StoryCore"],
+     "cons": ["Follows the latest version of the model, so it can change over time"]},
+    {"slug": "~anthropic/claude-haiku-latest", "role": "Budget", "label": "Low price, high quality", "tested": False,
+     "pros": ["Low price for high quality"],
+     "cons": ["Not yet tested in StoryCore"]},
+    {"slug": "~anthropic/claude-sonnet-latest", "role": "Premium", "label": "Best quality", "tested": False,
+     "pros": ["Best writing quality"],
+     "cons": ["High price", "Not yet tested in StoryCore"]},
+    {"slug": "mistralai/mistral-nemo", "role": "French", "label": "For French roleplay", "tested": False,
+     "pros": ["A good choice to play in French"],
+     "cons": ["Not yet tested in StoryCore"]},
+    {"slug": "google/gemini-3.8-flash", "role": "Low cost", "label": "Low price", "tested": False,
+     "pros": ["Low price"],
+     "cons": ["Not yet tested in StoryCore"]},
 ]
-FALLBACK_SLUG = "z-ai/glm-5"
+FALLBACK_SLUG = "~deepseek/deepseek-v4-flash-latest"
 
 
 def _cache_path(ctx: AppContext) -> Path:

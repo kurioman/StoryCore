@@ -1,17 +1,18 @@
 // Story library (v0.5, roadmap phase 3) at #/library, where "Start your next adventure" leads.
 // "Resume": the latest story in a big card, then the other stories in progress. "Stories": one card per lore pack
 // (cover, name, tags, summary from pack.json format 2, in the interface language). A card opens the story sheet:
-// openings, "New game" (wizard with the world and opening chosen) and the games already started in that world.
+// openings, who you play, and the whole new-game flow (StorySheet.jsx), plus the games already started in that world.
 import * as React from "react";
-import * as Dialog from "@radix-ui/react-dialog";
 import * as Icon from "lucide-react";
 import { useStories, useWorlds } from "@/api/queries";
 import { msg, packText, shownLanguage } from "@/i18n";
-import { Button, Spinner } from "@/components/ui";
+import { Spinner } from "@/components/ui";
 import { ImportButton } from "@/features/creator/ImportButton";
 import { IS_REMOTE } from "@/lib/remote";
 import { SetupNotices } from "@/features/home/SetupNotices";
-import { navigate } from "@/lib/router";
+import { navigate, useHashPath } from "@/lib/router";
+import { Cover, Tags } from "@/features/library/parts";
+import { StorySheet } from "@/features/library/StorySheet";
 import { cn, timeAgo } from "@/lib/util";
 
 export function lastStory(stories) {
@@ -20,45 +21,30 @@ export function lastStory(stories) {
     .sort((a, b) => String(b.last_activity ?? b.updated_at).localeCompare(String(a.last_activity ?? a.updated_at)))[0];
 }
 
-function coverUrl(world) {
-  return world?.data_json?.library?.cover ? `/api/worlds/${world.id}/cover` : null;
-}
-
-function Cover({ world, className }) {
-  let url = coverUrl(world);
-  return url ? (
-    <img src={url} alt="" className={cn(`object-cover`, className)} draggable={false} />
-  ) : (
-    <div className={cn(`sc-lib-nocover flex items-center justify-center p-3 text-center`, className)}>
-      <span className="sc-brand text-lg text-[#f3dca0]">{world?.name ?? msg("Free-form story")}</span>
-    </div>
-  );
-}
-
-function Tags({ world, className }) {
-  let t = world?.data_json?.library?.tags ?? {},
-    tags = t[shownLanguage()] || t.en || t.default || Object.values(t)[0] || [];
-  if (!tags.length) return null;
-  return (
-    <div className={cn(`flex flex-wrap gap-1.5`, className)}>
-      {tags.map((t) => (
-        <span key={t} className="sc-lib-tag">
-          {t}
-        </span>
-      ))}
-    </div>
-  );
-}
-
 export function LibraryPage() {
   let stories = useStories(),
     worlds = useWorlds(),
+    hashPath = useHashPath(),
     [open, setOpen] = React.useState(null),
+    // where to reopen the sheet: after "Create my avatar", the avatar editor sends the player back here with
+    // ?world=<id>&starter=<id>&avatar=<id>
+    [resume, setResume] = React.useState(null),
     byId = Object.fromEntries((worlds.data ?? []).map((w) => [w.id, w])),
     active = [...(stories.data ?? [])]
       .filter((s) => s.status === `active`)
       .sort((a, b) => String(b.last_activity ?? b.updated_at).localeCompare(String(a.last_activity ?? a.updated_at))),
     [latest, ...others] = active;
+  React.useEffect(() => {
+    let q = new URLSearchParams(hashPath.split(`?`)[1] ?? ``),
+      w = q.get(`world`);
+    if (!w || !worlds.data) return;
+    let found = worlds.data.find((x) => x.id === w || x.slug === w);
+    navigate(`/library`);
+    if (!found) return;
+    let avatar = q.get(`avatar`);
+    setResume({ starter: q.get(`starter`), avatar, step: avatar ? `title` : `pick` });
+    setOpen(found.id);
+  }, [hashPath, worlds.data]);
   return (
     <div className="sc-lib h-full overflow-y-auto">
       <div className="mx-auto max-w-6xl px-6 py-8">
@@ -68,9 +54,6 @@ export function LibraryPage() {
           {!IS_REMOTE && (
             <div className="ml-auto flex flex-wrap gap-2">
               <ImportButton />
-              <Button onClick={() => navigate(`/creator`)}>
-                <Icon.PencilRuler className="size-4" /> {msg("Create a world")}
-              </Button>
             </div>
           )}
         </header>
@@ -147,91 +130,48 @@ export function LibraryPage() {
                 </button>
               );
             })}
+            {!IS_REMOTE && (
+              <button className="sc-lib-card sc-lib-card-ghost group" onClick={() => navigate(`/creator`)}>
+                <div className="sc-lib-cover sc-lib-ghost-cover">
+                  <span className="sc-lib-ghost-icon">
+                    <Icon.Plus className="size-8" />
+                  </span>
+                  <Icon.PencilRuler className="mt-4 size-6 text-[#e2bd72aa]" />
+                </div>
+                <div className="p-3 text-left">
+                  <p className="sc-brand truncate text-lg text-[#f3dca0]">{msg("Create a world")}</p>
+                  <p className="mt-2 line-clamp-3 text-xs leading-relaxed text-[#ece6d8b3]">
+                    {msg("Invent your own world, its characters and places, and play it like the others.")}
+                  </p>
+                </div>
+              </button>
+            )}
+            <div className="sc-lib-card sc-lib-card-ghost sc-lib-card-soon" aria-disabled="true">
+              <div className="sc-lib-cover sc-lib-ghost-cover">
+                <Icon.Sparkles className="size-9 text-[#e2bd7288]" />
+              </div>
+              <div className="p-3 text-left">
+                <p className="sc-brand text-lg text-[#f3dca0b0]">{msg("More stories to come soon…")}</p>
+                <p className="mt-2 line-clamp-3 text-xs leading-relaxed text-[#ece6d899]">
+                  {msg("New worlds are on their way.")}
+                </p>
+              </div>
+            </div>
           </div>
         </section>
       </div>
       {open && byId[open] && (
-        <StorySheet world={byId[open]} games={active.filter((s) => s.world_id === open)} onClose={() => setOpen(null)} />
+        <StorySheet
+          world={byId[open]}
+          games={active.filter((s) => s.world_id === open)}
+          initial={resume}
+          key={open}
+          onClose={() => {
+            setOpen(null);
+            setResume(null);
+          }}
+        />
       )}
     </div>
-  );
-}
-
-function StorySheet({ world, games, onClose }) {
-  let starters = world.data_json?.starters ?? [],
-    [pick, setPick] = React.useState(starters[0]?.id ?? ``);
-  return (
-    <Dialog.Root open onOpenChange={(o) => !o && onClose()}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-[#04061499] backdrop-blur-[2px]" />
-        <Dialog.Content
-          aria-describedby={undefined}
-          className="sc-cx fixed left-1/2 top-1/2 z-50 flex max-h-[92vh] w-[min(96vw,1000px)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl"
-        >
-          <div className="hidden w-[38%] shrink-0 sm:block">
-            <Cover world={world} className="size-full" />
-          </div>
-          <div className="flex min-w-0 flex-1 flex-col overflow-y-auto p-7">
-            <div className="flex items-start gap-3">
-              <Dialog.Title className="sc-brand text-3xl leading-tight text-[#f3dca0]">{world.name}</Dialog.Title>
-              <Dialog.Close asChild>
-                <button className="ml-auto rounded-full p-2 text-[#e2bd72b0] hover:bg-[#e2bd721a] hover:text-[#fff0c4]" aria-label={msg("Close")}>
-                  <Icon.X className="size-5" />
-                </button>
-              </Dialog.Close>
-            </div>
-            <Tags world={world} className="mt-2" />
-            <p className="mt-4 text-sm leading-relaxed text-[#ece6d8e6]">
-              {packText(world.data_json?.library?.summary, world.description)}
-            </p>
-
-            {starters.length > 0 && (
-              <div className="mt-6">
-                <p className="sc-lib-h3">{msg("Choose your opening")}</p>
-                <div className="space-y-2">
-                  {starters.map((s) => (
-                    <button
-                      key={s.id}
-                      onClick={() => setPick(s.id)}
-                      className={cn(`sc-lib-opening`, pick === s.id && `sc-lib-opening-on`)}
-                    >
-                      <span className="sc-lib-radio" aria-hidden />
-                      <span className="min-w-0 flex-1 text-left">
-                        <span className="block text-sm font-semibold text-[#f3dca0]">{packText(s.i18n?.name, s.name)}</span>
-                        <span className="mt-0.5 block text-xs leading-relaxed text-[#ece6d8b3]">
-                          {packText(s.i18n?.purpose, s.purpose)}
-                        </span>
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <button
-              className="sc-lib-cta mt-6 self-start px-6 py-2.5 text-base"
-              onClick={() => navigate(`/new?world=${encodeURIComponent(world.id)}${pick ? `&starter=${encodeURIComponent(pick)}` : ``}`)}
-            >
-              <Icon.Sparkles className="size-4" /> {msg("New game")}
-            </button>
-
-            {games.length > 0 && (
-              <div className="mt-8">
-                <p className="sc-lib-h3">{msg("Your games in this world")}</p>
-                <div className="space-y-1.5">
-                  {games.map((g) => (
-                    <button key={g.id} onClick={() => navigate(`/story/${g.id}`)} className="sc-lib-game">
-                      <Icon.BookOpen className="size-4 shrink-0 text-[#e2bd72]" />
-                      <span className="min-w-0 flex-1 truncate text-left text-sm text-[#ece6d8]">{g.title}</span>
-                      <span className="shrink-0 text-xs text-[#e2bd7299]">{g.last_activity ? timeAgo(g.last_activity) : ``}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
   );
 }

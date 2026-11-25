@@ -12,3 +12,6 @@ _work/
 
 # Interface : dépendances npm (réinstallables avec npm install)
 app/frontend/node_modules/
+
+# Copie de travail de Lumencia (modifiée dans l'appli) : reste sur le PC pour l'instant ; retirer cette ligne quand elle remplacera la V1
+Lorepack/lumencia_academy_v2_lore_pack/

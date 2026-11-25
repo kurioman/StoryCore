@@ -12,7 +12,7 @@ import { navigate } from "@/lib/router";
 import { cn } from "@/lib/util";
 import { ProvidersQuickSetup } from "@/features/settings/Providers";
 import { Starfield } from "@/features/welcome/Starfield";
-import { CLOUD_MODELS, ROCINANTE, VRAM_CHOICES, rocinanteFor } from "@/features/setup/recommendations";
+import { ROCINANTE, VRAM_CHOICES, rocinanteFor } from "@/features/setup/recommendations";
 
 const STEPS = [`welcome`, `where`, `connect`, `tour`];
 
@@ -252,28 +252,8 @@ function Cloud() {
       <h2 className="sc-brand text-3xl text-[#f3dca0]">{msg("Using an online AI")}</h2>
       <p className="mt-3 text-sm text-[#ece6d8b3]">
         {msg(
-          "The simplest way is OpenRouter: one account and one key give access to hundreds of models. The models below are only our suggestions: further down, you can type the ID of any other OpenRouter model. You pay only for what you use, with credit you top up yourself.",
+          "The simplest way is OpenRouter: one account and one key give access to hundreds of models. Type the ID of any OpenRouter model, or press Select on one of our recommendations to fill it in for you. You pay only for what you use, with credit you top up yourself.",
         )}
-      </p>
-      <div className="mt-6 grid gap-3 sm:grid-cols-2">
-        {CLOUD_MODELS().map((m) => (
-          <div key={m.id} className="sc-su-panel">
-            <div className="flex items-baseline gap-2">
-              <p className="sc-brand text-xl text-[#f3dca0]">{m.name}</p>
-              <span className="text-xs text-[#e2bd72aa]">{m.maker}</span>
-              <span className="ml-auto text-sm tracking-widest text-[#f3d48c]" title={msg("Price")}>
-                {`€€€`.slice(0, m.cost)}
-                <span className="text-[#e2bd7240]">{`€€€`.slice(m.cost)}</span>
-              </span>
-            </div>
-            <p className="mt-2 text-sm text-[#ece6d8cc]">✓ {m.pros}</p>
-            <p className="mt-1 text-sm text-[#e2bd72aa]">• {m.cons}</p>
-            <p className="mt-2 text-xs text-[#ece6d899]">{msg("In the catalogue below, search: {{v0}}", { v0: m.search })}</p>
-          </div>
-        ))}
-      </div>
-      <p className="mt-3 text-xs text-[#ece6d899]">
-        {msg("Prices change often: check them in the catalogue before choosing. Claude, Mistral and others can also be connected directly with their own key in Settings > Providers & models.")}
       </p>
       <div className="sc-su-panel sc-su-embed mt-5">
         <ProvidersQuickSetup path="openrouter" hideChooser />
@@ -294,8 +274,15 @@ function Tour({ onBack, onDone }) {
     <div>
       <h2 className="sc-brand text-center text-3xl text-[#f3dca0]">{msg("A quick tour")}</h2>
       <div className="mt-8 grid gap-3 sm:grid-cols-2">
-        {items.map(([I, t, d]) => (
-          <div key={t} className="sc-su-panel flex gap-4">
+        {items.map(([I, t, d], i) => (
+          <div
+            key={t}
+            className={cn(
+              `sc-su-panel flex gap-4`,
+              // an odd last card sits alone on its row: centre it under the others
+              i === items.length - 1 && items.length % 2 === 1 && `sm:col-span-2 sm:mx-auto sm:w-[calc(50%-0.375rem)]`,
+            )}
+          >
             <I className="mt-0.5 size-7 shrink-0 text-[#e2bd72]" />
             <div>
               <p className="font-semibold text-[#f3dca0]">{t}</p>

@@ -62,26 +62,8 @@ var CONTEXT_BUDGET_DEFAULT = 8e3,
       ? null
       : (CONTEXT_BUDGET_DEFAULT * e.input_per_million + REPLY_RESERVE_DEFAULT * e.output_per_million) / 1e6;
 
-function CatalogModelRow({ m: e, provider, profile, isDefault, onAdded }) {
+function CatalogModelRow({ m: e, provider, profile, isDefault, onAdded, onPick, picking }) {
   let { toast } = useUi(),
-    mutation = useMutation({
-      mutationFn: () =>
-        apiPost(`/model-profiles`, {
-          provider_id: provider.id,
-          model_id: e.slug,
-          display_name: e.name === e.slug ? undefined : e.name,
-          context_limit: e.context_length,
-        }),
-      onSuccess: () => {
-        (onAdded(),
-          toast(
-            msg("{{v0}} added to your models. Stories keep their current model until you change it.", {
-              v0: e.slug,
-            }),
-          ));
-      },
-      onError: (e) => toast(errorMessage(e), `danger`),
-    }),
     s = useMutation({
       mutationFn: () =>
         apiPut(`/settings`, {
@@ -171,13 +153,13 @@ function CatalogModelRow({ m: e, provider, profile, isDefault, onAdded }) {
         ) : (
           <Button
             size="sm"
-            disabled={!provider || c}
-            loading={mutation.isPending}
-            onClick={() => mutation.mutate()}
+            disabled={c}
+            loading={picking}
+            onClick={() => onPick(e)}
             aria-label={msg("Select {{v0}}", {
               v0: e.slug,
             })}
-            title={provider ? undefined : msg("Connect OpenRouter first (steps below)")}
+            title={provider ? undefined : msg("Fills in the Model field above. Save your OpenRouter key below to use it.")}
           >
             {msg("Select")}
           </Button>
@@ -192,24 +174,10 @@ function CatalogModelRow({ m: e, provider, profile, isDefault, onAdded }) {
 
 // Any OpenRouter model, not only the recommended cards: the cards are suggestions, never a restriction.
 // A plain form (provider, base URL, key, model ID typed freely), plus the full searchable list and the player's own picks.
-function AnyOpenRouterModel({ provider, profiles, defaultId, cardSlugs, onChanged }) {
+function AnyOpenRouterModel({ provider, profiles, defaultId, cardSlugs, onChanged, modelId, setModelId, useModel, inputRef }) {
   let { toast } = useUi(),
     [open, setOpen] = React.useState(false),
-    [modelId, setModelId] = React.useState(``),
     own = provider ? profiles.filter((m) => m.provider_id === provider.id && !cardSlugs.includes(m.model_id)) : [],
-    useModel = useMutation({
-      mutationFn: async (id) => {
-        let existing = profiles.find((m) => m.provider_id === provider.id && m.model_id === id);
-        if (existing) return apiPut(`/settings`, { default_model_profile_id: existing.id });
-        return apiPost(`/model-profiles`, { provider_id: provider.id, model_id: id, make_default: true });
-      },
-      onSuccess: (_, id) => {
-        setModelId(``);
-        onChanged();
-        toast(msg("{{v0}} is now the default model for new stories.", { v0: id }));
-      },
-      onError: (e) => toast(errorMessage(e), `danger`),
-    }),
     makeDefault = useMutation({
       mutationFn: (id) => apiPut(`/settings`, { default_model_profile_id: id }),
       onSuccess: onChanged,
@@ -217,11 +185,11 @@ function AnyOpenRouterModel({ provider, profiles, defaultId, cardSlugs, onChange
     }),
     row = `grid grid-cols-[minmax(0,8rem)_minmax(0,1fr)] items-center gap-2 border-b border-line py-1.5 last:border-b-0`;
   return (
-    <div className="mt-3 rounded-lg border border-line bg-panel p-3">
+    <div className="mb-4 rounded-lg border border-accent/50 bg-panel p-3">
       <p className="text-sm font-semibold">{msg("Use any OpenRouter model")}</p>
       <p className="mt-0.5 text-xs text-muted">
         {msg(
-          "The cards above are only recommendations. Type the ID of any model available on OpenRouter (copied from its page on openrouter.ai), or search the full list.",
+          "Type the ID of any model available on OpenRouter (copied from its page on openrouter.ai), search the full list, or press Select on one of the recommended models below.",
         )}
       </p>
       <form
@@ -229,7 +197,7 @@ function AnyOpenRouterModel({ provider, profiles, defaultId, cardSlugs, onChange
         onSubmit={(e) => {
           e.preventDefault();
           let id = modelId.trim();
-          provider && id && useModel.mutate(id);
+          provider && id && useModel.mutate({ id });
         }}
       >
         <div className={row}>
@@ -252,6 +220,7 @@ function AnyOpenRouterModel({ provider, profiles, defaultId, cardSlugs, onChange
           </label>
           <div className="flex min-w-0 flex-wrap gap-1.5">
             <Input
+              ref={inputRef}
               id="or-model-id"
               value={modelId}
               onChange={(e) => setModelId(e.target.value)}
@@ -322,6 +291,9 @@ function AnyOpenRouterModel({ provider, profiles, defaultId, cardSlugs, onChange
 
 function ModelCatalog({ provider, profiles, defaultId }) {
   let queryClient = useQueryClient(),
+    { toast } = useUi(),
+    [modelId, setModelId] = React.useState(``),
+    inputRef = React.useRef(null),
     query = useQuery({
       queryKey: MODEL_CATALOG_KEY,
       queryFn: () => apiGet(`/model-catalog`),
@@ -342,9 +314,47 @@ function ModelCatalog({ provider, profiles, defaultId }) {
           queryKey: queryKeys.settings,
         }));
     },
-    c = (o?.models ?? []).filter((e) => e.role !== `Premium` && suggestedContext(e) !== null);
+    c = (o?.models ?? []).filter((e) => e.role !== `Premium` && suggestedContext(e) !== null),
+    // One model ID for both the free field and the cards: Select fills the field and, once OpenRouter is connected,
+    // adds the model and makes it the default for new stories (existing stories keep theirs).
+    useModel = useMutation({
+      mutationFn: async ({ id, m }) => {
+        let existing = profiles.find((p) => p.provider_id === provider.id && p.model_id === id);
+        if (existing) return apiPut(`/settings`, { default_model_profile_id: existing.id });
+        return apiPost(`/model-profiles`, {
+          provider_id: provider.id,
+          model_id: id,
+          display_name: m && m.name !== m.slug ? m.name : undefined,
+          context_limit: m?.context_length || undefined,
+          make_default: true,
+        });
+      },
+      onSuccess: (_, { id }) => {
+        setModelId(``);
+        s();
+        toast(msg("{{v0}} is now the default model for new stories.", { v0: id }));
+      },
+      onError: (e) => toast(errorMessage(e), `danger`),
+    }),
+    pick = (m) => {
+      setModelId(m.slug);
+      inputRef.current?.scrollIntoView({ behavior: `smooth`, block: `center` });
+      if (provider) useModel.mutate({ id: m.slug, m });
+      else toast(msg("{{v0}} is filled in. Save your OpenRouter key below, then press Use this model.", { v0: m.slug }));
+    };
   return (
     <section aria-labelledby="recommended-models">
+      <AnyOpenRouterModel
+        provider={provider}
+        profiles={profiles}
+        defaultId={defaultId}
+        cardSlugs={(o?.models ?? []).map((m) => m.slug)}
+        onChanged={s}
+        modelId={modelId}
+        setModelId={setModelId}
+        useModel={useModel}
+        inputRef={inputRef}
+      />
       <div className="mb-2 flex flex-wrap items-center gap-2">
         <h3 id="recommended-models" className="text-sm font-semibold">
           {msg("Recommended models for stories")}
@@ -373,7 +383,7 @@ function ModelCatalog({ provider, profiles, defaultId }) {
         </Button>
       </div>
       <p className="mb-2 text-xs text-muted">
-        {msg("Suggestions only: you are free to pick any other OpenRouter model (see below the cards).")}
+        {msg("Suggestions only: you are free to pick any other OpenRouter model (see above). Select fills in the model for you.")}
       </p>
       {query.isLoading && <Spinner />}
       {o && (
@@ -385,21 +395,16 @@ function ModelCatalog({ provider, profiles, defaultId }) {
               profile={profiles.find((t) => t.provider_id === provider?.id && t.model_id === r.slug)}
               isDefault={profiles.some((e) => e.id === defaultId && e.model_id === r.slug)}
               onAdded={s}
+              onPick={pick}
+              picking={useModel.isPending && useModel.variables?.id === r.slug}
               key={r.slug}
             />
           ))}
         </ul>
       )}
-      <AnyOpenRouterModel
-        provider={provider}
-        profiles={profiles}
-        defaultId={defaultId}
-        cardSlugs={(o?.models ?? []).map((m) => m.slug)}
-        onChanged={s}
-      />
       <p className="mt-2 text-xs text-muted">
         {msg(
-          "Start with GLM-5 for this project, try a cheaper model for experiments, and use Ollama when offline play or privacy comes first. Only GLM-5 has been tested with StoryCore; the others are options to evaluate. Prices can change and can differ by routed provider.",
+          "Start with DeepSeek V4 Flash: it is very cheap and has been tested with StoryCore. The others are options to evaluate. Use Ollama when offline play or privacy comes first. Prices can change and can differ by routed provider.",
         )}
       </p>
       <details className="mt-1 text-xs text-muted">

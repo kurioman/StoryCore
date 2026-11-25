@@ -184,6 +184,14 @@ wizard win). Keys: `location`, `time` (e.g. `"09:00"`), `weather`, `weekday`, `d
   "scene": { "location": "Pure White Space", "time": "09:00", "day": 1, "month": 3, "year": 1301, "present": ["lily"] } }
 ```
 
+Optional `choose_location` (`true`/`false`, default `false`): when `true`, the new-game window asks the player where
+the story starts, from the pack's locations (or "Let the narrator choose"). The player's choice wins over
+`scene.location`. Leave it out for an opening that must start in one place.
+
+```json
+{ "id": "free_roam", "name": "Free start", "blueprint": "...", "choose_location": true }
+```
+
 Format 2: `name` and `purpose` may be given per interface language, like the library card:
 `"name": {"en": "Alternative start: The Demon King", "fr": "Début alternatif : le Roi Démon"}`. The blueprint stays one
 text (it is written for the narrator). Since v0.5 the app has no generic openings: a pack without `starters` (or lore

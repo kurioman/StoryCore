@@ -21,10 +21,19 @@ import {
   useUi,
 } from "@/components/ui";
 import { cn, downloadJson, estimateTokens, readFileText, shortId } from "@/lib/util";
-import { navigate } from "@/lib/router";
+import { navigate, useHashPath } from "@/lib/router";
+
+// v1.8: the story sheet sends a player without an avatar here with ?back=<library address>. The address is kept while
+// the avatar is created, and a banner then leads back to the new game with this avatar chosen.
+function backTarget(hashPath) {
+  let b = new URLSearchParams(hashPath.split(`?`)[1] ?? ``).get(`back`);
+  return b && b.startsWith(`/library`) ? b : null;
+}
+const backQuery = (back) => (back ? `?back=${encodeURIComponent(back)}` : ``);
 
 export function AvatarsPage({ selectedId }) {
   let avatars = useAvatars(),
+    back = backTarget(useHashPath()),
     queryClient = useQueryClient(),
     { toast } = useUi(),
     i = React.useRef(null),
@@ -39,7 +48,7 @@ export function AvatarsPage({ selectedId }) {
             <IconButton label={msg("Import avatar JSON")} onClick={() => i.current?.click()}>
               <Icon.Upload className="size-4" />
             </IconButton>
-            <Button size="sm" variant="primary" onClick={() => navigate(`/avatars/new`)}>
+            <Button size="sm" variant="primary" onClick={() => navigate(`/avatars/new${backQuery(back)}`)}>
               <Icon.Plus className="size-3.5" /> {msg("New")}
             </Button>
           </div>
@@ -74,7 +83,7 @@ export function AvatarsPage({ selectedId }) {
           )}
           {avatars.data?.map((t) => (
             <button
-              onClick={() => navigate(`/avatars/${t.id}`)}
+              onClick={() => navigate(`/avatars/${t.id}${backQuery(back)}`)}
               className={cn(
                 `mb-1 flex w-full items-center gap-2.5 rounded-md p-2 text-left hover:bg-panel-2`,
                 t.id === selectedId && `bg-panel-2`,
@@ -98,14 +107,34 @@ export function AvatarsPage({ selectedId }) {
           ))}
         </div>
       </div>
-      <div className="min-w-0 flex-1">
+      <div className="flex min-w-0 flex-1 flex-col">
+        {back && (
+          <div className="flex flex-wrap items-center gap-3 border-b border-accent/40 bg-accent-soft px-4 py-2.5 text-sm">
+            <Icon.Sparkles className="size-4 shrink-0 text-accent" />
+            <span className="min-w-0 flex-1">
+              {a
+                ? msg("“{{v0}}” is saved. You can add a portrait now or later.", { v0: a.name })
+                : msg("Create your avatar, then save it to come back to your new game.")}
+            </span>
+            {a && (
+              <Button size="sm" variant="primary" onClick={() => navigate(`${back}&avatar=${encodeURIComponent(a.id)}`)}>
+                {msg("Continue my new game")} <Icon.ArrowRight className="size-3.5" />
+              </Button>
+            )}
+            <Button size="sm" variant="ghost" onClick={() => navigate(back)}>
+              {msg("Back to the story")}
+            </Button>
+          </div>
+        )}
+        <div className="min-h-0 flex-1">
         {o ? (
-          <AvatarEditor avatar={a} key={selectedId} />
+          <AvatarEditor avatar={a} key={selectedId} back={back} />
         ) : (
           <div className="hidden h-full items-center justify-center md:flex">
             <EmptyState title={msg("Select or create an avatar")} />
           </div>
         )}
+        </div>
       </div>
     </div>
   );
@@ -165,7 +194,7 @@ var AVATAR_STORY_FIELDS = () => ([
   ],
   APPEARANCE_KEYS = [`hair`, `eyes`, `height`, `build`, `clothing`, `distinctive`];
 
-function AvatarEditor({ avatar }) {
+function AvatarEditor({ avatar, back }) {
   let queryClient = useQueryClient(),
     { toast, confirm } = useUi(),
     [i, a] = React.useState(`identity`),
@@ -225,7 +254,7 @@ function AvatarEditor({ avatar }) {
             queryKey: queryKeys.avatars,
           }),
           toast(msg("Avatar saved")),
-          avatar || navigate(`/avatars/${r.id}`));
+          avatar || navigate(`/avatars/${r.id}${backQuery(back)}`));
       },
       onError: (e) => toast(errorMessage(e), `danger`),
     }),

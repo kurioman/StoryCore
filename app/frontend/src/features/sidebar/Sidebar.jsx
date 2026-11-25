@@ -110,7 +110,7 @@ export function Sidebar({ activeStoryId, path, collapsed, onToggle, onHelp }) {
       <IconButton label={msg("Expand library")} onClick={onToggle}>
         <Icon.ChevronsRight className="size-4" />
       </IconButton>
-      <IconButton label={msg("New story")} onClick={() => navigate(`/new`)}>
+      <IconButton label={msg("New story")} onClick={() => navigate(`/library`)}>
         <Icon.Plus className="size-4" />
       </IconButton>
       <div className="my-1 h-px w-6 bg-line" />
@@ -135,7 +135,7 @@ export function Sidebar({ activeStoryId, path, collapsed, onToggle, onHelp }) {
         </IconButton>
       </div>
       <div className="flex gap-1.5 px-3 pb-2">
-        <Button variant="primary" className="flex-1" onClick={() => navigate(`/new`)}>
+        <Button variant="primary" className="flex-1" onClick={() => navigate(`/library`)}>
           <Icon.Plus className="size-4" /> {msg("New story")}
         </Button>
         <IconButton label={msg("Import story package")} className="size-8.5 border border-line" onClick={() => setImportOpen(true)}>
