@@ -44,3 +44,16 @@ Points d'attention
   La vraie version publique aura sa propre clé secrète.
 - Images : le Pillow Android de Chaquopy ne lit pas le WebP. android_webp.py branche le décodeur WebP
   d'Android dans Pillow (lecture, vignettes, enregistrement) ; le moteur partagé n'en sait rien.
+
+Mode mobile de l'interface (Phase 1)
+------------------------------------
+- UNE SEULE interface (app/frontend) pour le PC et le mobile. L'app ajoute "StoryCoreAndroid/<version>" au
+  user agent ; lib/remote.js en déduit IS_ANDROID_APP (et IS_PHONE = app Android OU téléphone en Wi-Fi).
+  <html data-platform="android|phone"> permet d'adapter les styles.
+- Masqué dans l'app : onglets Ollama et « Play on a phone », choix local/en ligne (assistant et réglages),
+  modèles locaux dans « Ajouter un fournisseur », « Open data folder ».
+- Fichiers : <input type=file> -> sélecteur Android (FileTransfers.chooserIntent) ; téléchargements du moteur
+  (DownloadListener) et fichiers faits par l'interface (lib/util.js saveBlob -> window.StoryCoreAndroid.saveFile)
+  -> écran « Enregistrer sous » d'Android. Aucune permission de stockage nécessaire.
+- Tout se fait au doigt : chaque fenêtre a son bouton ✕ ; le bouton Retour d'Android n'est qu'un raccourci
+  (ferme la fenêtre ouverte, sinon revient en arrière).
