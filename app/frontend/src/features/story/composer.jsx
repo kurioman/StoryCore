@@ -18,6 +18,7 @@ import {
   Spinner,
 } from "@/components/ui";
 import { cn, fmtK, uuid } from "@/lib/util";
+import { usePhoneLayout } from "@/lib/layout";
 
 var draftKey = (e, t) => `lsd:draft:${e}:${t ?? `main`}`;
 
@@ -63,6 +64,9 @@ export var Composer = React.forwardRef(function (
   { storyId, branchId, generating, disabled, enterToSend, onSend, onStop, onQuick, model },
   l,
 ) {
+  // StoryCore mobile (Phase 2): on a phone the box is one line with a round Send button beside it; recap and journal
+  // are in the top bar / status panel, the model in the "⋯" menu
+  let phone = usePhoneLayout();
   let u = draftKey(storyId, branchId),
     [d, f] = React.useState(() => readDraft(u).text),
     p = React.useRef(
@@ -272,6 +276,7 @@ export var Composer = React.forwardRef(function (
               <CommandChip storyId={storyId} cmd={_} input={d} onRemove={() => v(null)} />
             </div>
           )}
+          <div className={phone ? `flex items-end gap-1 pr-1.5` : undefined}>
           <textarea
             ref={C}
             value={d}
@@ -319,11 +324,37 @@ export var Composer = React.forwardRef(function (
                   : msg("Add instructions or text (optional)…", {})
                 : msg("What do you do? Type / for commands")
             }
-            className="sc-composer-input block max-h-64 w-full resize-none bg-transparent px-3.5 py-2.5 font-serif text-base leading-relaxed text-fg placeholder:font-sans placeholder:text-sm placeholder:text-faint focus:outline-none"
+            className="sc-composer-input block max-h-64 w-full min-w-0 resize-none bg-transparent px-3.5 py-2.5 font-serif text-base leading-relaxed text-fg placeholder:font-sans placeholder:text-sm placeholder:text-faint focus:outline-none"
             id="story-composer"
             aria-label={msg("Message")}
           />
+          {phone && (
+            <div className="shrink-0 pb-1.5">
+              {generating ? (
+                <button
+                  type="button"
+                  onClick={onStop}
+                  aria-label={msg("Stop")}
+                  className="flex size-10 items-center justify-center rounded-full border border-line bg-panel-2 text-fg"
+                >
+                  <Icon.Square className="size-3.5 fill-current" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={ie}
+                  disabled={disabled || y || (!d.trim() && !_)}
+                  aria-label={_?.kind === `local_action` ? msg("Run") : msg("Send")}
+                  className="flex size-10 items-center justify-center rounded-full bg-accent text-accent-fg disabled:opacity-40"
+                >
+                  {y ? <Icon.LoaderCircle className="size-4 animate-spin" /> : <Icon.Send className="size-4" />}
+                </button>
+              )}
+            </div>
+          )}
+          </div>
 
+          {!phone && (
           <div className="sc-composer-tools flex items-center gap-1 px-2 pb-2">
             <IconButton label={msg("Recap the story (/recap)")} onClick={() => onQuick(`recap`)}>
               <Icon.ScrollText className="size-4" />
@@ -380,6 +411,7 @@ export var Composer = React.forwardRef(function (
               )}
             </div>
           </div>
+          )}
         </div>
       </div>
     </div>
