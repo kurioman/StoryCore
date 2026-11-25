@@ -184,7 +184,8 @@ function AnyOpenRouterModel({ provider, profiles, defaultId, cardSlugs, onChange
       onSuccess: onChanged,
       onError: (e) => toast(errorMessage(e), `danger`),
     }),
-    row = `grid grid-cols-[minmax(0,8rem)_minmax(0,1fr)] items-center gap-2 border-b border-line py-1.5 last:border-b-0`;
+    // sc-kv: on a phone (styles.css) the label goes above its value
+    row = `sc-kv grid grid-cols-[minmax(0,8rem)_minmax(0,1fr)] items-center gap-2 border-b border-line py-1.5 last:border-b-0`;
   return (
     <div className="mb-4 rounded-lg border border-accent/50 bg-panel p-3">
       <p className="text-sm font-semibold">{msg("Use any OpenRouter model")}</p>
@@ -228,7 +229,7 @@ function AnyOpenRouterModel({ provider, profiles, defaultId, cardSlugs, onChange
               placeholder="~deepseek/deepseek-v4-flash-latest"
               autoComplete="off"
               spellCheck={false}
-              className="min-w-48 flex-1 font-mono"
+              className="min-w-0 flex-1 basis-48 font-mono"
             />
             <Button
               size="md"
