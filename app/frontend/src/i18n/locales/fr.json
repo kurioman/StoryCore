@@ -2325,5 +2325,6 @@
  "Begin": "Commencer",
  "Message actions": "Actions du message",
  "Hide actions": "Masquer les actions",
- "Show {{v0}}'s portrait": "Afficher le portrait de {{v0}}"
+ "Show {{v0}}'s portrait": "Afficher le portrait de {{v0}}",
+ "Back to the list": "Retour à la liste"
 }

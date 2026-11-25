@@ -9,6 +9,7 @@ import { apiGet } from "@/api/legacy";
 import { currentLanguage, msg } from "@/i18n";
 import { ErrorCallout, Portrait, Spinner } from "@/components/ui";
 import { cn } from "@/lib/util";
+import { usePhoneLayout } from "@/lib/layout";
 
 var STATUS = () => ({
     rumored: { label: msg("Heard of", {}), tone: `sc-cx-badge-rumor` },
@@ -77,6 +78,9 @@ export function CodexDialog({ storyId, onClose }) {
     }),
     [tab, setTab] = React.useState(`characters`),
     [selected, setSelected] = React.useState(null),
+    // StoryCore mobile (Phase 3): on a phone the Codex is full screen; a card opens its entry full screen too
+    phone = usePhoneLayout(),
+    [opened, setOpened] = React.useState(false),
     data = query.data,
     items = !data
       ? []
@@ -90,18 +94,29 @@ export function CodexDialog({ storyId, onClose }) {
     // open on the first discovered entry of the tab
     setSelected(items.find((i) => i.status !== `locked`)?.id ?? null);
   }, [tab, data]);
+  React.useEffect(() => setOpened(false), [tab]);
   return (
     <Dialog.Root open onOpenChange={(o) => !o && onClose()}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 bg-[#04061499] backdrop-blur-[2px]" />
         <Dialog.Content
           aria-describedby={undefined}
-          className="sc-cx fixed left-1/2 top-1/2 z-50 flex h-[min(92vh,860px)] w-[min(96vw,1180px)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl"
+          className={cn(
+            `sc-cx fixed z-50 flex flex-col overflow-hidden`,
+            phone
+              ? `inset-0 h-dvh w-full`
+              : `left-1/2 top-1/2 h-[min(92vh,860px)] w-[min(96vw,1180px)] -translate-x-1/2 -translate-y-1/2 rounded-2xl`,
+          )}
         >
-          <header className="flex items-center gap-4 border-b border-[#e2bd7230] px-6 py-4">
+          <header
+            className={cn(
+              `flex items-center border-b border-[#e2bd7230]`,
+              phone ? `flex-wrap gap-x-3 gap-y-2 px-3 py-2` : `gap-4 px-6 py-4`,
+            )}
+          >
             <Icon.BookOpenText className="size-6 text-[#e2bd72]" />
             <Dialog.Title className="sc-brand text-2xl text-[#f3dca0]">{msg("Codex")}</Dialog.Title>
-            <div className="ml-4 flex gap-1" role="tablist">
+            <div className={cn(`flex gap-1`, phone ? `order-last -mx-1 w-full overflow-x-auto px-1 pb-1` : `ml-4`)} role="tablist">
               {[
                 [`characters`, msg("Characters"), Icon.Users],
                 [`places`, msg("Places"), Icon.MapPinned],
@@ -114,7 +129,7 @@ export function CodexDialog({ storyId, onClose }) {
                     role="tab"
                     aria-selected={tab === id}
                     onClick={() => setTab(id)}
-                    className={cn(`sc-cx-tab`, tab === id && `sc-cx-tab-on`)}
+                    className={cn(`sc-cx-tab shrink-0`, tab === id && `sc-cx-tab-on`)}
                   >
                     <TabIcon className="size-4" /> {label}
                     {c && (
@@ -127,8 +142,11 @@ export function CodexDialog({ storyId, onClose }) {
               })}
             </div>
             <Dialog.Close asChild>
-              <button className="ml-auto rounded-full p-2 text-[#e2bd72b0] hover:bg-[#e2bd721a] hover:text-[#fff0c4]" aria-label={msg("Close")}>
-                <Icon.X className="size-5" />
+              <button
+                className={cn(`ml-auto rounded-full text-[#e2bd72b0] hover:bg-[#e2bd721a] hover:text-[#fff0c4]`, phone ? `p-2.5` : `p-2`)}
+                aria-label={msg("Close")}
+              >
+                <Icon.X className={phone ? `size-6` : `size-5`} />
               </button>
             </Dialog.Close>
           </header>
@@ -147,9 +165,26 @@ export function CodexDialog({ storyId, onClose }) {
           )}
           {data?.enabled && (
             <div className="flex min-h-0 flex-1">
-              <div className="min-h-0 flex-1 overflow-y-auto p-5">
+              {phone && opened && current ? (
+                <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-8 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setOpened(false)}
+                    className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-[#e2bd7240] px-3 py-1.5 text-sm text-[#e2bd72]"
+                  >
+                    <Icon.ArrowLeft className="size-4" /> {msg("Back to the list")}
+                  </button>
+                  <Detail item={current} kind={tab} />
+                </div>
+              ) : (
+              <div className={cn(`min-h-0 flex-1 overflow-y-auto`, phone ? `p-3` : `p-5`)}>
                 <Progress counts={data.counts[tab]} />
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(118px,1fr))] gap-3">
+                <div
+                  className={cn(
+                    `grid`,
+                    phone ? `grid-cols-3 gap-2` : `grid-cols-[repeat(auto-fill,minmax(118px,1fr))] gap-3`,
+                  )}
+                >
                   {items.map((it, i) =>
                     it.status === `locked` ? (
                       <div key={`l${i}`} className="sc-cx-card sc-cx-locked" aria-label={msg("Not discovered yet")}>
@@ -167,7 +202,10 @@ export function CodexDialog({ storyId, onClose }) {
                     ) : (
                       <button
                         key={it.id}
-                        onClick={() => setSelected(it.id)}
+                        onClick={() => {
+                          setSelected(it.id);
+                          if (phone) setOpened(true);
+                        }}
                         className={cn(`sc-cx-card`, selected === it.id && `sc-cx-card-on`, it.status === `rumored` && `sc-cx-rumor`)}
                       >
                         <div className="sc-cx-thumb">
@@ -187,6 +225,8 @@ export function CodexDialog({ storyId, onClose }) {
                   )}
                 </div>
               </div>
+              )}
+              {!phone && (
               <aside className="sc-cx-detail w-[min(400px,40%)] shrink-0 overflow-y-auto border-l border-[#e2bd7230] p-6">
                 {current ? (
                   <Detail item={current} kind={tab} />
@@ -194,6 +234,7 @@ export function CodexDialog({ storyId, onClose }) {
                   <p className="text-sm text-[#e2bd7299]">{msg("Nothing discovered yet. Keep playing!")}</p>
                 )}
               </aside>
+              )}
             </div>
           )}
         </Dialog.Content>
