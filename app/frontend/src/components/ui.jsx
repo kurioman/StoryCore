@@ -245,7 +245,8 @@ export function Modal({ open, onOpenChange, title, description, children, footer
             (c.current?.isConnected && (e.preventDefault(), c.current.focus()), (c.current = null));
           }}
           className={cn(
-            `fixed left-1/2 top-1/2 z-50 flex max-h-[90vh] w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2 flex-col rounded-lg border border-line bg-panel shadow-2xl`,
+            // sc-modal: on a phone (styles.css) the window becomes a sheet rising from the bottom, above the keyboard
+            `sc-modal fixed left-1/2 top-1/2 z-50 flex max-h-[90vh] w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2 flex-col rounded-lg border border-line bg-panel shadow-2xl`,
             s,
           )}
         >
@@ -257,7 +258,7 @@ export function Modal({ open, onOpenChange, title, description, children, footer
               )}
             </div>
             <Dialog.Close asChild>
-              <IconButton label={msg("Close")}>
+              <IconButton label={msg("Close")} className="sc-modal-close shrink-0">
                 <Icon.X className="size-4" />
               </IconButton>
             </Dialog.Close>
