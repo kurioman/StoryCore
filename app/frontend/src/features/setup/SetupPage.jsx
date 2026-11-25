@@ -13,6 +13,7 @@ import { cn } from "@/lib/util";
 import { ProvidersQuickSetup } from "@/features/settings/Providers";
 import { Starfield } from "@/features/welcome/Starfield";
 import { ROCINANTE, VRAM_CHOICES, rocinanteFor } from "@/features/setup/recommendations";
+import { IS_ANDROID_APP } from "@/lib/remote";
 
 const STEPS = [`welcome`, `where`, `connect`, `tour`];
 
@@ -56,7 +57,13 @@ export function SetupPage() {
                   setLanguageLive(c);
                   setLang(c);
                 }}
-                onNext={() => setStep(1)}
+                onNext={() => {
+                  // the Android app only offers online AI: no "on my computer / online" question
+                  if (IS_ANDROID_APP) {
+                    setWhere(`cloud`);
+                    setStep(2);
+                  } else setStep(1);
+                }}
               />
             )}
             {step === 1 && (
@@ -71,7 +78,7 @@ export function SetupPage() {
             )}
             {step === 2 && (where === `local` ? <Local /> : <Cloud />)}
             {step === 2 && (
-              <Nav onBack={() => setStep(1)} onNext={() => setStep(3)} nextLabel={msg("Continue")} />
+              <Nav onBack={() => setStep(IS_ANDROID_APP ? 0 : 1)} onNext={() => setStep(3)} nextLabel={msg("Continue")} />
             )}
             {step === 3 && <Tour onBack={() => setStep(2)} onDone={() => finish()} />}
           </div>

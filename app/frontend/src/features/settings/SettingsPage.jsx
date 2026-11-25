@@ -15,7 +15,7 @@ import { cn } from "@/lib/util";
 import { navigate } from "@/lib/router";
 import { useUi } from "@/components/ui";
 import { PhonePanel } from "@/features/mobile/PhonePanel";
-import { IS_REMOTE } from "@/lib/remote";
+import { IS_ANDROID_APP, IS_REMOTE } from "@/lib/remote";
 
 // built when shown (msg() needs the chosen language); a paired phone only gets its own preferences (v0.5)
 function settingsTabs() {
@@ -57,10 +57,13 @@ function settingsTabs() {
     label: msg("Data & backups"),
   },
 ];
-  return IS_REMOTE ? tabs.filter((t) => PHONE_TABS.includes(t.id)) : tabs;
+  if (IS_REMOTE) return tabs.filter((t) => PHONE_TABS.includes(t.id));
+  return IS_ANDROID_APP ? tabs.filter((t) => !COMPUTER_ONLY_TABS.includes(t.id)) : tabs;
 }
 
 var PHONE_TABS = [`generation`, `memory`, `notes`, `appearance`];
+// the Android app runs the engine itself: everything but the computer-only tabs
+var COMPUTER_ONLY_TABS = [`ollama`, `phone`];
 
 export function SettingsPage({ tab }) {
   let SETTINGS_TABS = settingsTabs();

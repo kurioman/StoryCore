@@ -6,7 +6,7 @@ import * as React from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { useQuery } from "@tanstack/react-query";
 import { Check, History, Languages, Settings, SlidersHorizontal, Smartphone, Wand2 } from "lucide-react";
-import { IS_REMOTE } from "@/lib/remote";
+import { IS_ANDROID_APP, IS_REMOTE } from "@/lib/remote";
 import discordLogo from "@/assets/discord.png"; // official Discord symbol: keep its colours as they are
 import { apiGet } from "@/api/legacy";
 import { useSettings, useStories } from "@/api/queries";
@@ -91,10 +91,12 @@ export function WelcomePage() {
                   <Wand2 className="size-4" />
                   <span className="flex-1 text-left">{msg("First-run assistant")}</span>
                 </button>
-                <button type="button" onClick={() => navigate(`/mobile`)} className="sc-menu-item">
-                  <Smartphone className="size-4" />
-                  <span className="flex-1 text-left">{msg("Play on a phone")}</span>
-                </button>
+                {!IS_ANDROID_APP && (
+                  <button type="button" onClick={() => navigate(`/mobile`)} className="sc-menu-item">
+                    <Smartphone className="size-4" />
+                    <span className="flex-1 text-left">{msg("Play on a phone")}</span>
+                  </button>
+                )}
               </>
             )}
             <button type="button" onClick={() => navigate(`/settings`)} className="sc-menu-item">

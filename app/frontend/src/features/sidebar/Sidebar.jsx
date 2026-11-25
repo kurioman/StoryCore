@@ -20,7 +20,7 @@ import {
 } from "@/components/ui";
 import { cn, timeAgo } from "@/lib/util";
 import { navigate } from "@/lib/router";
-import { IS_REMOTE } from "@/lib/remote";
+import { IS_ANDROID_APP, IS_REMOTE } from "@/lib/remote";
 
 // v0.5: a paired phone is a player; computer-only pages are not offered there
 var PHONE_PAGES = [`/avatars`, `/lore`, `/music`, `/commands`, `/settings`];
@@ -100,7 +100,7 @@ export function Sidebar({ activeStoryId, path, collapsed, onToggle, onHelp }) {
         label: msg("Settings"),
         icon: Icon.Settings,
       },
-    ].filter((e) => !IS_REMOTE || PHONE_PAGES.includes(e.to));
+    ].filter((e) => (!IS_REMOTE || PHONE_PAGES.includes(e.to)) && !(IS_ANDROID_APP && e.to === `/mobile`));
 
   return collapsed ? (
     <aside className="flex h-full w-12 shrink-0 flex-col items-center gap-1 border-r border-line bg-panel py-2">

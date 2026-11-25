@@ -23,6 +23,7 @@ import {
 import { cn, isCloudModelId, timeAgo } from "@/lib/util";
 import { navigate } from "@/lib/router";
 import { useLocalState } from "@/lib/hooks";
+import { IS_ANDROID_APP } from "@/lib/remote";
 import { catalogText } from "@/features/settings/catalogTexts";
 
 var MODEL_CATALOG_KEY = [`model-catalog`],
@@ -944,7 +945,8 @@ export function ProvidersQuickSetup({ path, hideChooser = false } = {}) {
   let providers = useProviders(),
     queryClient = useQueryClient(),
     [saved, r] = useLocalState(`ai-path`, `openrouter`),
-    n = path ?? saved,
+    // the Android app has no local AI (Ollama / LM Studio run on a computer): straight to the online guide
+    n = IS_ANDROID_APP ? `openrouter` : (path ?? saved),
     i = providers.data;
   if (!i) return null;
   let a = () => {
@@ -962,7 +964,7 @@ export function ProvidersQuickSetup({ path, hideChooser = false } = {}) {
     l = c.find((e) => e.id === i.default_model_profile_id) ?? c[0];
   return (
     <div className="space-y-4">
-      {!hideChooser && (
+      {!hideChooser && !IS_ANDROID_APP && (
       <section aria-labelledby="run-ai">
         <SectionTitle>
           <span id="run-ai">{msg("Choose how to run the AI")}</span>
@@ -1582,6 +1584,11 @@ function AddModelDialog({ p, onClose, defaultMakeDefault = false }) {
   );
 }
 
+// Android app: presets that only make sense on a computer (a local server on this machine).
+function isComputerOnlyPreset(e) {
+  return e.provider_type === `ollama` || /\/\/(localhost|127\.0\.0\.1)\b/.test(e.base_url ?? ``);
+}
+
 function AddProviderDialog({ onClose }) {
   let query = useQuery({
       queryKey: [`presets`],
@@ -1608,7 +1615,7 @@ function AddProviderDialog({ onClose }) {
     >
       {!i && (
         <div className="grid gap-2 sm:grid-cols-2">
-          {query.data?.presets.map((e) => (
+          {query.data?.presets.filter((e) => !IS_ANDROID_APP || !isComputerOnlyPreset(e)).map((e) => (
             <button
               onClick={() => {
                 (a(e), s(e.display_name), l(e.base_url));

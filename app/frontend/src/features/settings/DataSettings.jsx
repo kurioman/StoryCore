@@ -6,6 +6,7 @@ import * as Icon from "lucide-react";
 import { msg, msgKey } from "@/i18n";
 import { Badge, Button, Callout, ErrorCallout, SectionTitle, Spinner, useUi } from "@/components/ui";
 import { cn, downloadJson, fmtBytes, readFileText, timeAgo } from "@/lib/util";
+import { IS_ANDROID_APP } from "@/lib/remote";
 
 export function DataSettings() {
   let query = useQuery({
@@ -65,16 +66,18 @@ export function DataSettings() {
           <Spinner />
         )}
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <Button
-            size="sm"
-            onClick={() =>
-              apiPost(`/system/open-data-folder`).then(
-                (e) => !e.ok && toast(e.error ?? msg("Could not open", {}), `warn`),
-              )
-            }
-          >
-            <Icon.FolderOpen className="size-3.5" /> {msg("Open data folder")}
-          </Button>
+          {!IS_ANDROID_APP && (
+            <Button
+              size="sm"
+              onClick={() =>
+                apiPost(`/system/open-data-folder`).then(
+                  (e) => !e.ok && toast(e.error ?? msg("Could not open", {}), `warn`),
+                )
+              }
+            >
+              <Icon.FolderOpen className="size-3.5" /> {msg("Open data folder")}
+            </Button>
+          )}
           {t.data && (
             <Badge tone={t.data.secrets_backend === `keyring` ? `ok` : `warn`}>
               {msg("API keys:")}{" "}
