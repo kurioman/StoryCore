@@ -318,9 +318,10 @@ select.sc-ns-input option{background:#0e1438;color:#f3ecd8}
 
 /* v0.6.2 (Kurio's phone test): smaller story text and a smaller writing box on a phone, so more of the story fits */
 @media (max-width:640px){
-:root{--story-size:.9375rem;--story-leading:1.6}
-:root[data-reading-size=compact]{--story-size:.875rem;--story-leading:1.55}
-:root[data-reading-size=large]{--story-size:1.0625rem;--story-leading:1.65}
+/* 26 Nov 2026: back up to the size of OOC.AI on a phone (~19 px), at Kurio's request */
+:root{--story-size:1.1875rem;--story-leading:1.5}
+:root[data-reading-size=compact]{--story-size:1.0625rem;--story-leading:1.5}
+:root[data-reading-size=large]{--story-size:1.3125rem;--story-leading:1.5}
 .prose-story p{margin-bottom:.7em}
 .sc-composer-input{padding:.45rem .7rem;line-height:1.4;max-height:7.5rem}
 .sc-composer-tools{padding:0 .3rem .3rem}
@@ -405,7 +406,11 @@ html[data-platform] .sc-lib section{margin-bottom:1.5rem}
 .story-beats:not(.story-beats-multi){max-width:min(100%,calc(34rem * var(--sc-portrait,1)))}
 .story-beats-multi{grid-template-columns:repeat(auto-fit,minmax(min(100%,calc(13rem * var(--sc-portrait,1))),1fr))}
 @container story (width>=64rem){.story-beats:not(.story-beats-multi){max-width:min(100%,calc(30rem * var(--sc-portrait,1)))}}
-/* test report 26 Nov: bigger portraits on a phone (about two thirds of the width at 100 %) */
+/* 26 Nov (OOC.AI as the model): on a phone the picture spans the whole screen width at 100 %, edge to edge
+   (the story column has .75rem side padding: StoryPage .story-scroll px-3); smaller sizes keep it inside the text */
 @media (max-width:767px){
-html[data-platform] .sc-beat-phone{width:min(100%,calc(64% * var(--sc-portrait,1)))}
+html[data-platform] .story-beats,html[data-platform] .story-beats-multi{max-width:none;flex-direction:column;gap:.6rem}
+html[data-platform] .sc-beat-phone{width:calc((100% + 1.5rem) * min(1, var(--sc-portrait,1)));margin-left:-.75rem}
+html[data-platform] .sc-beat-thumb{border-width:0;border-radius:0}
+html[data-platform] .sc-beat-name{padding-left:.75rem}
 }

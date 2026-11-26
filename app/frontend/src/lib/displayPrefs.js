@@ -5,7 +5,7 @@ import * as React from "react";
 
 const KEY = `lsd:display`;
 export const DISPLAY_DEFAULTS = { text: 1, portraits: 1, composer: 1 };
-export const DISPLAY_RANGES = { text: [0.8, 1.5], portraits: [0.5, 1.6], composer: [0.8, 1.5] };
+export const DISPLAY_RANGES = { text: [0.7, 1.4], portraits: [0.4, 1.6], composer: [0.8, 1.5] };
 
 export function readDisplay() {
   try {
