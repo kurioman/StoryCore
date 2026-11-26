@@ -1,13 +1,18 @@
 # StoryCore mobile: builds the Android APK (shared engine app/backend + interface + Lore packs).
 #
-# Start it by hand: GitHub > Actions > "Mobile APK" > Run workflow.
-# It also runs for a tag such as mobile-v0.7.0. The APK is then under the run's "Artifacts".
+# TEST APK: GitHub > Actions > "Mobile APK" > Run workflow (or a tag such as mobile-v0.7.0).
+#   Signed with the public test key, no automatic updates. The APK is under the run's "Artifacts".
+# FINAL APK: runs by itself when a version is published (DEVONLY "Publier une mise a jour.bat" -> release v0.7.3).
+#   Signed with the SECRET key (GitHub Secrets STORYCORE_KEYSTORE_B64 + STORYCORE_KEYSTORE_PASSWORD) and attached
+#   to that release as StoryCore-0.7.3.apk. Installed phones find it there and offer the update.
 name: Mobile APK
 
 on:
   workflow_dispatch:
   push:
     tags: ["mobile-v*"]
+  release:
+    types: [published]
 
 env:
   PYDANTIC_CORE: "2.50.2"   # must match requirements-mobile.txt
@@ -63,7 +68,8 @@ jobs:
           if-no-files-found: error
 
   apk:
-    name: APK
+    name: APK (test)
+    if: github.event_name != 'release'
     needs: pydantic-core
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -107,3 +113,77 @@ jobs:
           name: StoryCore-mobile-apk
           path: out/*.apk
           if-no-files-found: error
+
+  release-apk:
+    name: APK (final, self-updating)
+    if: github.event_name == 'release'
+    needs: pydantic-core
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write   # attach the APK to the release
+    env:
+      TAG: ${{ github.event.release.tag_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheels
+          path: mobile/android/wheels
+
+      - name: Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Python 3.13 (Chaquopy uses it to prepare the engine)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+
+      - name: Secret key
+        env:
+          KEYSTORE_B64: ${{ secrets.STORYCORE_KEYSTORE_B64 }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ]; then
+            echo "::error::GitHub Secret STORYCORE_KEYSTORE_B64 is missing (see _release/signing/LISEZ-MOI.txt)"
+            exit 1
+          fi
+          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/storycore-release.keystore"
+
+      - name: Build the final APK
+        working-directory: mobile/android
+        env:
+          STORYCORE_KEYSTORE: ${{ runner.temp }}/storycore-release.keystore
+          STORYCORE_KEYSTORE_PASSWORD: ${{ secrets.STORYCORE_KEYSTORE_PASSWORD }}
+        run: |
+          export STORYCORE_VERSION="${TAG#v}"
+          gradle assembleRelease --stacktrace
+
+      - name: Check the signature
+        run: |
+          APK=mobile/android/app/build/outputs/apk/release/app-release.apk
+          test -f "$APK" || { echo "::error::No signed APK (is STORYCORE_KEYSTORE_PASSWORD right?)"; ls -R mobile/android/app/build/outputs/apk; exit 1; }
+          "$ANDROID_HOME"/build-tools/$(ls "$ANDROID_HOME"/build-tools | sort -V | tail -1)/apksigner verify --print-certs "$APK" | head -5
+
+      - name: Attach the APK to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${TAG#v}"
+          mkdir -p out
+          cp mobile/android/app/build/outputs/apk/release/app-release.apk "out/StoryCore-$VERSION.apk"
+          gh release upload "$TAG" "out/StoryCore-$VERSION.apk" --clobber --repo "$GITHUB_REPOSITORY"
+
+      - name: Cleanup
+        if: always()
+        run: rm -f "$RUNNER_TEMP/storycore-release.keystore"
