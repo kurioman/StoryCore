@@ -159,8 +159,15 @@ export function EditableField({ label, field, value, onSave, characters, secret,
 function FieldEditor({ field, value, onSave, onCancel, characters }) {
   let [busy, setBusy] = React.useState(false),
     [error, setError] = React.useState(``),
-    kind =
-      field === `relationships` || (isRowList(value) && Object.keys(value[0]).includes(`target_id`))
+    // an empty category ({}, [], "" or nothing) is filled in as plain text: before, {} showed no input at all
+    blank =
+      value == null ||
+      value === `` ||
+      (Array.isArray(value) && value.length === 0) ||
+      (typeof value == `object` && !Array.isArray(value) && Object.keys(value).length === 0),
+    kind = blank && field !== `relationships`
+      ? `text`
+      : field === `relationships` || (isRowList(value) && Object.keys(value[0]).includes(`target_id`))
         ? `relations`
         : typeof value == `number`
           ? `number`
@@ -179,10 +186,12 @@ function FieldEditor({ field, value, onSave, onCancel, characters }) {
         : kind === `object`
           ? Object.fromEntries(Object.entries(value).map(([k, v]) => [k, Array.isArray(v) ? v.join(`\n`) : (v ?? ``)]))
           : kind === `relations` || kind === `rows`
-            ? (value ?? []).map((r) => ({ ...r }))
+            ? (Array.isArray(value) ? value : []).map((r) => ({ ...r }))
             : kind === `json`
               ? JSON.stringify(value, null, 2)
-              : (value ?? ``),
+              : blank
+                ? ``
+                : (value ?? ``),
     ),
     result = () => {
       if (kind === `list`) return lines(draft);
