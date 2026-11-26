@@ -91,7 +91,9 @@ export function StorySheet({ world, games, onClose, initial }) {
       },
       onError: (e) => toast(errorMessage(e), `danger`),
     }),
-    [starting, setStarting] = React.useState(false);
+    [starting, setStarting] = React.useState(false),
+    // simple first (test report 26 Nov): the game options stay behind a gear button
+    [showOpts, setShowOpts] = React.useState(false);
 
   // a chosen avatar that was deleted meanwhile falls back to the default
   React.useEffect(() => {
@@ -261,7 +263,6 @@ export function StorySheet({ world, games, onClose, initial }) {
                   placeholder={msg("e.g. The Commoner's Gambit")}
                   maxLength={200}
                 />
-                <p className="mt-1.5 text-xs text-[#ece6d899]">{msg("Only for you, to find this game in your library.")}</p>
 
                 {canChooseLocation && locations.length > 0 && (
                   <>
@@ -277,8 +278,9 @@ export function StorySheet({ world, games, onClose, initial }) {
                   </>
                 )}
 
-                <details className="sc-ns-details mt-6">
-                  <summary>{msg("Advanced options (optional)")}</summary>
+                {showOpts && (
+                <div className="sc-ns-details mt-6">
+                  <p className="sc-lib-h3">{msg("Advanced options")}</p>
                   <div className="mt-3 grid gap-3 sm:grid-cols-2">
                     <Opt label={msg("Narration preset")}>
                       <select className="sc-ns-input" value={opts.preset_id} onChange={(e) => setOpts({ ...opts, preset_id: e.target.value })}>
@@ -335,11 +337,25 @@ export function StorySheet({ world, games, onClose, initial }) {
                       </select>
                     </Opt>
                   </div>
-                </details>
+                </div>
+                )}
 
                 <div className="mt-auto flex items-center gap-3 pt-8">
                   <button type="button" className="sc-su-ghost" onClick={() => setStep(`pick`)} disabled={create.isPending}>
                     <Icon.ArrowLeft className="size-4" /> {msg("Back")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowOpts(!showOpts)}
+                    aria-label={msg("Advanced options")}
+                    aria-pressed={showOpts}
+                    title={msg("Advanced options")}
+                    className={cn(
+                      `flex size-10 items-center justify-center rounded-full border text-[#e2bd72]`,
+                      showOpts ? `border-[#e2bd72] bg-[#e2bd7218]` : `border-[#e2bd7244]`,
+                    )}
+                  >
+                    <Icon.Settings className="size-5" />
                   </button>
                   <button
                     type="submit"
@@ -378,9 +394,7 @@ export function StorySheet({ world, games, onClose, initial }) {
                     {msg("Create your avatar?")}
                   </p>
                   <p className="mt-2 text-sm leading-relaxed text-[#ece6d8cc]">
-                    {msg(
-                      "Your avatar is the character you play: name, look, personality. You create it once and take it from one story to the next, so you never have to describe the same character again.",
-                    )}
+                    {msg("The character you play, reused from one story to the next.")}
                   </p>
                   <button className="sc-lib-cta mt-6 w-full justify-center px-6 py-2.5" onClick={createAvatar}>
                     <Icon.UserRoundPlus className="size-4" /> {msg("Create my avatar")}
@@ -395,7 +409,6 @@ export function StorySheet({ world, games, onClose, initial }) {
                   >
                     {msg("Play without an avatar")}
                   </button>
-                  <p className="mt-2 text-xs text-[#ece6d880]">{msg("Without an avatar, you describe yourself in play.")}</p>
                 </div>
               </div>
             )}
