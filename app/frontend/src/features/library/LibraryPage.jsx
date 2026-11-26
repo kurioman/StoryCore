@@ -47,7 +47,7 @@ export function LibraryPage() {
   }, [hashPath, worlds.data]);
   return (
     <div className="sc-lib h-full overflow-y-auto">
-      <div className="mx-auto max-w-6xl px-6 py-8">
+      <div className="sc-lib-page mx-auto max-w-6xl px-6 py-8">
         <header className="mb-6 flex items-center gap-3">
           <Icon.Library className="size-7 text-[#e2bd72]" />
           <h1 className="sc-brand text-3xl text-[#f3dca0]">{msg("Library")}</h1>
@@ -107,7 +107,7 @@ export function LibraryPage() {
               {msg("No world yet. Create one with the world creator, or import a shared world (.zip).")}
             </p>
           )}
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(210px,1fr))] gap-5">
+          <div className="sc-lib-grid grid grid-cols-[repeat(auto-fill,minmax(210px,1fr))] gap-5">
             {(worlds.data ?? []).map((w) => {
               let n = active.filter((s) => s.world_id === w.id).length;
               return (
