@@ -414,3 +414,11 @@ html[data-platform] .sc-beat-phone{width:calc((100% + 1.5rem) * min(1, var(--sc-
 html[data-platform] .sc-beat-thumb{border-width:0;border-radius:0}
 html[data-platform] .sc-beat-name{padding-left:.75rem}
 }
+/* the phone play screen's side menu (features/story/header.jsx PhoneStoryMenu): big rows, it scrolls */
+.sc-side-menu{animation:sc-menu-in .2s ease-out}
+@keyframes sc-menu-in{from{transform:translateX(100%)}to{transform:none}}
+.sc-menu-head{margin:1.25rem .25rem .35rem;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--c-faint)}
+.sc-menu-row{display:flex;width:100%;min-height:3.25rem;align-items:center;gap:.85rem;border-radius:.6rem;padding:.4rem .5rem;text-align:left;font-size:16px;color:var(--c-fg)}
+.sc-menu-row:active{background:var(--c-panel-2)}
+.sc-menu-label{margin-bottom:.15rem;font-size:12px;color:var(--c-faint)}
+.sc-menu-inline button{font-size:15px}

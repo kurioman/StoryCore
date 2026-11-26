@@ -2353,5 +2353,15 @@
  "Display sizes (this device)": "Tailles d'affichage (cet appareil)",
  "Reset": "Réinitialiser",
  "Story text": "Texte de l'histoire",
- "Writing box": "Zone de saisie"
+ "Writing box": "Zone de saisie",
+ "Menu": "Menu",
+ "This game": "Cette partie",
+ "Status and characters": "Statut et personnages",
+ "My character (player note)": "Mon personnage (note du joueur)",
+ "Game settings": "Réglages de la partie",
+ "App": "Application",
+ "My stories": "Mes histoires",
+ "Your changes apply to the game as soon as they are saved.": "Tes modifications s'appliquent à la partie dès qu'elles sont enregistrées.",
+ "AI model": "Modèle d'IA",
+ "Narration": "Narration"
 }

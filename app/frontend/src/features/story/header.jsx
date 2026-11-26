@@ -19,7 +19,9 @@ import {
 } from "@/components/ui";
 import { ContextWarnings } from "@/features/story/composer";
 import { UsageMeter } from "@/features/story/UsageMeter";
-import { CodexButton } from "@/features/codex/CodexDialog";
+import { CodexButton, CodexDialog } from "@/features/codex/CodexDialog";
+import * as Dialog from "@radix-ui/react-dialog";
+import { Logo } from "@/features/sidebar/Sidebar";
 import { cn, isCloudModelId } from "@/lib/util";
 import { navigate } from "@/lib/router";
 import { presetName } from "@/lib/presets";
@@ -168,12 +170,10 @@ export function StoryHeader({
   );
 }
 
-// v0.6 (test report "30 tours", B11): inside the "⋯" menu (narrow window) these switches were popovers inside a
-// popover: a click in the inner one counted as a click outside the menu, so the menu closed under it and the inner
-// panel was left at the top-left corner of the screen, out of reach. Inside the menu they now open in place.
-// StoryCore mobile (Phase 2): the play screen's only top bar on a phone. The app shell's bar is hidden there (App.jsx);
-// ☰ opens the library, the title renames the story, then Codex, Journal, Status panel and the "⋯" menu (switches,
-// notes, savepoints, context, help). Big touch targets, nothing behind a mouse hover.
+// StoryCore mobile (26 Nov 2026, OOC.AI as the model): the play screen's only top bar on a phone holds four things,
+// the StoryCore logo (back to the title screen), the story title, the usage button and the menu button. Everything
+// else (Codex, journal, status, player note, story notes, savepoints, avatar, model, options, settings, help) is in
+// a side menu that scrolls, one big touch row per item.
 function PhoneStoryHeader({
   story,
   branches,
@@ -190,12 +190,13 @@ function PhoneStoryHeader({
   setEditing,
   saveTitle,
 }) {
-  let journal = view === `journal`;
+  let [menu, setMenu] = React.useState(false),
+    [codex, setCodex] = React.useState(false);
   return (
-    <header className="flex h-12 shrink-0 items-center gap-0.5 border-b border-line px-1">
-      <IconButton label={msg("Open library")} onClick={openLibrary} className="size-10">
-        <Icon.Menu className="size-5" />
-      </IconButton>
+    <header className="flex h-12 shrink-0 items-center gap-1 border-b border-line px-1.5">
+      <button type="button" onClick={() => navigate(`/`)} aria-label={msg("Home")} className="flex size-10 items-center justify-center">
+        <Logo />
+      </button>
       {editing ? (
         <form
           className="min-w-0 flex-1"
@@ -213,38 +214,124 @@ function PhoneStoryHeader({
           />
         </form>
       ) : (
-        <button
-          onClick={() => setEditing(true)}
-          className="min-w-0 flex-1 truncate rounded px-1 py-1 text-left text-[15px] font-semibold"
-          title={msg("Rename story")}
-        >
-          {story.title}
-        </button>
+        <p className="min-w-0 flex-1 truncate px-1 text-[16px] font-semibold">{story.title}</p>
       )}
-      <BranchMenu story={story} branches={branches} disabled={generating} />
       <UsageMeter storyId={story.id} refreshKey={`${generating ? 1 : 0}:${story.updated_at ?? ``}`} />
-      <CodexButton storyId={story.id} compact />
-      <IconButton
-        label={journal ? msg("Story") : msg("Journal & Memory")}
-        active={journal}
-        onClick={() => setView(journal ? `story` : `journal`)}
-        className="relative size-10"
-      >
-        {journal ? <Icon.MessageSquareText className="size-5" /> : <Icon.BookBookmark className="size-5" />}
-        {!journal && reviewCount > 0 && (
-          <span className="absolute right-1 top-1 size-2 rounded-full bg-accent" aria-hidden />
-        )}
+      <IconButton label={msg("Menu")} onClick={() => setMenu(true)} className="relative size-10">
+        <Icon.Menu className="size-6" />
+        {reviewCount > 0 && <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-accent" aria-hidden />}
       </IconButton>
-      <IconButton
-        label={rightOpen ? msg("Hide status panel") : msg("Show status panel")}
-        active={rightOpen}
-        onClick={() => setRightOpen(!rightOpen)}
-        className="size-10"
-      >
-        <Icon.PanelRight className="size-5" />
-      </IconButton>
-      <MoreToolsMenu story={story} onOpen={onOpen} compact phone />
+      {menu && (
+        <PhoneStoryMenu
+          story={story}
+          branches={branches}
+          generating={generating}
+          view={view}
+          setView={setView}
+          setRightOpen={setRightOpen}
+          reviewCount={reviewCount}
+          onOpen={onOpen}
+          onRename={() => setEditing(true)}
+          onCodex={() => setCodex(true)}
+          onClose={() => setMenu(false)}
+        />
+      )}
+      {codex && <CodexDialog storyId={story.id} onClose={() => setCodex(false)} />}
     </header>
+  );
+}
+
+function PhoneStoryMenu({ story, branches, generating, view, setView, setRightOpen, reviewCount, onOpen, onRename, onCodex, onClose }) {
+  let journal = view === `journal`,
+    go = (fn) => () => {
+      onClose();
+      fn();
+    },
+    row = (icon, label, onClick, extra) => {
+      let RowIcon = icon;
+      return (
+        <button type="button" onClick={onClick} className="sc-menu-row">
+          <RowIcon className="size-5 shrink-0 text-muted" />
+          <span className="min-w-0 flex-1 truncate">{label}</span>
+          {extra}
+          <Icon.ChevronRight className="size-4 shrink-0 text-faint" />
+        </button>
+      );
+    };
+  return (
+    <Dialog.Root open onOpenChange={(o) => !o && onClose()}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 z-40 bg-black/55" />
+        <Dialog.Content
+          aria-describedby={undefined}
+          className="sc-side-menu fixed inset-y-0 right-0 z-50 flex w-[min(88vw,24rem)] flex-col border-l border-line bg-panel shadow-2xl"
+        >
+          <div className="flex shrink-0 items-center gap-2 px-3 pt-2">
+            <Dialog.Title className="sc-brand text-sm text-accent">{msg("StoryCore")}</Dialog.Title>
+            <Dialog.Close asChild>
+              <IconButton label={msg("Close")} className="ml-auto size-10">
+                <Icon.X className="size-5" />
+              </IconButton>
+            </Dialog.Close>
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-8">
+            <div className="mt-1 flex items-center gap-3 rounded-xl bg-panel-2 p-3">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent">
+                <Icon.BookOpen className="size-5" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-[16px] font-semibold">{story.title}</span>
+                {story.world_name && <span className="block truncate text-xs text-faint">{story.world_name}</span>}
+              </span>
+              <IconButton label={msg("Rename story")} onClick={go(onRename)} className="size-10">
+                <Icon.Pencil className="size-4" />
+              </IconButton>
+            </div>
+
+            <p className="sc-menu-head">{msg("This game")}</p>
+            {row(Icon.BookOpenText, msg("Codex"), go(onCodex))}
+            {row(
+              journal ? Icon.MessageSquareText : Icon.BookBookmark,
+              journal ? msg("Back to the story") : msg("Journal & Memory"),
+              go(() => setView(journal ? `story` : `journal`)),
+              !journal && reviewCount > 0 ? <span className="rounded-full bg-accent px-1.5 text-[11px] text-accent-fg">{reviewCount}</span> : null,
+            )}
+            {row(Icon.PanelRight, msg("Status and characters"), go(() => setRightOpen(true)))}
+            {story.active_avatar_id &&
+              row(Icon.UserPen, msg("My character (player note)"), go(() => navigate(`/avatars/${story.active_avatar_id}?back=${encodeURIComponent(`/story/${story.id}`)}`)))}
+            {row(Icon.NotebookPen, msg("User notes"), go(() => onOpen(`notes`)))}
+            {row(Icon.Save, msg("Savepoints"), go(() => onOpen(`savepoints`)))}
+            {(branches?.length ?? 0) > 1 && (
+              <div className="px-1 py-2">
+                <BranchMenu story={story} branches={branches} disabled={generating} />
+              </div>
+            )}
+
+            <p className="sc-menu-head">{msg("Game settings")}</p>
+            <div className="sc-menu-inline space-y-3 px-1">
+              <div>
+                <p className="sc-menu-label">{msg("Avatar")}</p>
+                <AvatarSwitch story={story} inline />
+              </div>
+              <div>
+                <p className="sc-menu-label">{msg("AI model")}</p>
+                <ModelSwitch story={story} inline />
+              </div>
+              <div>
+                <p className="sc-menu-label">{msg("Narration")}</p>
+                <StoryOptions story={story} inline />
+              </div>
+            </div>
+
+            <p className="sc-menu-head">{msg("App")}</p>
+            {row(Icon.Library, msg("My stories"), go(openLibrary))}
+            {row(Icon.Settings, msg("Settings"), go(() => navigate(`/settings`)))}
+            {row(Icon.Gauge, msg("Context sent to the model"), go(() => onOpen(`context`)))}
+            {row(Icon.CircleQuestionMark, msg("Help and tour"), go(openHelp))}
+          </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }
 

@@ -27,7 +27,7 @@ import { navigate, useHashPath } from "@/lib/router";
 // the avatar is created, and a banner then leads back to the new game with this avatar chosen.
 function backTarget(hashPath) {
   let b = new URLSearchParams(hashPath.split(`?`)[1] ?? ``).get(`back`);
-  return b && b.startsWith(`/library`) ? b : null;
+  return b && (b.startsWith(`/library`) || /^\/story\/[\w-]+$/.test(b)) ? b : null; // also back to a game (side menu)
 }
 const backQuery = (back) => (back ? `?back=${encodeURIComponent(back)}` : ``);
 
@@ -112,11 +112,13 @@ export function AvatarsPage({ selectedId }) {
           <div className="flex flex-wrap items-center gap-3 border-b border-accent/40 bg-accent-soft px-4 py-2.5 text-sm">
             <Icon.Sparkles className="size-4 shrink-0 text-accent" />
             <span className="min-w-0 flex-1">
-              {a
-                ? msg("“{{v0}}” is saved. You can add a portrait now or later.", { v0: a.name })
-                : msg("Create your avatar, then save it.")}
+              {back.startsWith(`/story/`)
+                ? msg("Your changes apply to the game as soon as they are saved.")
+                : a
+                  ? msg("“{{v0}}” is saved. You can add a portrait now or later.", { v0: a.name })
+                  : msg("Create your avatar, then save it.")}
             </span>
-            {a && (
+            {a && !back.startsWith(`/story/`) && (
               <Button size="sm" variant="primary" onClick={() => navigate(`${back}&avatar=${encodeURIComponent(a.id)}`)}>
                 {msg("Continue my new game")} <Icon.ArrowRight className="size-3.5" />
               </Button>
