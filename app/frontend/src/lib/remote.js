@@ -9,6 +9,10 @@ export const IS_REMOTE = typeof window !== `undefined` && !LOCAL.has(window.loca
 // backups stay available), but the computer-only things are hidden: Ollama / LM Studio, "Play on a phone",
 // graphics-card advice, "Open data folder".
 export const IS_ANDROID_APP = typeof navigator !== `undefined` && /\bStoryCoreAndroid\//.test(navigator.userAgent);
+// Version of the installed Android app (the published version it was built for), or "" outside the app.
+export const ANDROID_APP_VERSION = IS_ANDROID_APP
+  ? (navigator.userAgent.match(/\bStoryCoreAndroid\/([0-9][^\s]*)/)?.[1] ?? ``)
+  : ``;
 
 // The phone interface (touch, small screen): the Android app or a phone paired over Wi-Fi.
 export const IS_PHONE = IS_ANDROID_APP || IS_REMOTE;

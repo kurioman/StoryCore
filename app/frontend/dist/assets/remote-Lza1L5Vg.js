@@ -1,0 +1,1 @@
+var e=typeof window<`u`&&!new Set([`127.0.0.1`,`localhost`,`[::1]`,`::1`]).has(window.location.hostname),t=typeof navigator<`u`&&/\bStoryCoreAndroid\//.test(navigator.userAgent),n=t?navigator.userAgent.match(/\bStoryCoreAndroid\/([0-9][^\s]*)/)?.[1]??``:``,r=t||e;export{e as i,t as n,r,n as t};

@@ -6,7 +6,7 @@ import * as React from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { useQuery } from "@tanstack/react-query";
 import { Check, History, Languages, Settings, SlidersHorizontal, Smartphone, Wand2 } from "lucide-react";
-import { IS_ANDROID_APP, IS_REMOTE } from "@/lib/remote";
+import { ANDROID_APP_VERSION, IS_ANDROID_APP, IS_REMOTE } from "@/lib/remote";
 import discordLogo from "@/assets/discord.png"; // official Discord symbol: keep its colours as they are
 import { apiGet } from "@/api/legacy";
 import { useSettings, useStories } from "@/api/queries";
@@ -28,6 +28,8 @@ export function WelcomePage() {
   // first visit: the first-run assistant comes before the library
   const firstRun = settings.data ? !(settings.data as { onboarding_done?: boolean }).onboarding_done : false;
   const health = useQuery({ queryKey: [`health`], queryFn: () => apiGet<{ version: string }>(`/health`) });
+  // Shown above the credits: the Android app's own version on the phone, the engine's version on the computer.
+  const version = ANDROID_APP_VERSION || health.data?.version || ``;
 
   /** Stars fly to the mouse while it is over the button (to the button centre with the keyboard). */
   function attract(on: boolean, e?: { clientX: number; clientY: number }) {
@@ -153,6 +155,12 @@ export function WelcomePage() {
 
         <footer className="sc-welcome-foot grid grid-cols-[1fr_auto_1fr] items-center gap-4 pb-4 text-[12px]">
           <p className="text-left text-[11px] leading-snug text-[#e2bd7299]" title={msg(CREDITS)}>
+            {version && (
+              <>
+                <span className="text-[10px] opacity-80">V.{version}</span>
+                <br />
+              </>
+            )}
             {msg("Made by Kurio")}
             <br />
             <span className="text-[10px] opacity-80">{msg("over a creation of Hugo_117")}</span>
@@ -166,7 +174,7 @@ export function WelcomePage() {
           >
             <img src={discordLogo} alt="" className="sc-discord-logo" draggable={false} />
           </button>
-          <p className="text-right text-[#e2bd7299]">{health.data?.version ? `v${health.data.version}` : ``}</p>
+          <span aria-hidden />
         </footer>
       </main>
     </div>
