@@ -152,7 +152,11 @@ export function WelcomePage() {
         <div aria-hidden />
 
         <footer className="sc-welcome-foot grid grid-cols-[1fr_auto_1fr] items-center gap-4 pb-4 text-[12px]">
-          <p className="text-left text-[#e2bd7299]">{msg(CREDITS)}</p>
+          <p className="text-left text-[11px] leading-snug text-[#e2bd7299]" title={msg(CREDITS)}>
+            {msg("Made by Kurio")}
+            <br />
+            <span className="text-[10px] opacity-80">{msg("over a creation of Hugo_117")}</span>
+          </p>
           <button
             type="button"
             onClick={() => DISCORD_URL && window.open(DISCORD_URL, `_blank`, `noopener`)}

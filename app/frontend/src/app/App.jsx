@@ -9,9 +9,9 @@ import { msg } from "@/i18n";
 import { HelpDialog } from "@/features/help/HelpDialog";
 import { WelcomePage } from "@/features/welcome/WelcomePage";
 import { IconButton, UiProvider } from "@/components/ui";
-import { Sidebar } from "@/features/sidebar/Sidebar";
+import { Logo, Sidebar } from "@/features/sidebar/Sidebar";
 import { cn } from "@/lib/util";
-import { matchRoute, useHashPath } from "@/lib/router";
+import { matchRoute, navigate, useHashPath } from "@/lib/router";
 import { useLocalState, useMediaQuery } from "@/lib/hooks";
 import { usePhoneLayout, useShellRequests } from "@/lib/layout";
 import { Spinner } from "@/components/ui";
@@ -156,13 +156,22 @@ function App() {
       )}
       <main className="relative flex min-w-0 flex-1 flex-col">
         {!mediaQuery && !(phone && d) && (
-          <div className="flex h-11 shrink-0 items-center gap-2 border-b border-line px-2">
-            <IconButton label={msg("Open library")} onClick={() => o(true)}>
-              <Icon.Menu className="size-4" />
+          // narrow screens and phones: ☰ | StoryCore logo in the middle (back to the title screen) | ?
+          <div className="grid h-12 shrink-0 grid-cols-[2.75rem_1fr_2.75rem] items-center border-b border-line px-1">
+            <IconButton label={msg("Open library")} onClick={() => o(true)} className="size-10">
+              <Icon.Menu className="size-5" />
             </IconButton>
-            <span className="sc-brand text-sm text-accent">{msg("StoryCore")}</span>
-            <IconButton label={msg("Help and tour")} className="ml-auto" onClick={() => c(true)}>
-              <Icon.CircleQuestionMark className="size-4" />
+            <button
+              type="button"
+              onClick={() => navigate(`/`)}
+              className="mx-auto flex items-center gap-2 rounded-md px-2 py-1"
+              aria-label={msg("Home")}
+            >
+              <Logo />
+              <span className="sc-brand text-[15px] text-accent">{msg("StoryCore")}</span>
+            </button>
+            <IconButton label={msg("Help and tour")} onClick={() => c(true)} className="size-10">
+              <Icon.CircleQuestionMark className="size-5" />
             </IconButton>
           </div>
         )}
