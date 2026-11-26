@@ -20,7 +20,7 @@ import {
 } from "@/components/ui";
 import { cn, timeAgo } from "@/lib/util";
 import { navigate } from "@/lib/router";
-import { IS_ANDROID_APP, IS_REMOTE } from "@/lib/remote";
+import { IS_ANDROID_APP, IS_PHONE, IS_REMOTE } from "@/lib/remote";
 
 // v0.5: a paired phone is a player; computer-only pages are not offered there
 var PHONE_PAGES = [`/avatars`, `/lore`, `/music`, `/commands`, `/settings`];
@@ -252,7 +252,21 @@ function StoryRow({ s: story, active }) {
           a === `archive` && toast(story.status === `archived` ? msg("Story restored", {}) : msg("Story archived", {})));
       },
       onError: (e) => toast(errorMessage(e), `danger`),
-    });
+    }),
+    askDelete = async () => {
+      (await confirm({
+        title: msg("Delete “{{v0}}”?", {
+          v0: story.title,
+        }),
+        body: msg(
+          "The story, its branches, journal and savepoints are removed. Avatars, global notes, providers and lore are not affected. A recovery package is saved in the backups folder first.",
+        ),
+        confirmLabel: msg("Delete story"),
+        danger: true,
+      })) && mutation.mutate(`delete`);
+    };
+  // StoryCore mobile: no hover on a phone. The actions menu is always shown, with a red delete button beside it.
+  let phone = IS_PHONE;
   return (
     <div className={cn(`group relative mb-0.5 rounded-md`, active ? `bg-panel-2` : `hover:bg-panel-2/60`)}>
       {renaming ? (
@@ -273,7 +287,7 @@ function StoryRow({ s: story, active }) {
       ) : (
         <button
           onClick={() => navigate(`/story/${story.id}`)}
-          className="block w-full px-2.5 py-2 pr-8 text-left"
+          className={cn(`block w-full px-2.5 py-2 text-left`, phone ? `pr-20` : `pr-8`)}
           aria-current={active ? `page` : undefined}
         >
           <div className="truncate text-[13px] font-medium">{story.title}</div>
@@ -300,7 +314,10 @@ function StoryRow({ s: story, active }) {
               label={msg("Actions for {{v0}}", {
                 v0: story.title,
               })}
-              className="absolute right-1 top-1.5 opacity-0 group-hover:opacity-100 focus:opacity-100 data-[state=open]:opacity-100"
+              className={cn(
+                `absolute right-1 top-1.5`,
+                phone ? `size-9` : `opacity-0 group-hover:opacity-100 focus:opacity-100 data-[state=open]:opacity-100`,
+              )}
             >
               <Icon.Ellipsis className="size-4" />
             </IconButton>
@@ -331,21 +348,20 @@ function StoryRow({ s: story, active }) {
               icon={Icon.Trash}
               danger
               label={msg("Delete…")}
-              onClick={async () => {
-                (await confirm({
-                  title: msg("Delete “{{v0}}”?", {
-                    v0: story.title,
-                  }),
-                  body: msg(
-                    "The story, its branches, journal and savepoints are removed. Avatars, global notes, providers and lore are not affected. A recovery package is saved in the backups folder first.",
-                  ),
-                  confirmLabel: msg("Delete story"),
-                  danger: true,
-                })) && mutation.mutate(`delete`);
-              }}
+              onClick={askDelete}
             />
           </PopoverContent>
         </Popover>
+      )}
+      {!renaming && phone && (
+        <button
+          type="button"
+          onClick={askDelete}
+          aria-label={msg("Delete “{{v0}}”?", { v0: story.title })}
+          className="absolute right-11 top-1.5 flex size-9 items-center justify-center rounded-md bg-danger text-white"
+        >
+          <Icon.Trash2 className="size-4" />
+        </button>
       )}
     </div>
   );
