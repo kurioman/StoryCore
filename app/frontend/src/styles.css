@@ -374,3 +374,38 @@ html[data-platform] .sc-modal-close svg{width:1.25rem;height:1.25rem}
 /* settings rows "label | value" (Providers): label above its value on a phone */
 html[data-platform] .sc-kv{grid-template-columns:minmax(0,1fr);gap:.2rem}
 }
+@media (max-width:767px){
+/* library on a phone: two story cards per row, a smaller "last adventure" card */
+html[data-platform] .sc-lib-page{padding:1rem 1rem 2rem}
+html[data-platform] .sc-lib-page h1{font-size:1.6rem}
+html[data-platform] .sc-lib-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem}
+html[data-platform] .sc-lib-grid .sc-lib-cover{aspect-ratio:3/4}
+html[data-platform] .sc-lib-grid .sc-lib-card>div:last-child{padding:.5rem .6rem .6rem}
+html[data-platform] .sc-lib-grid .sc-lib-card p.sc-brand{font-size:.95rem}
+html[data-platform] .sc-lib-grid .sc-lib-card p.line-clamp-3{-webkit-line-clamp:2;font-size:11px;margin-top:.3rem}
+html[data-platform] .sc-lib-grid .sc-lib-card .sc-lib-tag{font-size:.6rem;padding:0 .4rem}
+html[data-platform] .sc-lib-grid .sc-lib-ghost-icon{width:3rem;height:3rem}
+html[data-platform] .sc-lib-resume{height:10.5rem;border-radius:.8rem}
+html[data-platform] .sc-lib-resume>:first-child{width:7.5rem}
+html[data-platform] .sc-lib-resume>div{padding:.7rem .8rem}
+html[data-platform] .sc-lib-resume p.sc-brand{font-size:1.15rem}
+html[data-platform] .sc-lib-resume p.line-clamp-3{-webkit-line-clamp:2;margin-top:.4rem;font-size:12px}
+html[data-platform] .sc-lib-resume .sc-lib-cta{padding:.35rem .85rem;font-size:.8rem}
+html[data-platform] .sc-lib section{margin-bottom:1.5rem}
+}
+/* the simple avatar editor (features/avatars, Nov 2026): one card per part, a Save bar at the bottom */
+.sc-av-card{border:1px solid var(--c-border);border-radius:.8rem;background:var(--c-panel);padding:.8rem .9rem}
+.sc-av-label{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--c-accent)}
+.sc-av-toggle{display:flex;width:100%;align-items:center;gap:.5rem;font-size:.85rem;font-weight:500;color:var(--c-muted);text-align:left}
+.sc-av-save{position:sticky;bottom:0;display:flex;justify-content:center;border-top:1px solid var(--c-border);background:var(--c-bg);padding:.6rem 1rem}
+
+/* display sizes chosen in Settings > Appearance (lib/displayPrefs.js, saved per device), last so they win */
+.prose-story{font-size:calc(var(--story-size) * var(--sc-text,1))}
+.sc-composer-input{font-size:calc(1rem * var(--sc-composer,1));min-height:calc(2.6rem * var(--sc-composer,1))}
+.story-beats:not(.story-beats-multi){max-width:min(100%,calc(34rem * var(--sc-portrait,1)))}
+.story-beats-multi{grid-template-columns:repeat(auto-fit,minmax(min(100%,calc(13rem * var(--sc-portrait,1))),1fr))}
+@container story (width>=64rem){.story-beats:not(.story-beats-multi){max-width:min(100%,calc(30rem * var(--sc-portrait,1)))}}
+/* test report 26 Nov: bigger portraits on a phone (about two thirds of the width at 100 %) */
+@media (max-width:767px){
+html[data-platform] .sc-beat-phone{width:min(100%,calc(64% * var(--sc-portrait,1)))}
+}

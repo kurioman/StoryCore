@@ -3,12 +3,45 @@ import { useSettings } from "@/api/queries";
 import { LANGUAGES, currentLanguage, msg, setLanguage } from "@/i18n";
 import { Field, Select } from "@/components/ui";
 import { useSaveSettings } from "@/features/settings/SettingsPage";
+import { DISPLAY_DEFAULTS, DISPLAY_RANGES, useDisplayPrefs } from "@/lib/displayPrefs";
 
 export function AppearanceSettings() {
   let settings = useSettings(),
-    saveSettings = useSaveSettings();
+    saveSettings = useSaveSettings(),
+    [display, setDisplay] = useDisplayPrefs();
   return (
     <div className="max-w-xl space-y-3">
+      <section className="sc-av-card space-y-3" aria-labelledby="display-sizes">
+        <div className="flex items-center">
+          <p id="display-sizes" className="sc-av-label">
+            {msg("Display sizes (this device)")}
+          </p>
+          <button type="button" className="ml-auto text-xs text-muted" onClick={() => setDisplay({ ...DISPLAY_DEFAULTS })}>
+            {msg("Reset")}
+          </button>
+        </div>
+        {[
+          [`text`, msg("Story text")],
+          [`portraits`, msg("Portraits")],
+          [`composer`, msg("Writing box")],
+        ].map(([k, label]) => (
+          <label className="block text-sm" key={k}>
+            <span className="flex">
+              {label}
+              <span className="ml-auto text-xs text-faint">{Math.round(display[k] * 100)} %</span>
+            </span>
+            <input
+              type="range"
+              min={DISPLAY_RANGES[k][0]}
+              max={DISPLAY_RANGES[k][1]}
+              step={0.05}
+              value={display[k]}
+              onChange={(e) => setDisplay({ ...display, [k]: Number(e.target.value) })}
+              className="mt-1 w-full accent-[var(--c-accent)]"
+            />
+          </label>
+        ))}
+      </section>
       <Field
         label={msg("Interface language")}
         hint={msg("The language of menus, buttons and help. The story text has its own setting (Narration & context).")}
