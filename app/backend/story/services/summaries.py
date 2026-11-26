@@ -622,6 +622,7 @@ def memory_view(db: Session, story: Story, branch: MessageBranch) -> dict[str, A
         "layers": [{"id": r.id, "level": r.level, "start_seq": r.start_seq, "end_seq": r.end_seq, "content": r.content,
                     "source": r.source, "title": (r.data_json or {}).get("title"),
                     "locked": bool((r.data_json or {}).get("locked")),
+                    "merged": bool(r.parent_id),  # a scene already folded into a chapter (Memory screen: not short-term)
                     "has_model_text": bool((r.data_json or {}).get("model_text")),
                     "parts": sum(1 for x in all_scenes if x.parent_id == r.id) if r.level != "scene" else None}
                    for r in layers],

@@ -2363,5 +2363,21 @@
  "My stories": "Mes histoires",
  "Your changes apply to the game as soon as they are saved.": "Tes modifications s'appliquent à la partie dès qu'elles sont enregistrées.",
  "AI model": "Modèle d'IA",
- "Narration": "Narration"
+ "Narration": "Narration",
+ "Long-term": "Long terme",
+ "Short-term": "Court terme",
+ "What the AI keeps for the whole story: summaries of past chapters and the memories you pinned.": "Ce que l'IA garde pour toute l'histoire : les résumés des chapitres passés et les souvenirs que tu as épinglés.",
+ "Pinned memories": "Souvenirs épinglés",
+ "Chapters": "Chapitres",
+ "Nothing yet: chapters are summarised as the story goes on. You can pin a memory with +.": "Rien pour l'instant : les chapitres sont résumés au fil de l'histoire. Tu peux épingler un souvenir avec +.",
+ "Summaries of the latest scenes. Older ones are merged into chapters.": "Résumés des dernières scènes. Les plus anciens sont regroupés en chapitres.",
+ "Nothing yet: scenes are summarised every few messages.": "Rien pour l'instant : les scènes sont résumées tous les quelques messages.",
+ "Open threads found by the AI": "Fils en suspens repérés par l'IA",
+ "Pin a memory": "Épingler un souvenir",
+ "Full journal": "Journal complet",
+ "The story so far": "L'histoire jusqu'ici",
+ "Messages {{v0}}–{{v1}}": "Messages {{v0}}–{{v1}}",
+ "Delete this memory?": "Supprimer ce souvenir ?",
+ "New pinned memory": "Nouveau souvenir épinglé",
+ "Something the AI must never forget, e.g. “Kai promised Isabel to train with her every evening.”": "Ce que l'IA ne doit jamais oublier, par ex. « Kai a promis à Isabel de s'entraîner avec elle chaque soir. »"
 }

@@ -2178,5 +2178,21 @@
   "My stories": "My stories",
   "Your changes apply to the game as soon as they are saved.": "Your changes apply to the game as soon as they are saved.",
   "AI model": "AI model",
-  "Narration": "Narration"
+  "Narration": "Narration",
+  "Long-term": "Long-term",
+  "Short-term": "Short-term",
+  "What the AI keeps for the whole story: summaries of past chapters and the memories you pinned.": "What the AI keeps for the whole story: summaries of past chapters and the memories you pinned.",
+  "Pinned memories": "Pinned memories",
+  "Chapters": "Chapters",
+  "Nothing yet: chapters are summarised as the story goes on. You can pin a memory with +.": "Nothing yet: chapters are summarised as the story goes on. You can pin a memory with +.",
+  "Summaries of the latest scenes. Older ones are merged into chapters.": "Summaries of the latest scenes. Older ones are merged into chapters.",
+  "Nothing yet: scenes are summarised every few messages.": "Nothing yet: scenes are summarised every few messages.",
+  "Open threads found by the AI": "Open threads found by the AI",
+  "Pin a memory": "Pin a memory",
+  "Full journal": "Full journal",
+  "The story so far": "The story so far",
+  "Messages {{v0}}–{{v1}}": "Messages {{v0}}–{{v1}}",
+  "Delete this memory?": "Delete this memory?",
+  "New pinned memory": "New pinned memory",
+  "Something the AI must never forget, e.g. “Kai promised Isabel to train with her every evening.”": "Something the AI must never forget, e.g. “Kai promised Isabel to train with her every evening.”"
 }

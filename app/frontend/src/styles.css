@@ -422,3 +422,8 @@ html[data-platform] .sc-beat-name{padding-left:.75rem}
 .sc-menu-row:active{background:var(--c-panel-2)}
 .sc-menu-label{margin-bottom:.15rem;font-size:12px;color:var(--c-faint)}
 .sc-menu-inline button{font-size:15px}
+/* the Memory screen (features/story/MemoryScreen.jsx): pill tabs, a "+" button, OOC-like list */
+.sc-memory-tab{flex-shrink:0;border-radius:999px;border:1px solid var(--c-border);padding:.45rem 1rem;font-size:15px;color:var(--c-muted);white-space:nowrap}
+.sc-memory-tab-on{background:var(--c-fg);border-color:var(--c-fg);color:var(--c-bg);font-weight:500}
+.sc-memory-hint{margin:.25rem .1rem .5rem;font-size:12.5px;color:var(--c-faint)}
+.sc-memory-fab{position:absolute;right:1.1rem;bottom:4.2rem;display:flex;width:3.5rem;height:3.5rem;align-items:center;justify-content:center;border-radius:999px;background:var(--c-accent);color:var(--c-accent-fg);box-shadow:0 10px 30px -10px #000}

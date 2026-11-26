@@ -20,6 +20,7 @@ import {
 import { ContextWarnings } from "@/features/story/composer";
 import { UsageMeter } from "@/features/story/UsageMeter";
 import { CodexButton, CodexDialog } from "@/features/codex/CodexDialog";
+import { MemoryScreen } from "@/features/story/MemoryScreen";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Logo } from "@/features/sidebar/Sidebar";
 import { cn, isCloudModelId } from "@/lib/util";
@@ -191,7 +192,8 @@ function PhoneStoryHeader({
   saveTitle,
 }) {
   let [menu, setMenu] = React.useState(false),
-    [codex, setCodex] = React.useState(false);
+    [codex, setCodex] = React.useState(false),
+    [memory, setMemory] = React.useState(false);
   return (
     <header className="flex h-12 shrink-0 items-center gap-1 border-b border-line px-1.5">
       <button type="button" onClick={() => navigate(`/`)} aria-label={msg("Home")} className="flex size-10 items-center justify-center">
@@ -233,15 +235,27 @@ function PhoneStoryHeader({
           onOpen={onOpen}
           onRename={() => setEditing(true)}
           onCodex={() => setCodex(true)}
+          onMemory={() => setMemory(true)}
           onClose={() => setMenu(false)}
         />
       )}
       {codex && <CodexDialog storyId={story.id} onClose={() => setCodex(false)} />}
+      {memory && (
+        <MemoryScreen
+          storyId={story.id}
+          worldId={story.world_id}
+          onClose={() => setMemory(false)}
+          onAdvanced={() => {
+            setMemory(false);
+            setView(`journal`);
+          }}
+        />
+      )}
     </header>
   );
 }
 
-function PhoneStoryMenu({ story, branches, generating, view, setView, setRightOpen, reviewCount, onOpen, onRename, onCodex, onClose }) {
+function PhoneStoryMenu({ story, branches, generating, view, setView, setRightOpen, reviewCount, onOpen, onRename, onCodex, onMemory, onClose }) {
   let journal = view === `journal`,
     go = (fn) => () => {
       onClose();
@@ -290,11 +304,12 @@ function PhoneStoryMenu({ story, branches, generating, view, setView, setRightOp
 
             <p className="sc-menu-head">{msg("This game")}</p>
             {row(Icon.BookOpenText, msg("Codex"), go(onCodex))}
+            {journal && row(Icon.MessageSquareText, msg("Back to the story"), go(() => setView(`story`)))}
             {row(
-              journal ? Icon.MessageSquareText : Icon.BookBookmark,
-              journal ? msg("Back to the story") : msg("Journal & Memory"),
-              go(() => setView(journal ? `story` : `journal`)),
-              !journal && reviewCount > 0 ? <span className="rounded-full bg-accent px-1.5 text-[11px] text-accent-fg">{reviewCount}</span> : null,
+              Icon.Brain,
+              msg("Memory"),
+              go(onMemory),
+              reviewCount > 0 ? <span className="rounded-full bg-accent px-1.5 text-[11px] text-accent-fg">{reviewCount}</span> : null,
             )}
             {row(Icon.PanelRight, msg("Status and characters"), go(() => setRightOpen(true)))}
             {story.active_avatar_id &&
