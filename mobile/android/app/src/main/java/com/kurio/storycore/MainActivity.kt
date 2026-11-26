@@ -36,6 +36,7 @@ class MainActivity : Activity() {
     private lateinit var web: WebView
     private var fileChooserCallback: ValueCallback<Array<Uri>>? = null
     private var pendingSave: FileTransfers.Pending? = null
+    private val updater by lazy { Updater(this) }
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -97,7 +98,12 @@ class MainActivity : Activity() {
             if (!Python.isStarted()) Python.start(AndroidPlatform(this))
             val url = Python.getInstance().getModule("mobile_boot")
                 .callAttr("start", home.path, File(home, "web").path).toString()
-            runOnUiThread { if (!isDestroyed) web.loadUrl(url) }
+            runOnUiThread {
+                if (!isDestroyed) {
+                    web.loadUrl(url)
+                    updater.checkInBackground()  // final APK only: offers a newer version from GitHub Releases
+                }
+            }
         } catch (e: Throwable) {
             val report = runCatching {
                 Python.getInstance().getModule("mobile_boot").callAttr("status_json").toString()
@@ -141,6 +147,16 @@ class MainActivity : Activity() {
             }
             else -> super.onActivityResult(requestCode, resultCode, data)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updater.onResume()  // back from "allow installing apps": continue the update
+    }
+
+    override fun onDestroy() {
+        updater.onDestroy()
+        super.onDestroy()
     }
 
     // -------------------------------------------------------------------------------------- navigation

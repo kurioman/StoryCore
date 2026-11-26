@@ -25,8 +25,28 @@ Sur le téléphone (stockage privé de l'app)
 files/storycore/Lorepack, Music, web   recopiés depuis l'APK au 1er lancement et après chaque mise à jour
 files/storycore/data                    base, sauvegardes, clés API (data/secrets.json) : jamais touché par une mise à jour
 
-Compiler l'APK
---------------
+APK FINALE (se met à jour toute seule)
+-------------------------------------
+C'est celle que tout le monde installe. Elle est fabriquée AUTOMATIQUEMENT à chaque version publiée :
+1. Pousser sur GitHub (DEVONLY\Push vers GitHub.bat). Obligatoire : l'APK est fabriquée à partir du code EN LIGNE
+   (publish.ps1 refuse de publier s'il reste des modifications non poussées).
+2. Changer APP_VERSION (app/backend/story/config.py) puis lancer DEVONLY\Publier une mise a jour.bat.
+   -> la version vX.Y.Z est publiée (installateur PC) ; GitHub Actions ("Mobile APK", job "APK (final)")
+      fabrique alors StoryCore-X.Y.Z.apk, signée avec la clé SECRÈTE, et l'ajoute à cette même version (~10 min).
+3. Sur les téléphones : à chaque démarrage, Updater.kt lit https://github.com/kurioman/StoryCore/releases,
+   prend la version publiée la plus récente qui contient une .apk, et si elle est plus récente propose
+   « Mettre à jour » -> téléchargement -> écran Android « Mettre à jour cette application ? ».
+   La 1re fois, Android demande d'autoriser StoryCore à installer des applications (réglage « Autoriser depuis cette source »).
+   Parties, Lore packs modifiés et clés API sont conservés (dossier data jamais touché).
+Clé secrète : _release/signing (sur le PC, JAMAIS dans git) + 2 GitHub Secrets STORYCORE_KEYSTORE_B64 et
+STORYCORE_KEYSTORE_PASSWORD (voir _release/signing/LISEZ-MOI.txt). SANS CETTE CLÉ, PLUS AUCUNE MISE À JOUR POSSIBLE
+pour les téléphones déjà installés : garder une copie de sauvegarde (clé USB, cloud).
+Numéro de version Android : 0.7.3 -> versionCode 7003 (toujours croissant).
+L'APK de test et l'APK finale ont des clés différentes : passer de l'une à l'autre oblige à désinstaller
+(exporter d'abord ses parties et ses Lore packs).
+
+APK de test (Compiler l'APK à la main)
+--------------------------------------
 1. Pousser sur GitHub (DEVONLY\Push vers GitHub.bat).
 2. GitHub > dépôt StoryCore > onglet Actions > "Mobile APK" > bouton "Run workflow".
 3. Attendre (1re fois ~20-30 min car pydantic-core est compilé ; ensuite il est réutilisé, ~5-10 min).
@@ -41,7 +61,7 @@ Points d'attention
 - APK de test : signée avec une clé de TEST fixe (mobile/android/app/test-debug.keystore, publique) ;
   chaque nouvelle APK de test s'installe par-dessus l'ancienne sans perdre les parties.
   La première APK (test n°1) avait une autre clé : il a fallu la désinstaller une fois.
-  La vraie version publique aura sa propre clé secrète.
+  Pas de mise à jour automatique (BuildConfig.SELF_UPDATE = false). L'APK finale a sa propre clé secrète (voir plus haut).
 - Images : le Pillow Android de Chaquopy ne lit pas le WebP. android_webp.py branche le décodeur WebP
   d'Android dans Pillow (lecture, vignettes, enregistrement) ; le moteur partagé n'en sait rien.
 

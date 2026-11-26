@@ -86,6 +86,13 @@ if (-not $NoUpload) {
         Write-Host '   Rends-le public : GitHub > StoryCore > Settings > General > Danger Zone > Change visibility.' -ForegroundColor Yellow
     }
     Info "Depot $Owner/$Repo : OK"
+    # L'APK Android de cette version est fabriquee par GitHub a partir du code EN LIGNE (pas celui du PC) :
+    # tout doit etre pousse avant de publier, sinon le telephone recevrait l'ancien code.
+    $ahead = (git -C $Root rev-list --count '@{u}..HEAD' 2>$null)
+    if ($LASTEXITCODE -eq 0 -and [int]$ahead -gt 0) {
+        Fail ("$ahead modification(s) ne sont pas encore sur GitHub. Lance d'abord DEVONLY\Push vers GitHub.bat, " +
+              "puis relance ce fichier (l'APK Android est fabriquee a partir du code en ligne).")
+    }
     $exists = $false
     try { Invoke-RestMethod "$ApiRepo/releases/tags/v$Version" -Headers $Headers | Out-Null; $exists = $true }
     catch {

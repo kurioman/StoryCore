@@ -13,6 +13,15 @@ val generatedAssets: File = layout.buildDirectory.get().asFile.resolve("generate
 val engineVersion: String = Regex("""APP_VERSION\s*=\s*"([^"]+)"""")
     .find(repoRoot.resolve("app/backend/story/config.py").readText())?.groupValues?.get(1) ?: "0.0.0"
 
+// Final (self-updating) APK: GitHub Actions passes the release tag ("v0.7.3" -> "0.7.3") and the secret key.
+val releaseVersion: String = (System.getenv("STORYCORE_VERSION") ?: "").trimStart('v', 'V').ifBlank { engineVersion }
+// 0.7.3 -> 7003, 1.2.10 -> 1002010: always grows with the version, as Android requires for an update.
+val releaseVersionCode: Int = releaseVersion.split('.', '-').take(3).map { it.toIntOrNull() ?: 0 }
+    .let { p -> (p.getOrElse(0) { 0 } * 1_000_000) + (p.getOrElse(1) { 0 } * 1_000) + p.getOrElse(2) { 0 } }
+    .coerceAtLeast(1)
+val releaseKeystore: String? = System.getenv("STORYCORE_KEYSTORE")?.takeIf { it.isNotBlank() && file(it).exists() }
+val releaseKeystorePassword: String? = System.getenv("STORYCORE_KEYSTORE_PASSWORD")
+
 android {
     namespace = "com.kurio.storycore"
     compileSdk = 35
@@ -21,8 +30,16 @@ android {
         applicationId = "com.kurio.storycore"
         minSdk = 24  // Android 7.0, the lowest Chaquopy allows
         targetSdk = 35
-        versionCode = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInt()
-        versionName = engineVersion
+        if (System.getenv("STORYCORE_VERSION").isNullOrBlank()) {
+            // test APK: the run number, so each test build installs over the previous one
+            versionCode = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInt()
+            versionName = engineVersion
+        } else {
+            // final APK: the number of the published version (also what the updater compares)
+            versionCode = releaseVersionCode
+            versionName = releaseVersion
+        }
+        buildConfigField("String", "UPDATE_REPO", "\"\"")
         ndk {
             // 64-bit ARM: every phone of the last ~8 years. (Python 3.13 on Android has no 32-bit build.)
             abiFilters += listOf("arm64-v8a")
@@ -38,11 +55,33 @@ android {
             keyAlias = "androiddebugkey"
             keyPassword = "android"
         }
+        if (releaseKeystore != null) {
+            // SECRET key of the final APK (never in git: _release/signing on Kurio's PC + GitHub Secrets).
+            // Losing it means the installed app can no longer be updated.
+            create("release") {
+                storeFile = file(releaseKeystore)
+                storePassword = releaseKeystorePassword
+                keyAlias = "storycore"
+                keyPassword = releaseKeystorePassword
+            }
+        }
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
+        debug {
+            // Test APKs: no automatic updates (they are signed with the public test key).
+            buildConfigField("boolean", "SELF_UPDATE", "false")
+        }
         release {
             isMinifyEnabled = false
+            if (releaseKeystore != null) signingConfig = signingConfigs.getByName("release")
+            // Final APK: looks for a newer version in the GitHub Releases at every start.
+            buildConfigField("boolean", "SELF_UPDATE", "true")
+            buildConfigField("String", "UPDATE_REPO", "\"kurioman/StoryCore\"")
         }
     }
     compileOptions {
