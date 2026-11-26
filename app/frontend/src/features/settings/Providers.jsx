@@ -1096,12 +1096,23 @@ var PARAM_INFO = () => ({
 
 export function AdvancedProviders() {
   let providers = useProviders(),
-    [t, n] = React.useState(false);
+    [t, n] = React.useState(false),
+    // simple view first (test report 26 Nov): key + model; the full screen below is the "advanced options"
+    [advanced, setAdvanced] = useLocalState(`ai-advanced`, false);
   if (providers.isLoading) return <Spinner />;
   if (providers.isError) return <ErrorCallout error={providers.error} />;
+  if (!advanced)
+    return (
+      <div className="max-w-xl">
+        <SimpleAiSetup onAdvanced={() => setAdvanced(true)} />
+      </div>
+    );
   let r = providers.data;
   return (
     <div className="max-w-5xl space-y-5">
+      <button type="button" onClick={() => setAdvanced(false)} className="flex items-center gap-1.5 text-sm text-muted">
+        <Icon.ArrowLeft className="size-4" /> {msg("Simple view")}
+      </button>
       <ProvidersQuickSetup />
       <details className="rounded-lg border border-line p-3">
         <summary className="cursor-pointer text-sm font-semibold">{msg("All providers and advanced options")}</summary>
@@ -1733,5 +1744,166 @@ function ProviderStatusBadge({ p }) {
       </Button>
       {t && <AddModelDialog p={p} onClose={() => n(false)} />}
     </>
+  );
+}
+
+// Test report of 26 Nov 2026: the simple AI setup, the default view everywhere (settings and first-run assistant).
+// 1. paste the OpenRouter key, 2. touch a recommended model, 3. play. Everything else (any other OpenRouter model,
+// Ollama / LM Studio, other providers, generation settings, tests) is under "Advanced options".
+export function SimpleAiSetup({ onAdvanced, compact = false }) {
+  let providers = useProviders(),
+    queryClient = useQueryClient(),
+    { toast } = useUi(),
+    [key, setKey] = React.useState(``),
+    catalog = useQuery({
+      queryKey: MODEL_CATALOG_KEY,
+      queryFn: () => apiGet(`/model-catalog`),
+      staleTime: 1 / 0,
+      retry: false,
+      refetchOnWindowFocus: false,
+    }),
+    data = providers.data,
+    provider = data?.providers.find(isOpenRouter),
+    profiles = data?.profiles ?? [],
+    current = profiles.find((p) => p.id === data?.default_model_profile_id),
+    refresh = () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.providers });
+      queryClient.invalidateQueries({ queryKey: queryKeys.settings });
+    },
+    saveKey = useMutation({
+      mutationFn: () =>
+        provider
+          ? apiPatch(`/providers/${provider.id}`, { api_key: key.trim() })
+          : apiPost(`/providers`, {
+              provider_type: `openai_compat`,
+              display_name: `OpenRouter`,
+              base_url: `https://openrouter.ai/api/v1`,
+              api_key: key.trim(),
+              config: { label: msg("OpenRouter") },
+            }),
+      onSuccess: () => {
+        setKey(``);
+        refresh();
+        toast(msg("Key saved securely. It will not be shown again."));
+      },
+      onError: (e) => toast(errorMessage(e), `danger`),
+    }),
+    useModel = useMutation({
+      mutationFn: async (m) => {
+        let fresh = await apiGet(`/providers`),
+          or = fresh.providers.find(isOpenRouter),
+          existing = fresh.profiles.find((p) => p.provider_id === or.id && p.model_id === m.slug);
+        if (existing) return apiPut(`/settings`, { default_model_profile_id: existing.id });
+        return apiPost(`/model-profiles`, {
+          provider_id: or.id,
+          model_id: m.slug,
+          display_name: m.name !== m.slug ? m.name : undefined,
+          context_limit: m.context_length || undefined,
+          make_default: true,
+        });
+      },
+      onSuccess: () => refresh(),
+      onError: (e) => toast(errorMessage(e), `danger`),
+    });
+  if (!data) return <Spinner />;
+  let hasKey = !!provider?.has_api_key,
+    models = (catalog.data?.models ?? []).filter((m) => m.available !== false),
+    ready = hasKey && current && current.provider_id === provider?.id;
+  return (
+    <div className="sc-ai space-y-3">
+      <section className="sc-av-card">
+        <p className="sc-av-label">1 · {msg("Your OpenRouter key")}</p>
+        {hasKey ? (
+          <p className="mt-2 flex items-center gap-1.5 text-sm text-ok">
+            <Icon.CircleCheck className="size-4" /> {msg("Key saved")}
+          </p>
+        ) : (
+          <p className="mt-2 text-sm text-muted">
+            {msg("Create a free account and a key on")}{" "}
+            <ExternalLinkText href="https://openrouter.ai/settings/keys">openrouter.ai</ExternalLinkText>
+          </p>
+        )}
+        <form
+          className="mt-2 flex gap-1.5"
+          onSubmit={(e) => {
+            (e.preventDefault(), key.trim() && saveKey.mutate());
+          }}
+        >
+          <Input
+            type="password"
+            autoComplete="off"
+            value={key}
+            onChange={(e) => setKey(e.target.value)}
+            placeholder={hasKey ? msg("New key (to replace it)") : msg("Paste your key")}
+            aria-label={msg("OpenRouter API key")}
+            className="min-w-0 flex-1"
+          />
+          <Button type="submit" variant={hasKey ? `secondary` : `primary`} disabled={!key.trim()} loading={saveKey.isPending}>
+            {msg("Save")}
+          </Button>
+        </form>
+      </section>
+
+      <section className={cn(`sc-av-card`, !hasKey && `opacity-60`)}>
+        <p className="sc-av-label">2 · {msg("Choose a model")}</p>
+        {catalog.isLoading && <Spinner />}
+        <ul className="mt-2 space-y-1.5">
+          {models.map((m) => {
+            let on = current?.model_id === m.slug && current?.provider_id === provider?.id;
+            return (
+              <li key={m.slug}>
+                <button
+                  type="button"
+                  disabled={!hasKey || useModel.isPending}
+                  onClick={() => useModel.mutate(m)}
+                  className={cn(
+                    `flex w-full items-center gap-2 rounded-lg border px-3 py-2.5 text-left disabled:cursor-not-allowed`,
+                    on ? `border-accent bg-accent-soft` : `border-line hover:border-line-strong`,
+                  )}
+                >
+                  <span className="min-w-0 flex-1">
+                    <span className="flex flex-wrap items-center gap-1.5">
+                      <span className="font-medium">{m.name}</span>
+                      {m.tested && <Badge tone="accent">{msg("Recommended")}</Badge>}
+                    </span>
+                    <span className="mt-0.5 block text-xs text-muted">
+                      <ModelPrice m={m} />
+                    </span>
+                  </span>
+                  {useModel.isPending && useModel.variables?.slug === m.slug ? (
+                    <Spinner />
+                  ) : on ? (
+                    <Icon.CircleCheck className="size-5 shrink-0 text-accent" />
+                  ) : (
+                    <Icon.Circle className="size-5 shrink-0 text-faint" />
+                  )}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+        {!hasKey && <p className="mt-2 text-xs text-faint">{msg("Save your key first.")}</p>}
+      </section>
+
+      {ready && (
+        <section className="sc-av-card flex items-center gap-3 border-accent/50">
+          <Icon.Sparkles className="size-5 shrink-0 text-accent" />
+          <p className="min-w-0 flex-1 text-sm">
+            {msg("Ready! New games use {{v0}}.", { v0: current.display_name || current.model_id })}
+          </p>
+          {!compact && (
+            <Button size="sm" variant="primary" onClick={() => navigate(`/library`)}>
+              {msg("Play")}
+            </Button>
+          )}
+        </section>
+      )}
+
+      {onAdvanced && (
+        <button type="button" onClick={onAdvanced} className="mx-auto flex items-center gap-1.5 py-2 text-sm text-muted">
+          <Icon.Settings className="size-4" /> {msg("Advanced options")}
+        </button>
+      )}
+    </div>
   );
 }

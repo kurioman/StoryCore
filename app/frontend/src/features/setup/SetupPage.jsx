@@ -10,7 +10,7 @@ import { queryKeys } from "@/api/queries";
 import { LANGUAGES, msg, setLanguageLive, shownLanguage } from "@/i18n";
 import { navigate } from "@/lib/router";
 import { cn } from "@/lib/util";
-import { ProvidersQuickSetup } from "@/features/settings/Providers";
+import { ProvidersQuickSetup, SimpleAiSetup } from "@/features/settings/Providers";
 import { Starfield } from "@/features/welcome/Starfield";
 import { ROCINANTE, VRAM_CHOICES, rocinanteFor } from "@/features/setup/recommendations";
 import { IS_ANDROID_APP } from "@/lib/remote";
@@ -254,16 +254,15 @@ function Local() {
 }
 
 function Cloud() {
+  let [advanced, setAdvanced] = React.useState(false);
   return (
     <div>
       <h2 className="sc-brand text-3xl text-[#f3dca0]">{msg("Using an online AI")}</h2>
       <p className="mt-3 text-sm text-[#ece6d8b3]">
-        {msg(
-          "The simplest way is OpenRouter: one account and one key give access to hundreds of models. Type the ID of any OpenRouter model, or press Select on one of our recommendations to fill it in for you. You pay only for what you use, with credit you top up yourself.",
-        )}
+        {msg("Paste your OpenRouter key, touch a model, and you are ready to play. You pay only for what you use.")}
       </p>
       <div className="sc-su-panel sc-su-embed mt-5">
-        <ProvidersQuickSetup path="openrouter" hideChooser />
+        {advanced ? <ProvidersQuickSetup path="openrouter" hideChooser /> : <SimpleAiSetup compact onAdvanced={() => setAdvanced(true)} />}
       </div>
     </div>
   );
