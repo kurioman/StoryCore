@@ -56,6 +56,9 @@ def setup_logging(settings: Settings, ctx: AppContext) -> None:
 def seed_defaults(ctx: AppContext) -> None:
     with ctx.db.session() as db:
         commands_svc.seed(db)
+        from .services import avatar_profile  # Nov 2026: older avatars folded into the simple shape (once)
+        if (n := avatar_profile.migrate_all(db)):
+            log.info("avatars simplified: %d", n)
         if db.scalar(select(UserNote).where(UserNote.scope == "global")) is None:
             db.add(UserNote(scope="global", content="", enabled=True))
         if db.scalar(select(Provider).where(Provider.provider_type == "mock")) is None:

@@ -114,7 +114,7 @@ export function AvatarsPage({ selectedId }) {
             <span className="min-w-0 flex-1">
               {a
                 ? msg("“{{v0}}” is saved. You can add a portrait now or later.", { v0: a.name })
-                : msg("Create your avatar, then save it to come back to your new game.")}
+                : msg("Create your avatar, then save it.")}
             </span>
             {a && (
               <Button size="sm" variant="primary" onClick={() => navigate(`${back}&avatar=${encodeURIComponent(a.id)}`)}>
@@ -202,10 +202,10 @@ function AvatarEditor({ avatar, back }) {
     [c, l] = React.useState(() =>
       structuredClone(
         avatar?.profile_json ?? {
-          appearance: {
-            description: ``,
-            structured: {},
-          },
+          format: 2,
+          appearance: { description: `` },
+          abilities: ``,
+          user_note: ``,
           stats: [],
           inventory: [],
         },
@@ -225,6 +225,7 @@ function AvatarEditor({ avatar, back }) {
     query = useQuery({
       queryKey: [`avatar-preview`, o, JSON.stringify(c)],
       enabled: i === `preview`,
+      placeholderData: (prev) => prev,
       queryFn: () =>
         apiPost(`/avatars/preview`, {
           name: o,
@@ -281,448 +282,197 @@ function AvatarEditor({ avatar, back }) {
       zoom: 1,
     },
     T = estimateTokens(JSON.stringify(c));
-  return (
-    <div className="flex h-full flex-col">
-      <div className="flex flex-wrap items-center gap-2 border-b border-line px-4 py-2.5">
-        <Input
-          value={o}
-          onChange={(e) => {
-            (s(e.target.value), v(true));
-          }}
-          placeholder={msg("Avatar name")}
-          className="h-8 w-64 text-[15px] font-semibold"
-          aria-label={msg("Avatar name")}
+  // Test report of 26 Nov 2026: the simple avatar. Name, portrait, appearance, abilities and a free player note;
+  // the prompt preview (with its token count) and the advanced options (tags, starting stats and inventory, portrait
+  // framing, export, delete) stay one touch away. Older avatars were folded into this shape by the engine
+  // (services/avatar_profile.py): their other fields are in the player note.
+  let [showPreview, setShowPreview] = [i === `preview`, (v) => a(v ? `preview` : `identity`)],
+    [showAdvanced, setShowAdvanced] = React.useState(false),
+    portraitInput = React.useRef(null),
+    area = (key, label, hint, rows, placeholder) => (
+      <section className="sc-av-card">
+        <label className="sc-av-label" htmlFor={`av-${key}`}>
+          {label}
+        </label>
+        <Textarea
+          id={`av-${key}`}
+          value={key === `appearance` ? (c.appearance?.description ?? ``) : (c[key] ?? ``)}
+          onChange={(e) =>
+            b(
+              key === `appearance`
+                ? { appearance: { ...(c.appearance ?? {}), description: e.target.value } }
+                : { [key]: e.target.value },
+            )
+          }
+          rows={rows}
+          placeholder={placeholder}
+          className="mt-1.5 min-h-20"
         />
-
-        <IconButton
-          label={u ? msg("Unfavourite") : msg("Favourite")}
-          active={u}
-          onClick={() => {
-            (d(!u), v(true));
-          }}
-        >
-          <Icon.Star className={cn(`size-4`, u && `fill-current`)} />
-        </IconButton>
-        <span className="text-xs text-faint">
-          ≈{T} {msg("tokens of profile data")}
-        </span>
-        {avatar?.used_by.length ? (
-          <Badge>
-            {msg("Used by:")} {avatar.used_by.join(`, `)}
-          </Badge>
-        ) : null}
-        <div className="ml-auto flex gap-1.5">
-          {avatar && (
-            <>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={async () =>
-                  downloadJson(`${avatar.name}.avatar.json`, await apiGet(`/avatars/${avatar.id}/export`))
-                }
-              >
-                <Icon.Download className="size-3.5" /> {msg("Export")}
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={async () => {
-                  (await confirm({
-                    title: msg("Delete avatar “{{v0}}”?", {
-                      v0: avatar.name,
-                    }),
-                    body: avatar.used_by.length
-                      ? msg("Stories using it keep a snapshot of the profile.", {})
-                      : msg("This cannot be undone.", {}),
-
-                    danger: true,
-                    confirmLabel: msg("Delete"),
-                  })) &&
-                    (await apiDelete(`/avatars/${avatar.id}?confirm=true`),
-                    queryClient.invalidateQueries({
-                      queryKey: queryKeys.avatars,
-                    }),
-                    navigate(`/avatars`));
-                }}
-              >
-                <Icon.Trash className="size-3.5" />
-              </Button>
-            </>
-          )}
-          <Button size="sm" variant="primary" loading={mutation.isPending} onClick={() => mutation.mutate()}>
-            {g ? msg("Save changes") : msg("Saved")}
-          </Button>
+        {hint && <p className="mt-1.5 text-[11px] text-faint">{hint}</p>}
+      </section>
+    );
+  return (
+    <div className="h-full overflow-y-auto">
+      <div className="mx-auto flex max-w-2xl flex-col gap-3 p-4 pb-10">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() =>
+              avatar ? portraitInput.current?.click() : toast(msg("Save the avatar first, then add a portrait."), `warn`)
+            }
+            className="relative shrink-0"
+            aria-label={msg("Change portrait")}
+          >
+            <UploadedImage path={avatar?.portrait_path} name={o || `?`} className="size-16 rounded-full" />
+            <span className="absolute -bottom-0.5 -right-0.5 flex size-6 items-center justify-center rounded-full border border-line bg-panel text-accent">
+              <Icon.Camera className="size-3.5" />
+            </span>
+          </button>
+          <input
+            ref={portraitInput}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              let f = e.target.files?.[0];
+              (f && C(f), (e.target.value = ``));
+            }}
+          />
+          <div className="min-w-0 flex-1">
+            <Input
+              value={o}
+              onChange={(e) => {
+                (s(e.target.value), v(true));
+              }}
+              placeholder={msg("Name")}
+              className="h-10 w-full text-[17px] font-semibold"
+              aria-label={msg("Name")}
+            />
+            <p className="mt-1 text-[11px] text-faint">
+              ≈{T} {msg("tokens of profile data")}
+              {avatar?.used_by.length ? ` · ${msg("In {{v0}} story(ies)", { v0: avatar.used_by.length })}` : ``}
+            </p>
+          </div>
+          <IconButton
+            label={u ? msg("Unfavourite") : msg("Favourite")}
+            active={u}
+            onClick={() => {
+              (d(!u), v(true));
+            }}
+            className="size-10"
+          >
+            <Icon.Star className={cn(`size-5`, u && `fill-current`)} />
+          </IconButton>
         </div>
-      </div>
-      <Tabs
-        value={i}
-        onValueChange={a}
-        className="min-h-0 flex-1"
-        listClassName="px-4"
-        tabs={[
-          {
-            value: `identity`,
-            label: msg("Identity"),
-          },
-          {
-            value: `appearance`,
-            label: msg("Appearance"),
-          },
-          {
-            value: `story`,
-            label: msg("Background & personality"),
-          },
-          {
-            value: `abilities`,
-            label: msg("Abilities"),
-          },
-          {
-            value: `sheet`,
-            label: msg("Stats & inventory"),
-          },
-          {
-            value: `extra`,
-            label: msg("Additional info"),
-          },
-          {
-            value: `preview`,
-            label: msg("Prompt preview"),
-          },
-        ]}
-      >
-        <TabPanel value="identity" className="p-5">
-          <div className="grid max-w-3xl gap-3 sm:grid-cols-2">
-            <Field label={msg("Display name")}>
-              <Input
-                value={c.display_name ?? ``}
-                onChange={(e) =>
-                  b({
-                    display_name: e.target.value,
-                  })
-                }
-              />
-            </Field>
-            <Field label={msg("Name NPCs use")} hint={msg("Nickname or how they're addressed.")}>
-              <Input
-                value={c.called_name ?? ``}
-                onChange={(e) =>
-                  b({
-                    called_name: e.target.value,
-                  })
-                }
-              />
-            </Field>
-            <Field label={msg("Pronunciation")}>
-              <Input
-                value={c.pronunciation ?? ``}
-                onChange={(e) =>
-                  b({
-                    pronunciation: e.target.value,
-                  })
-                }
-              />
-            </Field>
-            <Field label={msg("Age")} hint={msg("Stored exactly as entered; never inferred from the portrait.")}>
-              <Input
-                value={String(c.age ?? ``)}
-                onChange={(e) =>
-                  b({
-                    age: e.target.value,
-                  })
-                }
-              />
-            </Field>
-            <Field label={msg("Pronouns")}>
-              <Input
-                value={c.pronouns ?? ``}
-                onChange={(e) =>
-                  b({
-                    pronouns: e.target.value,
-                  })
-                }
-              />
-            </Field>
-            <Field label={msg("Gender (optional)")}>
-              <Input
-                value={c.gender ?? ``}
-                onChange={(e) =>
-                  b({
-                    gender: e.target.value,
-                  })
-                }
-              />
-            </Field>
-            <Field label={msg("Title / epithet")}>
-              <Input
-                value={c.title ?? ``}
-                onChange={(e) =>
-                  b({
-                    title: e.target.value,
-                  })
-                }
-              />
-            </Field>
-            <Field label={msg("Occupation")}>
-              <Input
-                value={c.occupation ?? ``}
-                onChange={(e) =>
-                  b({
-                    occupation: e.target.value,
-                  })
-                }
-              />
-            </Field>
-            <Field label={msg("Social status")}>
-              <Input
-                value={c.social_status ?? ``}
-                onChange={(e) =>
-                  b({
-                    social_status: e.target.value,
-                  })
-                }
-              />
-            </Field>
-            <Field label={msg("Affiliations")}>
-              <Input
-                value={c.affiliations ?? ``}
-                onChange={(e) =>
-                  b({
-                    affiliations: e.target.value,
-                  })
-                }
-              />
-            </Field>
-            <Field label={msg("Tags")} className="sm:col-span-2">
-              <Input
-                value={f}
-                onChange={(e) => {
-                  (p(e.target.value), v(true));
-                }}
-                placeholder={msg("comma separated")}
-              />
-            </Field>
-          </div>
-        </TabPanel>
-        <TabPanel value="appearance" className="p-5">
-          <div className="grid max-w-4xl gap-5 lg:grid-cols-[220px_1fr]">
-            <div>
-              <div className="relative h-72 w-52 overflow-hidden rounded-lg border border-line bg-panel-2">
-                {avatar?.portrait_path ? (
-                  <img
-                    src={`/api/uploads/${avatar.portrait_path}`}
-                    alt={msg("Portrait")}
-                    className="absolute inset-0 h-full w-full object-cover"
-                    style={{
-                      objectPosition: `${w.x}% ${w.y}%`,
-                      transform: `scale(${w.zoom})`,
-                      transformOrigin: `${w.x}% ${w.y}%`,
-                    }}
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-xs text-faint">{msg("No portrait")}</div>
-                )}
-              </div>
-              <input
-                ref={y}
-                type="file"
-                accept="image/png,image/jpeg,image/webp,image/gif"
-                className="hidden"
-                onChange={(e) => e.target.files?.[0] && C(e.target.files[0])}
-              />
 
-              <Button size="sm" className="mt-2 w-52" onClick={() => y.current?.click()}>
-                <Icon.ImagePlus className="size-3.5" />{" "}
-                {avatar?.portrait_path ? msg("Replace portrait") : msg("Upload portrait")}
-              </Button>
-              {avatar?.portrait_path && (
-                <div className="mt-2 w-52 space-y-1 text-[11px] text-muted">
-                  <label className="block">
-                    {msg("Horizontal focus")}
-                    <input
-                      type="range"
-                      min={0}
-                      max={100}
-                      value={w.x}
-                      onChange={(e) =>
-                        b({
-                          portrait_fit: {
-                            ...w,
-                            x: Number(e.target.value),
-                          },
-                        })
-                      }
-                      className="w-full accent-[var(--c-accent)]"
-                    />
-                  </label>
-                  <label className="block">
-                    {msg("Vertical focus")}
-                    <input
-                      type="range"
-                      min={0}
-                      max={100}
-                      value={w.y}
-                      onChange={(e) =>
-                        b({
-                          portrait_fit: {
-                            ...w,
-                            y: Number(e.target.value),
-                          },
-                        })
-                      }
-                      className="w-full accent-[var(--c-accent)]"
-                    />
-                  </label>
-                  <label className="block">
-                    {msg("Zoom")}
-                    <input
-                      type="range"
-                      min={1}
-                      max={2.5}
-                      step={0.05}
-                      value={w.zoom}
-                      onChange={(e) =>
-                        b({
-                          portrait_fit: {
-                            ...w,
-                            zoom: Number(e.target.value),
-                          },
-                        })
-                      }
-                      className="w-full accent-[var(--c-accent)]"
-                    />
-                  </label>
-                </div>
-              )}
-              {!avatar && (
-                <p className="mt-2 w-52 text-[11px] text-faint">
-                  {msg("Save the avatar once to enable portrait upload.")}
-                </p>
-              )}
-              <p className="mt-2 w-52 text-[11px] text-faint">
-                {msg("The written profile is authoritative; nothing is inferred from the image.")}
-              </p>
-            </div>
-            <div className="space-y-3">
-              <Field label={msg("Appearance (free-form)")}>
-                <Textarea
-                  value={c.appearance?.description ?? ``}
-                  onChange={(e) =>
-                    b({
-                      appearance: {
-                        ...c.appearance,
-                        description: e.target.value,
-                      },
-                    })
-                  }
-                  className="min-h-32"
-                />
-              </Field>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {APPEARANCE_KEYS.map((e) => (
-                  <Field label={e[0].toUpperCase() + e.slice(1)} key={e}>
-                    <Input
-                      value={c.appearance?.structured?.[e] ?? ``}
-                      onChange={(t) =>
-                        b({
-                          appearance: {
-                            ...c.appearance,
-                            structured: {
-                              ...(c.appearance?.structured ?? {}),
-                              [e]: t.target.value,
-                            },
-                          },
-                        })
-                      }
-                    />
-                  </Field>
-                ))}
-              </div>
-            </div>
-          </div>
-        </TabPanel>
-        <TabPanel value="story" className="p-5">
-          <div className="grid max-w-4xl gap-3">
-            {AVATAR_STORY_FIELDS().map((e) => (
-              <Field label={e.label} hint={e.hint} key={e.key}>
-                <Textarea
-                  value={String(c[e.key] ?? ``)}
-                  onChange={(t) =>
-                    b({
-                      [e.key]: t.target.value,
-                    })
-                  }
-                  style={{
-                    minHeight: `${(e.rows ?? 3) * 1.6}rem`,
+        {area(`appearance`, msg("Appearance"), null, 4, msg("Face, hair, build, clothes…"))}
+        {area(`abilities`, msg("Abilities"), null, 3, msg("Skills, powers, magic…"))}
+        {area(
+          `user_note`,
+          msg("Player note"),
+          msg("Anything else the AI should know, kept up to date as your character changes: new powers, items, relationships, instructions…"),
+          5,
+          ``,
+        )}
+
+        <section className="sc-av-card">
+          <button type="button" className="sc-av-toggle" onClick={() => setShowPreview(!showPreview)} aria-expanded={showPreview}>
+            <Icon.ScanEye className="size-4" /> {msg("Prompt preview")}
+            <span className="ml-auto text-[11px] text-faint">≈{query.data?.tokens ?? T} {msg("tokens")}</span>
+            <Icon.ChevronDown className={cn(`size-4 transition-transform`, showPreview && `rotate-180`)} />
+          </button>
+          {showPreview && (
+            <pre className="mt-2 whitespace-pre-wrap rounded-md border border-line bg-panel-2 p-3 text-[12px] text-muted">
+              {query.data?.text || msg("Nothing to inject yet.")}
+            </pre>
+          )}
+        </section>
+
+        <section className="sc-av-card">
+          <button type="button" className="sc-av-toggle" onClick={() => setShowAdvanced(!showAdvanced)} aria-expanded={showAdvanced}>
+            <Icon.Settings className="size-4" /> {msg("Advanced options")}
+            <Icon.ChevronDown className={cn(`ml-auto size-4 transition-transform`, showAdvanced && `rotate-180`)} />
+          </button>
+          {showAdvanced && (
+            <div className="mt-3 space-y-4">
+              <Field label={msg("Tags")} hint={msg("Comma-separated, only to sort your avatars.")}>
+                <Input
+                  value={f}
+                  onChange={(e) => {
+                    (p(e.target.value), v(true));
                   }}
                 />
               </Field>
-            ))}
-          </div>
-        </TabPanel>
-        <TabPanel value="abilities" className="p-5">
-          <div className="grid max-w-4xl gap-3">
-            {AVATAR_ABILITY_FIELDS.map((e) => (
-              <Field label={e.label} key={e.key}>
-                <Textarea
-                  value={String(c[e.key] ?? ``)}
-                  onChange={(t) =>
-                    b({
-                      [e.key]: t.target.value,
-                    })
-                  }
-                />
-              </Field>
-            ))}
-          </div>
-        </TabPanel>
-        <TabPanel value="sheet" className="p-5">
-          <AvatarStatsEditor p={c} upd={b} />
-        </TabPanel>
-        <TabPanel value="extra" className="p-5">
-          <div className="grid max-w-4xl gap-3">
-            <Field
-              label={msg("Additional character information")}
-              hint={msg("Anything else the narrator should know.")}
-            >
-              <Textarea
-                value={c.additional_info ?? ``}
-                onChange={(e) =>
-                  b({
-                    additional_info: e.target.value,
-                  })
-                }
-                className="min-h-60"
-              />
-            </Field>
-            <Field label={msg("Private notes (not sent to the model)")}>
-              <Textarea
-                value={c.notes ?? ``}
-                onChange={(e) =>
-                  b({
-                    notes: e.target.value,
-                  })
-                }
-              />
-            </Field>
-          </div>
-        </TabPanel>
-        <TabPanel value="preview" className="p-5">
-          <div className="max-w-3xl">
-            <p className="mb-2 text-xs text-muted">
-              {msg("This is how the profile is injected into the model's context (≈")}
-              {query.data?.tokens ?? `…`} {msg("tokens). Stats and inventory become the story's starting state.")}
-            </p>
-            <pre className="whitespace-pre-wrap rounded-md border border-line bg-panel-2 p-4 text-[12px] text-muted">
-              {query.data?.text || msg("Nothing to inject yet.")}
-            </pre>
-            {T > 6e3 && (
-              <Callout tone="warn" className="mt-3">
-                {msg("This profile is large; it will take a big share of smaller models' context budgets.")}
-              </Callout>
-            )}
-          </div>
-        </TabPanel>
-      </Tabs>
+              {avatar?.portrait_path && (
+                <div className="grid gap-2 text-xs text-muted sm:grid-cols-3">
+                  {[
+                    [`x`, msg("Horizontal framing"), 0, 100, 1],
+                    [`y`, msg("Vertical framing"), 0, 100, 1],
+                    [`zoom`, msg("Zoom"), 1, 2.5, 0.05],
+                  ].map(([k, label, min, max, step]) => (
+                    <label className="block" key={k}>
+                      {label}
+                      <input
+                        type="range"
+                        min={min}
+                        max={max}
+                        step={step}
+                        value={w[k]}
+                        onChange={(e) => b({ portrait_fit: { ...w, [k]: Number(e.target.value) } })}
+                        className="w-full accent-[var(--c-accent)]"
+                      />
+                    </label>
+                  ))}
+                </div>
+              )}
+              <div>
+                <p className="sc-av-label mb-2">{msg("Starting stats & inventory")}</p>
+                <AvatarStatsEditor p={c} upd={b} />
+              </div>
+              {avatar && (
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    onClick={async () => downloadJson(`${avatar.name}.avatar.json`, await apiGet(`/avatars/${avatar.id}/export`))}
+                  >
+                    <Icon.Download className="size-3.5" /> {msg("Export")}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    onClick={async () => {
+                      (await confirm({
+                        title: msg("Delete avatar “{{v0}}”?", { v0: avatar.name }),
+                        body: avatar.used_by.length
+                          ? msg("Stories using it keep a snapshot of the profile.", {})
+                          : msg("This cannot be undone.", {}),
+                        danger: true,
+                        confirmLabel: msg("Delete"),
+                      })) &&
+                        (await apiDelete(`/avatars/${avatar.id}?confirm=true`),
+                        queryClient.invalidateQueries({ queryKey: queryKeys.avatars }),
+                        navigate(`/avatars`));
+                    }}
+                  >
+                    <Icon.Trash className="size-3.5" /> {msg("Delete")}
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+      </div>
+      <div className="sc-av-save">
+        <Button variant="primary" loading={mutation.isPending} onClick={() => mutation.mutate()} disabled={!g && !!avatar} className="w-full max-w-2xl">
+          {g || !avatar ? (
+            <>
+              <Icon.Check className="size-4" /> {msg("Save")}
+            </>
+          ) : (
+            msg("Saved")
+          )}
+        </Button>
+      </div>
     </div>
   );
 }

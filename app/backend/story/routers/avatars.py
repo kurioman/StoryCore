@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from ..services.avatar_profile import simplify
 from ..deps import get_ctx, get_db
 from ..models import Avatar, Story, now_iso
 from ..services.context_builder import est_tokens, render_avatar
@@ -53,7 +54,8 @@ def list_avatars(db: Session = Depends(get_db)) -> dict[str, Any]:
 @router.post("/avatars")
 def create_avatar(body: AvatarIn, db: Session = Depends(get_db)) -> dict[str, Any]:
     _check(body.profile)
-    a = Avatar(name=body.name.strip() or "Unnamed", profile_json=body.profile, favourite=body.favourite, tags_json=body.tags)
+    profile, name = simplify(body.profile, body.name.strip() or "Unnamed")
+    a = Avatar(name=name or "Unnamed", profile_json=profile, favourite=body.favourite, tags_json=body.tags)
     db.add(a)
     db.flush()
     return avatar_out(db, a)
@@ -81,7 +83,9 @@ def update_avatar(aid: str, body: AvatarPatch, db: Session = Depends(get_db)) ->
         raise HTTPException(404, "Avatar not found")
     if body.profile is not None:
         _check(body.profile)
-        a.profile_json = body.profile
+        a.profile_json, simple_name = simplify(body.profile, a.name)
+        if simple_name and body.name is None:
+            a.name = simple_name
     if body.name is not None:
         a.name = body.name.strip() or a.name
     if body.favourite is not None:
@@ -206,7 +210,8 @@ def import_avatar(body: dict[str, Any], ctx: AppContext = Depends(get_ctx), db: 
         raise ValueError("Not a StoryCore avatar file.")
     profile = body.get("profile") or {}
     _check(profile)
-    a = Avatar(name=str(body.get("name") or "Imported avatar"), profile_json=profile, favourite=bool(body.get("favourite")),
+    profile, name = simplify(profile, str(body.get("name") or "Imported avatar"))
+    a = Avatar(name=name or "Imported avatar", profile_json=profile, favourite=bool(body.get("favourite")),
                tags_json=list(body.get("tags") or []))
     db.add(a)
     db.flush()

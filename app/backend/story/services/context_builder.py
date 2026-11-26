@@ -129,6 +129,12 @@ def render_avatar(av: dict[str, Any]) -> str:
               "secrets", "speech_style", "additional_info"):
         if p.get(k):
             lines.append(f"{k.replace('_', ' ').capitalize()}: {p[k]}")
+    # the simple avatar (services/avatar_profile.py): abilities, then the player's own note, kept up to date in play
+    if p.get("abilities"):
+        ab = str(p["abilities"])
+        lines.append(f"Abilities:\n{ab}" if "\n" in ab else f"Abilities: {ab}")
+    if p.get("user_note"):
+        lines.append("Player's note about this character (current, overrides older details):\n" + str(p["user_note"]))
     return "\n".join(lines)
 
 
