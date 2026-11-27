@@ -54,6 +54,17 @@ class EngineTest(unittest.TestCase):
         path += [reply("orientation"), user("I want the knight wing.")]  # the player's words settle the choice
         self.assertEqual(due_id(path), ("exam", False, "A duel."))
 
+    def test_opening_that_plays_an_event(self):
+        # v0.7.4: a starter's "events_played" (its prologue plays them) counts them as played from the opening
+        opening = [user("start", {"name": "start", "events_played": ["ceremony", "unknown"]}), reply()]
+        prog = story_events.progress(PACK, opening)
+        self.assertEqual(prog["done"], {"ceremony": 0})
+        self.assertEqual(prog["how"]["ceremony"], "opening")
+        path = opening + [user("I look around.")]
+        self.assertIsNone(due_id(path))  # the ceremony is not asked for again
+        path += [reply(), user("I wait.")]
+        self.assertEqual(due_id(path)[0], "orientation")
+
     def test_narrator_choice_mark_wins_and_firm_then_given_up(self):
         path = [user("Hello."), reply("ceremony", tags=["ceremony"], choices=[{"choice": "wing", "value": "magic"}])]
         for i in range(2):

@@ -93,7 +93,8 @@ def create_story(body: StoryCreate, db: Session = Depends(get_db)) -> dict[str, 
     s = Story(title=body.title.strip() or "Untitled story", world_id=body.world_id, active_avatar_id=av.id if av else None,
               avatar_snapshot_json={"name": av.name, "profile": av.profile_json} if av else None,
               settings_json={k: v for k, v in {
-                  "starter_id": body.starter_id, "starter_blueprint": blueprint, "tone": body.tone, "pacing": body.pacing,
+                  "starter_id": body.starter_id, "starter_blueprint": blueprint,
+                  "starter_events_played": [e for e in starter.get("events_played") or [] if isinstance(e, str)], "tone": body.tone, "pacing": body.pacing,
                   "output_length": body.output_length, "max_tokens": body.max_tokens, "agency_policy": body.agency_policy,
                   "content_prefs": body.content_prefs,
                   "model_profile_id": body.model_profile_id, "preset_id": body.preset_id,
@@ -456,7 +457,9 @@ def start_story(sid: str, ctx: AppContext = Depends(get_ctx), db: Session = Depe
     branch = story_tree.get_branch(db, s)
     ctx.resolve(db, ctx.story_profile_id(db, s))
     user = story_tree.append_message(db, s, branch, role="user", content="Begin the story.",
-                                     command_json={"name": "start", "expansion": expansion, "output_target": "chat"})
+                                     command_json={"name": "start", "expansion": expansion, "output_target": "chat",
+                                                   # planned events the opening already plays (services/story_events)
+                                                   "events_played": cfg.get("starter_events_played") or []})
     ph = story_tree.append_message(db, s, branch, role="assistant", content="", status="streaming")
     manifest = turns._start_generation(ctx, db, s, branch, ph)
     return {"user_message_id": user.id, "assistant_message_id": ph.id, "context": manifest}

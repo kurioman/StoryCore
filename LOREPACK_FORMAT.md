@@ -184,6 +184,10 @@ wizard win). Keys: `location`, `time` (e.g. `"09:00"`), `weather`, `weekday`, `d
   "scene": { "location": "Pure White Space", "time": "09:00", "day": 1, "month": 3, "year": 1301, "present": ["lily"] } }
 ```
 
+Optional `events_played` (list of event ids from `events`): planned events that the opening's prologue already plays
+(e.g. `["entrance_ceremony"]` when the prologue is the ceremony). They count as played from the first reply, so the
+narrator is never asked to play them again, and they appear in the Journal.
+
 Optional `choose_location` (`true`/`false`, default `false`): when `true`, the new-game window asks the player where
 the story starts, from the pack's locations (or "Let the narrator choose"). The player's choice wins over
 `scene.location`. Leave it out for an opening that must start in one place.

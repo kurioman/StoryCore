@@ -77,6 +77,11 @@ def progress(pack: dict[str, Any], path: list[Message]) -> dict[str, Any]:
             continue
         if m.role == "user":
             if m.command_json:
+                # v0.7.4: an opening whose prologue already plays planned events (pack.json starter "events_played")
+                if m.command_json.get("name") == "start":
+                    for eid in m.command_json.get("events_played") or []:
+                        if eid in events and eid not in done:
+                            done[eid], how[eid] = 0, "opening"
                 continue
             turns += 1
             for cid, c in choices.items():
