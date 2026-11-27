@@ -61,6 +61,19 @@ class PrewrittenOpeningTest(AppTestCase):
         self.assertIn("The chill of dawn", everything)  # the opening is in the story so far
         self.assertNotIn("YOUR REPLY FOR THIS OPENING", everything)
 
+    def test_hero_chronicle_openings_are_prewritten(self):
+        w = self.world("hero_chronicle")
+        for starter in ("the_hero_summoned", "the_hero_and_the_demon_king"):
+            s = self.post("/stories", {"title": starter, "world_id": w["id"], "starter_id": starter})
+            CALLS.clear()
+            r = self.post(f"/stories/{s['id']}/start")
+            m = self.wait_reply(s["id"], r["assistant_message_id"])
+            self.assertTrue(r.get("prewritten"))
+            self.assertFalse(CALLS)
+            self.assertTrue(m["content"].startswith("───When consciousness returned"))
+            self.assertTrue(m["content"].endswith("\"Whether you take it or not is up to you.\""))
+            self.assertNotIn("[Lily:", m["content"])
+
 
 if __name__ == "__main__":
     unittest.main()

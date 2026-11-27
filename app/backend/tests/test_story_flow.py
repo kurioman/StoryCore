@@ -14,7 +14,7 @@ class StoryFlowTest(AppTestCase):
         start = self.post(f"/stories/{sid}/start")
         opening = self.wait_reply(sid, start["assistant_message_id"])
         self.assertEqual(opening["status"], "complete")
-        self.assertIn("Mock provider", opening["content"])
+        self.assertIn("Whether you take it or not is up to you.", opening["content"])  # v0.7.6: the author's opening
         r = self.client.post(f"/api/stories/{sid}/start")
         self.assertEqual(r.status_code, 400, "a story can only start once")
 
