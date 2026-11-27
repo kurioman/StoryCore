@@ -9,12 +9,12 @@
     {
       "term": "Aura",
       "id": "aura",
-      "definition": "Internally refined power used by martial artists to enhance body and weapons."
+      "definition": "Mana refined inside the body by swordsmen; enhances body and weapons. Becomes visible Sword Aura from Master rank."
     },
     {
       "term": "Circle",
       "id": "magic_circle_rank",
-      "definition": "A rank of a mage's stabilized mana construct and spellcraft mastery."
+      "definition": "A mage's rank, from 1-Circle to 9-Circle. 7-Circle = Archmage (equal to a Master swordsman); 9-Circle = Grand Sage."
     },
     {
       "term": "Divinity",
@@ -29,47 +29,87 @@
     {
       "term": "Saintess",
       "id": "saintess",
-      "definition": "An exceptional mortal conduit for divine power; Aria is described this way."
+      "definition": "An exceptional mortal conduit of divine power. Aria is the current Saintess."
     },
     {
       "term": "Four Celestials",
       "id": "four_celestials",
-      "definition": "Ethera, Emily, Carne and Seriel, described as the empire's four publicly known strongest figures."
+      "definition": "Ethera, Emily, Carne and Seriel: the four strongest publicly recognized people of the human realm, living legends with immense authority."
     },
     {
       "term": "Apostles",
       "id": "apostles",
-      "definition": "The highest ranking members of the Demon God Cult, each a vessel of a fragmented aspect of Delphirem according to the public adaptation."
+      "definition": "The highest-ranking members of the Demon God Cult; each is the vessel of a fragmented aspect of Delphirem (Despair, Void, Desire, Grief)."
     },
     {
       "term": "Sin Bishops",
       "id": "sin_bishops",
-      "definition": "A second tier in the Demon God Cult associated with the seven deadly sins."
+      "definition": "The second tier of the Demon God Cult, one for each of the seven deadly sins, granted 7-Circle-level power through their pacts."
     },
     {
       "term": "White Rose Society",
       "id": "white_rose_society",
-      "definition": "Elite social circle tied to Magic Department students and academy ceremonies."
+      "definition": "The leading social circle of the Magic Department, made of high-level students; it organizes galas, balls and ceremonies. President: Elise Reihart; Vice President: Lucia Caldwin."
     },
     {
       "term": "Blue Knights",
       "id": "blue_knights",
-      "definition": "Knight Department combat and escort circle."
+      "definition": "The main combat and escort circle of the Knight Department, nobles and commoners together: campus security, mock battles and escort missions."
     },
     {
       "term": "Mirabel / Maribel",
       "id": "mirabel",
-      "definition": "A Theology Department student from Dominus; name spelling varies across public/community sources."
+      "definition": "A first-year Theology student from Dominus who dreams of becoming the Holy Maiden. Also spelled Maribel."
     },
     {
       "term": "Delphirem / Delpirem",
       "id": "delphirem",
-      "definition": "Demon God sought by the cult; spelling varies in sources."
+      "definition": "The Demon God, sealed in the Abyss Zone, whom the cult seeks to resurrect. Also spelled Delpirem."
     },
     {
       "term": "Eye of Insight",
       "id": "eye_of_insight",
-      "definition": "Isabel's special ability. Exact boundaries and effects are not fully verified."
+      "definition": "Isabel's innate ability. Its exact powers are left to the narrator and revealed gradually."
+    },
+    {
+      "term": "Master Pinnacle",
+      "id": "master_pinnacle",
+      "definition": "Title of the single strongest living Master of the Path of the Sword. Only one holder at a time."
+    },
+    {
+      "term": "Compound-Realm",
+      "id": "compound_realm",
+      "definition": "Using martial Aura and magic simultaneously at full mastery. Only Emily is known to master it."
+    },
+    {
+      "term": "Sword Aura",
+      "id": "sword_aura",
+      "definition": "Aura made visible as energy, from Master rank onward."
+    },
+    {
+      "term": "Holy Maiden",
+      "id": "holy_maiden",
+      "definition": "A title of the Holy Kingdom of Dominus, reserved for the most powerful combatant of its Theology."
+    },
+    {
+      "term": "Acolytes",
+      "id": "acolytes",
+      "definition": "The lowest rank of the Demon God Cult: minions bound by demonic pacts, some hidden among the academy's students."
+    },
+    {
+      "term": "Priests",
+      "id": "cult_priests",
+      "definition": "Upper, Mid and Lower Priests: the cult's ranks between the Sin Bishops and the Acolytes."
+    },
+    {
+      "term": "Abyss Zone",
+      "id": "abyss_zone",
+      "definition": "The corrupted far east of Aethermere, prison of Delphirem and source of Miasma and demonic beasts."
+    },
+    {
+      "term": "Holy Kingdom of Dominus",
+      "id": "dominus",
+      "definition": "The theocracy neighbouring the Empire, worshipping only Lily; capital Lumina."
     }
   ]
 }

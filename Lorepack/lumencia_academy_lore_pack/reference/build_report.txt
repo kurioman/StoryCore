@@ -1,8 +1,0 @@
-Build report
-============
-Build date: 2026-10-29
-JSON files: 18
-Character/deity/cult-member records: 32
-Unique character/entity IDs: 32
-JSON validation: passed
-Source ID validation: passed

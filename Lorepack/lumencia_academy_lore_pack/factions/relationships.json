@@ -5,64 +5,37 @@
       "from": "valenheart_duchy",
       "to": "caldwin_duchy",
       "type": "longstanding_rivalry",
-      "description": "The leading martial house and the leading mage house compete for prestige and influence.",
-      "confidence": "high",
-      "source_ids": [
-        "dreamrunner_zeph_lumencia",
-        "reddit_character_profiles"
-      ]
+      "description": "The leading martial house and the leading mage house compete for prestige and influence."
     },
     {
       "from": "anastasia",
       "to": "isabel",
       "type": "succession_rivalry",
-      "description": "The first and second imperial princesses compete to build political support. The exact rules of succession are not documented.",
-      "confidence": "high",
-      "source_ids": [
-        "reddit_character_profiles"
-      ]
+      "description": "The First and Second Princesses, sisters and the only two heirs, compete to build political support for the throne."
     },
     {
       "from": "lumencia_academy",
       "to": "imperial_family",
       "type": "politically_entangled_with",
-      "description": "The academy is officially neutral but serves as a place to recruit capable allies and develop influence.",
-      "confidence": "high",
-      "source_ids": [
-        "dreamrunner_zeph_lumencia",
-        "reddit_character_profiles"
-      ]
+      "description": "The academy is officially neutral but serves as a place to recruit capable allies and develop influence."
     },
     {
       "from": "dominus_holy_kingdom",
       "to": "lumencia_empire",
       "type": "neighboring_polity_with_diplomatic_contact",
-      "description": "Dominus sends representatives and students to the academy; broader geopolitical details remain open.",
-      "confidence": "medium",
-      "source_ids": [
-        "dreamrunner_zeph_lumencia"
-      ]
+      "description": "Dominus sends representatives and students to the academy, such as the Saintess Aria, because of divine oracles."
     },
     {
       "from": "demon_god_cult",
       "to": "lumencia_empire",
       "type": "latent_threat",
-      "description": "The cult seeks Delphirem's return and may infiltrate or attack imperial interests; exact events are campaign-dependent.",
-      "confidence": "high",
-      "source_ids": [
-        "dreamrunner_zeph_lumencia"
-      ]
+      "description": "The cult seeks Delphirem's return, infiltrates imperial institutions (the academy first) and strikes during major events."
     },
     {
       "from": "demon_god_cult",
       "to": "dominus_holy_kingdom",
       "type": "theological_opposition",
-      "description": "The cult's demonic power contrasts with Dominus's devotion to Lily and holy power.",
-      "confidence": "medium",
-      "source_ids": [
-        "dreamrunner_zeph_lumencia",
-        "reddit_calendar_power"
-      ]
+      "description": "The cult's demonic power contrasts with Dominus's devotion to Lily and holy power."
     }
   ]
 }

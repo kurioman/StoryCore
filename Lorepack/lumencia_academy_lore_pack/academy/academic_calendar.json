@@ -1,16 +1,10 @@
 {
   "schema_version": "1.0.0",
-  "title": "Community-reconstructed Academic Calendar",
-  "canon_status": "community_reconstruction",
-  "confidence": "medium",
-  "source_ids": [
-    "reddit_calendar_power"
-  ],
-  "warning": "This is a useful scheduling scaffold published by a community member, not verified as a locked official calendar. Treat dates as defaults that can flex with the story.",
+  "title": "Academic Calendar of Lumencia Academy",
   "imperial_year": {
     "starts": "March 1",
     "ends": "February 28/29",
-    "note": "Imperial year is described as running March through February."
+    "note": "The imperial year runs from March to February."
   },
   "terms": [
     {
@@ -44,8 +38,7 @@
   ],
   "weekly_schedule": {
     "classes": "Monday-Friday",
-    "weekends": "Clubs, missions and personal training may occur Saturday-Sunday",
-    "canon_status": "community_reconstruction"
+    "weekends": "Clubs, missions and personal training may occur Saturday-Sunday"
   },
   "events": [
     {
@@ -71,7 +64,7 @@
     {
       "id": "field_expedition_one",
       "timing": "Late June to early July",
-      "description": "Supervised outing outside Asterion; destination can vary."
+      "description": "Supervised outing outside Asterion; the narrator chooses the destination."
     },
     {
       "id": "summer_mission_board",
@@ -101,7 +94,7 @@
     {
       "id": "imperial_audience",
       "timing": "January",
-      "description": "Top students may be presented to the Emperor and invited to imperial events."
+      "description": "Top students may be presented to the reigning monarch and invited to imperial events."
     }
   ],
   "year_progression": [
@@ -109,19 +102,20 @@
       "year": 1,
       "focus": "Foundation, fundamentals, ranking and identity",
       "typical_age": 20,
-      "note": "Community reconstruction; age and expected skills are not verified official rules."
+      "note": "Typical age only. Students are adults, usually between 20 and 24."
     },
     {
       "year": 2,
       "focus": "Specialization, political involvement and external exposure",
       "typical_age": 21,
-      "note": "Community reconstruction."
+      "note": "Typical age only. Students are adults, usually between 20 and 24."
     },
     {
       "year": 3,
       "focus": "Advanced mastery, leadership and post-academy positioning",
       "typical_age": 22,
-      "note": "Community reconstruction."
+      "note": "Typical age only. Students are adults, usually between 20 and 24."
     }
-  ]
+  ],
+  "age_rule": "Every student is an adult, usually 20 to 24 years old. Instructors and other adults are usually 30 to 40. Exception: the Headmaster Emily is 28."
 }

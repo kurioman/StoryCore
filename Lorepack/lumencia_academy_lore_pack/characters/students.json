@@ -18,7 +18,9 @@
       "power": {
         "system": "martial_aura",
         "rank": "Expert Mid",
-        "abilities": []
+        "abilities": [
+          "Valenheart family sword style (details left to the narrator)"
+        ]
       },
       "role": "1st-year Knight student; Youngest daughter of the Valenheart Duchy",
       "personality_traits": [
@@ -26,9 +28,11 @@
         "honest",
         "bright",
         "hardworking",
-        "direct"
+        "direct",
+        "pure",
+        "frank"
       ],
-      "motivation": "Wants to achieve genuine strength through personal merit, rather than relying only on family honour.",
+      "motivation": "Seeks pure strength rather than simply looking after her family's honour.",
       "story_functions": [
         "martial rival or training partner",
         "bridge between noble prestige and personal merit"
@@ -37,15 +41,27 @@
         "valenheart_duchy",
         "lumencia_academy"
       ],
-      "notes": [],
+      "notes": [
+        "Speaks frankly and enthusiastically."
+      ],
       "relationships": [
         {
           "target_id": "laris",
-          "type": "target of subtle jealousy or following"
+          "type": "secret jealousy",
+          "note": "Laris comes from a lower branch of the family yet is better than her in combat. This gives Lilia a feeling of inferiority she hates. She hides it; Laris does not notice."
+        },
+        {
+          "target_id": "carne",
+          "type": "hatred and fear, mixed with admiration",
+          "note": "Hates and fears Carne, but admires her formidable combat power."
         }
       ],
-      "hidden": [],
-      "never": []
+      "hidden": [
+        "She wants to become stronger so that one day she is powerful enough to expel Carne from her family, whom she judges far too dangerous."
+      ],
+      "never": [
+        "Never cheats, and never wins in a dishonourable way."
+      ]
     },
     {
       "id": "isabel",
@@ -68,7 +84,7 @@
           "Eye of Insight"
         ]
       },
-      "role": "1st-year Knight student; Second imperial princess",
+      "role": "1st-year Knight student; Second Princess of the Empire",
       "personality_traits": [
         "arrogant",
         "calculating",
@@ -87,16 +103,24 @@
         "lumencia_academy"
       ],
       "notes": [
-        "The Eye of Insight is recurring, but its precise capabilities should be revealed conservatively; claims about lie detection or mana perception vary by playthrough."
+        "Sometimes speaks indirectly and informally.",
+        "Enrolled at the academy specifically to build a faction.",
+        "Born with the 'Eye of Insight'.",
+        "The exact powers of the Eye of Insight are left to the narrator; reveal them gradually."
       ],
       "relationships": [
         {
           "target_id": "anastasia",
-          "type": "succession rivalry"
+          "type": "succession rivalry",
+          "note": "Her older sister, who openly despises her."
         }
       ],
-      "hidden": [],
-      "never": []
+      "hidden": [
+        "If the protagonist is male, she slowly falls in love with him, and becomes jealous."
+      ],
+      "never": [
+        "Never openly submits to Anastasia, and never admits a weakness in public."
+      ]
     },
     {
       "id": "sera",
@@ -113,15 +137,18 @@
       "power": {
         "system": "martial_aura",
         "rank": "Expert Low",
-        "abilities": []
+        "abilities": [
+          "Street-fighting instincts and effective dirty tricks"
+        ]
       },
-      "role": "1st-year Knight student; Commoner; reportedly grew up on the streets",
+      "role": "1st-year Knight student; Commoner",
       "personality_traits": [
         "cynical",
         "realistic",
         "prickly",
         "sarcastic",
-        "perceptive"
+        "perceptive",
+        "acerbic"
       ],
       "motivation": "Survive and improve her position through practical skill rather than status.",
       "story_functions": [
@@ -132,10 +159,20 @@
       "faction_ids": [
         "lumencia_academy"
       ],
-      "notes": [],
-      "relationships": [],
-      "hidden": [],
-      "never": []
+      "notes": [
+        "Tends to be sarcastic, but her observations are usually relevant.",
+        "Hates nobles.",
+        "Her background before the academy is left to the narrator."
+      ],
+      "relationships": [
+        "none"
+      ],
+      "hidden": [
+        "none"
+      ],
+      "never": [
+        "Never flatters a noble."
+      ]
     },
     {
       "id": "laris",
@@ -151,10 +188,12 @@
       },
       "power": {
         "system": "martial_aura",
-        "rank": "Expert Low",
-        "abilities": []
+        "rank": "Expert Mid",
+        "abilities": [
+          "Precise, economical sword style with no wasted movement"
+        ]
       },
-      "role": "1st-year Knight student; Member of a secondary branch of the Valenheart family",
+      "role": "1st-year Knight student; Member of a fallen branch of the Valenheart family (the cause of its fall is left to the narrator)",
       "personality_traits": [
         "cold",
         "rational",
@@ -162,7 +201,7 @@
         "decisive",
         "terse"
       ],
-      "motivation": "Wants to prove that merit can matter more than proximity to the main bloodline.",
+      "motivation": "Driven to prove that merit matters more than a direct blood tie.",
       "story_functions": [
         "reserved rival",
         "disciplined combatant",
@@ -172,15 +211,24 @@
         "valenheart_duchy",
         "lumencia_academy"
       ],
-      "notes": [],
+      "notes": [
+        "Speaks little and is extremely decisive.",
+        "Stronger than Lilia: she beats her in every duel.",
+        "Follows Lilia everywhere."
+      ],
       "relationships": [
         {
           "target_id": "lilia_valenheart",
-          "type": "subtle jealousy and following"
+          "type": "follows her everywhere",
+          "note": "Stronger than Lilia and beats her in every duel. Does not notice that Lilia is secretly jealous of her."
         }
       ],
-      "hidden": [],
-      "never": []
+      "hidden": [
+        "She has been tasked with protecting Lilia discreetly."
+      ],
+      "never": [
+        "none"
+      ]
     },
     {
       "id": "anastasia",
@@ -196,10 +244,12 @@
       },
       "power": {
         "system": "martial_aura",
-        "rank": "Master Low",
-        "abilities": []
+        "rank": "Master Initiate",
+        "abilities": [
+          "Visible Sword Aura, golden in color, radiating a royal aura"
+        ]
       },
-      "role": "3rd-year Knight student; First imperial princess; Student Council President; Key member of the Blue Knights",
+      "role": "3rd-year Knight student; First Princess of the Empire; Student Council President; Key member of the Blue Knights",
       "personality_traits": [
         "dignified",
         "charismatic",
@@ -218,25 +268,34 @@
       "faction_ids": [
         "imperial_family",
         "lumencia_academy",
-        "student_council"
+        "student_council",
+        "blue_knights"
       ],
       "notes": [
         "Strongest student of the Knight Department.",
         "Regularly and silently observes Knight Department classes to spot promising students.",
-        "Openly despises and criticizes Isabel whenever they interact."
+        "Openly despises and criticizes Isabel whenever they interact.",
+        "Speaks concisely and with authority.",
+        "Currently competing with her sister for the throne; uses the academy as an important power base."
       ],
       "relationships": [
         {
           "target_id": "isabel",
-          "type": "succession rivalry"
+          "type": "succession rivalry",
+          "note": "Her younger sister, whom she despises."
         },
         {
           "target_id": "lucia_caldwin",
-          "type": "political rivalry or competition"
+          "type": "political rivalry",
+          "note": "Her Vice President on the Student Council, and her main rival."
         }
       ],
-      "hidden": [],
-      "never": []
+      "hidden": [
+        "none"
+      ],
+      "never": [
+        "Never friendly toward Isabel."
+      ]
     },
     {
       "id": "rena",
@@ -252,18 +311,23 @@
       },
       "power": {
         "system": "mana_and_magic_circles",
-        "rank": "7-Circle; some reports say 7th/8th circle",
-        "abilities": []
+        "rank": "7-Circle (Archmage)",
+        "abilities": [
+          "Silent casting",
+          "Reads and predicts mana flow"
+        ]
       },
-      "role": "1st-year Magic student; Commoner; first-year valedictorian in the public reference",
+      "role": "1st-year Magic student; Commoner; first-year valedictorian; apprentice of the Tower Master",
       "personality_traits": [
         "genius",
         "lazy",
         "curious",
         "slow-speaking",
-        "sleepy"
+        "sleepy",
+        "cute",
+        "small"
       ],
-      "motivation": "Prefers minimum effort for maximum result and values sleep; curiosity can pull her into research.",
+      "motivation": "Lives by the philosophy of 'minimum effort, maximum results'; loves taking naps.",
       "story_functions": [
         "prodigy",
         "comic relief",
@@ -273,16 +337,22 @@
         "lumencia_academy"
       ],
       "notes": [
-        "Exact circle count varies between 7 and 8 in community reports. Use 7 as baseline and keep the discrepancy visible."
+        "Speaks slowly and yawns often.",
+        "A first-year Archmage is extraordinary; how much the academy knows about her true level, and how it reacts, is left to the narrator."
       ],
       "relationships": [
         {
           "target_id": "ethera",
-          "type": "apprentice of tower master"
+          "type": "apprentice",
+          "note": "Apprentice of the Tower Master."
         }
       ],
-      "hidden": [],
-      "never": []
+      "hidden": [
+        "Sent to the academy by her master Ethera to find and recruit potential great magical talents."
+      ],
+      "never": [
+        "Never makes a useless effort; never runs if she can avoid it."
+      ]
     },
     {
       "id": "sia",
@@ -301,7 +371,7 @@
         "rank": "4-Circle",
         "abilities": [
           "Specialization: spirit magic",
-          "Exceptional affinity with four elemental spirits"
+          "Can summon four elemental spirits"
         ]
       },
       "role": "1st-year Magic student; Commoner",
@@ -321,11 +391,18 @@
         "lumencia_academy"
       ],
       "notes": [
-        "Names and identities of her four spirits vary between playthroughs and are intentionally not hard-coded here."
+        "Has an exceptional spiritual affinity that defies common sense; can summon four elemental spirits.",
+        "The names and nature of her four spirits are left free to the narrator and may differ in each story."
       ],
-      "relationships": [],
-      "hidden": [],
-      "never": []
+      "relationships": [
+        "none"
+      ],
+      "hidden": [
+        "Destined to become the Host of the Spirits: an exceptionally powerful mage, able to join the ranks of the Celestials if her story progresses far enough."
+      ],
+      "never": [
+        "Never mistreats a spirit."
+      ]
     },
     {
       "id": "serena_caldwin",
@@ -344,7 +421,9 @@
       "power": {
         "system": "mana_and_magic_circles",
         "rank": "4-Circle",
-        "abilities": []
+        "abilities": [
+          "Precise, theoretical magic: more brilliant in analysis than in raw power"
+        ]
       },
       "role": "1st-year Magic student; Second daughter of the Caldwin Duchy",
       "personality_traits": [
@@ -354,27 +433,38 @@
         "quiet",
         "terse"
       ],
-      "motivation": "Wants to establish her own worth while living under constant comparison to her older sister Lucia.",
+      "motivation": "Feels heavily burdened by constant comparisons with her older sister, Lucia, and wants to establish her own worth.",
       "story_functions": [
         "underestimated student",
         "family tension",
-        "quiet intellectual ally"
+        "quiet intellectual ally",
+        "love interest for the protagonist"
       ],
       "faction_ids": [
         "caldwin_duchy",
         "lumencia_academy"
       ],
       "notes": [
-        "A fondness for romance novels is anecdotal and should not be treated as essential canon."
+        "Loves romance novels.",
+        "Will try to flirt with the protagonist as the story goes on."
       ],
       "relationships": [
         {
           "target_id": "lucia_caldwin",
-          "type": "younger sister in older sister shadow"
+          "type": "younger sister in her older sister's shadow"
+        },
+        {
+          "target_id": "elena_caldwin",
+          "type": "niece",
+          "note": "Elena is her aunt, from the distant branch of the family."
         }
       ],
-      "hidden": [],
-      "never": []
+      "hidden": [
+        "none"
+      ],
+      "never": [
+        "none"
+      ]
     },
     {
       "id": "chloe_brightwell",
@@ -392,8 +482,10 @@
       },
       "power": {
         "system": "mana_and_magic_circles",
-        "rank": "2-Circle (reported; practical magical ability may be secondary to her trade role)",
-        "abilities": []
+        "rank": "2-Circle",
+        "abilities": [
+          "Small magic useful for trade: appraising an item, sealing or hiding goods"
+        ]
       },
       "role": "1st-year Magic student; Daughter of the Brightwell merchant family",
       "personality_traits": [
@@ -401,9 +493,10 @@
         "clever",
         "cunning",
         "pragmatic",
-        "transactional"
+        "transactional",
+        "hypocritical"
       ],
-      "motivation": "Prioritizes trade, profit, information and leverage over pure magical scholarship.",
+      "motivation": "Driven by desire; cares more about making money than mastering magic.",
       "story_functions": [
         "merchant contact",
         "information broker",
@@ -414,11 +507,22 @@
         "lumencia_academy"
       ],
       "notes": [
-        "Some players emphasize commerce more than spellcasting; do not assume she is a combat-focused mage."
+        "Not a combat mage.",
+        "Runs illicit trades inside the academy."
       ],
-      "relationships": [],
-      "hidden": [],
-      "never": []
+      "relationships": [
+        {
+          "target_id": "elise_reihart",
+          "type": "competitor and occasional partner",
+          "note": "They compete, and sometimes cooperate, on the market of information."
+        }
+      ],
+      "hidden": [
+        "She may be a hidden Acolyte of the Demon God Cult. The narrator decides in each story whether she is or not. If she is, her contact and patron in the cult is Aris, the Sin Bishop of Greed."
+      ],
+      "never": [
+        "Never gives anything for free."
+      ]
     },
     {
       "id": "lucia_caldwin",
@@ -436,16 +540,21 @@
       },
       "power": {
         "system": "mana_and_magic_circles",
-        "rank": "6-Circle",
-        "abilities": []
+        "rank": "7-Circle (Archmage)",
+        "abilities": [
+          "Silent casting",
+          "Reads and predicts mana flow",
+          "Fast and powerful elemental magic"
+        ]
       },
-      "role": "2nd-year Magic student; Eldest daughter of the Caldwin Duchy; Student Council Vice President",
+      "role": "2nd-year Magic student; Eldest daughter of the Caldwin Duchy; Student Council Vice President; White Rose Society Vice President",
       "personality_traits": [
         "arrogant",
         "brilliant",
         "irritable",
         "sarcastic",
-        "haughty"
+        "haughty",
+        "genius"
       ],
       "motivation": "Maintain her standing as a top mage and influential academy figure.",
       "story_functions": [
@@ -456,21 +565,41 @@
       "faction_ids": [
         "caldwin_duchy",
         "lumencia_academy",
-        "student_council"
+        "student_council",
+        "white_rose_society"
       ],
-      "notes": [],
+      "notes": [
+        "Speaks sarcastically and haughtily.",
+        "Anastasia's main rival.",
+        "Often avoids her younger sister Serena."
+      ],
       "relationships": [
         {
           "target_id": "serena_caldwin",
-          "type": "older sister who often dismisses younger sister"
+          "type": "older sister who often dismisses her younger sister"
         },
         {
           "target_id": "anastasia",
-          "type": "political competition"
+          "type": "political rivalry",
+          "note": "Anastasia is her President on the Student Council."
+        },
+        {
+          "target_id": "elena_caldwin",
+          "type": "niece",
+          "note": "Elena is her aunt."
+        },
+        {
+          "target_id": "elise_reihart",
+          "type": "good relationship",
+          "note": "Elise is her President in the White Rose Society."
         }
       ],
-      "hidden": [],
-      "never": []
+      "hidden": [
+        "none"
+      ],
+      "never": [
+        "Never admits a mistake in public."
+      ]
     },
     {
       "id": "elise_reihart",
@@ -489,16 +618,19 @@
       "power": {
         "system": "mana_and_magic_circles",
         "rank": "5-Circle",
-        "abilities": []
+        "abilities": [
+          "Discreet communication and listening magic (messages, small perception spells)"
+        ]
       },
-      "role": "2nd-year Magic student; Daughter of the Reihart Marquisate; White Rose Society Vice President",
+      "role": "2nd-year Magic student; Daughter of the Reihart Marquisate; White Rose Society President",
       "personality_traits": [
         "sociable",
         "perceptive",
         "pragmatic",
-        "kind"
+        "kind",
+        "very sociable"
       ],
-      "motivation": "Maintain relationships and influence through social knowledge; precise long-term goals are not established.",
+      "motivation": "Maintain her relationships and influence through what she knows about people.",
       "story_functions": [
         "rumour network",
         "social connector",
@@ -509,15 +641,34 @@
         "lumencia_academy",
         "white_rose_society"
       ],
-      "notes": [],
-      "relationships": [],
-      "hidden": [],
-      "never": []
+      "notes": [
+        "The centre of the academy's social network: every rumour passes through her."
+      ],
+      "relationships": [
+        {
+          "target_id": "chloe_brightwell",
+          "type": "competitor and occasional partner",
+          "note": "They compete, and sometimes cooperate, on the market of information."
+        },
+        {
+          "target_id": "lucia_caldwin",
+          "type": "good relationship",
+          "note": "Lucia is her Vice President in the White Rose Society."
+        }
+      ],
+      "hidden": [
+        "She knows far more than she shows, and keeps some information as a bargaining chip."
+      ],
+      "never": [
+        "Never reveals her sources."
+      ]
     },
     {
       "id": "aria",
       "name": "Aria",
-      "aliases": [],
+      "aliases": [
+        "Saintess"
+      ],
       "type": "student",
       "department_id": "theology_department",
       "year": 3,
@@ -529,30 +680,51 @@
       "power": {
         "system": "divinity",
         "rank": "Saintess",
-        "abilities": []
+        "abilities": [
+          "Deep healing",
+          "Holy barriers",
+          "Purification",
+          "Anti-demon arts"
+        ]
       },
-      "role": "3rd-year Theology student; Representative of the Holy Kingdom of Dominus; healer",
+      "role": "3rd-year Theology student; Representative of the Holy Kingdom of Dominus; Healer; Saintess; teaches Theology to first- and second-years",
       "personality_traits": [
-        "compassionate",
-        "gentle",
+        "compassionate but calculating",
         "poised",
-        "strategic",
-        "dual-natured"
+        "confident",
+        "dual-natured",
+        "gentle"
       ],
-      "motivation": "Her academy attendance is associated with a divine oracle; the exact prophecy is not documented.",
+      "motivation": "Enrolled at the academy because of a divine prophecy; the exact prophecy is not fixed.",
       "story_functions": [
         "healer",
         "religious envoy",
-        "sign of divine interest in the empire"
+        "Instructor of theology",
+        "Ally",
+        "Key character for the Prophecy plotline"
       ],
       "faction_ids": [
         "dominus_holy_kingdom",
         "lumencia_academy"
       ],
-      "notes": [],
-      "relationships": [],
-      "hidden": [],
-      "never": []
+      "notes": [
+        "Her aura and personality make everyone appreciate her; when she speaks, people feel forgiven for their sins.",
+        "Speaks softly and calmly, but can be insistent when necessary."
+      ],
+      "relationships": [
+        {
+          "target_id": "mirabel",
+          "type": "protective",
+          "note": "She deeply cares for Mirabel."
+        }
+      ],
+      "hidden": [
+        "She was sent to the academy to find and dismantle the Demon God Cult; she is secretly hunting it."
+      ],
+      "never": [
+        "Never mean or hostile to anyone, except members of the Demon God Cult.",
+        "Never gets angry."
+      ]
     },
     {
       "id": "mirabel",
@@ -570,8 +742,11 @@
       },
       "power": {
         "system": "martial_aura_and_divinity",
-        "rank": "Expert Low; aspiring holy combatant",
-        "abilities": []
+        "rank": "Expert Low",
+        "abilities": [
+          "Faith-reinforced strikes",
+          "Small combat blessings"
+        ]
       },
       "role": "1st-year Theology student; Student from the Holy Kingdom of Dominus",
       "personality_traits": [
@@ -580,24 +755,38 @@
         "devoted",
         "playful",
         "teasing",
-        "emotional"
+        "emotional",
+        "a little spoiled"
       ],
-      "motivation": "Aspires to become a holy knight or inquisitor.",
+      "motivation": "Dreams of becoming the Holy Maiden: a title reserved for the most powerful combatant of the Holy Kingdom's Theology.",
       "story_functions": [
         "combat-oriented theologian",
         "energetic ally",
-        "religious perspective on danger"
+        "religious perspective on danger",
+        "potential love interest for the protagonist"
       ],
       "faction_ids": [
         "dominus_holy_kingdom",
         "lumencia_academy"
       ],
       "notes": [
-        "The spelling Mirabel/Maribel varies. This pack uses Mirabel as the primary ID and retains Maribel as an alias."
+        "Speaks fast, in a radiant and emotional way.",
+        "Works as a combat theologian.",
+        "Seems charmed by the protagonist."
       ],
-      "relationships": [],
-      "hidden": [],
-      "never": []
+      "relationships": [
+        {
+          "target_id": "aria",
+          "type": "admiration",
+          "note": "Admires Aria like an older sister."
+        }
+      ],
+      "hidden": [
+        "none"
+      ],
+      "never": [
+        "Never abandons someone in danger."
+      ]
     }
   ]
 }

@@ -5,12 +5,6 @@
   "type": "imperial academy",
   "description": "The most prestigious academy in the Lumencia Empire, operating under direct imperial jurisdiction. It is officially politically neutral, but students and external powers use it to build influence.",
   "location_id": "asterion",
-  "source_ids": [
-    "dreamrunner_zeph_lumencia",
-    "reddit_character_profiles"
-  ],
-  "canon_status": "recurring_reference",
-  "confidence": "high",
   "institutional_principles": [
     "Education is nominally open to nobles and commoners.",
     "Actual access, reputation and opportunity remain affected by money, lineage and political networks.",
@@ -57,10 +51,11 @@
         "religious doctrine",
         "anti-demonic operations"
       ],
-      "culture": "Associated with the Holy Kingdom of Dominus and its traditions. The exact departmental status is less fully documented than the other two departments.",
-      "head_professor_id": null,
-      "confidence": "medium",
-      "canon_status": "recurring_reference"
+      "culture": "Linked to the Holy Kingdom of Dominus and its traditions. Aria, the Saintess, is the head instructor of the Theology wing.",
+      "head_professor_id": "aria",
+      "notes": [
+        "The narrator may invent unnamed priests and senior sisters of Dominus as additional Theology teachers."
+      ]
     }
   ],
   "governance": {
@@ -79,8 +74,7 @@
       ]
     },
     "ranking_system": {
-      "description": "Student performance, practical examinations, professor evaluations and attitude affect rank and reputation.",
-      "warning": "Exact scoring formula and consequences are not verified."
+      "description": "Grades, practical examinations, professor evaluations and attitude set each student's rank and reputation. The exact scoring is left to the narrator."
     }
   },
   "organizations": [
@@ -95,7 +89,10 @@
         "escort missions",
         "combat training"
       ],
-      "membership": "Mixed noble and commoner membership is described in the public adaptation."
+      "membership": "A mix of nobles and commoners. Anastasia is a key member; the other members are unnamed students the narrator plays and names freely.",
+      "known_member_ids": [
+        "anastasia"
+      ]
     },
     {
       "id": "white_rose_society",
@@ -110,20 +107,15 @@
         "information exchange"
       ],
       "known_member_ids": [
-        "elise_reihart"
-      ]
+        "elise_reihart",
+        "lucia_caldwin"
+      ],
+      "membership": "High-level Magic Department students. President: Elise Reihart; Vice President: Lucia Caldwin. The other members are unnamed students the narrator plays and names freely."
     }
   ],
   "campus_details": {
-    "dormitories_by_year": {
-      "first_year": "Hall A",
-      "second_year": "Hall B",
-      "third_year": "Hall C"
-    },
-    "entry_age_year_one": 20,
-    "confidence": "medium",
-    "canon_status": "public_adaptation_detail",
-    "note": "These details appear in the public DreamRunner adaptation and should not be assumed to match every OOC run."
+    "dormitories": "Hall A for first-years, Hall B for second-years, Hall C for third-years. Each hall is separated between women and men, and by wing (Knight, Magic, Theology).",
+    "entry_age_year_one": 20
   },
   "pedagogy": [
     "Training and study should affect abilities gradually.",

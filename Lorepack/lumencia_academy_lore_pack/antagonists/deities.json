@@ -3,33 +3,62 @@
   "deities": [
     {
       "id": "lily",
-      "name": "Lily",
-      "aliases": [],
+      "name": "Lily Lumina",
+      "aliases": [
+        "Lily"
+      ],
       "type": "celestial_deity",
       "gender": "female",
-      "appearance": {},
+      "appearance": {
+        "hair": "long silver ash-grey",
+        "eyes": "amber",
+        "other": "golden halo, white dress"
+      },
       "power": {
         "system": "divinity",
-        "rank": "",
-        "abilities": []
+        "rank": "God",
+        "abilities": [
+          "Source of all Divinity",
+          "Omens, dreams and blessings"
+        ]
       },
-      "role": "Celestial deity; A protective celestial deity associated with healing and holy power",
-      "personality_traits": [],
-      "motivation": "",
-      "story_functions": [],
+      "role": "Celestial deity of the Holy Kingdom of Dominus; protective deity associated with healing and holy power",
+      "personality_traits": [
+        "lazy",
+        "lethargic",
+        "slothful",
+        "indifferent",
+        "cynical"
+      ],
+      "motivation": "Fulfil her duty as a protector, without enthusiasm.",
+      "story_functions": [
+        "distant presence",
+        "signs and omens; almost never intervenes directly"
+      ],
       "faction_ids": [
         "dominus_holy_kingdom"
       ],
       "notes": [
-        "A detailed public character reference depicts Lily as ancient, duty-driven, distant and cynical rather than warmly affectionate.",
-        "The exact scope of Lily's intervention and her metaphysical nature are not fully established.",
-        "Reported nature: Ancient and duty-bound, emotionally distant rather than warmly nurturing.",
-        "Intervention style: Rarely direct; may influence events subtly through omens, dreams or small changes in circumstance.",
-        "Limits: This is from the public adaptation; do not force this interpretation into a campaign if the active OOC version differs."
+        "Intervenes rarely and indirectly: omens, dreams or small changes in circumstance.",
+        "Speaks in a jaded, annoyed tone."
       ],
-      "relationships": [],
-      "hidden": [],
-      "never": []
+      "relationships": [
+        {
+          "target_id": "delphirem",
+          "type": "enemy",
+          "note": "The sealed Demon God."
+        },
+        {
+          "target_id": "aria",
+          "type": "her Saintess"
+        }
+      ],
+      "hidden": [
+        "none"
+      ],
+      "never": [
+        "none"
+      ]
     },
     {
       "id": "delphirem",
@@ -39,30 +68,50 @@
       ],
       "type": "demon_god",
       "gender": "female",
-      "appearance": {},
+      "appearance": {
+        "hair": "short white bob",
+        "eyes": "heterochromatic, one pink and one blue",
+        "other": "broken rings as a halo; white outfit crossed by cosmic purple ribbons"
+      },
       "power": {
         "system": "miasma",
-        "rank": "",
-        "abilities": []
+        "rank": "God",
+        "abilities": [
+          "Source of all Miasma",
+          "Grants demonic pacts"
+        ]
       },
       "role": "Demon god",
-      "personality_traits": [],
-      "motivation": "The cult seeks to resurrect or return Delphirem; the exact mechanism is not fixed in this pack.",
-      "story_functions": [],
+      "personality_traits": [
+        "playful",
+        "hedonistic",
+        "dominant"
+      ],
+      "motivation": "Break free from her seal. The cult seeks to resurrect her; the exact mechanism is not fixed.",
+      "story_functions": [
+        "ultimate threat of the Demon God Cult plotline",
+        "should almost never appear in person"
+      ],
       "faction_ids": [
         "demon_god_cult"
       ],
       "notes": [
-        "The public adaptation describes a playful or curious nature, but divine motives should remain uncertain unless established in the campaign.",
-        "The spelling varies between sources; use Delphirem as the primary name and Delpirem as an alias.",
-        "Reported nature: Playful and fascinated by mortal urgency, but lacking a human moral frame in the public adaptation.",
-        "Seal and abyss: Described as sealed for ages, with the Abyss Zone functioning as a prison and a source of leaking Miasma.",
-        "Cult motivation: The cult attempts to weaken the seal, though the exact ritual or mechanism remains campaign-dependent.",
-        "Limits: This characterization belongs to the public adaptation; preserve ambiguity until confirmed in the active story."
+        "Fascinated by mortal urgency, without a human moral frame.",
+        "Sealed for ages: the Abyss Zone is her prison and leaks Miasma.",
+        "The cult tries to weaken the seal; the exact ritual is left to the narrator."
       ],
-      "relationships": [],
-      "hidden": [],
-      "never": []
+      "relationships": [
+        {
+          "target_id": "lily",
+          "type": "enemy"
+        }
+      ],
+      "hidden": [
+        "none"
+      ],
+      "never": [
+        "none"
+      ]
     }
   ]
 }

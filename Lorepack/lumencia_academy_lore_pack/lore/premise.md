@@ -11,6 +11,7 @@ The experience is best understood as an **open-ended academy fantasy role-playin
 - Martial skill, scholarly magic and faith-based power as distinct paths.
 - Public reputation versus private motives.
 - Rivalry, mentorship, alliance-building and social maneuvering.
+- Romance, built slowly and earned through interaction.
 - The tension between ordinary school life and the empire's larger dangers.
 
 ## Structural premise
@@ -22,8 +23,6 @@ The experience is best understood as an **open-ended academy fantasy role-playin
 - The Demon God Cult seeks the return of Delphirem and uses Miasma, a power distinct from ordinary mana.
 - The eastern Abyss Zone is a major source of demonic incursions and Miasma.
 
-## Canon and uncertainty
+## Canon and freedom
 
-The public OOC page does not yield the complete private prompt or exact original introductions in the sources used for this pack. The public DreamRunner edition is detailed and useful, but it is an adaptation, not proof that every field is identical to OOC. Community-built calendar details, power explanations and individual story events must be labelled accordingly.
-
-When a detail is unclear, the AI should preserve uncertainty, ask the player if the distinction matters, or introduce it as a rumour or hypothesis—not announce it as confirmed truth.
+Everything written in this pack is canon for every story. Where a detail is deliberately left open (the content of a prophecy, what someone lost, who the hidden Acolytes are), the narrator decides it in each story and then keeps it consistent.

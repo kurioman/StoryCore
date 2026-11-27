@@ -12,11 +12,6 @@
         "politics",
         "academy",
         "nobility"
-      ],
-      "confidence": "high",
-      "canon_status": "recurring_reference",
-      "source_ids": [
-        "dreamrunner_zeph_lumencia"
       ]
     },
     {
@@ -30,12 +25,6 @@
         "combat",
         "magic",
         "politics"
-      ],
-      "confidence": "high",
-      "canon_status": "recurring_reference",
-      "source_ids": [
-        "dreamrunner_zeph_lumencia",
-        "reddit_character_profiles"
       ]
     },
     {
@@ -48,11 +37,6 @@
         "arts",
         "coast",
         "crafts"
-      ],
-      "confidence": "medium",
-      "canon_status": "recurring_reference",
-      "source_ids": [
-        "dreamrunner_zeph_lumencia"
       ]
     },
     {
@@ -66,11 +50,6 @@
         "trade",
         "sailing",
         "guilds"
-      ],
-      "confidence": "medium",
-      "canon_status": "recurring_reference",
-      "source_ids": [
-        "dreamrunner_zeph_lumencia"
       ]
     },
     {
@@ -83,11 +62,6 @@
         "research",
         "botany",
         "alchemy"
-      ],
-      "confidence": "medium",
-      "canon_status": "recurring_reference",
-      "source_ids": [
-        "dreamrunner_zeph_lumencia"
       ]
     },
     {
@@ -100,11 +74,6 @@
         "mountains",
         "cold",
         "survival"
-      ],
-      "confidence": "medium",
-      "canon_status": "recurring_reference",
-      "source_ids": [
-        "dreamrunner_zeph_lumencia"
       ]
     },
     {
@@ -118,12 +87,119 @@
         "ruins",
         "temples",
         "exploration"
-      ],
-      "confidence": "medium",
-      "canon_status": "recurring_reference",
-      "source_ids": [
-        "dreamrunner_zeph_lumencia"
       ]
+    },
+    {
+      "id": "grand_hall",
+      "name": "Grand Hall",
+      "type": "academy_building",
+      "parent_location_id": "lumencia_academy",
+      "description": "The academy's ceremonial heart: a vast marble hall with tall windows and the imperial crest, used for the entrance ceremony, assemblies, award ceremonies and the Founders' Gala."
+    },
+    {
+      "id": "training_grounds",
+      "name": "Training Grounds",
+      "type": "academy_area",
+      "parent_location_id": "lumencia_academy",
+      "description": "Sand yards, duelling rings and an enclosed arena of the Knight wing, where classes, sparring, mock battles and tournaments take place. Always echoing with steel."
+    },
+    {
+      "id": "magic_wing_halls",
+      "name": "Magic Wing",
+      "type": "academy_building",
+      "parent_location_id": "lumencia_academy",
+      "description": "Lecture halls, reinforced casting chambers and laboratories of the Magic Department, where the mana detection crystal stands. Minor explosions are a daily occurrence."
+    },
+    {
+      "id": "academy_chapel",
+      "name": "Chapel of Lily",
+      "type": "academy_building",
+      "parent_location_id": "lumencia_academy",
+      "description": "The Theology wing's white chapel, dedicated to Lily, with an infirmary where Aria and the theology students heal the wounded of training and missions."
+    },
+    {
+      "id": "academy_library",
+      "name": "Great Library",
+      "type": "academy_building",
+      "parent_location_id": "lumencia_academy",
+      "description": "A multi-storey library of books, scrolls and magical treatises. Its restricted section requires a professor's authorization."
+    },
+    {
+      "id": "refectory",
+      "name": "Refectory",
+      "type": "academy_building",
+      "parent_location_id": "lumencia_academy",
+      "description": "The great dining hall shared by all wings; nobles and commoners tend to sit apart. A crossroads of rumours."
+    },
+    {
+      "id": "dormitories",
+      "name": "Dormitories",
+      "type": "academy_building",
+      "parent_location_id": "lumencia_academy",
+      "description": "Hall A for first-years, Hall B for second-years, Hall C for third-years; each hall is separated between women and men, and by wing."
+    },
+    {
+      "id": "headmaster_office",
+      "name": "Headmaster's Office",
+      "type": "academy_room",
+      "parent_location_id": "lumencia_academy",
+      "description": "Emily's office at the top of the main building: elegant, cluttered with paperwork and always stocked with sweets."
+    },
+    {
+      "id": "student_council_room",
+      "name": "Student Council Room",
+      "type": "academy_room",
+      "parent_location_id": "lumencia_academy",
+      "description": "The council's chamber, where Anastasia and Lucia run academy operations, events and examinations."
+    },
+    {
+      "id": "academy_gardens",
+      "name": "Academy Gardens",
+      "type": "academy_area",
+      "parent_location_id": "lumencia_academy",
+      "description": "Courtyards, rose gardens and paths between the buildings; the White Rose Society holds outdoor receptions here."
+    },
+    {
+      "id": "magic_tower",
+      "name": "The Tower",
+      "type": "tower",
+      "parent_location_id": "asterion",
+      "description": "The Magic Tower of Asterion, seat of the Tower Master Ethera: the Empire's highest centre of magical research. Its upper floors are closed to all but Ethera and those she invites, such as her apprentice Rena."
+    },
+    {
+      "id": "imperial_palace",
+      "name": "Imperial Palace",
+      "type": "palace",
+      "parent_location_id": "asterion",
+      "description": "Seat of the imperial family and of the Imperial Guard commanded by Carne. The heart of the succession war."
+    },
+    {
+      "id": "valenheart_domain",
+      "name": "Valenheart Domain",
+      "type": "ducal_domain",
+      "polity_id": "lumencia_empire",
+      "description": "The lands of the Valenheart Duchy, a fortress-castle surrounded by training fields where knights of the house are forged in martial prowess and honour."
+    },
+    {
+      "id": "caldwin_domain",
+      "name": "Caldwin Domain",
+      "type": "ducal_domain",
+      "polity_id": "lumencia_empire",
+      "description": "The lands of the Caldwin Duchy, with a palace-library filled with magical archives and the family's private research halls."
+    },
+    {
+      "id": "lumina",
+      "name": "Lumina",
+      "type": "holy_city",
+      "polity_id": "dominus_holy_kingdom",
+      "description": "The capital of the Holy Kingdom of Dominus, a white city of cathedrals dedicated to Lily, where combat theologians, inquisitors and healers are trained."
+    },
+    {
+      "id": "abyss_zone_region",
+      "name": "Abyss Zone",
+      "type": "demonic_region",
+      "polity_id": "abyss_zone",
+      "description": "The far east of Aethermere: a corrupted land where Miasma leaks from Delphirem's seal and demonic beasts spawn. The Demon God Cult's headquarters lies hidden deep inside."
     }
   ]
 }

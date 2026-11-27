@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "warning": "These are optional, setting-compatible hooks, not claims about a mandatory canon storyline. Activate only when appropriate for the player's choices and established campaign facts.",
+  "warning": "SPOILERS: hooks marked ⚠ reveal secrets of the story. Players who want to discover them in play should not open them.",
   "hooks": [
     {
       "id": "succession_competition",
@@ -22,8 +22,7 @@
         "anastasia",
         "isabel",
         "student_council"
-      ],
-      "canon_status": "recurring_reference_plus_optional_hook"
+      ]
     },
     {
       "id": "valenheart_caldwin_rivalry",
@@ -48,8 +47,7 @@
         "laris",
         "lucia_caldwin",
         "serena_caldwin"
-      ],
-      "canon_status": "recurring_reference_plus_optional_hook"
+      ]
     },
     {
       "id": "commoner_merit",
@@ -72,8 +70,7 @@
         "rena",
         "sia",
         "lumencia_academy"
-      ],
-      "canon_status": "setting-derived_optional_hook"
+      ]
     },
     {
       "id": "white_rose_information",
@@ -94,38 +91,13 @@
         "elise_reihart",
         "white_rose_society",
         "chloe_brightwell"
-      ],
-      "canon_status": "setting-derived_optional_hook"
-    },
-    {
-      "id": "dominuse_oracle",
-      "title": "The Unanswered Oracle",
-      "category": "religion_and_prophecy",
-      "premise": "Aria's reported oracle-related enrolment suggests religious interest in the academy, but the content of the oracle remains open.",
-      "entry_points": [
-        "A second interpretation of a sacred sign appears.",
-        "A healer recognises a pattern tied to an unexplained event.",
-        "Dominus sends an envoy whose account conflicts with the official version."
-      ],
-      "stakes": [
-        "faith",
-        "diplomacy",
-        "personal duty",
-        "uncertainty"
-      ],
-      "involved_ids": [
-        "aria",
-        "mirabel",
-        "dominus_holy_kingdom",
-        "lily"
-      ],
-      "canon_status": "setting-derived_optional_hook"
+      ]
     },
     {
       "id": "abyss_miasma_trace",
       "title": "A Trace from the Abyss",
       "category": "demonic_mystery",
-      "premise": "An unusual magical disturbance suggests Miasma, but the source and motive are not initially known.",
+      "premise": "An unusual magical disturbance suggests Miasma; its source and motive are not known at first.",
       "entry_points": [
         "A field team returns with a damaged mana circuit.",
         "A harmless-looking object produces a corruptive reaction.",
@@ -141,8 +113,7 @@
         "demon_god_cult",
         "abyss_zone",
         "delphirem"
-      ],
-      "canon_status": "setting-derived_optional_hook"
+      ]
     },
     {
       "id": "celestial_intervention",
@@ -165,8 +136,126 @@
         "emily",
         "carne",
         "seriel"
+      ]
+    },
+    {
+      "id": "aria_prophecy",
+      "title": "⚠ SPOILER — The Saintess's Prophecy",
+      "category": "religion_and_prophecy",
+      "spoiler": true,
+      "premise": "Aria was sent to the academy because of a divine prophecy, and secretly hunts the Demon God Cult there. The exact prophecy is left to the narrator, but it ties the academy to the cult's plans.",
+      "entry_points": [
+        "Aria asks the protagonist an odd question about a dream or a sign.",
+        "A purification at the chapel reveals a trace of Miasma.",
+        "An envoy from Lumina brings a new reading of the oracle."
       ],
-      "canon_status": "setting-derived_optional_hook"
+      "stakes": [
+        "faith",
+        "the cult's discovery",
+        "Aria's safety"
+      ],
+      "involved_ids": [
+        "aria",
+        "mirabel",
+        "lily",
+        "dominus_holy_kingdom",
+        "demon_god_cult"
+      ]
+    },
+    {
+      "id": "hidden_acolytes",
+      "title": "⚠ SPOILER — Acolytes Among Us",
+      "category": "demonic_mystery",
+      "spoiler": true,
+      "premise": "The Demon God Cult is rooted in the academy: Acolytes hide among the students and recruit more with promises and pacts, mostly sealed by the Apostle Cartia. The Apostle Beradin is infiltrated in the academy itself. Which students are Acolytes is decided by the narrator in each story; Chloe Brightwell is a possible candidate, linked to the Sin Bishop Aris.",
+      "entry_points": [
+        "A student suddenly gains power far beyond their rank.",
+        "Someone offers the protagonist a deal that seems too good.",
+        "A classmate disappears for a night and comes back changed."
+      ],
+      "stakes": [
+        "trust",
+        "friendship",
+        "the academy's safety"
+      ],
+      "involved_ids": [
+        "demon_god_cult",
+        "kartia",
+        "veradin",
+        "aris",
+        "chloe_brightwell",
+        "aria",
+        "lumencia_academy"
+      ]
+    },
+    {
+      "id": "carne_corruption",
+      "title": "⚠ SPOILER — The Fall of a Celestial",
+      "category": "high_power_event",
+      "spoiler": true,
+      "premise": "Carne, Commander of the Imperial Guard, is a strongly likely target for corruption by the Demon God Cult. If it happens (the narrator decides, and it does not happen every time), she becomes an antagonist of the hero. Seriel appears as an ally in this plotline.",
+      "entry_points": [
+        "Carne's blood-red Aura feels heavier and darker than before.",
+        "Imperial Guards die in an unexplained massacre.",
+        "Lilia confides that she fears Carne more and more."
+      ],
+      "stakes": [
+        "the Empire's safety",
+        "the Valenheart family",
+        "the balance of the Four Celestials"
+      ],
+      "involved_ids": [
+        "carne",
+        "seriel",
+        "lilia_valenheart",
+        "demon_god_cult",
+        "four_celestials"
+      ]
+    },
+    {
+      "id": "spirit_host",
+      "title": "⚠ SPOILER — The Host of the Spirits",
+      "category": "personal_growth",
+      "spoiler": true,
+      "premise": "Sia is destined to become the Host of the Spirits: an exceptionally powerful mage, able to join the Celestials if her story progresses far enough. Rena, sent by Ethera to find great magical talents, may notice her.",
+      "entry_points": [
+        "Sia's spirits act on their own to protect someone.",
+        "An instrument of the Magic wing reacts wildly to Sia.",
+        "Rena takes an unusual interest in Sia."
+      ],
+      "stakes": [
+        "Sia's growth",
+        "Ethera's interest",
+        "the cult's interest in such power"
+      ],
+      "involved_ids": [
+        "sia",
+        "rena",
+        "ethera"
+      ]
+    },
+    {
+      "id": "valenheart_shadows",
+      "title": "⚠ SPOILER — Shadows of Valenheart",
+      "category": "family_drama",
+      "spoiler": true,
+      "premise": "Lilia is secretly jealous of Laris, who comes from a fallen branch yet beats her in every duel; Laris, secretly tasked with protecting Lilia, never notices. Lilia also hates and fears Carne, her adoptive relative, and trains to one day be strong enough to expel her from the family.",
+      "entry_points": [
+        "Lilia loses another duel to Laris in front of everyone.",
+        "Laris turns up wherever Lilia goes, a little too often.",
+        "Carne visits the academy."
+      ],
+      "stakes": [
+        "pride",
+        "family",
+        "loyalty"
+      ],
+      "involved_ids": [
+        "lilia_valenheart",
+        "laris",
+        "carne",
+        "valenheart_duchy"
+      ]
     }
   ]
 }

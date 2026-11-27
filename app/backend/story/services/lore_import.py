@@ -35,6 +35,18 @@ STEM_CATEGORY = {**KEY_CATEGORY, "glossary": "glossary", "starting_scenarios": "
 NOT_LORE_DIRS = ("ai/", "scenarios/")  # Markdown there is written for the AI or the openings, not about the world
 NOT_LORE_CATEGORIES = {"scenario", "source"}
 HIDDEN_KEY = "hidden"  # narrator-only notes: never shown to the player (see LOREPACK_FORMAT.md)
+# Kurio (27/11): an author writes "none" (or "null") to mark a section as deliberately empty; it is never sent to the
+# narrator nor stored as a secret
+EMPTY_MARKS = {"none", "null", "n/a"}
+
+
+def is_empty_mark(v: Any) -> bool:
+    """Whether ``v`` is a deliberate "nothing here" mark: "none", ["none"], "null"..."""
+    if isinstance(v, str):
+        return v.strip().lower() in EMPTY_MARKS
+    if isinstance(v, list):
+        return bool(v) and all(is_empty_mark(i) for i in v)
+    return False
 
 
 def strip_hidden(obj: Any, notes: list[str] | None = None, _depth: int = 0) -> tuple[Any, list[str]]:
@@ -46,6 +58,8 @@ def strip_hidden(obj: Any, notes: list[str] | None = None, _depth: int = 0) -> t
         if h:
             name = str(obj.get("name") or obj.get("id") or "")
             for n in (h if isinstance(h, list) else [h]):
+                if is_empty_mark(n):
+                    continue
                 text = n if isinstance(n, str) else json.dumps(n, ensure_ascii=False)
                 notes.append(f"[{name}] {text}" if _depth and name else text)
         return {k: strip_hidden(v, notes, _depth + 1)[0] for k, v in obj.items() if k != HIDDEN_KEY}, notes
@@ -143,7 +157,7 @@ def render_value(v: Any, indent: int = 0) -> list[str]:
     if isinstance(v, dict):
         lines = []
         for k, x in v.items():
-            if k in ("source_ids", "schema_version"):
+            if k in ("source_ids", "schema_version") or is_empty_mark(x):
                 continue
             if isinstance(x, dict) and x and _inline(x):
                 lines.append(f"{pad}{k}: {_inline(x)}")

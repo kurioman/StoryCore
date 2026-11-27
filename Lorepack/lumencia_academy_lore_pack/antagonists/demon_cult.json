@@ -16,7 +16,11 @@
       "aliases": [],
       "type": "apostle",
       "gender": "female",
-      "appearance": {},
+      "appearance": {
+        "hair": "long silver-grey",
+        "eyes": "grey",
+        "other": "black nun's habit with veil, a cross, black gloves"
+      },
       "power": {
         "system": "miasma",
         "rank": "9-Circle level",
@@ -29,9 +33,10 @@
         "cold",
         "fatalistic",
         "calm",
-        "convinced resistance is futile"
+        "convinced resistance is futile",
+        "nihilistic"
       ],
-      "motivation": "",
+      "motivation": "Delphirem's return is inevitable; she only hastens the end.",
       "story_functions": [
         "A top-level, rare antagonist whose presence should signal a major escalation."
       ],
@@ -57,41 +62,52 @@
           "type": "finds her emotionality distracting but recognizes her danger"
         }
       ],
-      "hidden": [],
-      "never": []
+      "hidden": [
+        "none"
+      ],
+      "never": [
+        "Never begs, never threatens."
+      ]
     },
     {
       "id": "veradin",
-      "name": "Veradin",
-      "aliases": [],
+      "name": "Beradin",
+      "aliases": [
+        "Veradin"
+      ],
       "type": "apostle",
       "gender": "female",
-      "appearance": {},
+      "appearance": {
+        "hair": "short dark green bob with straight bangs",
+        "eyes": "green",
+        "other": "black high-collared military uniform with green accents and a black cape; often holds a book"
+      },
       "power": {
         "system": "miasma",
         "rank": "Master Apex level",
         "abilities": [
-          "Can suppress or conceal a distinctive Miasma signature in the public adaptation.",
+          "Can suppress or conceal her Miasma signature.",
           "Uses spatial manipulation or dimensional severing to disrupt positions, trajectories and defensive formations."
         ]
       },
-      "role": "Apostle of the demon god cult (aspect: Void)",
+      "role": "Apostle of the demon god cult (aspect: Void / Nihility)",
       "personality_traits": [
         "cynical",
         "logical",
+        "philosophical",
         "methodical",
         "strategic"
       ],
-      "motivation": "",
+      "motivation": "Treats Delphirem's return as a logical conclusion rather than an act of religious devotion.",
       "story_functions": [
-        "Strategic threat associated with the Void aspect; detailed abilities beyond this are not fixed here."
+        "Strategic threat associated with the Void aspect."
       ],
       "faction_ids": [
         "demon_god_cult"
       ],
       "notes": [
         "Most likely Apostle to work inside ordinary society without being identified.",
-        "Treats Delphirem's return as a conclusion rather than an act of religious devotion."
+        "Avoids interacting with the protagonist so as not to be spotted."
       ],
       "relationships": [
         {
@@ -99,16 +115,26 @@
           "type": "mutual intellectual respect"
         }
       ],
-      "hidden": [],
-      "never": []
+      "hidden": [
+        "She is infiltrated inside Lumencia Academy."
+      ],
+      "never": [
+        "none"
+      ]
     },
     {
       "id": "kartia",
-      "name": "Kartia",
-      "aliases": [],
+      "name": "Cartia",
+      "aliases": [
+        "Kartia"
+      ],
       "type": "apostle",
       "gender": "female",
-      "appearance": {},
+      "appearance": {
+        "hair": "long silver-white, in a loose braid",
+        "eyes": "glowing red",
+        "other": "small dark horns; black leather outfit with straps and chains, long black gloves, thigh-high boots"
+      },
       "power": {
         "system": "miasma",
         "rank": "8-Circle level",
@@ -121,10 +147,11 @@
       "personality_traits": [
         "seductive",
         "proud",
+        "arrogant",
         "dominant",
         "amused by contradiction"
       ],
-      "motivation": "",
+      "motivation": "Reveal to everyone what they truly desire, and bind them to the cult through that desire.",
       "story_functions": [
         "Temptation, control and desire; use only when the campaign has built sufficient foreshadowing."
       ],
@@ -141,16 +168,26 @@
           "type": "complex attachment; sees beauty in her grief"
         }
       ],
-      "hidden": [],
-      "never": []
+      "hidden": [
+        "She is the one who makes most Acolytes sign their pacts, deceiving them with her Miasma ability."
+      ],
+      "never": [
+        "none"
+      ]
     },
     {
       "id": "arien",
       "name": "Arien",
-      "aliases": [],
+      "aliases": [
+        "Mourning Lady"
+      ],
       "type": "apostle",
       "gender": "female",
-      "appearance": {},
+      "appearance": {
+        "hair": "long silver-grey, braided",
+        "eyes": "blue, veiled with tears",
+        "other": "white lace veil and dress, like a bride in mourning; surrounded by ghosts"
+      },
       "power": {
         "system": "miasma",
         "rank": "8-Circle level",
@@ -159,14 +196,15 @@
           "May overwhelm targets with nostalgia or longing, blurring present and past."
         ]
       },
-      "role": "Apostle of the demon god cult (aspect: Grief)",
+      "role": "Apostle of the demon god cult (aspect: Grief / Mourning)",
       "personality_traits": [
         "emotional",
         "obsessive",
         "volatile",
-        "intensely attached to lost things"
+        "intensely attached to lost things",
+        "lonely"
       ],
-      "motivation": "",
+      "motivation": "Ressurect the Demon god to be free of unsatiable mourning feeling and sadness",
       "story_functions": [
         "A personal and psychological antagonist associated with loss and grief."
       ],
@@ -174,8 +212,8 @@
         "demon_god_cult"
       ],
       "notes": [
-        "Her shifts between tenderness and violence are described as emotional volatility rather than calculated deception.",
-        "The person or thing she lost is explicitly unresolved in the public adaptation."
+        "Her shifts between tenderness and violence come from emotional volatility, not calculated deception.",
+        "What she lost is not fixed and is left to the narrator."
       ],
       "relationships": [
         {
@@ -183,8 +221,12 @@
           "type": "mutual fixation or attachment; exact nature left ambiguous"
         }
       ],
-      "hidden": [],
-      "never": []
+      "hidden": [
+        "none"
+      ],
+      "never": [
+        "none"
+      ]
     },
     {
       "id": "pria",
@@ -192,25 +234,48 @@
       "aliases": [],
       "type": "sin_bishop",
       "gender": "female",
-      "appearance": {},
+      "appearance": {
+        "hair": "long silver-white",
+        "eyes": "blue",
+        "other": "golden halo-like tiara; white and gold priestly robe with an ornate collar; looks like a priestess"
+      },
       "power": {
         "system": "miasma",
-        "rank": "7-Circle level through pact; source-reported",
-        "abilities": []
+        "rank": "7-Circle level, granted through the cult",
+        "abilities": [
+          "Her Miasma crushes others under a feeling of inferiority; she imposes her presence."
+        ]
       },
       "role": "Sin Bishop of Pride of the demon god cult",
-      "personality_traits": [],
-      "motivation": "",
-      "story_functions": [],
+      "personality_traits": [
+        "haughty",
+        "condescending",
+        "convinced of her own holiness"
+      ],
+      "motivation": "Be recognized as superior to everyone, mortals and saints alike.",
+      "story_functions": [
+        "mid-rank antagonist",
+        "ideological opponent of Aria and the Church of Lily"
+      ],
       "faction_ids": [
         "demon_god_cult"
       ],
       "notes": [
-        "Personality details are inconsistent and should be treated as optional unless established in play."
+        "none"
       ],
-      "relationships": [],
-      "hidden": [],
-      "never": []
+      "relationships": [
+        {
+          "target_id": "aria",
+          "type": "contempt",
+          "note": "Despises her as a 'false saint'."
+        }
+      ],
+      "hidden": [
+        "Sometimes poses as a priestess of Lily."
+      ],
+      "never": [
+        "Never kneels before anyone, except Delphirem."
+      ]
     },
     {
       "id": "sloth",
@@ -218,23 +283,45 @@
       "aliases": [],
       "type": "sin_bishop",
       "gender": "female",
-      "appearance": {},
+      "appearance": {
+        "hair": "long lavender-white, with braids",
+        "eyes": "almost always closed",
+        "other": "loose white robe, barefoot, metal bracelets"
+      },
       "power": {
         "system": "miasma",
-        "rank": "7-Circle level through pact; source-reported",
-        "abilities": []
+        "rank": "7-Circle level, granted through the cult",
+        "abilities": [
+          "Her Miasma drains her targets of their will and energy."
+        ]
       },
       "role": "Sin Bishop of Sloth of the demon god cult",
-      "personality_traits": [],
-      "motivation": "",
-      "story_functions": [],
+      "personality_traits": [
+        "apathetic",
+        "sleepy",
+        "indifferent",
+        "strangely peaceful"
+      ],
+      "motivation": "That everything finally stops, so she can sleep forever.",
+      "story_functions": [
+        "disconcerting antagonist",
+        "a threat that exhausts rather than strikes"
+      ],
       "faction_ids": [
         "demon_god_cult"
       ],
-      "notes": [],
-      "relationships": [],
-      "hidden": [],
-      "never": []
+      "notes": [
+        "Barely speaks, often half asleep."
+      ],
+      "relationships": [
+        "none"
+      ],
+      "hidden": [
+        "none"
+      ],
+      "never": [
+        "none"
+      ]
     },
     {
       "id": "aris",
@@ -242,23 +329,50 @@
       "aliases": [],
       "type": "sin_bishop",
       "gender": "female",
-      "appearance": {},
+      "appearance": {
+        "hair": "blonde, in large drill curls",
+        "eyes": "red",
+        "other": "black and gold dress with a fur collar, golden rings; always surrounded by treasure"
+      },
       "power": {
         "system": "miasma",
-        "rank": "7-Circle level through pact; source-reported",
-        "abilities": []
+        "rank": "7-Circle level, granted through the cult",
+        "abilities": [
+          "Can bend to her will those weaker than her.",
+          "Can impose wagers: if she wins, she gains total control over the loser's will."
+        ]
       },
       "role": "Sin Bishop of Greed of the demon god cult",
-      "personality_traits": [],
-      "motivation": "",
-      "story_functions": [],
+      "personality_traits": [
+        "greedy",
+        "flamboyant",
+        "mocking",
+        "self-assured"
+      ],
+      "motivation": "Own everything: gold, objects, people.",
+      "story_functions": [
+        "merchant antagonist",
+        "offers pacts in the form of 'contracts' and wagers"
+      ],
       "faction_ids": [
         "demon_god_cult"
       ],
-      "notes": [],
-      "relationships": [],
-      "hidden": [],
-      "never": []
+      "notes": [
+        "Speaks of everything in terms of prices and transactions."
+      ],
+      "relationships": [
+        {
+          "target_id": "chloe_brightwell",
+          "type": "possible link",
+          "note": "If the narrator makes Chloe a hidden Acolyte, Aris is her contact or patron in the cult."
+        }
+      ],
+      "hidden": [
+        "none"
+      ],
+      "never": [
+        "Never gives anything without something in return."
+      ]
     },
     {
       "id": "beelzebub",
@@ -266,23 +380,46 @@
       "aliases": [],
       "type": "sin_bishop",
       "gender": "female",
-      "appearance": {},
+      "appearance": {
+        "hair": "purple-black twin tails with straight bangs",
+        "eyes": "orange",
+        "other": "small fangs, crown of thorns, black and gold outfit; surrounded by red-eyed demonic beasts"
+      },
       "power": {
         "system": "miasma",
-        "rank": "7-Circle level through pact; source-reported",
-        "abilities": []
+        "rank": "7-Circle level, granted through the cult",
+        "abilities": [
+          "Devours the mana, Aura and even the spells of her opponents to feed on them.",
+          "Commands demonic beasts of the Abyss."
+        ]
       },
       "role": "Sin Bishop of Gluttony of the demon god cult",
-      "personality_traits": [],
-      "motivation": "",
-      "story_functions": [],
+      "personality_traits": [
+        "voracious",
+        "unsettlingly cheerful",
+        "never satisfied",
+        "childish in her cruelty"
+      ],
+      "motivation": "Taste everything and devour everything: food, power, people.",
+      "story_functions": [
+        "savage antagonist",
+        "linked to demonic beast incursions"
+      ],
       "faction_ids": [
         "demon_god_cult"
       ],
-      "notes": [],
-      "relationships": [],
-      "hidden": [],
-      "never": []
+      "notes": [
+        "Often talks about what she wants to eat, her opponents included."
+      ],
+      "relationships": [
+        "none"
+      ],
+      "hidden": [
+        "none"
+      ],
+      "never": [
+        "none"
+      ]
     },
     {
       "id": "asmo",
@@ -290,23 +427,49 @@
       "aliases": [],
       "type": "sin_bishop",
       "gender": "female",
-      "appearance": {},
+      "appearance": {
+        "hair": "long silver-white with pink tips",
+        "eyes": "red",
+        "other": "low-cut black and red nun's habit with veil and a golden cross"
+      },
       "power": {
         "system": "miasma",
-        "rank": "7-Circle level through pact; source-reported",
-        "abilities": []
+        "rank": "7-Circle level, granted through the cult",
+        "abilities": [
+          "Charm: her Miasma awakens attraction and makes her targets docile."
+        ]
       },
       "role": "Sin Bishop of Lust of the demon god cult",
-      "personality_traits": [],
-      "motivation": "",
-      "story_functions": [],
+      "personality_traits": [
+        "seductive",
+        "provocative",
+        "playful",
+        "shameless"
+      ],
+      "motivation": "Make everyone give in to their desires, even the most pious.",
+      "story_functions": [
+        "temptress",
+        "manipulation antagonist"
+      ],
       "faction_ids": [
         "demon_god_cult"
       ],
-      "notes": [],
-      "relationships": [],
-      "hidden": [],
-      "never": []
+      "notes": [
+        "Especially enjoys corrupting believers of Lily."
+      ],
+      "relationships": [
+        {
+          "target_id": "kartia",
+          "type": "reverence",
+          "note": "Reveres Cartia, the Apostle of Desire, as her model."
+        }
+      ],
+      "hidden": [
+        "none"
+      ],
+      "never": [
+        "none"
+      ]
     },
     {
       "id": "leviane",
@@ -314,23 +477,45 @@
       "aliases": [],
       "type": "sin_bishop",
       "gender": "female",
-      "appearance": {},
+      "appearance": {
+        "hair": "long dark green, in a long braid, a lock hiding one eye",
+        "eyes": "golden",
+        "other": "backless dark green dress"
+      },
       "power": {
         "system": "miasma",
-        "rank": "7-Circle level through pact; source-reported",
-        "abilities": []
+        "rank": "7-Circle level, granted through the cult",
+        "abilities": [
+          "Her Miasma stirs jealousy and resentment between her targets until they turn against each other."
+        ]
       },
       "role": "Sin Bishop of Envy of the demon god cult",
-      "personality_traits": [],
-      "motivation": "",
-      "story_functions": [],
+      "personality_traits": [
+        "cold",
+        "resentful",
+        "observant",
+        "bitter"
+      ],
+      "motivation": "Take what others have, and watch them lose it.",
+      "story_functions": [
+        "shadow manipulator",
+        "sows discord inside the academy"
+      ],
       "faction_ids": [
         "demon_god_cult"
       ],
-      "notes": [],
-      "relationships": [],
-      "hidden": [],
-      "never": []
+      "notes": [
+        "Spots hidden jealousies and uses them as a way in."
+      ],
+      "relationships": [
+        "none"
+      ],
+      "hidden": [
+        "none"
+      ],
+      "never": [
+        "none"
+      ]
     },
     {
       "id": "belian",
@@ -338,29 +523,54 @@
       "aliases": [],
       "type": "sin_bishop",
       "gender": "female",
-      "appearance": {},
+      "appearance": {
+        "hair": "long blood-red, in a braided ponytail",
+        "eyes": "red",
+        "other": "black and red armour, tattered red cape"
+      },
       "power": {
         "system": "miasma",
-        "rank": "7-Circle level through pact; source-reported",
-        "abilities": []
+        "rank": "Master Adept level, through a Miasma contract",
+        "abilities": [
+          "The angrier she gets, the stronger she becomes.",
+          "Her Miasma inflicts on her opponents the wounds she suffers herself."
+        ]
       },
       "role": "Sin Bishop of Wrath of the demon god cult",
-      "personality_traits": [],
-      "motivation": "",
-      "story_functions": [],
+      "personality_traits": [
+        "furious",
+        "brutal",
+        "impulsive",
+        "blunt"
+      ],
+      "motivation": "Destroy everything, to vent a rage she cannot extinguish.",
+      "story_functions": [
+        "direct combat antagonist",
+        "the most likely to attack openly"
+      ],
       "faction_ids": [
         "demon_god_cult"
       ],
-      "notes": [],
-      "relationships": [],
-      "hidden": [],
-      "never": []
+      "notes": [
+        "Despises the schemes and manoeuvres of her peers."
+      ],
+      "relationships": [
+        "none"
+      ],
+      "hidden": [
+        "none"
+      ],
+      "never": [
+        "Never backs down from a fight."
+      ]
     }
   ],
   "operational_guidance": [
     "Apostles are not random encounters; they are rare, consequential threats.",
     "Prefer gradual foreshadowing, intermediaries, rumours, evidence and consequences before a direct appearance.",
+    "The cult is insidious: it blends into daily life, offers pacts to the desperate and usually makes its major moves during important events or tournaments.",
+    "The cult is already rooted inside Lumencia Academy: hidden Acolytes live among the students and try to recruit more Acolytes with promises and demonic pacts. The narrator decides who they are.",
     "The cult can infiltrate institutions or exploit vulnerable people; it need not behave as a visible army in every scene.",
-    "Do not invent the full identity or abilities of unnamed priests as existing canon."
+    "Acolytes and lower, mid and upper priests are not listed: they are minions the narrator plays, invents and names freely. Only the Apostles and Sin Bishops are fixed characters."
   ]
 }

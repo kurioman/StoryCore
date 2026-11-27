@@ -14,7 +14,9 @@
       "power": {
         "system": "martial_aura",
         "rank": "Master Adept",
-        "abilities": []
+        "abilities": [
+          "Permanent Sword Aura, silver in color"
+        ]
       },
       "role": "Head Professor of the Knight Department; Commoner",
       "personality_traits": [
@@ -22,19 +24,30 @@
         "upright",
         "caring",
         "disciplined",
-        "firm"
+        "firm",
+        "strict"
       ],
-      "motivation": "",
-      "story_functions": [],
+      "motivation": "Protect the students.",
+      "story_functions": [
+        "combat teacher and mentor",
+        "referee of duels and training"
+      ],
       "faction_ids": [
         "lumencia_academy"
       ],
       "notes": [
-        "Concise, firm and military in manner."
+        "Has a military attitude; concise and firm in her teaching."
       ],
-      "relationships": [],
-      "hidden": [],
-      "never": []
+      "relationships": [
+        "none"
+      ],
+      "hidden": [
+        "none"
+      ],
+      "never": [
+        "Never shows emotions in public: stays as neutral as possible in every circumstance, and opens up a little only in private.",
+        "Never favours a student because of their rank or family."
+      ]
     },
     {
       "id": "elena_caldwin",
@@ -51,28 +64,52 @@
       "power": {
         "system": "mana_and_magic_circles",
         "rank": "8-Circle",
-        "abilities": []
+        "abilities": [
+          "Manipulates natural laws directly",
+          "Silent casting"
+        ]
       },
-      "role": "Head Professor of the Magic Department; Member of a Caldwin branch; distant from the main house",
+      "role": "Head Professor of the Magic Department; Member of a Caldwin branch family",
       "personality_traits": [
         "playful",
         "relaxed",
         "witty",
         "intellectual",
-        "curious"
+        "curious",
+        "sensual"
       ],
-      "motivation": "",
-      "story_functions": [],
+      "motivation": "Live her own way, far from the obligations of the main house, and enjoy teaching magic.",
+      "story_functions": [
+        "magic teacher",
+        "mentor",
+        "teasing ally"
+      ],
       "faction_ids": [
         "caldwin_duchy",
         "lumencia_academy"
       ],
       "notes": [
-        "Witty and relaxed; the source material notes a lively, teasing manner."
+        "Speaks with wit and intellect.",
+        "Voluntarily distanced herself from the main Caldwin house."
       ],
-      "relationships": [],
-      "hidden": [],
-      "never": []
+      "relationships": [
+        {
+          "target_id": "lucia_caldwin",
+          "type": "aunt",
+          "note": "Lucia is her niece."
+        },
+        {
+          "target_id": "serena_caldwin",
+          "type": "aunt",
+          "note": "Serena is her niece."
+        }
+      ],
+      "hidden": [
+        "none"
+      ],
+      "never": [
+        "none"
+      ]
     },
     {
       "id": "emily",
@@ -87,28 +124,53 @@
       "power": {
         "system": "hybrid_martial_and_magic",
         "rank": "Master Adept (martial) / 8-Circle (magic)",
-        "abilities": []
+        "abilities": [
+          "Compound-Realm: uses Aura and magic at the same time, at full mastery"
+        ]
       },
       "role": "Headmaster of Lumencia Academy; one of the Four Celestials; Commoner",
       "personality_traits": [
         "playful",
-        "apparently innocent",
         "sharp",
         "calculating",
-        "serious when needed"
+        "innocent",
+        "bright"
       ],
-      "motivation": "Maintain her duties as headmaster; deeper private agenda is not established in the sources.",
-      "story_functions": [],
+      "motivation": "Fulfil her duties as Headmaster.",
+      "story_functions": [
+        "supreme authority of the academy",
+        "protector of the students in great danger",
+        "rare but memorable appearances"
+      ],
       "faction_ids": [
         "lumencia_academy",
         "four_celestials"
       ],
       "notes": [
-        "The public adaptation describes her as in her thirties despite a youthful appearance and says she loves sweets."
+        "28 years old.",
+        "Loves sweets.",
+        "Bright, but very serious when the situation demands it."
       ],
-      "relationships": [],
-      "hidden": [],
-      "never": []
+      "relationships": [
+        {
+          "target_id": "ethera",
+          "type": "fellow Celestial"
+        },
+        {
+          "target_id": "carne",
+          "type": "fellow Celestial"
+        },
+        {
+          "target_id": "seriel",
+          "type": "fellow Celestial"
+        }
+      ],
+      "hidden": [
+        "none"
+      ],
+      "never": [
+        "Never leaves a student in mortal danger without stepping in."
+      ]
     },
     {
       "id": "ethera",
@@ -122,32 +184,58 @@
       },
       "power": {
         "system": "mana_and_magic_circles",
-        "rank": "9-Circle",
-        "abilities": []
+        "rank": "9-Circle (Grand Sage)",
+        "abilities": [
+          "Rewrites the laws of magic",
+          "Creates entirely new spells"
+        ]
       },
       "role": "Tower Master; one of the Four Celestials; Commoner",
       "personality_traits": [
         "intellectual",
         "arrogant",
         "curiosity-driven",
-        "unconventional"
+        "unconventional",
+        "sensual"
       ],
-      "motivation": "Follows whatever knowledge or phenomenon catches her interest; exact loyalties are not fully established.",
-      "story_functions": [],
+      "motivation": "Simply desires whatever catches her interest.",
+      "story_functions": [
+        "very high-level mentor",
+        "mysterious figure with rare appearances",
+        "source of knowledge about magic"
+      ],
       "faction_ids": [
         "four_celestials"
       ],
       "notes": [
-        "Often described as speaking as though she can read or anticipate people's thoughts; do not treat literal mind-reading as confirmed unless the current story establishes it."
+        "Reads people's thoughts as she speaks.",
+        "A pioneer of theoretical magic."
       ],
       "relationships": [
         {
           "target_id": "rena",
-          "type": "mentor or apprentice master relationship"
+          "type": "master",
+          "note": "Rena is her apprentice."
+        },
+        {
+          "target_id": "emily",
+          "type": "fellow Celestial"
+        },
+        {
+          "target_id": "carne",
+          "type": "fellow Celestial"
+        },
+        {
+          "target_id": "seriel",
+          "type": "fellow Celestial"
         }
       ],
-      "hidden": [],
-      "never": []
+      "hidden": [
+        "none"
+      ],
+      "never": [
+        "none"
+      ]
     },
     {
       "id": "carne",
@@ -163,7 +251,8 @@
         "system": "martial_aura",
         "rank": "Master Apex",
         "abilities": [
-          "Ridel (sentient sword)"
+          "Wields the sentient sword 「Ridel」",
+          "Dark Sword Aura, blood-red in color, shaped by will alone. The pressure it exerts is sickening and frightening."
         ]
       },
       "role": "Commander of the Imperial Guard; one of the Four Celestials; Adopted into the Valenheart family",
@@ -174,9 +263,10 @@
         "manic",
         "inscrutable"
       ],
-      "motivation": "",
+      "motivation": "Protect the Emperor and the Empire, and perfect her 'art'.",
       "story_functions": [
-        "Her presence and activities are not required in every campaign; encounters should be significant."
+        "Antagonist",
+        "Her presence is not required in every story; every encounter with her must matter."
       ],
       "faction_ids": [
         "lumencia_empire",
@@ -184,11 +274,35 @@
         "four_celestials"
       ],
       "notes": [
-        "Murmurs in an indifferent manner; the reference describes her as treating killing as an art."
+        "Murmurs with indifference.",
+        "The only Celestial who calls killing an 'art'.",
+        "Wields the sentient sword 「Ridel」."
       ],
-      "relationships": [],
-      "hidden": [],
-      "never": []
+      "relationships": [
+        {
+          "target_id": "lilia_valenheart",
+          "type": "adoptive family",
+          "note": "The youngest of her adoptive family, who hates and fears her. Carne finds it amusing, or ignores it."
+        },
+        {
+          "target_id": "emily",
+          "type": "fellow Celestial"
+        },
+        {
+          "target_id": "ethera",
+          "type": "fellow Celestial"
+        },
+        {
+          "target_id": "seriel",
+          "type": "fellow Celestial"
+        }
+      ],
+      "hidden": [
+        "She is a strongly likely candidate for corruption by the Demon God Cult; if corrupted, she becomes an antagonist of the hero. Whether it happens is decided by the narrator in each story: it does not happen every time."
+      ],
+      "never": [
+        "none"
+      ]
     },
     {
       "id": "seriel",
@@ -212,19 +326,40 @@
         "cold",
         "intellectual",
         "confident",
-        "analytical"
+        "analytical",
+        "sensual"
       ],
-      "motivation": "",
+      "motivation": "Travel the Empire and bring down the threats no one else can stop.",
       "story_functions": [
-        "The character may be rarely encountered in ordinary academy-focused play."
+        "Ally in the Demon God Cult plotline",
+        "Rarely encountered in ordinary academy-focused play."
       ],
       "faction_ids": [
         "four_celestials"
       ],
-      "notes": [],
-      "relationships": [],
-      "hidden": [],
-      "never": []
+      "notes": [
+        "Wields the bow 「Lactiel」, made of condensed pure mana."
+      ],
+      "relationships": [
+        {
+          "target_id": "emily",
+          "type": "fellow Celestial"
+        },
+        {
+          "target_id": "ethera",
+          "type": "fellow Celestial"
+        },
+        {
+          "target_id": "carne",
+          "type": "fellow Celestial"
+        }
+      ],
+      "hidden": [
+        "She only appears if the story goes into the Demon God Cult plotline."
+      ],
+      "never": [
+        "none"
+      ]
     }
   ]
 }

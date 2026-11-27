@@ -1,24 +1,16 @@
 {
   "schema_version": "1.0.0",
-  "source_ids": [
-    "reddit_start_modes",
-    "reddit_wiki_thread"
-  ],
-  "official_intro_text_recovered": false,
-  "warning": "The descriptions below are functional summaries of user-reported mode behaviour, not verbatim official OOC prologues. Do not present them as original text.",
   "scenarios": [
     {
       "id": "enrollment",
       "name": "Enrollment",
       "purpose": "Start as a newly enrolled academy student.",
-      "reported_behaviour": [
-        "Strongly anchors the protagonist to student life.",
-        "Naturally leads toward classes, department affiliation, campus relationships and evaluations."
-      ],
       "recommended_for": "A school-life campaign with academy progression at the centre.",
       "ai_initialization": "Establish the protagonist as a new student, then present a concrete first choice or immediate situation without deciding the protagonist's actions.",
-      "confidence": "medium",
-      "canon_status": "community_reconstruction"
+      "what_it_leads_to": [
+        "Strongly anchors the protagonist to student life.",
+        "Naturally leads toward classes, department affiliation, campus relationships and evaluations."
+      ]
     }
   ]
 }

@@ -1,6 +1,6 @@
 # Reusable Starting-Scene Blueprints
 
-These are **new, generic English scaffolds** for a local narrative engine. They are not quotations or reconstructions of OOC's official prologue text.
+Opening scene blueprints for Lumencia Academy.
 
 ## Enrollment — Academy arrival
 

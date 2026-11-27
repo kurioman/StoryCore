@@ -20,6 +20,7 @@ from ..providers.base import ChatMessage
 from . import music as music_svc
 from . import narration_language, portrait_tags, settings_service, state_service, story_events, story_tree, world_pack
 from .entities import EntityIndex, build_index
+from .lore_import import is_empty_mark
 
 STOPWORDS = set("""the and that with this from have what your their there they them then than into about would could should
 which while where when were been being just like some more most other over only very also will shall must does did done
@@ -254,7 +255,8 @@ def character_play_card(le, post: str | None = None, names: dict[str, str] | Non
         lines.append("  Power: " + _words(pw))
     for key, label in (("motivation", "Motivation"), ("notes", "Voice & notes"), ("story_functions", "In the story"),
                        ("never", "Never")):
-        text = _words(d.get(key)) if d.get(key) not in (None, "", [], {}) else ""
+        v = d.get(key)
+        text = _words(v) if v not in (None, "", [], {}) and not is_empty_mark(v) else ""
         if text:
             lines.append(f"  {label}: {text}")
     ties = []

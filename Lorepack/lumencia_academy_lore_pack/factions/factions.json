@@ -5,6 +5,7 @@
       "id": "lumencia_empire",
       "name": "Lumencia Empire",
       "type": "state",
+      "description": "The dominant power of central and western Aethermere, capital Asterion. Officially, the Academy treats nobles and commoners as equals, but discrimination against commoners remains heavy in society, and the great houses constantly compete for influence.",
       "goals": [
         "Maintain imperial authority",
         "Preserve the stability and prestige of the capital and academy"
@@ -21,18 +22,13 @@
       "rivals": [
         "dominus_holy_kingdom",
         "demon_god_cult"
-      ],
-      "source_ids": [
-        "dreamrunner_zeph_lumencia",
-        "reddit_character_profiles"
-      ],
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      ]
     },
     {
       "id": "imperial_family",
       "name": "Imperial Family",
       "type": "ruling dynasty",
+      "description": "The ruling body of the Lumencia Empire. A fierce war of succession is brewing between the heirs, who use factions inside the Academy as proxies for their political manoeuvres. First Princess Anastasia and Second Princess Isabel are the main figures; both attend the Academy to gather capable retainers and consolidate power.",
       "goals": [
         "Preserve the throne and imperial legitimacy",
         "Build alliances and secure succession"
@@ -44,17 +40,16 @@
       "internal_conflicts": [
         "Anastasia and Isabel are described as rival claimants who build networks of supporters."
       ],
-      "source_ids": [
-        "reddit_character_profiles",
-        "dreamrunner_zeph_lumencia"
-      ],
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      "notes": [
+        "Anastasia and Isabel are the only two heirs to the throne. Never invent another heir, prince, princess or claimant: the whole succession war rests on these two.",
+        "The reigning monarch is not detailed by this pack; keep them off-stage unless the story needs them."
+      ]
     },
     {
       "id": "valenheart_duchy",
       "name": "Valenheart Duchy",
       "type": "noble house",
+      "description": "The strongest knightly house of the Empire, unchallenged. Values martial prowess and honour above all. Eternal rival of the Caldwin Duchy.",
       "domain": "Martial strength, swordsmanship and knightly honour",
       "goals": [
         "Maintain martial prestige",
@@ -67,18 +62,13 @@
       ],
       "rivals": [
         "caldwin_duchy"
-      ],
-      "source_ids": [
-        "dreamrunner_zeph_lumencia",
-        "reddit_character_profiles"
-      ],
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      ]
     },
     {
       "id": "caldwin_duchy",
       "name": "Caldwin Duchy",
       "type": "noble house",
+      "description": "The foremost house of mages in the Empire. Controls enormous magical resources and knowledge. Eternal rival of the Valenheart Duchy.",
       "domain": "Magic, magical knowledge and academic influence",
       "goals": [
         "Preserve influence over magical institutions",
@@ -91,19 +81,13 @@
       ],
       "rivals": [
         "valenheart_duchy"
-      ],
-      "source_ids": [
-        "dreamrunner_zeph_lumencia",
-        "reddit_character_profiles",
-        "reddit_constant_data"
-      ],
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      ]
     },
     {
       "id": "brightwell_county",
       "name": "Brightwell County",
       "type": "noble / merchant family",
+      "description": "A family built on commercial power and trade. Holds significant financial influence over the Empire's economy.",
       "domain": "Trade, finance and commercial networks",
       "key_members": [
         "chloe_brightwell"
@@ -112,18 +96,13 @@
         "Trade",
         "Information gathering",
         "Transactional alliances"
-      ],
-      "source_ids": [
-        "dreamrunner_zeph_lumencia",
-        "reddit_wiki_thread"
-      ],
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      ]
     },
     {
       "id": "reihart_marquisate",
       "name": "Reihart Marquisate",
       "type": "noble house",
+      "description": "An aristocratic family deeply rooted in high society, politics and the flow of information and rumours.",
       "domain": "High society, connections and information",
       "key_members": [
         "elise_reihart"
@@ -132,116 +111,99 @@
         "Social networking",
         "Rumour circulation",
         "Court access"
-      ],
-      "source_ids": [
-        "dreamrunner_zeph_lumencia",
-        "reddit_character_profiles"
-      ],
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      ]
     },
     {
       "id": "lumencia_academy",
       "name": "Lumencia Academy",
       "type": "institution",
+      "description": "The absolute centre of education and youth in the Empire, politically neutral and under direct imperial jurisdiction. It gathers the most talented nobles and commoners and acts as a microcosm of the Empire's power struggles, alliances and social dynamics.",
       "goals": [
         "Educate capable students",
         "Maintain prestige and institutional function"
       ],
       "official_position": "Politically neutral and under imperial jurisdiction",
       "practical_reality": "Competing houses, the imperial heirs and foreign/religious interests seek influence on campus.",
-      "source_ids": [
-        "dreamrunner_zeph_lumencia",
-        "reddit_character_profiles"
-      ],
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      "hidden": [
+        "The Demon God Cult is already rooted in the academy: Acolytes are hidden among the students and try to recruit more Acolytes with promises and demonic pacts. Who they are is for the narrator to decide in each story."
+      ]
     },
     {
       "id": "student_council",
       "name": "Student Council",
       "type": "academy governance body",
+      "description": "The supreme student authority. It runs academy operations, oversees the other clubs and has full authority over events, galas and examinations. Members are selected strictly on grades, practical evaluations and leadership.",
       "goals": [
-        "Oversee student operations, events, galas and examinations"
+        "Run student operations and oversee the clubs",
+        "Organize and supervise events, galas and examinations"
       ],
       "key_members": [
         "anastasia",
         "lucia_caldwin"
       ],
-      "source_ids": [
-        "dreamrunner_zeph_lumencia",
-        "reddit_character_profiles"
-      ],
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      "leadership": "President: Anastasia; Vice President: Lucia Caldwin"
     },
     {
       "id": "blue_knights",
       "name": "Blue Knights",
       "type": "academy club / combat circle",
+      "description": "The main combat and escort circle of the Knight Department. A mix of nobles and commoners, they handle campus security, run mock battles and take on escort missions.",
       "goals": [
-        "Train together",
-        "Support campus security and escort missions"
+        "Ensure campus security",
+        "Run mock battles",
+        "Carry out escort missions"
       ],
-      "source_ids": [
-        "dreamrunner_zeph_lumencia"
-      ],
-      "confidence": "medium",
-      "canon_status": "public_adaptation_detail"
+      "key_members": [
+        "anastasia"
+      ]
     },
     {
       "id": "white_rose_society",
       "name": "White Rose Society",
       "type": "academy social circle",
+      "description": "The leading social circle of the Magic Department, made of high-level students. It organizes galas, balls, ceremonies and the preparation of high-society events.",
       "goals": [
         "Host galas and ceremonies",
         "Coordinate elite social events",
         "Maintain social connections"
       ],
       "key_members": [
-        "elise_reihart"
+        "elise_reihart",
+        "lucia_caldwin"
       ],
-      "source_ids": [
-        "dreamrunner_zeph_lumencia",
-        "reddit_character_profiles"
-      ],
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      "leadership": "President: Elise Reihart; Vice President: Lucia Caldwin"
     },
     {
       "id": "dominus_holy_kingdom",
       "name": "Holy Kingdom of Dominus",
       "type": "theocratic state",
+      "description": "A powerful theocratic state neighbouring the Empire. It worships only the Celestial Deity Lily, trains combat theologians and inquisitors, and wields a unique divine magic (healing and holy arts). It occasionally sends representatives to the Academy because of divine oracles, such as the Saintess Aria.",
       "deity_id": "lily",
       "goals": [
         "Preserve its faith and institutions",
-        "Train divine healers, holy warriors and inquisitors"
+        "Train combat theologians, inquisitors and divine healers"
       ],
       "key_members": [
         "aria",
         "mirabel"
-      ],
-      "source_ids": [
-        "dreamrunner_zeph_lumencia",
-        "reddit_character_profiles"
-      ],
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      ]
     },
     {
       "id": "demon_god_cult",
       "name": "Demon God Cult",
       "type": "secret religious / antagonistic organization",
+      "description": "A massive, fanatical underground organization seeking to resurrect the Demon God Delphirem. It uses Miasma instead of ordinary mana. Its headquarters lie in the Abyss Zone, in the far east of the continent. Hierarchy: Demon God > Apostles > Sin Bishops > Upper / Mid / Lower Priests > Acolytes. The cult is already rooted inside Lumencia Academy: hidden Acolytes live among the students and try to recruit more Acolytes with promises and demonic pacts.",
       "deity_id": "delphirem",
       "goals": [
-        "Bring about the return of Delphirem",
+        "Resurrect the Demon God Delphirem",
         "Expand the cult's influence and access to Miasma"
       ],
       "methods": [
-        "Pacts",
-        "Rituals",
-        "Infiltration",
-        "Manipulation",
+        "Hidden Acolytes among the students recruit new Acolytes with promises and demonic pacts",
+        "Blends into everyday life instead of attacking openly",
+        "Offers pacts to the desperate",
+        "Infiltration and manipulation",
+        "Usually makes major moves during important events or tournaments",
         "Demonic incursions"
       ],
       "headquarters_location_id": "abyss_zone",
@@ -252,18 +214,12 @@
         "mid_priests",
         "lower_priests",
         "acolytes"
-      ],
-      "source_ids": [
-        "dreamrunner_zeph_lumencia",
-        "reddit_character_profiles"
-      ],
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      ]
     },
     {
       "id": "four_celestials",
       "name": "The Four Celestials",
-      "type": "informal group of elite individuals",
+      "type": "the four strongest publicly recognized individuals of the human realm",
       "goals": [
         "No unified group agenda is established; each acts according to their own duties and interests."
       ],
@@ -273,12 +229,7 @@
         "carne",
         "seriel"
       ],
-      "source_ids": [
-        "reddit_character_profiles",
-        "dreamrunner_zeph_lumencia"
-      ],
-      "confidence": "high",
-      "canon_status": "recurring_reference"
+      "description": "The four strongest people publicly recognized in the human realm. They hold immense authority and are seen as living legends: Ethera (Tower Master, 9-Circle Grand Sage, pioneer of theoretical magic), Emily (Headmaster, Master Adept and 8-Circle, sole living master of Compound-Realm), Carne (Commander of the Imperial Guard, Master Apex swordswoman who sees killing as an art) and Seriel (Dawn of the Empire, wandering Master Apex archer using condensed pure mana)."
     }
   ]
 }
