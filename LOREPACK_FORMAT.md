@@ -184,6 +184,11 @@ wizard win). Keys: `location`, `time` (e.g. `"09:00"`), `weather`, `weekday`, `d
   "scene": { "location": "Pure White Space", "time": "09:00", "day": 1, "month": 3, "year": 1301, "present": ["lily"] } }
 ```
 
+Optional `opening_text` (since v0.7.6): the opening scene written by the author. When it is set, the app shows it as
+the story's first reply exactly as written, without asking the narrator (no cost, nothing changed). Portrait tags such
+as `[Emily:2]` work as in a narrated reply. The `blueprint` then holds only the narrator's instructions for the turns
+that follow (where the story stands, what the player decides next), not the text itself.
+
 Optional `events_played` (list of event ids from `events`): planned events that the opening's prologue already plays
 (e.g. `["entrance_ceremony"]` when the prologue is the ceremony). They count as played from the first reply, so the
 narrator is never asked to play them again, and they appear in the Journal.

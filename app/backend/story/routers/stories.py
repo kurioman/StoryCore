@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import re
 import tempfile
 from pathlib import Path
@@ -94,7 +95,9 @@ def create_story(body: StoryCreate, db: Session = Depends(get_db)) -> dict[str, 
               avatar_snapshot_json={"name": av.name, "profile": av.profile_json} if av else None,
               settings_json={k: v for k, v in {
                   "starter_id": body.starter_id, "starter_blueprint": blueprint,
-                  "starter_events_played": [e for e in starter.get("events_played") or [] if isinstance(e, str)], "tone": body.tone, "pacing": body.pacing,
+                  "starter_events_played": [e for e in starter.get("events_played") or [] if isinstance(e, str)],
+                  "starter_opening_text": str(starter.get("opening_text") or "").strip() if body.starter_id else "",
+                  "tone": body.tone, "pacing": body.pacing,
                   "output_length": body.output_length, "max_tokens": body.max_tokens, "agency_policy": body.agency_policy,
                   "content_prefs": body.content_prefs,
                   "model_profile_id": body.model_profile_id, "preset_id": body.preset_id,
@@ -460,9 +463,46 @@ def start_story(sid: str, ctx: AppContext = Depends(get_ctx), db: Session = Depe
                                      command_json={"name": "start", "expansion": expansion, "output_target": "chat",
                                                    # planned events the opening already plays (services/story_events)
                                                    "events_played": cfg.get("starter_events_played") or []})
+    if cfg.get("starter_opening_text"):  # v0.7.6: the author's opening is shown as written, without asking the model
+        ph = _prewritten_opening(ctx, db, s, branch, cfg["starter_opening_text"])
+        return {"user_message_id": user.id, "assistant_message_id": ph.id, "context": None, "prewritten": True}
     ph = story_tree.append_message(db, s, branch, role="assistant", content="", status="streaming")
     manifest = turns._start_generation(ctx, db, s, branch, ph)
     return {"user_message_id": user.id, "assistant_message_id": ph.id, "context": manifest}
+
+
+def _prewritten_opening(ctx: AppContext, db: Session, s: Story, branch: MessageBranch, text: str) -> Message:
+    """v0.7.6: a starter's ``opening_text`` becomes the first reply as it is (no model call, no cost, word for word).
+    Its portrait, music, event and choice tags are read like a streamed reply's, then the usual after-reply steps run
+    (portraits, memory), except the scene analysis: the starter's ``scene`` already sets the place, time and cast."""
+    from ..services.portrait_tags import TagFilter
+    f = TagFilter()
+    clean = (f.feed(text) + f.flush()).strip()
+    stamp = now_iso()
+    meta: dict[str, Any] = {"prewritten": True, "started_at": stamp, "finished_at": stamp, "duration_s": 0,
+                            "approx_output_tokens": 0, "error": None, "cleanup": {"skipped": "prewritten opening"}}
+    if f.tags:
+        meta["portrait_tags_raw"] = f.found()
+    if f.music:
+        meta["music_tags"] = f.music
+    if f.events:
+        meta["event_tags"] = f.events
+    if f.choices:
+        meta["choice_tags"] = f.choices
+    ph = story_tree.append_message(db, s, branch, role="assistant", content=clean, status="complete")
+    ph.generation_metadata_json = meta
+    from ..services import chrono
+    chrono.record_current(db, ph, branch, "before_reply")
+    db.commit()
+    import asyncio
+    for cb in ctx.generations.on_complete:
+        try:
+            res = cb(ph.id)
+            if asyncio.iscoroutine(res):
+                ctx.spawn(res)
+        except Exception:
+            logging.getLogger(__name__).exception("after-reply step failed for the prewritten opening %s", ph.id)
+    return ph
 
 
 def _reconcile(db: Session, sid: str, mid: str, *, edited: bool = False) -> None:

@@ -127,7 +127,6 @@ class EngineTest(unittest.TestCase):
 
 class LumenciaFlowTest(AppTestCase):
     def test_ceremony_then_wing_then_artemis(self):
-        from story.models import Message
         av = self.post("/avatars", {"name": "Kaïs"})
         story = self.new_story("Événements", world_slug="lumencia_academy", starter_id="enrollment", avatar_id=av["id"])
         sid = story["id"]
@@ -140,11 +139,7 @@ class LumenciaFlowTest(AppTestCase):
             ctx = self.get(f"/stories/{sid}/messages/{t['assistant_message_id']}/context")["context"]
             return t["assistant_message_id"], (ctx.get("planned_event") or {}).get("id")
 
-        mid, asked = turn("Je regarde autour de moi.")
-        self.assertEqual(asked, "entrance_ceremony")
-        with self.ctx.db.session() as db:  # the narrator played it and marked it
-            m = db.get(Message, mid)
-            m.generation_metadata_json = {**(m.generation_metadata_json or {}), "event_tags": ["entrance_ceremony"]}
+        # v0.7.6: the author's opening is the ceremony ("events_played"): it is never asked for
         self.assertEqual(turn("Je veux rejoindre l'aile des chevaliers.")[1], None)
         self.assertEqual(turn("Je me rends à la salle d'entraînement.")[1], "wing_exam")
         full = self.get(f"/stories/{sid}/context?full=true")

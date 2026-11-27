@@ -112,6 +112,14 @@ def render_fact(f: EntityFact, index: EntityIndex) -> str:
     return f"- {('[' + label + '] ') if label else ''}{(subj + ': ') if subj else ''}{f.content}{know}"
 
 
+# v0.7.6 (Kurio's test): NPCs recognised the protagonist's techniques straight from the card. The card is the narrator's
+# knowledge only; the other characters learn about the protagonist in the story, like anyone else.
+AVATAR_PRIVACY = ("Only you, the narrator, know this card. The other characters know only what they can see (appearance) "
+                  "and what happened in front of them or was told to them in the story. They never recognise, name or "
+                  "know the protagonist's abilities, techniques, past or secrets unless they saw them used or learned of "
+                  "them in the story.")
+
+
 def render_avatar(av: dict[str, Any]) -> str:
     p = av.get("profile") or av
     fields = [("Name", p.get("display_name") or av.get("name")), ("Called by NPCs", p.get("called_name")),
@@ -605,7 +613,8 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
     player_text, scene_text = render_state(state, index, calendar_of(db, story.world_id)["year_label"])
     if av:  # v0.5: the profile (stable) and the current state (changes every turn) are separate sections
         sections.append(Section("avatar", "Protagonist (played by the player)",
-                                render_avatar(av), [{"type": "avatar", "label": av.get("name") or "Avatar"}]))
+                                render_avatar(av) + "\n" + AVATAR_PRIVACY,
+                                [{"type": "avatar", "label": av.get("name") or "Avatar"}]))
     if player_text:
         sections.append(Section("player_state", "Protagonist's current state", player_text,
                                 [{"type": "state", "label": "Player state"}]))

@@ -129,7 +129,7 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
             has_info = await asyncio.to_thread(_apply_info, message_id)
         except Exception:
             log.exception("info table failed for %s", message_id)
-        if not has_info:
+        if not has_info and not _prewritten(message_id):  # v0.7.6: an author's opening needs no analysis (its scene is set)
             try:
                 await turn_analysis.analyse(ctx, message_id, force=tagged)
             except Exception:  # never let optional metadata affect the finished reply or the extraction that follows
@@ -205,6 +205,12 @@ def create_app(settings: Settings | None = None, *, transport: httpx.AsyncBaseTr
             story_id = s.get(Message, message_id).story_id
             mode = settings_service.get(s, "event_capture_mode")
         await ctx.extraction.run(story_id, branch_id, "after_each_turn" if mode == "after_each_turn" else "automatic_batch")
+
+    def _prewritten(message_id: str) -> bool:
+        from .models import Message
+        with ctx.db.session() as s:
+            m = s.get(Message, message_id)
+            return bool(m is not None and (m.generation_metadata_json or {}).get("prewritten"))
 
     def _apply_tags(message_id: str) -> bool:
         from .services import portrait_tags

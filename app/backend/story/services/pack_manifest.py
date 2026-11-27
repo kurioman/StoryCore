@@ -362,6 +362,14 @@ def _starters(v: Any, rep: _Report) -> list[dict[str, Any]] | None:
             item["i18n"] = {"name": names, "purpose": purposes}
         if s.get("choose_location") is True:  # v1.8: the new-game window lets the player pick the starting location
             item["choose_location"] = True
+        if _str(s.get("opening_text")):  # v0.7.6: the author's opening, shown as written (routers/stories.start_story)
+            item["opening_text"] = _str(s["opening_text"])
+        if "events_played" in s:  # v0.7.6: planned events the opening already plays (services/story_events.progress)
+            ev = s["events_played"]
+            if isinstance(ev, list) and all(isinstance(x, str) and x.strip() for x in ev):
+                item["events_played"] = [x.strip() for x in ev]
+            else:
+                rep.warnings.append(f"starters[{s['id']}]: \"events_played\" must be a list of event ids; ignored.")
         if "scene" in s:  # optional starting scene (place, time, date, who is present); checked when a story starts
             if isinstance(s["scene"], dict):
                 item["scene"] = s["scene"]

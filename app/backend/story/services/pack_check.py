@@ -185,7 +185,7 @@ def _check_starters(world: World, index: EntityIndex, rep: Report) -> None:
     if not starters:
         rep.warnings.append("No opening (pack.json \"starters\"): the narrator has to improvise the first scene.")
     for st in starters:
-        text = " ".join(str(st.get(k) or "") for k in ("blueprint", "purpose"))
+        text = " ".join(str(st.get(k) or "") for k in ("blueprint", "purpose", "opening_text"))
         for name, _slot in TAG.findall(text):
             if not index.resolve(name.strip()):
                 rep.warnings.append(f"Opening \"{st.get('name') or st.get('id')}\": portrait tag [{name.strip()}:…] "
