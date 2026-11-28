@@ -6,7 +6,7 @@ Bonjour Claude. On continue le développement de StoryCore. Voici tout le contex
 - Tu as mon autorisation complète pour ajouter, modifier ou supprimer des fichiers du projet (j'ai une sauvegarde).
   Pour que git puisse faire ses commits, demande l'autorisation de suppression sur le dossier du projet en début de session.
 - Fais un commit git après chaque étape. Termine chaque message de commit par les lignes d'attribution demandées par le système.
-- Je pousse moi-même sur GitHub avec `DEVONLY\Push vers GitHub.bat` (dépôt privé, branche `main`). Rappelle-le-moi en fin de phase.
+- J'envoie moi-même sur GitHub avec `DEVONLY\Publier une mise a jour.bat` (branche `main`) : choix 1 = nouvelle version (demande le numéro, envoie le code, publie), choix 2 = envoyer seulement le code. Rappelle-le-moi en fin de phase.
 
 ## Le projet en bref
 StoryCore (version **0.6.0** ; la numérotation est repartie de zéro après la 1.7.0 : on vise une vraie V1) est un moteur
@@ -51,7 +51,7 @@ local de jeu de rôle textuel par IA, basé sur des « Lore packs » (des mondes
 - Les réglages sont dans `settings_service.DEFAULTS`. Une requête PUT `/api/settings` refuse les clés inconnues.
 - Piège : ne jamais appeler `msg()` au niveau d'un module (la langue peut changer sans recharger) : utiliser des fonctions.
 - Release : `python3 DEVONLY/make_release.py $HOME/tmp/rel` (sur le disque local de la VM, ~1 min), puis copier le zip dans `_release\`.
-  Le zip exclut `data\`, mes musiques (Music part vide), `DEVONLY\Push vers GitHub.bat` et les captures de l'ancienne interface.
+  Le zip exclut `data\`, mes musiques (Music part vide), les captures de l'ancienne interface.
   Licences tierces : `DEVONLY/tools/js_notices.py` régénère la partie JavaScript de `THIRD_PARTY_NOTICES.txt`.
 
 ## Ce qui est fait (v0.5)

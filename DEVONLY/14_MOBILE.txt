@@ -28,9 +28,9 @@ files/storycore/data                    base, sauvegardes, clés API (data/secre
 APK FINALE (se met à jour toute seule)
 -------------------------------------
 C'est celle que tout le monde installe. Elle est fabriquée AUTOMATIQUEMENT à chaque version publiée :
-1. Pousser sur GitHub (DEVONLY\Push vers GitHub.bat). Obligatoire : l'APK est fabriquée à partir du code EN LIGNE
-   (publish.ps1 refuse de publier s'il reste des modifications non poussées).
-2. Changer APP_VERSION (app/backend/story/config.py) puis lancer DEVONLY\Publier une mise a jour.bat.
+1-2. Lancer DEVONLY\Publier une mise a jour.bat, choix 1 : il demande le numéro de version (écrit dans
+   APP_VERSION), enregistre et envoie le code sur GitHub (obligatoire : l'APK est fabriquée à partir du code EN
+   LIGNE), puis publie.
    -> la version vX.Y.Z est publiée (installateur PC) ; GitHub Actions ("Mobile APK", job "APK (final)")
       fabrique alors StoryCore-X.Y.Z.apk, signée avec la clé SECRÈTE, et l'ajoute à cette même version (~10 min).
 3. Sur les téléphones : à chaque démarrage, Updater.kt lit https://github.com/kurioman/StoryCore/releases,
@@ -47,7 +47,7 @@ L'APK de test et l'APK finale ont des clés différentes : passer de l'une à l'
 
 APK de test (Compiler l'APK à la main)
 --------------------------------------
-1. Pousser sur GitHub (DEVONLY\Push vers GitHub.bat).
+1. Envoyer le code sur GitHub (DEVONLY\Publier une mise a jour.bat, choix 2).
 2. GitHub > dépôt StoryCore > onglet Actions > "Mobile APK" > bouton "Run workflow".
 3. Attendre (1re fois ~20-30 min car pydantic-core est compilé ; ensuite il est réutilisé, ~5-10 min).
 4. Ouvrir l'exécution terminée > "Artifacts" > StoryCore-mobile-apk (un .zip qui contient l'APK).

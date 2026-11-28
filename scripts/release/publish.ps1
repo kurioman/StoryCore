@@ -1,9 +1,9 @@
 ﻿<#
   Publie une nouvelle version de StoryCore (installateur Windows + mise a jour automatique des testeurs).
 
-  Lance-le avec DEVONLY\Publier une mise a jour.bat (double-clic).
-  Avant : change APP_VERSION dans app\backend\story\config.py (ex. 0.6.0 -> 0.6.1) et reconstruis l'interface
-  si tu l'as modifiee (npm run build dans app\frontend).
+  Lance-le avec DEVONLY\Publier une mise a jour.bat (double-clic) : le .bat demande d'abord le numero de version et
+  envoie le code sur GitHub (scripts\release\version_and_push.ps1). Reconstruis l'interface avant si tu l'as
+  modifiee (npm run build dans app\frontend).
 
   Ce que fait le script :
     1. lit la version, recupere ton acces GitHub (celui que Git utilise deja), verifie que la version est nouvelle ;
@@ -74,8 +74,8 @@ if (-not $NoUpload) {
     Step 'Acces GitHub'
     $Token = Get-GitHubToken
     if (-not $Token) {
-        Fail ("Aucun acces GitHub trouve. Lance d'abord DEVONLY\Push vers GitHub.bat (il te connecte a GitHub), " +
-              "puis relance ce fichier.")
+        Fail ("Aucun acces GitHub trouve. Relance DEVONLY\Publier une mise a jour.bat sans -NoUpload : " +
+              "l'envoi du code sur GitHub te connecte a GitHub.")
     }
     $Headers.Authorization = "Bearer $Token"
     try { $info = Invoke-RestMethod "$ApiRepo" -Headers $Headers }
@@ -90,8 +90,8 @@ if (-not $NoUpload) {
     # tout doit etre pousse avant de publier, sinon le telephone recevrait l'ancien code.
     $ahead = (git -C $Root rev-list --count '@{u}..HEAD' 2>$null)
     if ($LASTEXITCODE -eq 0 -and [int]$ahead -gt 0) {
-        Fail ("$ahead modification(s) ne sont pas encore sur GitHub. Lance d'abord DEVONLY\Push vers GitHub.bat, " +
-              "puis relance ce fichier (l'APK Android est fabriquee a partir du code en ligne).")
+        Fail ("$ahead modification(s) ne sont pas encore sur GitHub. Relance DEVONLY\Publier une mise a jour.bat " +
+              "(il envoie le code avant de publier : l'APK Android est fabriquee a partir du code en ligne).")
     }
     $exists = $false
     try { Invoke-RestMethod "$ApiRepo/releases/tags/v$Version" -Headers $Headers | Out-Null; $exists = $true }
@@ -101,8 +101,8 @@ if (-not $NoUpload) {
         if ($code -ne 404) { Fail "Impossible de lire les versions publiees ($($_.Exception.Message))." }
     }
     if ($exists) {
-        Fail ("La version $Version est deja publiee. Change APP_VERSION dans app\backend\story\config.py " +
-              "(par exemple $Version -> la version suivante), puis relance.")
+        Fail ("La version $Version est deja publiee. Relance DEVONLY\Publier une mise a jour.bat " +
+              "et choisis un numero plus grand.")
     }
 }
 
