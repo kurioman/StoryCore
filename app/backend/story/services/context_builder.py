@@ -418,7 +418,11 @@ NARRATION_RULES_V6 = (
     "immediate, visible result; do not carry it further with travel, follow-up actions or time skips.\n"
     "- In a fight, opponents and the surroundings act; {name}'s attacks, defence and movement belong to the player. "
     "Stop at the moment {name} must respond.\n"
-    "- Keep the other characters active: they talk, decide and act on what they plausibly know.\n"
+    "- Keep the other characters active: they talk, decide and act on what they know.\n"
+    # v0.7.7 "who knows what"
+    "- Each character knows only what she saw or heard herself, what she was told in the story and what is common "
+    "knowledge in her world: never what happened where she was absent, what {name} only thought, or another "
+    "character's secret.\n"
     "- A length target is a maximum, not a quota. Never repeat or paraphrase earlier replies: continue from the exact "
     "point where the last one ended.\n"
     "- Never invent a shared past between {name} and anyone unless the story or {name}'s profile established it.\n"
@@ -891,15 +895,21 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
     if hidden:
         in_play = set(focus) | {i["id"] for i in lore_items if i.get("type") == "lore" and i.get("included", True)}
         in_play |= {c.entity_id for c in (db.get(LoreChunk, i) for i in in_play) if c is not None and c.entity_id}
-        names = {e.entity_id: e.name for e in db.scalars(select(LoreEntity).where(LoreEntity.world_id == story.world_id))}
-        secret_lines = [f"- {names.get(key.split(':', 1)[1], key.split(':', 1)[1])}: {note}"
+        from . import secret_knowledge
+        world_ents = list(db.scalars(select(LoreEntity).where(LoreEntity.world_id == story.world_id)))
+        names = {e.entity_id: e.name for e in world_ents}
+        who_lookup = secret_knowledge.name_lookup(e for e in world_ents if e.category == "character")
+        # v0.7.7 "who knows what": a secret can say which characters know it ("(Known by: Beelzebub) ...")
+        secret_lines = [secret_knowledge.render(names.get(key.split(":", 1)[1], key.split(":", 1)[1]), note, who_lookup,
+                                                subject_is_character=key.split(":", 1)[0] == "character")
                         for key, notes in hidden.items() if key.split(":", 1)[1] in in_play for note in notes]
         if secret_lines:
             text_ = ("These facts are TRUE but SECRET. The player must not learn them unless the story reveals them "
                      "through events, clues or a character's own choice. Never state them in narration, never hint at "
-                     "them out of nowhere, and never record them as something the protagonist knows. A character knows "
-                     "a secret only if it is their own or they would plausibly know it. Let secrets quietly shape "
-                     "motives, behaviour and consequences.\n" + "\n".join(secret_lines))
+                     "them out of nowhere, and never record them as something the protagonist knows. When a secret says "
+                     "who knows it, only those characters know it; otherwise a character knows a secret only if it is "
+                     "their own or they would plausibly know it. A character who knows a secret keeps it to herself "
+                     "unless she chooses to reveal it. Let secrets quietly shape motives, behaviour and consequences.\n" + "\n".join(secret_lines))
             secret_texts.append(text_)
             sections.append(Section("secrets", "Narrator-only secrets (hidden from the player)", text_,
                                     [{"type": "secret", "label": f"{len(secret_lines)} hidden note(s)"}]))

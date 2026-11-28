@@ -10,7 +10,7 @@ function secrets() {
     key: `hidden`,
     label: msg("Secrets (narrator only)"),
     type: `lines`,
-    hint: msg("One secret per line. The narrator knows them and lets them shape the story, but never says them outright. The player never sees them."),
+    hint: msg("One secret per line. The narrator knows them and lets them shape the story, but never says them outright. The player never sees them. Start a line with (Known by: Name, Name) so that only these characters know it."),
   };
 }
 

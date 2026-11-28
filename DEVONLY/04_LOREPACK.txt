@@ -120,6 +120,11 @@ What the engine does (lore_import.strip_hidden / context_builder section 8b):
   - The "Preview context" screen shows "[Narrator-only notes are hidden from the player.]" instead.
   - A note inside a nested entry is prefixed with that entry's name ("[4th Legion (Unknown)] ...").
   - Tip: put a secret on EVERY record that should trigger it (the character AND the place/faction where it matters).
+  - v0.7.7 WHO KNOWS WHAT (services/secret_knowledge.py): a note may begin with "(Known by: Name, Name)" (French
+    "(Connu de : ...)"), "(Known by: nobody)" (only the record's own character) or "(Known by: everyone)" (every
+    character, not the player); JSON {"text": "...", "known_by": [...]} is turned into that line at import. The
+    narrator's line then says "Known ONLY by: ... Every other character does NOT know it". Names are matched by name,
+    first name, alias or id; pack_check warns about unknown names ("secrets_with_known_by" in its stats).
   Limits: not read from Markdown files; hidden notes inside "relationships" lists are dropped (not stored).
   Honest warning: the player can still read the pack files on disk, and a model can let a secret slip. It hides
   information from the app's interface, it is not encryption.

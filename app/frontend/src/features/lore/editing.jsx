@@ -281,6 +281,13 @@ function FieldEditor({ field, value, onSave, onCancel, characters }) {
           <p className="text-[11px] text-faint">{msg("This field has nested parts: it is edited as JSON.")}</p>
         </>
       )}
+      {field === `hidden` && (
+        <p className="text-xs text-faint">
+          {msg(
+            "Tip: start a secret with (Known by: Name, Name) so that only these characters know it. (Known by: nobody): only this character. (Known by: everyone): every character, but not the player.",
+          )}
+        </p>
+      )}
       {error && <p className="text-xs text-danger">{error}</p>}
       <div className="flex justify-end gap-2">
         <Button size="sm" variant="ghost" onClick={onCancel}>

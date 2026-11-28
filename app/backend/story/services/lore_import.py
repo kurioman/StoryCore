@@ -60,7 +60,8 @@ def strip_hidden(obj: Any, notes: list[str] | None = None, _depth: int = 0) -> t
             for n in (h if isinstance(h, list) else [h]):
                 if is_empty_mark(n):
                     continue
-                text = n if isinstance(n, str) else json.dumps(n, ensure_ascii=False)
+                from .secret_knowledge import note_from_object  # v0.7.7: {"text": ..., "known_by": [...]}
+                text = n if isinstance(n, str) else (note_from_object(n) or json.dumps(n, ensure_ascii=False))
                 notes.append(f"[{name}] {text}" if _depth and name else text)
         return {k: strip_hidden(v, notes, _depth + 1)[0] for k, v in obj.items() if k != HIDDEN_KEY}, notes
     if isinstance(obj, list):

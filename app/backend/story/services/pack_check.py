@@ -80,6 +80,8 @@ def check_pack(pack_dir: Path) -> dict[str, Any]:
                 if world is not None:
                     _check_starters(world, index, rep)
                 _check_gender(s, rep)
+                if world is not None:
+                    _check_known_by(s, world, rep)
                 lib = (manifest or {}).get("library") or {}
                 if manifest and not lib.get("summary"):
                     rep.info.append("No summary (pack.json \"summary\", format 2): the story library card has no text.")
@@ -176,6 +178,21 @@ def _check_gender(s, rep: Report) -> None:
         rep.warnings.append(f"No \"gender\" for {len(missing)} character(s): {', '.join(missing[:12])}"
                             + (" ..." if len(missing) > 12 else "") + ". The narrator may guess it wrong (add \"gender\": "
                             "\"female\" / \"male\" / another word, and \"pronouns\" if useful).")
+
+
+def _check_known_by(s, world: World, rep: Report) -> None:
+    """v0.7.7: a name in a secret's "(Known by: ...)" list that is not a character of the pack."""
+    from ..models import LoreEntity
+    from . import secret_knowledge
+    lookup = secret_knowledge.name_lookup(s.scalars(select(LoreEntity).where(LoreEntity.category == "character")))
+    hidden = (world.data_json or {}).get("hidden") or {}
+    unknown = secret_knowledge.unknown_names(hidden, lookup)
+    if unknown:
+        rep.warnings.append(f"Unknown name(s) in a secret's \"(Known by: ...)\" list: {', '.join(unknown[:12])}. Write a "
+                            "character's name, first name or id as in the pack.")
+    lists = sum(1 for notes in hidden.values() for n in notes if secret_knowledge.parse(n)[1])
+    if lists:
+        rep.stats["secrets_with_known_by"] = lists
 
 
 def _check_starters(world: World, index: EntityIndex, rep: Report) -> None:

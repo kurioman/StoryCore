@@ -327,6 +327,26 @@ Any record in the lore files (a character, a faction, a place, even an entry nes
 }
 ```
 
+### Who knows a secret (v0.7.7)
+
+A secret can say which characters know it: begin the line with `(Known by: Name, Name)` (or, in French,
+`(Connu de : Name, Name)`). Only those characters know it; every other character never acts on it or hints at it until
+the story shows them learning it. Names are matched with the pack's characters by name, first name, alias or id
+(**Check Lore Packs.bat** warns about a name it cannot find).
+
+```json
+"hidden": [
+  "(Known by: Beelzebub) She is soul-bound to the Demon King: if she disobeys him, she dies.",
+  "(Known by: nobody) She still dreams of the day she lost.",
+  "(Known by: everyone) The 4th Legion has never lost a battle."
+]
+```
+
+- `(Known by: nobody)`: only the record's own character knows it (for a place or a group: no character at all);
+- `(Known by: everyone)`: every character knows it, only the player does not;
+- in JSON, `{"text": "...", "known_by": ["beelzebub"]}` is the same as the first line above;
+- a secret without a list keeps the older rule: a character knows it if it is her own or she would plausibly know it.
+
 A note inside a nested entry is labelled with that entry's name (for example `[4th Legion (Unknown)] ...`). Hidden notes
 are only read from JSON files, not from Markdown. The import report gives their number, never their text.
 
