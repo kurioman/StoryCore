@@ -3,6 +3,22 @@
 StoryCore is the new name of Lumencia Story Desk. It is now a multi-story engine: every world is a lore pack in the
 `Lorepack` folder, loaded automatically at start.
 
+## Next version (after 0.7.6)
+
+- **Your actions are attempts.** What you write is what your character tries to do, not a fact. The narrator judges it
+  against your rank and abilities, the other characters' strength and the situation, then tells how it really goes, in
+  its own words: success, partial success or failure ("I parry and win" against a much stronger teacher does not simply
+  happen). Settings > Narration: **Player actions**, Attempts (default) or Free (as before). Characters' ranks are now
+  on their short line, so the narrator can compare.
+- **Who knows what.** A secret in a lore pack can say who knows it: begin it with `(Known by: Name, Name)` (or
+  `(Connu de : ...)`, `(Known by: nobody)`, `(Known by: everyone)`). Only those characters know it. A new narration rule:
+  a character knows only what she saw, heard or was told, never what happened where she was absent. Check Lore Packs
+  warns about an unknown name. See LOREPACK_FORMAT.md.
+- **Clear errors.** A failed reply now says what happened in plain words (key refused, no credit left, model not found,
+  no connection, provider overloaded, reply cut off...) with the button that helps (Retry, AI settings, Budget); the
+  provider's own text is folded under "Technical details". The same in the settings' connection tests.
+- The Lore editor and the world creator are now fully translated into French.
+
 ## Phase 2: narration quality (after the 50-turn test of 19/11/2026)
 
 - **Clean replies, whatever the model.** Code fences (```), the app's own labels ("[The player's turn]",

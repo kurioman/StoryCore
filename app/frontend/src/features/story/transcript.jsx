@@ -12,6 +12,61 @@ import { StoryMarkdown } from "@/features/story/prose";
 import { cn, timeAgo } from "@/lib/util";
 import { sceneKeys } from "@/features/story/api";
 import { usePhoneLayout } from "@/lib/layout";
+import { friendlyError, TechnicalDetails } from "@/lib/errors";
+
+// v0.7.7 "clear errors": a stopped, incomplete or failed reply, said in plain words with the button that helps
+function GenerationNotice({ status, error, cost, busy, onRetry }) {
+  const failed = status === `failed` || error?.category === `budget`;
+  const f = failed ? (friendlyError(error) ?? { title: msg("Generation failed."), text: ``, action: `retry`, technical: `` }) : null;
+  return (
+    <div
+      className={cn(
+        `mt-2 flex flex-wrap items-start gap-2 rounded-md px-2.5 py-1.5 text-xs`,
+        failed ? `bg-danger-soft text-danger` : `bg-warn-soft text-warn`,
+      )}
+      role="status"
+    >
+      <Icon.CircleAlert className="mt-0.5 size-3.5 shrink-0" />
+      <div className="min-w-0 flex-1">
+        {status === `cancelled` && !failed && msg("Stopped — the text so far was kept.")}
+        {status === `partial` && !failed && msg("Incomplete response — the text received so far was kept.")}
+        {!failed && error && status !== `cancelled` && status !== `partial` && (
+          <>
+            <span className="font-medium">{friendlyError(error).title}</span> — {friendlyError(error).text}
+          </>
+        )}
+        {f && (
+          <>
+            <span className="font-medium">{f.title}</span>
+            {f.text ? <> — {f.text}</> : null}
+          </>
+        )}
+        {typeof cost == `number` &&
+          msg(" This attempt cost ${{v0}}.", {
+            v0: cost.toFixed(4),
+          })}
+        {(f || error) && <TechnicalDetails text={(f ?? friendlyError(error)).technical} className="mt-1" />}
+      </div>
+      <div className="flex flex-wrap gap-1">
+        {f?.action === `budget` && (
+          <Button size="sm" variant="ghost" onClick={() => (window.location.hash = `#/settings/budget`)}>
+            <Icon.Coins className="size-3" /> {msg("Budget settings")}
+          </Button>
+        )}
+        {f?.action === `providers` && (
+          <Button size="sm" variant="ghost" onClick={() => (window.location.hash = `#/settings/providers`)}>
+            <Icon.Settings className="size-3" /> {msg("AI settings")}
+          </Button>
+        )}
+        {!busy && (
+          <Button size="sm" variant="ghost" onClick={onRetry} title={msg("Sends a new request; on a paid model it is billed again")}>
+            <Icon.RefreshCw className="size-3" /> {msg("Retry")}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 function speakerColorIndex(e) {
   let t = 0;
@@ -430,42 +485,7 @@ export function MessageItem({
         <InfoTable storyId={storyId} messageId={e.id} info={de.info_table} busy={busy} onChanged={onChanged} />
       )}
       {!se && (ae !== `complete` || fe) && ae !== `streaming` && (
-        <div
-          className={cn(
-            `mt-2 flex flex-wrap items-center gap-2 rounded-md px-2.5 py-1.5 text-xs`,
-            ae === `failed` ? `bg-danger-soft text-danger` : `bg-warn-soft text-warn`,
-          )}
-          role="status"
-        >
-          <Icon.CircleAlert className="size-3.5" />
-          <span>
-            {ae === `cancelled` && msg("Stopped — the text so far was kept.")}
-            {ae === `partial` && msg("Incomplete response — the text received so far was kept.")}
-            {ae === `failed` && fe?.category !== `budget` && msg("Generation failed.")}{" "}
-            {fe?.category === `budget`
-              ? msg("Spending cap reached: nothing was sent and your message is kept. Raise the cap to keep playing.")
-              : fe?.message}
-            {typeof pe == `number` &&
-              msg(" This attempt cost ${{v0}}.", {
-                v0: pe.toFixed(4),
-              })}
-          </span>
-          {fe?.category === `budget` && (
-            <Button size="sm" variant="ghost" onClick={() => (window.location.hash = `#/settings/budget`)}>
-              <Icon.Coins className="size-3" /> {msg("Budget settings")}
-            </Button>
-          )}
-          {!busy && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => onRegenerate(e.id)}
-              title={msg("Sends a new request; on a paid model it is billed again")}
-            >
-              <Icon.RefreshCw className="size-3" /> {msg("Retry")}
-            </Button>
-          )}
-        </div>
+        <GenerationNotice status={ae} error={fe} cost={pe} busy={busy} onRetry={() => onRegenerate(e.id)} />
       )}
       <div className={cn(`sc-msg-meta mt-1 flex min-h-6 items-center gap-1 text-[11px] text-faint`, se && `justify-end`)}>
         {ve && ve.ids.length > 1 && (

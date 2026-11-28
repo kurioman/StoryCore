@@ -25,6 +25,7 @@ import { navigate } from "@/lib/router";
 import { useLocalState } from "@/lib/hooks";
 import { IS_ANDROID_APP } from "@/lib/remote";
 import { catalogText } from "@/features/settings/catalogTexts";
+import { ResultText, resultText } from "@/lib/errors";
 
 var MODEL_CATALOG_KEY = [`model-catalog`],
   OPENROUTER_URL = `https://openrouter.ai/`,
@@ -602,7 +603,7 @@ function SelectedModelStatus({ provider, model, onChanged }) {
       </ol>
       {s && (
         <Callout tone={s.ok ? `ok` : `danger`} className="mt-2">
-          {s.message}
+          <ResultText result={s} />
         </Callout>
       )}
       <Callout tone="info" className="mt-2">
@@ -682,7 +683,7 @@ function OllamaQuickSetup({ provider, onChanged }) {
       </ol>
       {n && (
         <Callout tone={n.ok ? `ok` : `warn`} className="mt-2">
-          {n.message}
+          <ResultText result={n} />
         </Callout>
       )}
       {provider?.is_cloud && (
@@ -761,7 +762,7 @@ function DefaultModelPicker({ providers, profiles, defaultId, tested }) {
             </dt>
             <dd className={c ? (c.ok ? `text-ok` : `text-danger`) : `text-faint`}>
               {c
-                ? `${c.ok ? msg("Passed", {}) : msg("Failed", {})} ${timeAgo(c.at)}: ${c.message}`
+                ? `${c.ok ? msg("Passed", {}) : msg("Failed", {})} ${timeAgo(c.at)}: ${c.ok || !c.category ? c.message : resultText({ ok: false, error: { category: c.category, message: c.message } })}`
                 : msg("Not tested yet")}
             </dd>
           </>
@@ -1223,12 +1224,7 @@ function ProviderCard({ p: e, profiles, defaultId }) {
       <div className="space-y-3 px-4 py-3">
         {o && (
           <Callout tone={o.ok ? `ok` : `danger`}>
-            {o.message}
-            {o.error?.details && (
-              <pre className="mt-1 max-h-24 overflow-auto whitespace-pre-wrap text-[11px] text-muted">
-                {o.error.details}
-              </pre>
-            )}
+            <ResultText result={o} />
           </Callout>
         )}
         {e.provider_type !== `mock` && (
@@ -1522,7 +1518,7 @@ function AddModelDialog({ p, onClose, defaultMakeDefault = false }) {
       {query.isLoading && <Spinner />}
       {query.data && !query.data.ok && (
         <Callout tone="warn" className="mb-3" title={msg("Couldn't list models")}>
-          {query.data.message} {query.data.manual_hint}
+          <ResultText result={query.data} /> {msg("You can still type the model's name yourself.")}
         </Callout>
       )}
       {query.data?.ok && (
@@ -1714,7 +1710,7 @@ function AddProviderDialog({ onClose }) {
         <div className="space-y-3">
           {g && (
             <Callout tone={g.ok ? `ok` : `warn`} title={g.ok ? msg("Connected") : msg("Connection test failed")}>
-              {g.message}
+              <ResultText result={g} />
               {!g.ok && (
                 <p className="mt-1">
                   {msg(

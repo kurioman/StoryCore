@@ -176,7 +176,8 @@ async def test_provider(pid: str, body: dict[str, Any] | None = None, ctx: AppCo
         out = {"ok": False, "message": e.message, "error": e.to_dict()}
     if body.get("record"):  # a test the player pressed, shown as "last tested"; background status checks leave no trace
         p.nonsecret_config_json = {**(p.nonsecret_config_json or {}), "last_test": {
-            "ok": out["ok"], "at": now_iso(), "message": out["message"][:300], "model_id": model_id, "generated": bool(body.get("generate"))}}
+            "ok": out["ok"], "at": now_iso(), "message": out["message"][:300], "model_id": model_id, "generated": bool(body.get("generate")),
+            "category": (out.get("error") or {}).get("category")}}
     return out
 
 

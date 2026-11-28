@@ -447,22 +447,15 @@ FREE_ACTION_RULE = ("- Never write {name}'s dialogue, thoughts, feelings, intent
                     "- In a fight, opponents and the surroundings act; {name}'s attacks, defence and movement belong to the player. "
                     "Stop at the moment {name} must respond.\n")
 ATTEMPT_ACTION_RULE = (
-    "- The player's message is what {name} TRIES to say and do, never an established fact. Judge the attempt against "
-    "{name}'s profile (rank, abilities, condition, what {name} carries and knows), the strength and skill of the other "
-    "characters, the situation and the world's rules, then decide yourself how it really goes: success, partial success "
-    "or failure. A result the player writes (a hit that lands, a victory, someone convinced, charmed, fooled or beaten, "
-    "an item found, a door that opens) is only what {name} hopes for: the world and the other characters decide it. A "
-    "much weaker character does not beat a much stronger one by saying so; only planning, terrain, allies or a real "
-    "weakness can close a gap.\n"
-    "- Open with {name}'s attempt told again in your own words, in one or two sentences, as it really happens (a clumsy "
-    "parry from a beginner, a counter that a master turns aside with ease), then its consequences. Never copy the "
-    "player's sentences. {name}'s spoken words stay as the player wrote them, unless what happens makes them impossible "
-    "(interrupted, out of breath, knocked down). An action beyond {name}'s means fails or falls short; knowledge {name} "
-    "could not have is simply not there.\n"
-    "- Add nothing the player did not state: no new dialogue, thoughts, feelings, decisions or actions for {name}. Show "
-    "what {name} perceives and the immediate result; do not carry it further with travel, follow-up actions or time skips.\n"
-    "- In a fight, the player chooses {name}'s attacks, defence and movement and you resolve them; opponents and the "
-    "surroundings act too. Stop at the moment {name} must respond.\n")
+    "- The player's message is what {name} TRIES to say and do, never a fact. Judge it against {name}'s rank, abilities "
+    "and condition, the others' strength and the situation, and decide the outcome yourself: success, partial success or "
+    "failure. A result the player writes (a hit, a win, someone convinced or beaten) is only a hope: a much weaker "
+    "fighter never beats a much stronger one just by saying so.\n"
+    "- Start by telling {name}'s attempt in your own words, briefly, as it really happens (a beginner's clumsy parry, a "
+    "counter a master turns aside), then its consequences. Keep {name}'s spoken words unless events prevent them. Add no "
+    "other words, thoughts, feelings, decisions or actions for {name}, and do not carry it further with travel or time skips.\n"
+    "- In a fight, the player chooses {name}'s moves and you resolve them; opponents and the surroundings act too. Stop "
+    "when {name} must respond.\n")
 ATTEMPT_NOTE = (" What the player wrote is {name}'s attempt, not a fact: judge it against {name}'s rank and abilities and "
                 "the situation, and tell how it really goes.")
 

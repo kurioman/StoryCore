@@ -202,7 +202,9 @@ export function StoryPage({ storyId }) {
     le = React.useRef(null),
     ue = React.useCallback(
       (e) => {
-        e instanceof ApiError && e.code === `no_model` ? toast(e.message, `danger`) : toast(errorMessage(e), `danger`);
+        e instanceof ApiError && e.code === `no_model`
+          ? toast(msg("No model selected. Choose an AI model in the settings to play."), `danger`)
+          : toast(errorMessage(e), `danger`);
       },
       [toast],
     ),

@@ -135,7 +135,7 @@ class SummariesWithoutCaptureTest(SummaryHelpers, AppTestCase):
         from story.services import context_builder, story_tree
         with self.ctx.db.session() as s:
             st = story_tree.get_story(s, sid)
-            st.settings_json = {**(st.settings_json or {}), "context_budget_tokens": 4500}
+            st.settings_json = {**(st.settings_json or {}), "context_budget_tokens": 5000}  # v0.7.7: the narration rules grew (attempts, who knows what)
         with self.ctx.db.session() as s:
             st = story_tree.get_story(s, sid)
             built = context_builder.build(s, st, story_tree.get_branch(s, st))
@@ -228,7 +228,7 @@ class LayersTest(SummaryHelpers, AppTestCase):
             from story.services import context_builder, story_tree
             with self.ctx.db.session() as s:
                 st = story_tree.get_story(s, sid)
-                st.settings_json = {**(st.settings_json or {}), "context_budget_tokens": 4500}
+                st.settings_json = {**(st.settings_json or {}), "context_budget_tokens": 5000}  # v0.7.7: the narration rules grew (attempts, who knows what)
             with self.ctx.db.session() as s:
                 st = story_tree.get_story(s, sid)
                 built = context_builder.build(s, st, story_tree.get_branch(s, st))

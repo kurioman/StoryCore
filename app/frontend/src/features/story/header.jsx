@@ -27,6 +27,7 @@ import { cn, isCloudModelId } from "@/lib/util";
 import { navigate } from "@/lib/router";
 import { presetName } from "@/lib/presets";
 import { openHelp, openLibrary, usePhoneLayout } from "@/lib/layout";
+import { ResultText } from "@/lib/errors";
 
 var WIDE_HEADER = 960;
 
@@ -643,7 +644,9 @@ function ModelSwitch({ story, inline = false }) {
             : msg("Local only — nothing leaves your computer.")}
         </p>
         {l && l !== `pending` && (
-          <p className={cn(`px-2 pb-1 text-[11px]`, l.ok ? `text-ok` : `text-danger`)}>{l.message}</p>
+          <div className={cn(`px-2 pb-1 text-[11px]`, l.ok ? `text-ok` : `text-danger`)}>
+            <ResultText result={l} />
+          </div>
         )}
         <button
           onClick={() => d(null)}
