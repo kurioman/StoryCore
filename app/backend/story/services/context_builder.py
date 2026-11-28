@@ -233,7 +233,11 @@ def character_card(le, post: str | None = None) -> str:
     head = "; ".join(x for x in (gender, role, status) if x)
     traits = ", ".join((d.get("personality_traits") or [])[:6]) or (le.summary or "")[:120]
     looks = looks_of(d)
-    return f"- {le.name}" + (f" ({head})" if head else "") + (f": {traits}" if traits else "") + (f"; looks: {looks}" if looks else "")
+    # v0.7.7: the rank stays on the short line, so that the narrator can judge the player's attempts against it
+    pw = d.get("power") if isinstance(d.get("power"), dict) else {}
+    rank = str(pw.get("rank") or "").strip()
+    return (f"- {le.name}" + (f" ({head})" if head else "") + (f": {traits}" if traits else "")
+            + (f"; rank: {rank}" if rank else "") + (f"; looks: {looks}" if looks else ""))
 
 
 def _words(v: Any) -> str:
@@ -428,6 +432,52 @@ NARRATION_RULES_V6 = (
     "- When sources disagree: fixed truths and canon facts first, then the player's corrections, the scene now, the "
     "recaps, and last the older messages."
 )
+# v0.7.7 (Kurio, 28/11/2026): what the player writes is an attempt, never a fact. A low-ranked student who "parries and
+# counters, the blade at the teacher's throat" against a far stronger teacher does not win because the player said so:
+# the narrator judges the attempt (ranks, abilities, situation) and tells it again in its own words as it really goes.
+# Setting ``action_resolution`` (story setting first, then app setting): "attempts" (default) | "free" (as before).
+ACTION_RESOLUTIONS = ("attempts", "free")
+FREE_ACTION_RULE = ("- Never write {name}'s dialogue, thoughts, feelings, intentions, decisions or any action the player did not "
+                    "state, and never tell the player's action again: start with what it causes. Show what {name} perceives and the "
+                    "immediate, visible result; do not carry it further with travel, follow-up actions or time skips.\n"
+                    "- In a fight, opponents and the surroundings act; {name}'s attacks, defence and movement belong to the player. "
+                    "Stop at the moment {name} must respond.\n")
+ATTEMPT_ACTION_RULE = (
+    "- The player's message is what {name} TRIES to say and do, never an established fact. Judge the attempt against "
+    "{name}'s profile (rank, abilities, condition, what {name} carries and knows), the strength and skill of the other "
+    "characters, the situation and the world's rules, then decide yourself how it really goes: success, partial success "
+    "or failure. A result the player writes (a hit that lands, a victory, someone convinced, charmed, fooled or beaten, "
+    "an item found, a door that opens) is only what {name} hopes for: the world and the other characters decide it. A "
+    "much weaker character does not beat a much stronger one by saying so; only planning, terrain, allies or a real "
+    "weakness can close a gap.\n"
+    "- Open with {name}'s attempt told again in your own words, in one or two sentences, as it really happens (a clumsy "
+    "parry from a beginner, a counter that a master turns aside with ease), then its consequences. Never copy the "
+    "player's sentences. {name}'s spoken words stay as the player wrote them, unless what happens makes them impossible "
+    "(interrupted, out of breath, knocked down). An action beyond {name}'s means fails or falls short; knowledge {name} "
+    "could not have is simply not there.\n"
+    "- Add nothing the player did not state: no new dialogue, thoughts, feelings, decisions or actions for {name}. Show "
+    "what {name} perceives and the immediate result; do not carry it further with travel, follow-up actions or time skips.\n"
+    "- In a fight, the player chooses {name}'s attacks, defence and movement and you resolve them; opponents and the "
+    "surroundings act too. Stop at the moment {name} must respond.\n")
+ATTEMPT_NOTE = (" What the player wrote is {name}'s attempt, not a fact: judge it against {name}'s rank and abilities and "
+                "the situation, and tell how it really goes.")
+
+
+def action_resolution(cfg: dict[str, Any], story_settings: dict[str, Any]) -> str:
+    v = story_settings.get("action_resolution") or cfg.get("action_resolution") or "attempts"
+    return v if v in ACTION_RESOLUTIONS else "attempts"
+
+
+def with_action_resolution(rules: str, reminder: str | None, mode: str) -> tuple[str, str | None]:
+    """The v6 rules and per-turn note for the chosen mode (other profiles are left as they are)."""
+    if mode != "attempts" or FREE_ACTION_RULE not in rules:
+        return rules, reminder
+    rules = rules.replace(FREE_ACTION_RULE, ATTEMPT_ACTION_RULE)
+    if reminder and "</narrator-note>" in reminder:
+        reminder = reminder.replace("</narrator-note>", ATTEMPT_NOTE + "</narrator-note>")
+    return rules, reminder
+
+
 AGENCY_NOTE_V6 = ("\n\n<narrator-note>Story only, in the third person. {name}'s words, actions and feelings are the "
                   "player's: write what the world and the other characters do next.</narrator-note>")
 
@@ -952,8 +1002,11 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
 
     # 10. recent messages within budget (the final rules section is sent too, so it counts against the budget)
     pname = (av or {}).get("name") or "the protagonist"
+    act_mode = action_resolution(cfg, ssettings)
+    rules_tpl, reminder_tpl = with_action_resolution(profile.get("rules", NARRATION_RULES), profile["reminder"], act_mode)
     rules = (Section("narration_rules", "Narration rules (highest priority; they override anything above)",
-                     profile.get("rules", NARRATION_RULES).format(name=pname), [{"type": "prompt", "label": profile["label"]}])
+                     rules_tpl.format(name=pname), [{"type": "prompt", "label": profile["label"]},
+                                                    {"type": "prompt", "label": f"Player actions: {act_mode}"}])
              if profile["final_rules"] else None)
     min_recent = int(cfg.get("recent_messages_min") or 6)
     # v1.7 portrait tags: the narrator marks who speaks and how ([Selphina:3]); the app shows the portrait at once
@@ -1080,10 +1133,10 @@ def build(db: Session, story: Story, branch: MessageBranch, *, context_limit: in
     # (not after the opening request: its blueprint is the instruction, and a reminder after it was copied into the
     # opening scene by small models)
     opening = (chosen[-1].command_json or {}).get("name") == "start" if chosen else False
-    if profile["reminder"] and msgs and msgs[-1].role == "user" and chosen[-1].kind == "story" and not opening:
+    if reminder_tpl and msgs and msgs[-1].role == "user" and chosen[-1].kind == "story" and not opening:
         # long system prompts and older replies that broke the rule get ignored by smaller models; a short per-request
         # reminder next to the player's turn helps. Sent only, never stored in the transcript.
-        reminder = profile["reminder"].format(name=pname)
+        reminder = reminder_tpl.format(name=pname)
         if info_svc.enabled(db):
             reminder = (reminder.replace("</narrator-note>", info_svc.REMINDER + "</narrator-note>")
                         if "</narrator-note>" in reminder else reminder + info_svc.REMINDER)

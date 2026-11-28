@@ -67,6 +67,29 @@ export function NarrationSettings() {
     }, [settings.data, n]),
     n ? (
       <div className="max-w-3xl space-y-6">
+        <Field
+          label={msg("Player actions")}
+          hint={
+            (n.action_resolution ?? `attempts`) === `attempts`
+              ? msg(
+                  "What you write is what your character tries to do. The narrator judges it against your rank, your abilities and the situation, then tells how it really goes: it can succeed, partly succeed or fail.",
+                )
+              : msg("What you write happens as written: the narrator only tells what it causes.")
+          }
+        >
+          <Select
+            value={n.action_resolution ?? `attempts`}
+            onChange={(e) =>
+              r({
+                ...n,
+                action_resolution: e.target.value,
+              })
+            }
+          >
+            <option value="attempts">{msg("Attempts (realistic)")}</option>
+            <option value="free">{msg("Free (my actions always succeed)")}</option>
+          </Select>
+        </Field>
         <section className="grid gap-3 sm:grid-cols-2">
           <Field
             label={msg("Context budget (tokens)")}

@@ -88,6 +88,9 @@ DEFAULTS: dict[str, Any] = {
     "relationship_mode": "auto_conservative",
     # narrator prompt profile (context_builder.PROMPT_PROFILES); None = the built-in default. Stories may override it.
     "narrator_prompt_profile": None,
+    # v0.7.7: "attempts" = what the player writes is an attempt the narrator resolves (rank, abilities, situation);
+    # "free" = the stated action happens as written (before v0.7.7). Stories may override it (settings_json).
+    "action_resolution": "attempts",
     "action_suggestions_enabled": False,  # v1.7: off by default (shorter scene analysis); on in Settings > Memory capture
     # v1.7 portrait tags: the narrator writes [Name:N] before a character's spoken line; the portrait shows at once
     "portrait_tags_enabled": True,
