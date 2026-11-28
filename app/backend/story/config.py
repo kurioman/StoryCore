@@ -19,7 +19,7 @@ from typing import Optional
 APP_ROOT = Path(__file__).resolve().parents[3]
 PROJECT_ROOT = Path(os.environ["STORY_USER_ROOT"]).resolve() if os.environ.get("STORY_USER_ROOT") else APP_ROOT
 FRONTEND_DIST = APP_ROOT / "app" / "frontend" / "dist"
-APP_VERSION = "0.7.5"
+APP_VERSION = "0.7.6"
 EXPORT_FORMAT_VERSION = 1
 
 
